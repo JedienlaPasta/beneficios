@@ -1,15 +1,21 @@
 "use client";
 
+import { RiDashboardFill } from "react-icons/ri";
+import { FaBoxesStacked } from "react-icons/fa6";
+import { FaBoxOpen } from "react-icons/fa6";
+import { FaHouseChimney } from "react-icons/fa6";
+import { FaFileExcel } from "react-icons/fa6";
+
 import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const links = [
-  { nombre: "General", href: "/dashboard", icon: "" },
-  { nombre: "Campañas", href: "/dashboard/campanas", icon: "" },
-  { nombre: "Beneficiarios", href: "/dashboard/beneficiarios", icon: "" },
-  { nombre: "RSH", href: "/dashboard/rsh", icon: "" },
-  { nombre: "Registros", href: "/dashboard/registros", icon: "" },
+  { nombre: "Inicio", href: "/dashboard", icon: <RiDashboardFill /> },
+  { nombre: "Campañas", href: "/dashboard/campanas", icon: <FaBoxesStacked /> },
+  { nombre: "Entregas", href: "/dashboard/entregas", icon: <FaBoxOpen /> },
+  { nombre: "RSH", href: "/dashboard/rsh", icon: <FaHouseChimney /> },
+  { nombre: "Registros", href: "/dashboard/registros", icon: <FaFileExcel /> },
 ];
 
 export default function NavLinks() {
@@ -28,7 +34,7 @@ export default function NavLinks() {
             }
           )}
         >
-          {/* <span>Icon</span> */}
+          {link.icon}
           <p>{link.nombre}</p>
         </Link>
       ))}
