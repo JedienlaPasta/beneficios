@@ -1,8 +1,15 @@
+"use client";
 import CampañasActivas from "@/app/ui/dashboard/campañas/campañas_activas";
+import NuevaCampañaModal from "@/app/ui/dashboard/campañas/nueva-campaña-modal";
+import { useState } from "react";
+import { FiSearch } from "react-icons/fi";
+// import { RiCloseCircleFill } from "react-icons/ri";
+import { RiCloseLine } from "react-icons/ri";
 // import NuevaCampañaForm from "@/app/ui/dashboard/campañas/nueva_campaña_form";
-import { inter, roboto, roboto_mono } from "@/app/ui/fonts";
 
 export default function Campanas() {
+  const [abrirModal, setAbrirModal] = useState(false);
+
   const tableData = [
     {
       nombre: "Materiales de Construcción",
@@ -114,17 +121,29 @@ export default function Campanas() {
     <TableRow key={index} item={item} />
   ));
 
+  const toggleModal = () => {
+    setAbrirModal((prev) => !prev);
+  };
+
   return (
     <div className="w-full overflow-hidden p-4 text-slate-900">
+      <NuevaCampañaModal closeModal={toggleModal} />
       <div className="flex items-center justify-between px-6">
         <h2 className="text-2xl font-bold">Campañas</h2>
-        <button className="h-10 rounded-md bg-slate-800 px-6 text-sm text-white">
+        <button
+          onClick={toggleModal}
+          className="h-10 rounded-md bg-slate-800 px-6 text-sm text-white"
+        >
           Nueva Campaña
         </button>
       </div>
+      <p className="px-6 text-xs text-slate-900/60">
+        Registro de todas las campañas creadas, puedes gestionar que hacer con
+        ellas.
+      </p>
       {/* Form para ingresar nueva campaña */}
       {/* <NuevaCampañaForm /> */}
-      <div className="mt-4 flex flex-col gap-8 rounded-xl p-6">
+      <div className="flex flex-col gap-8 rounded-xl p-6">
         {/* Campañas Activas */}
         <CampañasActivas />
         {/* tabla campañas */}
@@ -133,18 +152,20 @@ export default function Campanas() {
             Historial de Campañas Creadas
           </h2>
           <div>
-            <div className="flex h-9 max-w-80 overflow-hidden rounded-md border border-gray-900/15 bg-white px-8 pb-[2px]">
+            <div className="flex h-9 max-w-96 items-center gap-2 overflow-hidden rounded-lg border border-gray-900/15 bg-white px-4 text-gray-600 shadow-md shadow-slate-800/20">
+              <FiSearch className="text-xl" />
               <input
                 type="text"
                 placeholder="Buscar"
-                className="w-full bg-transparent text-sm outline-none"
+                className="w-full bg-transparent text-sm text-gray-700 outline-none"
               />
+              <RiCloseLine className="text-xl" />
             </div>
           </div>
-          <div className="overflow-x-auto rounded-md border border-gray-900/15">
+          <div className="overflow-x-auto rounded-md shadow-lg shadow-slate-800/20">
             <table className="flex min-w-[44rem] grow flex-col overflow-hidden bg-white text-slate-900/90">
-              <thead className="bg-slate-800 py-1 text-xs font-semibold text-white">
-                <tr className="grid-cols-24 grid text-left">
+              <thead className="bg-slate-800 py-1 text-xs text-white">
+                <tr className="grid grid-cols-24 text-left">
                   <th className="col-span-9 px-6 py-3">CAMPAÑA</th>
                   <th className="col-span-4 px-6 py-3">INICIO</th>
                   <th className="col-span-4 px-6 py-3">TÉRMINO</th>
@@ -152,7 +173,7 @@ export default function Campanas() {
                   <th className="col-span-3 px-6 py-3 text-right">ENTREGAS</th>
                 </tr>
               </thead>
-              <tbody>{tableRows}</tbody>
+              <tbody className="border border-gray-900/15">{tableRows}</tbody>
             </table>
           </div>
         </div>
@@ -176,7 +197,7 @@ function TableRow({
   const { nombre, entregas, estado, inicio, termino } = item;
 
   return (
-    <tr className="grid-cols-24 grid text-sm odd:bg-gray-800/10 hover:bg-gray-800/20">
+    <tr className="grid grid-cols-24 text-sm odd:bg-gray-800/10 hover:bg-gray-800/20">
       <CustomRow col_span="col-span-9">{nombre}</CustomRow>
       <CustomRow col_span="col-span-4">{inicio}</CustomRow>
       <CustomRow col_span="col-span-4">{termino}</CustomRow>

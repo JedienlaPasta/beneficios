@@ -22,7 +22,7 @@ export default function NavLinks() {
   const pathname = usePathname();
 
   return (
-    <ol className="flex flex-col gap-1 py-1 text-slate-900/30">
+    <ol className="flex flex-col gap-1 py-1 text-slate-500">
       {links.map((link) => (
         <Link
           key={link.nombre}
@@ -30,13 +30,13 @@ export default function NavLinks() {
           className={clsx(
             "flex items-center gap-2 rounded-md px-3 py-2 text-sm",
             {
-              "bg-slate-800 text-white": pathname === link.href,
+              "bg-slate-700 text-white": pathname === link.href,
             },
           )}
         >
           {link.icon}
           <p
-            className={clsx("text-slate-900/70", {
+            className={clsx("text-slate-500s", {
               "text-white": pathname === link.href,
             })}
           >
