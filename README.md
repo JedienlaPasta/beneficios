@@ -13,3 +13,5 @@ Acción Solidaria – Refuerza el enfoque en la acción y el compromiso social.
 "Tu apoyo, directo a quienes más lo necesitan."
 "Conectamos ayuda con quienes más la requieren."
 "Asistencia fácil, rápida y transparente."
+
+Descargar reportes mensuales, anuales o totales?

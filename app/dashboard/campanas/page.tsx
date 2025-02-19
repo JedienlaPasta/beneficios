@@ -1,37 +1,113 @@
-import NuevaCampañaForm from "@/app/ui/dashboard/campañas/nueva_campaña_form";
-import { roboto } from "@/app/ui/fonts";
+import CampañasActivas from "@/app/ui/dashboard/campañas/campañas_activas";
+// import NuevaCampañaForm from "@/app/ui/dashboard/campañas/nueva_campaña_form";
+import { inter, roboto, roboto_mono } from "@/app/ui/fonts";
 
 export default function Campanas() {
   const tableData = [
     {
       nombre: "Materiales de Construcción",
-      entregas: 32,
+      entregas: 76,
       estado: "En curso",
-      fecha: "21 / 05 / 2025",
+      inicio: "21 / 05 / 2025",
+      termino: "21 / 05 / 2025",
     },
     {
       nombre: "Balones de Gas",
-      entregas: 32,
+      entregas: 241,
       estado: "En curso",
-      fecha: "12 / 02 / 2024",
+      inicio: "12 / 02 / 2024",
+      termino: "12 / 02 / 2024",
     },
     {
       nombre: "Pack de Pañales",
-      entregas: 32,
+      entregas: 12,
       estado: "Terminado",
-      fecha: "27 / 08 / 2021",
+      inicio: "27 / 08 / 2021",
+      termino: "27 / 08 / 2021",
     },
     {
       nombre: "Desratización",
-      entregas: 32,
+      entregas: 3,
       estado: "Terminado",
-      fecha: "04 / 09 / 2020",
+      inicio: "04 / 09 / 2020",
+      termino: "04 / 09 / 2020",
     },
     {
       nombre: "Tarjeta de Comida",
-      entregas: 32,
+      entregas: 127,
       estado: "Terminado",
-      fecha: "09 / 12 / 2019",
+      inicio: "09 / 12 / 2019",
+      termino: "09 / 12 / 2019",
+    },
+    {
+      nombre: "Materiales de Construcción",
+      entregas: 76,
+      estado: "En curso",
+      inicio: "21 / 05 / 2025",
+      termino: "21 / 05 / 2025",
+    },
+    {
+      nombre: "Balones de Gas",
+      entregas: 241,
+      estado: "En curso",
+      inicio: "12 / 02 / 2024",
+      termino: "12 / 02 / 2024",
+    },
+    {
+      nombre: "Pack de Pañales",
+      entregas: 12,
+      estado: "Terminado",
+      inicio: "27 / 08 / 2021",
+      termino: "27 / 08 / 2021",
+    },
+    {
+      nombre: "Desratización",
+      entregas: 3,
+      estado: "Terminado",
+      inicio: "04 / 09 / 2020",
+      termino: "04 / 09 / 2020",
+    },
+    {
+      nombre: "Tarjeta de Comida",
+      entregas: 127,
+      estado: "Terminado",
+      inicio: "09 / 12 / 2019",
+      termino: "09 / 12 / 2019",
+    },
+    {
+      nombre: "Materiales de Construcción",
+      entregas: 76,
+      estado: "En curso",
+      inicio: "21 / 05 / 2025",
+      termino: "21 / 05 / 2025",
+    },
+    {
+      nombre: "Balones de Gas",
+      entregas: 241,
+      estado: "En curso",
+      inicio: "12 / 02 / 2024",
+      termino: "12 / 02 / 2024",
+    },
+    {
+      nombre: "Pack de Pañales",
+      entregas: 12,
+      estado: "Terminado",
+      inicio: "27 / 08 / 2021",
+      termino: "27 / 08 / 2021",
+    },
+    {
+      nombre: "Desratización",
+      entregas: 3,
+      estado: "Terminado",
+      inicio: "04 / 09 / 2020",
+      termino: "04 / 09 / 2020",
+    },
+    {
+      nombre: "Tarjeta de Comida",
+      entregas: 127,
+      estado: "Terminado",
+      inicio: "09 / 12 / 2019",
+      termino: "09 / 12 / 2019",
     },
   ];
   const tableRows = tableData.map((item, index) => (
@@ -39,40 +115,25 @@ export default function Campanas() {
   ));
 
   return (
-    <div className="overflow-hidden p-4 text-slate-900">
-      <h2 className="bg-slate-100">Campañas</h2>
+    <div className="w-full overflow-hidden p-4 text-slate-900">
+      <div className="flex items-center justify-between px-6">
+        <h2 className="text-2xl font-bold">Campañas</h2>
+        <button className="h-10 rounded-md bg-slate-800 px-6 text-sm text-white">
+          Nueva Campaña
+        </button>
+      </div>
       {/* Form para ingresar nueva campaña */}
-      <NuevaCampañaForm />
-      {/* Campañas Activas */}
-      <div className="mt-4 flex bg-gray-300">
-        <div>
-          <h2 className="text-sm font-semibold text-slate-900/80">
-            Campañas Activas
-          </h2>
-          <div className="flex flex-col gap-5 overflow-x-auto p-4">
-            <CampañaActiva
-              nombre={"Balón de Gas"}
-              fecha={"12/02/2025"}
-              entregado={70}
-            />
-            <CampañaActiva
-              nombre={"Balón de Gas"}
-              fecha={"12/02/2025"}
-              entregado={70}
-            />
-            <CampañaActiva
-              nombre={"Balón de Gas"}
-              fecha={"12/02/2025"}
-              entregado={70}
-            />
-          </div>
-        </div>
-
+      {/* <NuevaCampañaForm /> */}
+      <div className="mt-4 flex flex-col gap-8 rounded-xl p-6">
+        {/* Campañas Activas */}
+        <CampañasActivas />
         {/* tabla campañas */}
         <div className="flex flex-col gap-4">
-          <h2>Histórico Campañas</h2>
+          <h2 className={`text-lg font-bold text-slate-900/90`}>
+            Historial de Campañas Creadas
+          </h2>
           <div>
-            <div className="flex h-9 max-w-80 overflow-hidden rounded-md border border-slate-900/15 bg-white px-8 pb-[2px]">
+            <div className="flex h-9 max-w-80 overflow-hidden rounded-md border border-gray-900/15 bg-white px-8 pb-[2px]">
               <input
                 type="text"
                 placeholder="Buscar"
@@ -80,16 +141,15 @@ export default function Campanas() {
               />
             </div>
           </div>
-          <div className="overflow-x-auto rounded-xl border border-slate-900/10">
-            <table className="flex min-w-[44rem] flex-col overflow-hidden bg-white px-6 py-2 text-slate-900/90">
-              <thead>
-                <tr className="grid-cols-18 grid gap-4 text-left text-sm">
-                  <th className="col-span-8 px-3 py-2 font-medium">Campaña</th>
-                  <th className="col-span-4 px-3 py-2 font-medium">Entrega</th>
-                  <th className="col-span-3 px-3 py-2 font-medium">Estado</th>
-                  <th className="col-span-3 px-3 py-2 text-right font-medium">
-                    Entregas
-                  </th>
+          <div className="overflow-x-auto rounded-md border border-gray-900/15">
+            <table className="flex min-w-[44rem] grow flex-col overflow-hidden bg-white text-slate-900/90">
+              <thead className="bg-slate-800 py-1 text-xs font-semibold text-white">
+                <tr className="grid-cols-24 grid text-left">
+                  <th className="col-span-9 px-6 py-3">CAMPAÑA</th>
+                  <th className="col-span-4 px-6 py-3">INICIO</th>
+                  <th className="col-span-4 px-6 py-3">TÉRMINO</th>
+                  <th className="col-span-4 px-6 py-3">ESTADO</th>
+                  <th className="col-span-3 px-6 py-3 text-right">ENTREGAS</th>
                 </tr>
               </thead>
               <tbody>{tableRows}</tbody>
@@ -101,53 +161,27 @@ export default function Campanas() {
   );
 }
 
-// Campaña
-function CampañaActiva({
-  nombre,
-  fecha,
-  entregado,
-}: {
-  nombre: string;
-  fecha: string;
-  entregado: number;
-}) {
-  return (
-    <div className="w-60 shrink-0 overflow-hidden rounded-xl border border-slate-900/15 bg-white text-slate-900/80">
-      <h5 className="border-b border-slate-900/15 px-7 pb-2 pt-3 text-sm font-medium">
-        {nombre}
-      </h5>
-      <div className="bg-red grid grid-cols-2 gap-7 px-7 pb-3 pt-2 text-sm">
-        <span>
-          <label className="text-xs">Término</label>
-          <p className="text-xs">{fecha}</p>
-        </span>
-        <span>
-          <label className="text-xs">Entregas</label>
-          <p className="text-xs">{entregado}</p>
-        </span>
-      </div>
-    </div>
-  );
-}
-
 // Tabla
 function TableRow({
   item,
 }: {
-  item: { nombre: string; entregas: number; estado: string; fecha: string };
+  item: {
+    nombre: string;
+    entregas: number;
+    estado: string;
+    inicio: string;
+    termino: string;
+  };
 }) {
-  const { nombre, entregas, estado, fecha } = item;
+  const { nombre, entregas, estado, inicio, termino } = item;
 
   return (
-    <tr className="grid-cols-18 grid gap-4 text-sm">
-      <CustomRow col_span="col-span-8">{nombre}</CustomRow>
-      <CustomRow col_span="col-span-4" font={roboto.className}>
-        {fecha}
-      </CustomRow>
-      <CustomRow col_span="col-span-3">{estado}</CustomRow>
-      <CustomRow col_span="col-span-3" font={roboto.className}>
-        {entregas}
-      </CustomRow>
+    <tr className="grid-cols-24 grid text-sm odd:bg-gray-800/10 hover:bg-gray-800/20">
+      <CustomRow col_span="col-span-9">{nombre}</CustomRow>
+      <CustomRow col_span="col-span-4">{inicio}</CustomRow>
+      <CustomRow col_span="col-span-4">{termino}</CustomRow>
+      <CustomRow col_span="col-span-4">{estado}</CustomRow>
+      <CustomRow col_span="col-span-3">{entregas}</CustomRow>
     </tr>
   );
 }
@@ -162,7 +196,7 @@ function CustomRow({
   font?: string;
 }) {
   const numberFont = typeof children === "string" ? font : font + " text-right";
-  const rowStyle = col_span + " px-3 py-1 text-sm " + numberFont;
+  const rowStyle = col_span + " px-6 py-3 text-sm tabular-nums " + numberFont;
 
   return <td className={rowStyle}>{children}</td>;
 }
