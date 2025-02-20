@@ -3,12 +3,11 @@ import CampañasActivas from "@/app/ui/dashboard/campañas/campañas_activas";
 import NuevaCampañaModal from "@/app/ui/dashboard/campañas/nueva-campaña-modal";
 import { useState } from "react";
 import { FiSearch } from "react-icons/fi";
-// import { RiCloseCircleFill } from "react-icons/ri";
 import { RiCloseLine } from "react-icons/ri";
-// import NuevaCampañaForm from "@/app/ui/dashboard/campañas/nueva_campaña_form";
 
 export default function Campanas() {
   const [abrirModal, setAbrirModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const tableData = [
     {
@@ -117,63 +116,78 @@ export default function Campanas() {
       termino: "09 / 12 / 2019",
     },
   ];
-  const tableRows = tableData.map((item, index) => (
-    <TableRow key={index} item={item} />
-  ));
+
+  const filteredTableRows = tableData
+    .filter((item) =>
+      item.nombre.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
+    .map((item, index) => <TableRow key={index} item={item} />);
 
   const toggleModal = () => {
     setAbrirModal((prev) => !prev);
   };
 
   return (
-    <div className="w-full overflow-hidden p-4 text-slate-900">
-      <NuevaCampañaModal closeModal={toggleModal} />
-      <div className="flex items-center justify-between px-6">
-        <h2 className="text-2xl font-bold">Campañas</h2>
+    <div className="w-full px-6 py-8 pr-0 text-slate-900 lg:px-10">
+      {abrirModal && <NuevaCampañaModal closeModal={toggleModal} />}
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold text-slate-800">Campañas</h2>
+          <p className="mt-2 text-sm text-slate-600">
+            Registro de todas las campañas creadas, puedes gestionar que hacer
+            con ellas.
+          </p>
+        </div>
         <button
           onClick={toggleModal}
-          className="h-10 rounded-md bg-slate-800 px-6 text-sm text-white"
+          className="flex h-11 items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-6 text-sm font-medium text-white transition-all hover:from-blue-700 hover:to-blue-600 active:scale-95"
         >
-          Nueva Campaña
+          <span className="text-lg">+</span> Nueva Campaña
         </button>
       </div>
-      <p className="px-6 text-xs text-slate-900/60">
-        Registro de todas las campañas creadas, puedes gestionar que hacer con
-        ellas.
-      </p>
-      {/* Form para ingresar nueva campaña */}
-      {/* <NuevaCampañaForm /> */}
-      <div className="flex flex-col gap-8 rounded-xl p-6">
-        {/* Campañas Activas */}
+
+      <div className="flex flex-col gap-10 rounded-xl">
         <CampañasActivas />
-        {/* tabla campañas */}
-        <div className="flex flex-col gap-4">
-          <h2 className={`text-lg font-bold text-slate-900/90`}>
-            Historial de Campañas Creadas
-          </h2>
-          <div>
-            <div className="flex h-9 max-w-96 items-center gap-2 overflow-hidden rounded-lg border border-gray-900/15 bg-white px-4 text-gray-600 shadow-md shadow-slate-800/20">
-              <FiSearch className="text-xl" />
-              <input
-                type="text"
-                placeholder="Buscar"
-                className="w-full bg-transparent text-sm text-gray-700 outline-none"
-              />
-              <RiCloseLine className="text-xl" />
+
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-slate-800">
+              Historial de Campañas
+            </h2>
+            <div className="relative">
+              <div className="flex h-11 w-72 items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 shadow-sm transition-all focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100">
+                <FiSearch className="text-lg text-slate-400" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Buscar campaña..."
+                  className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
+                />
+                {searchTerm && (
+                  <RiCloseLine
+                    className="cursor-pointer text-xl text-slate-400 hover:text-slate-600"
+                    onClick={() => setSearchTerm("")}
+                  />
+                )}
+              </div>
             </div>
           </div>
-          <div className="overflow-x-auto rounded-md shadow-lg shadow-slate-800/20">
-            <table className="flex min-w-[44rem] grow flex-col overflow-hidden bg-white text-slate-900/90">
-              <thead className="bg-slate-800 py-1 text-xs text-white">
-                <tr className="grid grid-cols-24 text-left">
-                  <th className="col-span-9 px-6 py-3">CAMPAÑA</th>
-                  <th className="col-span-4 px-6 py-3">INICIO</th>
-                  <th className="col-span-4 px-6 py-3">TÉRMINO</th>
-                  <th className="col-span-4 px-6 py-3">ESTADO</th>
-                  <th className="col-span-3 px-6 py-3 text-right">ENTREGAS</th>
+
+          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <table className="w-full min-w-[44rem]">
+              <thead className="bg-slate-50 text-xs font-medium uppercase tracking-wider text-slate-600">
+                <tr>
+                  <th className="px-6 py-4 text-left">Campaña</th>
+                  <th className="px-6 py-4 text-left">Inicio</th>
+                  <th className="px-6 py-4 text-left">Término</th>
+                  <th className="px-6 py-4 text-left">Estado</th>
+                  <th className="px-6 py-4 text-right">Entregas</th>
                 </tr>
               </thead>
-              <tbody className="border border-gray-900/15">{tableRows}</tbody>
+              <tbody className="divide-y divide-slate-100">
+                {filteredTableRows}
+              </tbody>
             </table>
           </div>
         </div>
@@ -182,7 +196,6 @@ export default function Campanas() {
   );
 }
 
-// Tabla
 function TableRow({
   item,
 }: {
@@ -196,28 +209,28 @@ function TableRow({
 }) {
   const { nombre, entregas, estado, inicio, termino } = item;
 
+  const statusColor =
+    estado === "En curso"
+      ? "bg-green-50 text-green-700 border-green-200"
+      : "bg-slate-50 text-slate-700 border-slate-200";
+
   return (
-    <tr className="grid grid-cols-24 text-sm odd:bg-gray-800/10 hover:bg-gray-800/20">
-      <CustomRow col_span="col-span-9">{nombre}</CustomRow>
-      <CustomRow col_span="col-span-4">{inicio}</CustomRow>
-      <CustomRow col_span="col-span-4">{termino}</CustomRow>
-      <CustomRow col_span="col-span-4">{estado}</CustomRow>
-      <CustomRow col_span="col-span-3">{entregas}</CustomRow>
+    <tr className="group transition-colors hover:bg-slate-50/50">
+      <td className="px-6 py-4">
+        <span className="font-medium text-slate-700">{nombre}</span>
+      </td>
+      <td className="px-6 py-4 text-slate-600">{inicio}</td>
+      <td className="px-6 py-4 text-slate-600">{termino}</td>
+      <td className="px-6 py-4">
+        <span
+          className={`inline-block rounded-full border px-3 py-1 text-xs font-medium ${statusColor}`}
+        >
+          {estado}
+        </span>
+      </td>
+      <td className="px-6 py-4 text-right">
+        <span className="font-medium text-slate-700">{entregas}</span>
+      </td>
     </tr>
   );
-}
-
-function CustomRow({
-  children,
-  col_span,
-  font,
-}: {
-  children: string | number;
-  col_span: string;
-  font?: string;
-}) {
-  const numberFont = typeof children === "string" ? font : font + " text-right";
-  const rowStyle = col_span + " px-6 py-3 text-sm tabular-nums " + numberFont;
-
-  return <td className={rowStyle}>{children}</td>;
 }

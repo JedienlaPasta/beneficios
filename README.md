@@ -14,4 +14,32 @@ Acción Solidaria – Refuerza el enfoque en la acción y el compromiso social.
 "Conectamos ayuda con quienes más la requieren."
 "Asistencia fácil, rápida y transparente."
 
+## Funcionalidades
+
+#Login
+Iniciar Sesión.
+
+#Dashboard
+Campañas Activas - Beneficios Entregados - Total Beneficiarios.
+Tabla Registro de Actividades Personales.
+
+#Campañas
+Campañas Activas.
+Tabla Datos de Campañas.
+
+#Entregas
+Beneficios Entregados.
+Tabla Datos de Entregas.
+
+#Beneficiarios
+Total Beneficiarios.
+Tabla Datos de Beneficiarios.
+
+#Registros
+Tabla Datos de Registros Generales.
+
+#Apartado de Reportes
 Descargar reportes mensuales, anuales o totales?
+
+#Apartado Gestion de Usuarios.
+Crear Usuario, Editar Usuario, Borrar Usuario.
