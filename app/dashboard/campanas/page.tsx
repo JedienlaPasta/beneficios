@@ -1,127 +1,13 @@
 "use client";
 import CampañasActivas from "@/app/ui/dashboard/campañas/campañas_activas";
 import NuevaCampañaModal from "@/app/ui/dashboard/campañas/nueva-campaña-modal";
-import { useState } from "react";
-import { FiSearch } from "react-icons/fi";
+import TablaDatosDashboard from "@/app/ui/dashboard/tabla-datos-dashboard";
 import { RiCloseLine } from "react-icons/ri";
-
+import { FiSearch } from "react-icons/fi";
+import { useState } from "react";
 export default function Campanas() {
   const [abrirModal, setAbrirModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-
-  const tableData = [
-    {
-      nombre: "Materiales de Construcción",
-      entregas: 76,
-      estado: "En curso",
-      inicio: "21 / 05 / 2025",
-      termino: "21 / 05 / 2025",
-    },
-    {
-      nombre: "Balones de Gas",
-      entregas: 241,
-      estado: "En curso",
-      inicio: "12 / 02 / 2024",
-      termino: "12 / 02 / 2024",
-    },
-    {
-      nombre: "Pack de Pañales",
-      entregas: 12,
-      estado: "Terminado",
-      inicio: "27 / 08 / 2021",
-      termino: "27 / 08 / 2021",
-    },
-    {
-      nombre: "Desratización",
-      entregas: 3,
-      estado: "Terminado",
-      inicio: "04 / 09 / 2020",
-      termino: "04 / 09 / 2020",
-    },
-    {
-      nombre: "Tarjeta de Comida",
-      entregas: 127,
-      estado: "Terminado",
-      inicio: "09 / 12 / 2019",
-      termino: "09 / 12 / 2019",
-    },
-    {
-      nombre: "Materiales de Construcción",
-      entregas: 76,
-      estado: "En curso",
-      inicio: "21 / 05 / 2025",
-      termino: "21 / 05 / 2025",
-    },
-    {
-      nombre: "Balones de Gas",
-      entregas: 241,
-      estado: "En curso",
-      inicio: "12 / 02 / 2024",
-      termino: "12 / 02 / 2024",
-    },
-    {
-      nombre: "Pack de Pañales",
-      entregas: 12,
-      estado: "Terminado",
-      inicio: "27 / 08 / 2021",
-      termino: "27 / 08 / 2021",
-    },
-    {
-      nombre: "Desratización",
-      entregas: 3,
-      estado: "Terminado",
-      inicio: "04 / 09 / 2020",
-      termino: "04 / 09 / 2020",
-    },
-    {
-      nombre: "Tarjeta de Comida",
-      entregas: 127,
-      estado: "Terminado",
-      inicio: "09 / 12 / 2019",
-      termino: "09 / 12 / 2019",
-    },
-    {
-      nombre: "Materiales de Construcción",
-      entregas: 76,
-      estado: "En curso",
-      inicio: "21 / 05 / 2025",
-      termino: "21 / 05 / 2025",
-    },
-    {
-      nombre: "Balones de Gas",
-      entregas: 241,
-      estado: "En curso",
-      inicio: "12 / 02 / 2024",
-      termino: "12 / 02 / 2024",
-    },
-    {
-      nombre: "Pack de Pañales",
-      entregas: 12,
-      estado: "Terminado",
-      inicio: "27 / 08 / 2021",
-      termino: "27 / 08 / 2021",
-    },
-    {
-      nombre: "Desratización",
-      entregas: 3,
-      estado: "Terminado",
-      inicio: "04 / 09 / 2020",
-      termino: "04 / 09 / 2020",
-    },
-    {
-      nombre: "Tarjeta de Comida",
-      entregas: 127,
-      estado: "Terminado",
-      inicio: "09 / 12 / 2019",
-      termino: "09 / 12 / 2019",
-    },
-  ];
-
-  const filteredTableRows = tableData
-    .filter((item) =>
-      item.nombre.toLowerCase().includes(searchTerm.toLowerCase()),
-    )
-    .map((item, index) => <TableRow key={index} item={item} />);
 
   const toggleModal = () => {
     setAbrirModal((prev) => !prev);
@@ -173,64 +59,9 @@ export default function Campanas() {
               </div>
             </div>
           </div>
-
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            <table className="w-full min-w-[44rem]">
-              <thead className="bg-slate-50 text-xs font-medium uppercase tracking-wider text-slate-600">
-                <tr>
-                  <th className="px-6 py-4 text-left">Campaña</th>
-                  <th className="px-6 py-4 text-left">Inicio</th>
-                  <th className="px-6 py-4 text-left">Término</th>
-                  <th className="px-6 py-4 text-left">Estado</th>
-                  <th className="px-6 py-4 text-right">Entregas</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredTableRows}
-              </tbody>
-            </table>
-          </div>
+          <TablaDatosDashboard searchTerm={searchTerm} />
         </div>
       </div>
     </div>
-  );
-}
-
-function TableRow({
-  item,
-}: {
-  item: {
-    nombre: string;
-    entregas: number;
-    estado: string;
-    inicio: string;
-    termino: string;
-  };
-}) {
-  const { nombre, entregas, estado, inicio, termino } = item;
-
-  const statusColor =
-    estado === "En curso"
-      ? "bg-green-50 text-green-700 border-green-200"
-      : "bg-slate-50 text-slate-700 border-slate-200";
-
-  return (
-    <tr className="group transition-colors hover:bg-slate-50/50">
-      <td className="px-6 py-4">
-        <span className="font-medium text-slate-700">{nombre}</span>
-      </td>
-      <td className="px-6 py-4 text-slate-600">{inicio}</td>
-      <td className="px-6 py-4 text-slate-600">{termino}</td>
-      <td className="px-6 py-4">
-        <span
-          className={`inline-block rounded-full border px-3 py-1 text-xs font-medium ${statusColor}`}
-        >
-          {estado}
-        </span>
-      </td>
-      <td className="px-6 py-4 text-right">
-        <span className="font-medium text-slate-700">{entregas}</span>
-      </td>
-    </tr>
   );
 }

@@ -1,6 +1,6 @@
 import { HiOutlineGift } from "react-icons/hi2";
 import { HiOutlineUsers } from "react-icons/hi2";
-import { HiOutlineClock } from "react-icons/hi2";
+// import { HiOutlineClock } from "react-icons/hi2";
 
 export default function CampañasActivas() {
   const stats = [
@@ -12,18 +12,18 @@ export default function CampañasActivas() {
       changeType: "positive",
     },
     {
-      title: "Beneficiarios",
-      value: "1,429",
+      title: "Entregas",
+      value: "98",
       icon: <HiOutlineUsers className="h-5 w-5" />,
-      change: "+180 última semana",
+      change: "+31 última semana",
       changeType: "positive",
     },
     {
-      title: "Tiempo Promedio",
-      value: "48h",
-      icon: <HiOutlineClock className="h-5 w-5" />,
-      change: "-2h del mes pasado",
-      changeType: "negative",
+      title: "Beneficiarios",
+      value: "1,429",
+      icon: <HiOutlineUsers className="h-5 w-5" />,
+      change: "+0 última semana",
+      changeType: "positive",
     },
   ];
 
