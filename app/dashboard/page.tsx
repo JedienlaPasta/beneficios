@@ -1,5 +1,5 @@
 "use client";
-// import CampañasActivas from "@/app/ui/dashboard/campañas/campañas_activas";
+import DatosGenerales from "@/app/ui/dashboard/datos-generales";
 import NuevaCampañaModal from "@/app/ui/dashboard/campañas/nueva-campaña-modal";
 import TablaDatosDashboard from "@/app/ui/dashboard/tabla-datos-dashboard";
 import { RiCloseLine } from "react-icons/ri";
@@ -15,33 +15,34 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="w-full px-6 py-8 pr-0 text-slate-900 lg:px-10">
+    <div className="w-full px-6 py-8 text-slate-900 lg:px-10">
       {abrirModal && <NuevaCampañaModal closeModal={toggleModal} />}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
         <div>
           <h2 className="text-3xl font-bold text-slate-800">Inicio</h2>
-          <p className="mt-2 text-sm text-slate-600/70">
-            Bienvenido de vuelta, aquí podras encontrar información sobre tus
-            actividades, asi como datos generales.
+          <p className="text-sm text-slate-600/70">
+            Datos generales y actividades personales.
           </p>
+          {/* <p className="text-sm text-slate-600/70">
+            Aquí podras encontrar información sobre tus actividades, asi como
+            datos generales.
+          </p> */}
         </div>
-        <button
-          onClick={toggleModal}
-          className="flex h-11 items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-6 text-sm font-medium text-white transition-all hover:from-blue-700 hover:to-blue-600 active:scale-95"
-        >
-          <span className="text-lg">+</span> Nueva Campaña
-        </button>
       </div>
 
-      <div className="flex flex-col gap-10 rounded-xl">
-        <div className="overflow-x-auto">
+      <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
+        <DatosGenerales />
+        <div className="flex flex-col gap-4 overflow-x-auto">
+          <h2 className="text-lg font-semibold text-slate-800">
+            Actividad de Entregas
+          </h2>
           <TableroEntregasInicio />
         </div>
 
-        <div className="flex flex-col gap-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-slate-800">
-              Registro de Actividades Personales
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between 3xl:w-[96rem] 3xl:self-center">
+            <h2 className="text-lg font-semibold text-slate-800">
+              Actividades Personales
             </h2>
             <div className="relative">
               <div className="flex h-11 w-72 items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 shadow-sm transition-all focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100">
@@ -50,7 +51,7 @@ export default function DashboardPage() {
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Buscar campaña..."
+                  placeholder="Buscar..."
                   className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
                 />
                 {searchTerm && (

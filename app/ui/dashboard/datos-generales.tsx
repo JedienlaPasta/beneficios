@@ -2,7 +2,7 @@ import { HiOutlineGift } from "react-icons/hi2";
 import { HiOutlineUsers } from "react-icons/hi2";
 // import { HiOutlineClock } from "react-icons/hi2";
 
-export default function CampañasActivas() {
+export default function DatosGenerales() {
   const stats = [
     {
       title: "Campañas Activas",

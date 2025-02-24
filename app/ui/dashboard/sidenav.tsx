@@ -1,11 +1,11 @@
 import NavLinks from "./nav_links";
 import PerfilUsuario from "./perfil_usuario";
-import Image from "next/image";
+// import Image from "next/image";
 
 export default function Sidenav() {
   return (
     <div className="fixed flex h-dvh w-64 flex-col bg-[#171a1f] text-slate-300">
-      <div className="flex h-16 items-center justify-center border-b border-slate-700/50 px-4">
+      <div className="flex h-16 items-center gap-2 border-b border-slate-700/50 px-4">
         {/* <Image
           src="/logo.png"
           alt="Logo"
@@ -13,6 +13,10 @@ export default function Sidenav() {
           height={32}
           className="h-8 w-auto"
         /> */}
+        <div className="h-6 w-3 rounded bg-gradient-to-r from-blue-400 to-blue-500"></div>
+        <p className="text-xl font-bold tracking-wider text-slate-100">
+          ApoyoFacil
+        </p>
       </div>
 
       <div className="flex flex-1 flex-col gap-6 px-4 py-6">

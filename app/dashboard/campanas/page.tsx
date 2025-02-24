@@ -1,10 +1,10 @@
 "use client";
-import CampañasActivas from "@/app/ui/dashboard/campañas/campañas_activas";
 import NuevaCampañaModal from "@/app/ui/dashboard/campañas/nueva-campaña-modal";
 import TablaDatosDashboard from "@/app/ui/dashboard/tabla-datos-dashboard";
 import { RiCloseLine } from "react-icons/ri";
 import { FiSearch } from "react-icons/fi";
 import { useState } from "react";
+import CampañasActivas from "@/app/ui/dashboard/campañas/campañas-activas";
 export default function Campanas() {
   const [abrirModal, setAbrirModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -16,12 +16,11 @@ export default function Campanas() {
   return (
     <div className="w-full px-6 py-8 text-slate-900 lg:px-10">
       {abrirModal && <NuevaCampañaModal closeModal={toggleModal} />}
-      <div className="mb-8 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
+      <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
         <div>
           <h2 className="text-3xl font-bold text-slate-800">Campañas</h2>
-          <p className="mt-2 text-sm text-slate-600">
-            Registro de todas las campañas creadas, puedes gestionar que hacer
-            con ellas.
+          <p className="text-sm text-slate-600/70">
+            Gestionar campañas activas y historial de campañas.
           </p>
         </div>
         <button
@@ -32,12 +31,16 @@ export default function Campanas() {
         </button>
       </div>
 
-      <div className="flex flex-col gap-10 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
-        <CampañasActivas />
-
-        <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
+        {/* <DatosGenerales /> */}
+        <div className="flex gap-4">
+          <CampañasActivas nombre="Vale de Gas" termina="27/04/2025" />
+          <CampañasActivas nombre="Tarjeta de Comida" termina="04/06/2025" />
+          <CampañasActivas nombre="Pañales" termina="12/09/2025" />
+        </div>
+        <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between 3xl:w-[96rem] 3xl:self-center">
-            <h2 className="text-xl font-bold text-slate-800">
+            <h2 className="text-lg font-semibold text-slate-800">
               Historial de Campañas
             </h2>
             <div className="relative">

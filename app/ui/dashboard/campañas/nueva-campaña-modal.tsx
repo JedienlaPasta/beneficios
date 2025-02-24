@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { RiCloseLine } from "react-icons/ri";
+import CampañaDropdown from "@/app/ui/dashboard/campañas/campaña-dropdown";
 
 type NuevaCampañaModalProps = {
   closeModal: () => void;
@@ -8,6 +9,14 @@ type NuevaCampañaModalProps = {
 export default function NuevaCampañaModal({
   closeModal,
 }: NuevaCampañaModalProps) {
+  const [nombreCampaña, setNombreCampaña] = useState("");
+  const [fechaTermino, setFechaTermino] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+
+  // console.log(nombreCampaña);
+  // console.log(fechaTermino);
+  // console.log(descripcion);
+
   return (
     <div className="fixed left-0 top-0 z-[1] flex h-dvh w-full items-center justify-center">
       <div
@@ -20,15 +29,33 @@ export default function NuevaCampañaModal({
           onClick={() => closeModal()}
         />
         <h2 className="text-lg font-bold">Crear Campaña</h2>
-        <div className="border-t border-gray-200/70"></div>
+        <div className="border-t border-gray-200/80"></div>
         <p className="text-xs text-gray-500">
           Elige el tipo de campaña que quieres ingresar y sus datos
           correspondientes.
         </p>
-        <Input placeHolder="Nombre campaña..." />
-        <Input placeHolder="Código..." />
-        <Input placeHolder="Descripción..." />
-        <button className="flex h-11 w-fit items-center gap-2 self-end rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-10 text-sm font-medium text-white transition-all hover:from-blue-700 hover:to-blue-600 active:scale-95">
+        <form className="mt-3 flex flex-col gap-8">
+          <CampañaDropdown
+            label="Nombre Campaña"
+            nombreCampaña={nombreCampaña}
+            setNombreCampaña={setNombreCampaña}
+          />
+          <Input
+            placeHolder="Término..."
+            label="Término"
+            type="date"
+            value={fechaTermino}
+            setValue={setFechaTermino}
+          />
+          <Input
+            placeHolder="Descripción..."
+            label="Descripción"
+            type="text"
+            value={descripcion}
+            setValue={setDescripcion}
+          />
+        </form>
+        <button className="flex h-11 w-fit items-center gap-2 self-end rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-10 text-sm font-medium text-white transition-all hover:from-blue-700 hover:to-blue-600 active:scale-95">
           Guardar
         </button>
       </div>
@@ -36,21 +63,35 @@ export default function NuevaCampañaModal({
   );
 }
 
-function Input({ placeHolder }: { placeHolder: string }) {
-  const [campo, setCampo] = useState("");
+type InputProps = {
+  placeHolder: string;
+  label: string;
+  type: string;
+  value: string;
+  setValue: React.Dispatch<React.SetStateAction<string>>;
+};
+
+function Input({ placeHolder, label, type, value, setValue }: InputProps) {
   return (
-    <div className="flex h-11 items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 shadow-sm transition-all focus-within:border-blue-500">
+    <div className="relative flex h-11 items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 shadow-sm transition-all focus-within:border-blue-500">
+      <label
+        htmlFor={label}
+        className="absolute left-3 top-[-1rem] text-xs text-slate-400"
+      >
+        {label}
+      </label>
       <input
-        type="text"
-        value={campo}
-        onChange={(e) => setCampo(e.target.value)}
+        id={label}
+        type={type}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
         placeholder={placeHolder}
         className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
       />
-      {campo && (
+      {value && (
         <RiCloseLine
           className="cursor-pointer text-xl text-slate-400 hover:text-slate-600"
-          onClick={() => setCampo("")}
+          onClick={() => setValue("")}
         />
       )}
     </div>
