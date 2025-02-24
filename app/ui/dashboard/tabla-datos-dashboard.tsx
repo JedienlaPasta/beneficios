@@ -13,7 +13,7 @@ export default function TablaDatosDashboard({
     .map((item, index) => <TableRow key={index} item={item} />);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
       <table className="w-full min-w-[44rem]">
         <thead className="bg-slate-50 text-xs font-medium uppercase tracking-wider text-slate-600/70">
           <tr>
@@ -49,7 +49,7 @@ function TableRow({
       : "bg-slate-50 text-slate-700 border-slate-200";
 
   return (
-    <tr className="text-sm tabular-nums transition-colors hover:bg-gray-200/90">
+    <tr className="text-sm tabular-nums transition-colors hover:bg-gray-200/90 text-nowrap">
       <td className="w-[30%] py-4 pl-10 pr-6 font-medium text-slate-700">
         {nombre}
       </td>

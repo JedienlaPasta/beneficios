@@ -6,13 +6,13 @@ export default function Sidenav() {
   return (
     <div className="fixed flex h-dvh w-64 flex-col bg-[#171a1f] text-slate-300">
       <div className="flex h-16 items-center justify-center border-b border-slate-700/50 px-4">
-        <Image
+        {/* <Image
           src="/logo.png"
           alt="Logo"
           width={120}
           height={32}
           className="h-8 w-auto"
-        />
+        /> */}
       </div>
 
       <div className="flex flex-1 flex-col gap-6 px-4 py-6">

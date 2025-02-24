@@ -1,3 +1,10 @@
+# Apoyo Fácil
+
+## Descripción
+
+Apoyo Fácil es una aplicación web que se enfoca en facilitar el acceso a la ayuda y la colaboración en diversas áreas. La aplicación permite a los usuarios registrarse, iniciar sesión, crear campañas de ayuda, recibir beneficios y realizar registros de actividades.
+
+
 ## Posibles Nombres
 
 ApoyoFácil – Enfocado en una ayuda accesible y rápida.

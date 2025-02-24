@@ -14,9 +14,9 @@ export default function Campanas() {
   };
 
   return (
-    <div className="w-full px-6 py-8 pr-0 text-slate-900 lg:px-10">
+    <div className="w-full px-6 py-8 text-slate-900 lg:px-10">
       {abrirModal && <NuevaCampañaModal closeModal={toggleModal} />}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
         <div>
           <h2 className="text-3xl font-bold text-slate-800">Campañas</h2>
           <p className="mt-2 text-sm text-slate-600">
@@ -32,11 +32,11 @@ export default function Campanas() {
         </button>
       </div>
 
-      <div className="flex flex-col gap-10 rounded-xl">
+      <div className="flex flex-col gap-10 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
         <CampañasActivas />
 
         <div className="flex flex-col gap-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between 3xl:w-[96rem] 3xl:self-center">
             <h2 className="text-xl font-bold text-slate-800">
               Historial de Campañas
             </h2>

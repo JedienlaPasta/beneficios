@@ -34,7 +34,9 @@ export default function DashboardPage() {
       </div>
 
       <div className="flex flex-col gap-10 rounded-xl">
-        <TableroEntregasInicio />
+        <div className="overflow-x-auto">
+          <TableroEntregasInicio />
+        </div>
 
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between">
