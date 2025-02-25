@@ -5,6 +5,8 @@ import { RiCloseLine } from "react-icons/ri";
 import { FiSearch } from "react-icons/fi";
 import { useState } from "react";
 import CampañasActivas from "@/app/ui/dashboard/campañas/campañas-activas";
+import { IoCardOutline, IoTicketOutline } from "react-icons/io5";
+import { TbDiaper } from "react-icons/tb";
 export default function Campanas() {
   const [abrirModal, setAbrirModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -34,12 +36,24 @@ export default function Campanas() {
       <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
         {/* <DatosGenerales /> */}
         <div className="flex gap-4">
-          <CampañasActivas nombre="Vale de Gas" termina="27/04/2025" />
-          <CampañasActivas nombre="Tarjeta de Comida" termina="04/06/2025" />
-          <CampañasActivas nombre="Pañales" termina="12/09/2025" />
+          <CampañasActivas
+            nombre="Vale de Gas"
+            termina="27 Abr, 2025"
+            icono={<IoTicketOutline className="text-4xl" />}
+          />
+          <CampañasActivas
+            nombre="Tarjeta de Comida"
+            termina="04 Jun, 2025"
+            icono={<IoCardOutline className="text-4xl" />}
+          />
+          <CampañasActivas
+            nombre="Pañales"
+            termina="12 Sep, 2025"
+            icono={<TbDiaper className="text-4xl" />}
+          />
         </div>
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between 3xl:w-[96rem] 3xl:self-center">
+        <div className="flex flex-col gap-4 rounded-xl bg-slate-50">
+          <div className="flex items-center justify-between px-10 pt-4 3xl:w-[96rem] 3xl:self-center">
             <h2 className="text-lg font-semibold text-slate-800">
               Historial de Campañas
             </h2>

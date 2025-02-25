@@ -49,7 +49,7 @@ function TableRow({
       : "bg-slate-50 text-slate-700 border-slate-200";
 
   return (
-    <tr className="text-sm tabular-nums transition-colors hover:bg-gray-200/90 text-nowrap">
+    <tr className="text-nowrap text-sm tabular-nums transition-colors hover:bg-gray-200/90">
       <td className="w-[30%] py-4 pl-10 pr-6 font-medium text-slate-700">
         {nombre}
       </td>
