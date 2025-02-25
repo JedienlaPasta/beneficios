@@ -51,3 +51,9 @@ Descargar reportes mensuales, anuales o totales?
 Crear Usuario, Editar Usuario, Borrar Usuario.
 
 #LOOKA\_
+
+## Comentarios
+
+Unir tabla con Titulo y input de busqueda.
+
+Lista Campañas activas hacia abajo.
