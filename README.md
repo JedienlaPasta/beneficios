@@ -57,3 +57,5 @@ Crear Usuario, Editar Usuario, Borrar Usuario.
 Unir tabla con Titulo y input de busqueda.
 
 Lista Campañas activas hacia abajo.
+
+Pagination => faltan las flechas de los lados y controlar lo que pasa si se abre una url con un numero de pagina que no existe.
