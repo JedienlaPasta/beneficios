@@ -23,12 +23,28 @@ export default function Pagination({ totalPaginas }: { totalPaginas: number }) {
     <li key={index}>
       <Link
         href={URLPaginaActual(numero)}
-        className={`${numero === paginaActual ? "bg-blue-300" : "bg-white"} text-slate-600" flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 text-sm`}
+        className={`${numero === paginaActual ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white" : "bg-white hover:bg-gray-300"} text-slate-600" flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-sm`}
       >
         {numero}
       </Link>
     </li>
   ));
+
+  const calcularCambioPagina = (sentido: "subir" | "bajar") => {
+    if (sentido === "bajar") {
+      if (paginaActual > 1) {
+        return paginaActual - 1;
+      } else {
+        return 1;
+      }
+    } else {
+      if (paginaActual < totalPaginas) {
+        return paginaActual + 1;
+      } else {
+        return totalPaginas;
+      }
+    }
+  };
 
   return (
     <nav
@@ -37,16 +53,16 @@ export default function Pagination({ totalPaginas }: { totalPaginas: number }) {
     >
       <ul className="flex gap-2 p-2">
         <Link
-          href={URLPaginaActual(paginaActual - 1)}
-          className="flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 text-slate-500"
+          href={URLPaginaActual(calcularCambioPagina("bajar"))}
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-gray-300 hover:text-slate-600"
         >
           <MdKeyboardArrowLeft className="text-xl" />
         </Link>
 
         {paginas}
         <Link
-          href={URLPaginaActual(paginaActual + 1)}
-          className="flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 text-slate-500"
+          href={URLPaginaActual(calcularCambioPagina("subir"))}
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-gray-300 hover:text-slate-600"
         >
           <MdKeyboardArrowRight className="text-xl" />
         </Link>

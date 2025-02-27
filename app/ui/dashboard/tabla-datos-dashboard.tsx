@@ -17,7 +17,7 @@ export default async function TablaDatosDashboard({
     paginaActual,
   );
 
-  const filasFiltradas = data?.map((item: Campaña, index: number) => (
+  const filas = data?.map((item: Campaña, index: number) => (
     <TableRow key={index} item={item} />
   ));
 
@@ -33,7 +33,7 @@ export default async function TablaDatosDashboard({
             <th className="py-4 pl-6 pr-10 text-right font-normal">Entregas</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">{filasFiltradas}</tbody>
+        <tbody className="divide-y divide-slate-200">{filas}</tbody>
       </table>
       <Pagination totalPaginas={totalPaginas} />
     </div>
@@ -62,7 +62,7 @@ function TableRow({
       : "bg-slate-50 text-slate-700 border-slate-200";
 
   return (
-    <tr className="text-nowrap text-sm tabular-nums transition-colors hover:bg-gray-200/90">
+    <tr className="cursor-pointer text-nowrap text-sm tabular-nums transition-colors hover:bg-gray-200/90">
       <td className="w-[30%] py-4 pl-10 pr-6 font-medium text-slate-700">
         {nombre}
       </td>
@@ -70,7 +70,7 @@ function TableRow({
       <td className="w-[20%] py-4 pr-14 text-right text-slate-600">
         {termino}
       </td>
-      <td className="w-[1 0%] px-6 py-4">
+      <td className="w-[10%] px-6 py-4">
         <span
           className={`inline-block rounded-full border px-3 py-1 text-xs font-medium ${colorEstado}`}
         >

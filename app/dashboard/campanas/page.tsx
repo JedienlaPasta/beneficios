@@ -4,16 +4,26 @@ import { IoCardOutline, IoTicketOutline } from "react-icons/io5";
 import { TbDiaper } from "react-icons/tb";
 import Buscar from "@/app/ui/dashboard/buscar";
 import { Suspense } from "react";
-export default async function Campanas(props: {
-  searchParams?: Promise<{ query?: string; page?: string }>;
-}) {
+import NuevaCampañaModal from "@/app/ui/dashboard/campañas/n-campaña-modal";
+import Modal from "@/app/ui/dashboard/modal";
+import NuevaCampañaButton from "@/app/ui/dashboard/nueva-campaña-button";
+
+type CampanasProps = {
+  searchParams?: Promise<{ query?: string; page?: string; modal?: string }>;
+};
+export default async function Campanas(props: CampanasProps) {
   const searchParams = await props.searchParams;
+  const modal = searchParams?.modal || "";
   const busqueda = searchParams?.query || "";
   const paginaActual = Number(searchParams?.page) || 1;
 
   return (
     <div className="w-full px-6 py-8 text-slate-900 lg:px-10">
-      {/* {abrirModal && <NuevaCampañaModal closeModal={toggleModal} />} */}
+      {modal === "open" && (
+        <Modal>
+          <NuevaCampañaModal />
+        </Modal>
+      )}
       <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
         <div>
           <h2 className="text-3xl font-bold text-slate-800">Campañas</h2>
@@ -21,12 +31,7 @@ export default async function Campanas(props: {
             Gestionar campañas activas y historial de campañas.
           </p>
         </div>
-        <button
-          // onClick={toggleModal}
-          className="flex h-11 items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-6 text-sm font-medium text-white transition-all hover:from-blue-700 hover:to-blue-600 active:scale-95"
-        >
-          <span className="text-lg">+</span> Nueva Campaña
-        </button>
+        <NuevaCampañaButton />
       </div>
 
       <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
