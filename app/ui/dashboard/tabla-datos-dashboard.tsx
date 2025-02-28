@@ -2,7 +2,7 @@ import { FiBox } from "react-icons/fi";
 import { fetchCampañasFiltradas } from "@/app/lib/data";
 import { formatearFecha } from "@/app/lib/utils";
 import Pagination from "./pagination";
-import { Campaña } from "@/app/lib/definitios";
+import { Campaña } from "@/app/lib/definitions";
 
 type TablaDatosDashboardProps = {
   busqueda: string;
@@ -16,6 +16,9 @@ export default async function TablaDatosDashboard({
     busqueda,
     paginaActual,
   );
+
+  console.log(data[0].fecha_inicio);
+  console.log(data[0].fecha_termino);
 
   const filas = data?.map((item: Campaña, index: number) => (
     <TableRow key={index} item={item} />

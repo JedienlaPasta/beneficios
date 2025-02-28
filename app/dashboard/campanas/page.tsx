@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import NuevaCampañaModal from "@/app/ui/dashboard/campañas/nueva-campaña-modal";
 import Modal from "@/app/ui/dashboard/modal";
 import NuevaCampañaButton from "@/app/ui/dashboard/nueva-campaña-button";
+import { Toaster } from "sonner";
 
 type CampanasProps = {
   searchParams?: Promise<{ query?: string; page?: string; modal?: string }>;
@@ -24,6 +25,7 @@ export default async function Campanas(props: CampanasProps) {
           <NuevaCampañaModal />
         </Modal>
       )}
+      <Toaster />
       <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
         <div>
           <h2 className="text-3xl font-bold text-slate-800">Campañas</h2>
@@ -65,7 +67,6 @@ export default async function Campanas(props: CampanasProps) {
               paginaActual={paginaActual}
             />
           </Suspense>
-          {/* <Pagination totalPaginas={totalPaginas} /> */}
         </div>
       </div>
     </div>

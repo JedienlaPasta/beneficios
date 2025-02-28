@@ -1,6 +1,5 @@
 // import { RiCloseLine } from "react-icons/ri";
-// import { BiSolidDownArrow } from "react-icons/bi";
-import { MdArrowDropDown, MdKeyboardArrowDown } from "react-icons/md";
+import { MdKeyboardArrowDown } from "react-icons/md";
 import { useEffect, useRef, useState } from "react";
 import { listaCampañas } from "@/app/data/data";
 

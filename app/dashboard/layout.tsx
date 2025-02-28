@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import Sidenav from "../ui/dashboard/sidenav";
+import { Toaster } from "sonner";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
@@ -7,7 +8,10 @@ export default function Layout({ children }: { children: ReactNode }) {
       <Sidenav />
       {/* sidenav placeholder, ya que <Sidenav /> tiene position:fixed */}
       <div className="z-[-5] w-64 shrink-0"></div>
-      <div className="flex grow justify-center overflow-auto">{children}</div>
+      <div className="flex grow justify-center overflow-auto">
+        {children}
+        <Toaster />
+      </div>
     </div>
   );
 }

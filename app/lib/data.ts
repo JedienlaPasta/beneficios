@@ -1,5 +1,5 @@
 import postgres from "postgres";
-import { Campaña } from "./definitios";
+import { Campaña } from "./definitions";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -17,8 +17,7 @@ export async function fetchCampañasFiltradas(
                 campañas.nombre ILIKE ${`%${query}%`}
             ORDER BY campañas.fecha_inicio DESC
             LIMIT ${resultadosPorPagina}
-            OFFSET ${offset}
-        `;
+            OFFSET ${offset}`;
     const total_paginas = Math.ceil(
       Number(data[0]?.cantidad_total) / resultadosPorPagina,
     );
