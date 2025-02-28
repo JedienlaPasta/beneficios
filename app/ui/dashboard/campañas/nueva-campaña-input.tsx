@@ -25,8 +25,7 @@ export default function Input({
         id={label}
         name={nombre}
         type={type}
-        // value={value}
-        // onChange={(e) => setValue(e.target.value)}
+        autoComplete="off"
         placeholder={placeHolder}
         className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
       />

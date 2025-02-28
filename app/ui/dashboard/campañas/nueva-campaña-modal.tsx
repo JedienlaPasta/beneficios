@@ -3,11 +3,10 @@ import React, { useState } from "react";
 import { RiCloseLine } from "react-icons/ri";
 import CampañaDropdown from "@/app/ui/dashboard/campañas/campaña-dropdown";
 import { useRouter } from "next/navigation";
-import Input from "@/app/ui/dashboard/campañas/n-campaña-input";
+import Input from "@/app/ui/dashboard/campañas/nueva-campaña-input";
 import { crearCampaña } from "@/app/lib/actions";
 
 export default function NuevaCampañaModal() {
-  const [nombreCampaña, setNombreCampaña] = useState("");
   const router = useRouter();
 
   return (
@@ -19,17 +18,18 @@ export default function NuevaCampañaModal() {
           onClick={() => router.back()}
         />
       </div>
-      {/* <div className="border-t border-gray-200/80"></div> */}
       <p className="text-xs text-gray-500">
         Elige el tipo de campaña que quieres ingresar y sus datos
         correspondientes.
       </p>
       <form action={crearCampaña} className="flex flex-col gap-8 pt-4">
-        <CampañaDropdown
-          label="Nombre Campaña"
-          nombreCampaña={nombreCampaña}
-          setNombreCampaña={setNombreCampaña}
-        />
+        <CampañaDropdown label="Campaña..." nombre={"nombre"} />
+        {/* <Input
+          placeHolder="Tipo de dato..."
+          label="Dato"
+          type="text"
+          nombre="tipo_dato"
+        /> */}
         <Input
           placeHolder="Término..."
           label="Término"
@@ -42,10 +42,14 @@ export default function NuevaCampañaModal() {
           type="text"
           nombre="descripcion"
         />
+        <button
+          type="submit"
+          // onClick={() => router.back()}
+          className="flex h-11 items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-sm font-medium text-white transition-all hover:from-blue-600 hover:to-blue-700 active:scale-95"
+        >
+          Guardar
+        </button>
       </form>
-      <button className="mt-5 flex h-11 items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-sm font-medium text-white transition-all hover:from-blue-600 hover:to-blue-700 active:scale-95">
-        Guardar
-      </button>
     </div>
   );
 }

@@ -59,3 +59,11 @@ Unir tabla con Titulo y input de busqueda.
 Lista Campañas activas hacia abajo.
 
 Pagination => faltan las flechas de los lados y controlar lo que pasa si se abre una url con un numero de pagina que no existe.
+
+Si ya hay una campaña de por ejemplo, entrega de Vales de Gas, limitar la campaña a 1 hasta que esta termine?
+
+Descargar reporte completo de una campaña?
+
+Error Handlers.
+
+Revizar ingreso de fechas, estan un poco corridas por la zona horaria me parece.

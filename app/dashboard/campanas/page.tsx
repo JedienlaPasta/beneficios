@@ -4,7 +4,7 @@ import { IoCardOutline, IoTicketOutline } from "react-icons/io5";
 import { TbDiaper } from "react-icons/tb";
 import Buscar from "@/app/ui/dashboard/buscar";
 import { Suspense } from "react";
-import NuevaCampañaModal from "@/app/ui/dashboard/campañas/n-campaña-modal";
+import NuevaCampañaModal from "@/app/ui/dashboard/campañas/nueva-campaña-modal";
 import Modal from "@/app/ui/dashboard/modal";
 import NuevaCampañaButton from "@/app/ui/dashboard/nueva-campaña-button";
 
@@ -52,7 +52,7 @@ export default async function Campanas(props: CampanasProps) {
             icono={<TbDiaper className="text-4xl" />}
           />
         </div>
-        <div className="flex flex-col gap-4 rounded-xl bg-slate-50">
+        <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50">
           <div className="flex items-center justify-between px-10 pt-4 3xl:w-[96rem] 3xl:self-center">
             <h2 className="text-lg font-semibold text-slate-800">
               Historial de Campañas

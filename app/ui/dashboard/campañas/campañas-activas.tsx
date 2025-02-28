@@ -11,12 +11,8 @@ export default function CampañasActivas({
   termina,
   icono,
 }: CampañasActivasProps) {
-  const estiloBase =
-    "overflow-hidden rounded-xl w-80 shrink-0 bg-slate-900/90 shadow-md shadow-slate-600/90";
-  const estiloPersonalizado = estiloBase;
-
   return (
-    <div className={estiloPersonalizado}>
+    <div className="w-80 rounded-xl bg-slate-900/90 shadow-md shadow-slate-600/90">
       <div className="relative flex items-center gap-4 px-7 py-5 text-white">
         <div className="absolute bottom-5 right-5 h-3 w-3 rounded-lg bg-green-400"></div>
         {icono}

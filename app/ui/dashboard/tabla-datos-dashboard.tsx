@@ -12,7 +12,7 @@ export default async function TablaDatosDashboard({
   busqueda,
   paginaActual,
 }: TablaDatosDashboardProps) {
-  const { data, totalPaginas } = await fetchCampañasFiltradas(
+  const { data, total_paginas } = await fetchCampañasFiltradas(
     busqueda,
     paginaActual,
   );
@@ -22,9 +22,9 @@ export default async function TablaDatosDashboard({
   ));
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className="overflow-x-auto rounded-b-xl bg-white shadow-sm">
       <table className="w-full min-w-[44rem]">
-        <thead className="bg-slate-50 text-xs font-medium uppercase tracking-wider text-slate-600/70">
+        <thead className="border-y border-slate-200/70 bg-slate-50 text-xs font-medium uppercase tracking-wider text-slate-600/70">
           <tr>
             <th className="py-4 pl-10 pr-6 text-left font-normal">Campaña</th>
             <th className="py-4 pr-14 text-right font-normal">Inicio</th>
@@ -33,9 +33,9 @@ export default async function TablaDatosDashboard({
             <th className="py-4 pl-6 pr-10 text-right font-normal">Entregas</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-200">{filas}</tbody>
+        <tbody className="divide-y divide-slate-200/30">{filas}</tbody>
       </table>
-      <Pagination totalPaginas={totalPaginas} />
+      <Pagination totalPaginas={total_paginas} />
     </div>
   );
 }
