@@ -95,3 +95,8 @@ En caso de ser doble, el código de folio sería "DO".¿Cómo es en caso de que 
 
 3?
 4?
+
+# Fechas
+
+17/03/2025 - Revición interna de la aplicación.
+24/03/2025 - Primera versión de la aplicación.

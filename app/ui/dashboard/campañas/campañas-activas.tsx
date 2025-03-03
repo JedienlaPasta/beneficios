@@ -12,27 +12,25 @@ type CampañasActivasProps = {
 
 export default function CampañasActivas() {
   return (
-    <div className="flex flex-col flex-wrap gap-4">
-      <div className="flex gap-4">
-        <CampañaActiva
-          nombre="Vale de Gas"
-          termina="27 Abr, 2025"
-          entregas={126}
-          icono={<IoTicketOutline />}
-        />
-        <CampañaActiva
-          nombre="Tarjeta de Comida"
-          termina="04 Jun, 2025"
-          entregas={83}
-          icono={<IoCardOutline />}
-        />
-        <CampañaActiva
-          nombre="Pañales"
-          termina="12 Sep, 2025"
-          entregas={17}
-          icono={<TbDiaper />}
-        />
-      </div>
+    <div className="flex flex-wrap gap-4">
+      <CampañaActiva
+        nombre="Vale de Gas"
+        termina="27 Abr, 2025"
+        entregas={126}
+        icono={<IoTicketOutline />}
+      />
+      <CampañaActiva
+        nombre="Tarjeta de Comida"
+        termina="04 Jun, 2025"
+        entregas={83}
+        icono={<IoCardOutline />}
+      />
+      <CampañaActiva
+        nombre="Pañales"
+        termina="12 Sep, 2025"
+        entregas={17}
+        icono={<TbDiaper />}
+      />
     </div>
   );
 }
@@ -44,7 +42,7 @@ function CampañaActiva({
   icono,
 }: CampañasActivasProps) {
   return (
-    <div className="relative flex w-[30%] min-w-64 flex-col rounded-xl bg-white shadow-md shadow-slate-300">
+    <div className="flex min-w-64 grow flex-col rounded-xl bg-white shadow-md shadow-slate-300">
       <div className="flex items-center justify-between px-7">
         <div>
           <div className="flex items-center justify-between gap-4 pt-6 text-slate-700">
