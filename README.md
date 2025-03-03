@@ -78,3 +78,20 @@ Skeleton Loading
 Si es posible tambien:
 Entregas
 RSH
+
+# Pendiente por pedir
+
+¿Límite de 1 tipo campaña activa a la vez? Ej: 1 campaña de vales de gas, 1 campaña de tarjeta de comida, 1 campaña de pañales, etc.
+¿Cuales serán los roles de los usuarios?¿Que permisos tiene cada uno?
+Es posible eliminar una entrega de beneficio en caso de ser necesario?
+Lista de todos los beneficios, cual sería su código de folio correspondiente y cuales son los datos necesarios a registrar?
+En caso de ser doble, el código de folio sería "DO".¿Cómo es en caso de que se entreguen más de 2 beneficios a la vez?
+
+¿Necesitan la fecha de la última actualización del rsh de la persona?
+¿Cómo se conectan al rsh?¿de donde obtienen el excel con la información?¿Alguna plataforma?
+¿Qué atributos tienen asociados cada campaña? (a quienes está dirigida/restriccion nivel socioeconomico, criterios de aceptación, etc.) ¿Necesitan que esta información esté incluida en los datos de la campaña?
+
+¿Que atributos tienen asociados cada entrega de beneficio?¿Además de datos personales, ¿que datos se deben incluir? ej: pertenece a un grupo indígena, discapacidades, nivel socioeconómico, etc.
+
+3?
+4?
