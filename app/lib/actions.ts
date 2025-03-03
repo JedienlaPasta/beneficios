@@ -3,7 +3,6 @@
 import { z } from "zod";
 import postgres from "postgres";
 import { revalidatePath } from "next/cache";
-// import { redirect } from "next/navigation";
 import { FormState } from "../ui/dashboard/campañas/nueva-campaña-modal";
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: "require" });
