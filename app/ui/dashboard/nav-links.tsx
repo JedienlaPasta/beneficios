@@ -40,11 +40,14 @@ const links = [
 ];
 export default function NavLinks() {
   const pathname = usePathname();
+  const splitPathname = pathname.split("/");
+  const parentPathname =
+    "/" + splitPathname[1] + (splitPathname[2] ? "/" + splitPathname[2] : "");
 
   return (
     <nav className="flex flex-col gap-1.5 py-2">
       {links.map((link) => {
-        const isActive = pathname === link.href;
+        const isActive = parentPathname === link.href;
 
         return (
           <Link
