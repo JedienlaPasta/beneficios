@@ -1,3 +1,4 @@
+import Link from "next/link";
 import SubmitButton from "./submit-button";
 
 export default function LoginForm() {
@@ -33,9 +34,9 @@ export default function LoginForm() {
           className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
         />
       </div>
-      <div className="mt-3 flex">
+      <Link href={"/dashboard"} className="mt-3 flex">
         <SubmitButton disabled={true} />
-      </div>
+      </Link>
     </form>
   );
 }
