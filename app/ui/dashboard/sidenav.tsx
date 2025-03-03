@@ -1,5 +1,5 @@
-import NavLinks from "./nav_links";
-import PerfilUsuario from "./perfil_usuario";
+import NavLinks from "./nav-links";
+import PerfilUsuario from "./perfil-usuario";
 // import Image from "next/image";
 
 export default function Sidenav() {

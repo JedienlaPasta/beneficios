@@ -67,3 +67,14 @@ Descargar reporte completo de una campaña?
 Error Handlers.
 
 Revizar ingreso de fechas, estan un poco corridas por la zona horaria me parece.
+
+# Urgente Domingo
+
+Login
+Ingresar Registros de Actividades
+Mejorar UI de Campañas Activas
+Skeleton Loading
+
+Si es posible tambien:
+Entregas
+RSH

@@ -19,7 +19,7 @@ export default function CampañaDropdown({
     <li
       key={index}
       onClick={() => setNombreCampaña(campaña.nombre)}
-      className="flex w-full cursor-pointer flex-col px-4 py-1 text-sm hover:bg-gray-300"
+      className="flex w-full cursor-pointer flex-col px-4 py-[6px] text-sm hover:bg-sky-100"
     >
       <span>{campaña.nombre}</span>
       <span className="text-xs text-slate-500">{campaña.tipo}</span>
@@ -76,7 +76,7 @@ export default function CampañaDropdown({
         className={`transform cursor-pointer text-3xl text-slate-400 transition duration-300 ${isOpen ? "rotate-[-180deg]" : ""}`}
       />
       {isOpen && (
-        <ul className="absolute left-[-1px] top-full z-10 mt-1 w-[101%] rounded-lg border border-gray-200 bg-white py-3 shadow-lg">
+        <ul className="absolute left-[-1px] top-full z-10 mt-1 w-[101%] divide-y overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
           {mostrarCampañas}
         </ul>
       )}

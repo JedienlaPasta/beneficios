@@ -1,24 +1,21 @@
 import { FiBox } from "react-icons/fi";
 import { fetchCampañasFiltradas } from "@/app/lib/data";
 import { formatearFecha } from "@/app/lib/utils";
-import Pagination from "./pagination";
+import Pagination from "../pagination";
 import { Campaña } from "@/app/lib/definitions";
 
-type TablaDatosDashboardProps = {
+type TablaCampañasProps = {
   busqueda: string;
   paginaActual: number;
 };
-export default async function TablaDatosDashboard({
+export default async function TablaCampañas({
   busqueda,
   paginaActual,
-}: TablaDatosDashboardProps) {
-  const { data, total_paginas } = await fetchCampañasFiltradas(
+}: TablaCampañasProps) {
+  const { data, paginas } = await fetchCampañasFiltradas(
     busqueda,
     paginaActual,
   );
-
-  console.log(data[0].fecha_inicio);
-  console.log(data[0].fecha_termino);
 
   const filas = data?.map((item: Campaña, index: number) => (
     <TableRow key={index} item={item} />
@@ -38,7 +35,7 @@ export default async function TablaDatosDashboard({
         </thead>
         <tbody className="divide-y divide-slate-200/30">{filas}</tbody>
       </table>
-      <Pagination totalPaginas={total_paginas} />
+      <Pagination paginas={paginas} />
     </div>
   );
 }
@@ -65,22 +62,22 @@ function TableRow({
       : "bg-slate-50 text-slate-700 border-slate-200";
 
   return (
-    <tr className="cursor-pointer text-nowrap text-sm tabular-nums transition-colors hover:bg-gray-200/90">
-      <td className="w-[30%] py-4 pl-10 pr-6 font-medium text-slate-700">
+    <tr className="cursor-pointer text-nowrap text-sm tabular-nums transition-colors hover:bg-slate-200/50">
+      <td className="w-[30%] py-3 pl-10 pr-6 font-medium text-slate-700">
         {nombre}
       </td>
-      <td className="w-[20%] py-4 pr-14 text-right text-slate-600">{inicio}</td>
-      <td className="w-[20%] py-4 pr-14 text-right text-slate-600">
+      <td className="w-[20%] py-3 pr-14 text-right text-slate-600">{inicio}</td>
+      <td className="w-[20%] py-3 pr-14 text-right text-slate-600">
         {termino}
       </td>
-      <td className="w-[10%] px-6 py-4">
+      <td className="w-[10%] px-6 py-3">
         <span
           className={`inline-block rounded-full border px-3 py-1 text-xs font-medium ${colorEstado}`}
         >
           {estado}
         </span>
       </td>
-      <td className="w-[20%] items-center py-4 pl-6 pr-10 text-right text-slate-700">
+      <td className="w-[20%] items-center py-3 pl-6 pr-10 text-right text-slate-700">
         <div className="grid grid-cols-6 items-center gap-2 font-medium text-slate-700/90">
           <div className="col-span-5 flex w-full justify-end">
             <FiBox className="" />

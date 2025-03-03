@@ -32,7 +32,7 @@ export default function TableroEntregasInicio() {
   ));
 
   return (
-    <div className="items-centers flex w-fit flex-col justify-center rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="items-centers flex w-fit flex-col justify-center rounded-xl border border-slate-200 bg-slate-50 p-4">
       <div className="bg-slate-300s ml-7 flex gap-12 pb-1 text-xs text-gray-600">
         {mesesTablero}
       </div>
@@ -62,7 +62,7 @@ function RecuadroTablero({ estado }: { estado: number }) {
       className={`group relative flex h-4 w-4 items-center justify-center rounded border ${clsx(colorEstado[estado - 1])}`}
     >
       <div className="absolute bottom-5 z-10 hidden text-nowrap rounded-md bg-gray-800 px-2 py-1 text-xs text-white group-hover:flex">
-        Entregas: {estado}
+        Entregas: +{(estado - 1) * 2}
       </div>
     </div>
   );

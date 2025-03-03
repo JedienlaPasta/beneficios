@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 
-export default function Pagination({ totalPaginas }: { totalPaginas: number }) {
+export default function Pagination({ paginas }: { paginas: number }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const paginaActual = Number(searchParams.get("page")) || 1;
@@ -15,15 +15,15 @@ export default function Pagination({ totalPaginas }: { totalPaginas: number }) {
   };
 
   const numeroPaginas = [];
-  for (let i = 1; i <= totalPaginas; i++) {
+  for (let i = 1; i <= paginas; i++) {
     numeroPaginas.push(i);
   }
 
-  const paginas = numeroPaginas.map((numero, index) => (
+  const arrayPaginas = numeroPaginas.map((numero, index) => (
     <li key={index}>
       <Link
         href={URLPaginaActual(numero)}
-        className={`${numero === paginaActual ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white" : "bg-white hover:bg-gray-300"} text-slate-600" flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-sm`}
+        className={`${numero === paginaActual ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white" : "bg-white hover:bg-slate-200"} text-slate-600" flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-xs`}
       >
         {numero}
       </Link>
@@ -38,10 +38,10 @@ export default function Pagination({ totalPaginas }: { totalPaginas: number }) {
         return 1;
       }
     } else {
-      if (paginaActual < totalPaginas) {
+      if (paginaActual < paginas) {
         return paginaActual + 1;
       } else {
-        return totalPaginas;
+        return paginas;
       }
     }
   };
@@ -54,15 +54,15 @@ export default function Pagination({ totalPaginas }: { totalPaginas: number }) {
       <ul className="flex gap-2 p-2">
         <Link
           href={URLPaginaActual(calcularCambioPagina("bajar"))}
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-gray-300 hover:text-slate-600"
+          className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-200 hover:text-slate-600"
         >
           <MdKeyboardArrowLeft className="text-xl" />
         </Link>
 
-        {paginas}
+        {arrayPaginas}
         <Link
           href={URLPaginaActual(calcularCambioPagina("subir"))}
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-gray-300 hover:text-slate-600"
+          className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-200 hover:text-slate-600"
         >
           <MdKeyboardArrowRight className="text-xl" />
         </Link>
