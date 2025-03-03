@@ -6,13 +6,6 @@ import { useRouter } from "next/navigation";
 export default function Modal({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
-  //   useEffect(() => {
-  //     document.body.style.overflow = 'hidden';
-  //     return () => {
-  //       document.body.style.overflow = 'unset';
-  //     };
-  //   }, []);
-
   return (
     <div className="fixed inset-0 z-50">
       <div

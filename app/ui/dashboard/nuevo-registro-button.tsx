@@ -1,9 +1,12 @@
 "use client";
 import { FaPlus } from "react-icons/fa6";
-// import { FaFolderPlus } from "react-icons/fa6";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function NuevaCampañaButton() {
+export default function NuevoRegistroButton({
+  children,
+}: {
+  children: string;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -21,7 +24,7 @@ export default function NuevaCampañaButton() {
       <span>
         <FaPlus />
       </span>{" "}
-      Nueva Campaña
+      {children}
     </button>
   );
 }

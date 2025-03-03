@@ -1,18 +1,10 @@
 import NavLinks from "./nav-links";
 import PerfilUsuario from "./perfil-usuario";
-// import Image from "next/image";
 
 export default function Sidenav() {
   return (
     <div className="fixed flex h-dvh w-64 flex-col bg-[#171a1f] text-slate-300">
       <div className="flex h-16 items-center gap-2 border-b border-slate-700/50 px-4">
-        {/* <Image
-          src="/logo.png"
-          alt="Logo"
-          width={120}
-          height={32}
-          className="h-8 w-auto"
-        /> */}
         <div className="h-6 w-3 rounded bg-gradient-to-r from-blue-400 to-blue-500"></div>
         <p className="text-xl font-bold tracking-wider text-slate-100">
           ApoyoFacil

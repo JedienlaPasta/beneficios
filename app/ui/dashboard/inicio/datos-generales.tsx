@@ -20,7 +20,7 @@ export default function DatosGenerales() {
     },
     {
       title: "Beneficiarios",
-      value: "1,429",
+      value: "1.429",
       icon: <HiOutlineUsers className="h-5 w-5" />,
       change: "+0 última semana",
       changeType: "positive",

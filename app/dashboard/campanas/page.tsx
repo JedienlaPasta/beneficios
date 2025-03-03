@@ -4,7 +4,7 @@ import Buscar from "@/app/ui/dashboard/buscar";
 import { Suspense } from "react";
 import NuevaCampañaModal from "@/app/ui/dashboard/campañas/nueva-campaña-modal";
 import Modal from "@/app/ui/dashboard/modal";
-import NuevaCampañaButton from "@/app/ui/dashboard/campañas/nueva-campaña-button";
+import NuevaCampañaButton from "@/app/ui/dashboard/nuevo-registro-button";
 import { Toaster } from "sonner";
 import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/tabla-campañas-skeleton";
 
@@ -19,7 +19,7 @@ export default async function Campanas(props: CampanasProps) {
   const paginaActual = Number(searchParams?.page) || 1;
 
   return (
-    <div className="w-full px-6 py-8 text-slate-900 lg:px-10">
+    <div className="h-fit w-full px-6 py-8 text-slate-900 lg:px-10">
       {modal === "open" && (
         <Modal>
           <NuevaCampañaModal />
@@ -33,7 +33,7 @@ export default async function Campanas(props: CampanasProps) {
             Gestionar campañas activas y historial de campañas.
           </p>
         </div>
-        <NuevaCampañaButton />
+        <NuevaCampañaButton>Nueva Campaña</NuevaCampañaButton>
       </div>
 
       <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
