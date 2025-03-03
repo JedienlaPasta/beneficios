@@ -4,11 +4,11 @@ import { inter } from "./ui/fonts";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Social El Quisco",
-    default: "Social El Quisco",
+    template: "%s | ApoyoFacil El Quisco",
+    default: "ApoyoFacil El Quisco",
   },
   description:
-    "Gestor de la entrega y registro de los beneficios sociales destinados a los habitantes de El Quisco",
+    "Gestor de la entrega y registro de los beneficios sociales destinados a los habitantes de la comuna de El Quisco",
 };
 
 export default function RootLayout({

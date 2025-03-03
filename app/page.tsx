@@ -1,11 +1,20 @@
-// import Image from "next/image";
+import { Suspense } from "react";
+import LoginForm from "@/app/ui/login-form";
 
-export default function Home() {
+export default function LoginPage() {
   return (
-    <div className="grid min-h-screen grid-rows-[20px_1fr_20px] items-center justify-items-center gap-16 p-8 pb-20 font-[family-name:var(--font-geist-sans)] sm:p-20">
-      <main className="row-start-2 flex flex-col items-center gap-8 sm:items-start">
-        Landpage
-      </main>
-    </div>
+    <main className="flex items-center justify-center bg-gray-200 md:h-screen">
+      <div className="flex w-full max-w-[360px] flex-col gap-5 rounded-lg bg-white px-8 py-12 md:-mt-32">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-xl font-bold text-slate-700">Iniciar Sesión</h2>
+          <p className="text-sm font-normal text-slate-400">
+            Bienvenid@! ingresa tus credenciales.
+          </p>
+        </div>
+        <Suspense>
+          <LoginForm />
+        </Suspense>
+      </div>
+    </main>
   );
 }
