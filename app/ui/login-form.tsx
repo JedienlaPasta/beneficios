@@ -35,7 +35,7 @@ export default function LoginForm() {
         />
       </div>
       <Link href={"/dashboard"} className="mt-3 flex">
-        <SubmitButton disabled={true} />
+        <SubmitButton disabled={false} />
       </Link>
     </form>
   );
