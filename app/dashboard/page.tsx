@@ -29,7 +29,7 @@ export default async function DashboardPage(props: InicioProps) {
 
       <div className="flex flex-col gap-6 overflow-hidden rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
         <DatosGenerales />
-        <div className="items-centers w-fits flex flex-col justify-center gap-3 overflow-x-auto rounded-xl border border-slate-200 bg-white px-10 py-4 shadow-sm">
+        <div className="items-centers w-fits flex flex-col justify-center gap-3 overflow-x-auto rounded-xl border border-slate-200 bg-white px-10 py-4 shadow-md shadow-slate-300">
           <h2 className="my-2 text-lg font-semibold text-slate-800">
             Entregas Realizadas
           </h2>
@@ -45,7 +45,7 @@ export default async function DashboardPage(props: InicioProps) {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50">
+        <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50 shadow-md shadow-slate-300">
           <div className="flex items-center justify-between px-10 pt-4 3xl:w-[96rem] 3xl:self-center">
             <h2 className="text-lg font-semibold text-slate-800">
               Tus Actividades

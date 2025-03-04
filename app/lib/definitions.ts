@@ -31,3 +31,24 @@ export type Actividad = {
   paginas?: number; // total de paginas
   cantidad_total?: number; // total de registros
 };
+
+export type EntregaDetalleCampaña = {
+  folio: string;
+  id_campaña: string;
+  nombre: string;
+  fecha_inicio: Date;
+  paginas?: number; // total de paginas
+  cantidad_total?: number; // total de registros
+};
+
+export type Usuario = {
+  id: string;
+  nombre: string;
+  correo: string;
+  password: string;
+  rol: "Administrador" | "Usuario";
+  estado: "Activo" | "Inactivo";
+  // icono: string;
+  paginas?: number; // total de paginas
+  cantidad_total?: number; // total de registros
+};

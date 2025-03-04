@@ -58,3 +58,14 @@ export async function fetchCampañasFiltradas(
     return { data: [], paginas: 0 };
   }
 }
+
+// Entregas mostradas en el detalle de cada campaña
+export async function fetchEntregasCampaña(id: string) {
+  try {
+    const data = await sql`SELECT * FROM entregas WHERE id_campaña = ${id}`;
+    return { data, paginas: 0 };
+  } catch (error) {
+    console.error("Error al obtener datos de la tabla de entregas:", error);
+    return { data: [], paginas: 0 };
+  }
+}

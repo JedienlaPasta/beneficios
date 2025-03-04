@@ -1,25 +1,20 @@
-import { FiBox } from "react-icons/fi";
-import { fetchCampañasFiltradas } from "@/app/lib/data";
-import { formatearFecha } from "@/app/lib/utils";
+import { fetchEntregasCampaña } from "@/app/lib/data";
+import { EntregaDetalleCampaña } from "@/app/lib/definitions";
 import Pagination from "../pagination";
-import { Campaña } from "@/app/lib/definitions";
-import { CiViewList } from "react-icons/ci";
+import { formatearFecha } from "@/app/lib/utils";
+import { FiBox } from "react-icons/fi";
 import Link from "next/link";
+import { CiViewList } from "react-icons/ci";
 
-type TablaCampañasProps = {
-  busqueda: string;
-  paginaActual: number;
-};
-export default async function TablaCampañas({
-  busqueda,
-  paginaActual,
-}: TablaCampañasProps) {
-  const { data, paginas } = await fetchCampañasFiltradas(
-    busqueda,
-    paginaActual,
-  );
+export default async function TablaEntregasDetalleCampaña({
+  id,
+}: {
+  id: string;
+}) {
+  const { data, paginas } = await fetchEntregasCampaña(id);
+  console.log(data);
 
-  const filas = data?.map((item: Campaña, index: number) => (
+  const filas = data?.map((item: EntregaDetalleCampaña, index: number) => (
     <TableRow key={index} item={item} />
   ));
 
@@ -47,15 +42,16 @@ function TableRow({
   item,
 }: {
   item: {
-    id: string;
+    folio: string;
     nombre: string;
-    entregas: number;
-    estado: "En curso" | "Finalizado";
-    fecha_inicio: Date;
-    fecha_termino: Date;
+    fecha: Date;
   };
 }) {
-  const { id, nombre, entregas, estado, fecha_inicio, fecha_termino } = item;
+  const { folio, nombre, fecha } = item;
+  const fecha_inicio = new Date(fecha);
+  const fecha_termino = new Date(fecha);
+  const estado = "En curso";
+  const entregas = "0";
 
   const inicio = formatearFecha(fecha_inicio);
   const termino = formatearFecha(fecha_termino);
@@ -64,6 +60,8 @@ function TableRow({
     estado === "En curso"
       ? "bg-green-50 text-green-700 border-green-200"
       : "bg-slate-50 text-slate-700 border-slate-200";
+
+  const id = "51174ce0-a4ee-4e1c-8d44-dc35a3dff40f";
 
   return (
     <tr className="text-nowrap text-sm tabular-nums transition-colors hover:bg-slate-200/50">
