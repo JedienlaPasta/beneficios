@@ -9,7 +9,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       {/* sidenav placeholder, ya que <Sidenav /> tiene position:fixed */}
       <div className="z-[-5] w-64 shrink-0"></div>
       {/* <div className="flex grow justify-center overflow-auto"> */}
-      <div className="container mx-auto flex min-h-screen w-full flex-grow overflow-auto">
+      <div className="scrollbar-stable container mx-auto flex min-h-screen w-full flex-grow overflow-auto">
         {children}
         <Toaster />
       </div>

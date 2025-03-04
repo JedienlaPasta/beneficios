@@ -14,13 +14,17 @@
   }
 }
 
+@layer utilities {
+  .scrollbar-stable {
+    scrollbar-gutter: stable both-edges;
+  }
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
-
-
 
 ::-webkit-scrollbar {
   width: 10px;
@@ -30,7 +34,7 @@ body {
 ::-webkit-scrollbar-thumb {
   background: #4b535a;
   border-radius: 100vh;
-  border: 2px solid #242B31;
+  border: 2px solid #242b31;
 }
 
 ::-webkit-scrollbar-thumb:hover {
