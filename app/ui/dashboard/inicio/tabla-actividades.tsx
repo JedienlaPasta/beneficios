@@ -45,7 +45,7 @@ export default async function TablaActividades({
   ));
 
   return (
-    <div className="overflow-x-auto rounded-b-xl bg-white shadow-sm">
+    <div className="overflow-x-auto rounded-b-xl bg-white">
       <table className="w-full min-w-[44rem]">
         <thead className="border-y border-slate-200/70 bg-slate-50 text-xs font-medium tracking-wider text-slate-600/70">
           <tr>

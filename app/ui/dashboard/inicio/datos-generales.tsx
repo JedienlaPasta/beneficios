@@ -32,7 +32,7 @@ export default function DatosGenerales() {
       {stats.map((stat) => (
         <div
           key={stat.title}
-          className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md"
+          className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-md shadow-slate-300 transition-all hover:shadow-md"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">

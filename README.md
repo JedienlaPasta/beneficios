@@ -68,17 +68,6 @@ Error Handlers.
 
 Revizar ingreso de fechas, estan un poco corridas por la zona horaria me parece.
 
-# Urgente Domingo
-
-Login
-Ingresar Registros de Actividades
-Mejorar UI de Campañas Activas
-Skeleton Loading
-
-Si es posible tambien:
-Entregas
-RSH
-
 # Pendiente por pedir
 
 ¿Límite de 1 tipo campaña activa a la vez? Ej: 1 campaña de vales de gas, 1 campaña de tarjeta de comida, 1 campaña de pañales, etc.
@@ -100,3 +89,17 @@ En caso de ser doble, el código de folio sería "DO".¿Cómo es en caso de que 
 
 17/03/2025 - Revición interna de la aplicación.
 24/03/2025 - Primera versión de la aplicación.
+
+# TODO
+
+Login // Authorization - Aunthentication
+Ingresar Registros de Actividades Personales
+Mejorar UI de Campañas Activas
+Skeleton Loading
+
+Entregas
+RSH
+
+Cómo se estructurará el folio? Código predefinido para cada tipo de campaña? o dropdown con opción a que seleccionen el código o ingresen uno nuevo?
+
+Search bar -> Detalle Campaña (no esta configurada)

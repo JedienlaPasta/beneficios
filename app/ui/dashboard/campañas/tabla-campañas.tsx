@@ -24,7 +24,7 @@ export default async function TablaCampañas({
   ));
 
   return (
-    <div className="overflow-x-auto rounded-b-xl bg-white shadow-sm">
+    <div className="overflow-x-auto rounded-b-xl bg-white shadow-md shadow-slate-300">
       <table className="w-full min-w-[44rem]">
         <thead className="border-y border-slate-200/70 bg-slate-50 text-xs font-medium uppercase tracking-wider text-slate-600/70">
           <tr>
@@ -32,7 +32,7 @@ export default async function TablaCampañas({
             <th className="py-4 pr-14 text-right font-normal">Inicio</th>
             <th className="py-4 pr-14 text-right font-normal">Término</th>
             <th className="px-6 py-4 text-left font-normal">Estado</th>
-            <th className="py-4 pl-6 pr-10 text-right font-normal">Entregas</th>
+            <th className="py-4 pl-6 pr-10 text-left font-normal">Entregas</th>
             <th className="py-4 pr-10 text-right font-normal">Detalle</th>
           </tr>
         </thead>
@@ -47,6 +47,7 @@ function TableRow({
   item,
 }: {
   item: {
+    id: string;
     nombre: string;
     entregas: number;
     estado: "En curso" | "Finalizado";
@@ -54,7 +55,7 @@ function TableRow({
     fecha_termino: Date;
   };
 }) {
-  const { nombre, entregas, estado, fecha_inicio, fecha_termino } = item;
+  const { id, nombre, entregas, estado, fecha_inicio, fecha_termino } = item;
 
   const inicio = formatearFecha(fecha_inicio);
   const termino = formatearFecha(fecha_termino);
@@ -63,8 +64,6 @@ function TableRow({
     estado === "En curso"
       ? "bg-green-50 text-green-700 border-green-200"
       : "bg-slate-50 text-slate-700 border-slate-200";
-
-  const id = "51174ce0-a4ee-4e1c-8d44-dc35a3dff40f";
 
   return (
     <tr className="text-nowrap text-sm tabular-nums transition-colors hover:bg-slate-200/50">
@@ -82,21 +81,23 @@ function TableRow({
           {estado}
         </span>
       </td>
-      <td className="w-[10%] items-center py-3 pl-6 pr-10 text-right text-slate-700">
-        <div className="grid grid-cols-6 items-center gap-2 font-medium text-slate-700/90">
-          <div className="col-span-5 flex w-full justify-end">
-            <FiBox className="" />
+      <td className="w-[10%] items-center py-3 pl-6 pr-10 text-slate-700">
+        <div className="flex items-center gap-3 font-medium text-slate-700/90">
+          <div className="col-span-1 flex w-fit justify-start">
+            <FiBox />
           </div>
           {entregas}
         </div>
       </td>
       <td className="w-[10%] pl-6 pr-10 text-right">
-        <Link
-          href={`/dashboard/campanas/${id}`}
-          className="flex items-center justify-end font-medium text-slate-700/90"
-        >
-          <CiViewList className="h-6 w-6 cursor-pointer" />
-        </Link>
+        <div className="flex items-center justify-end">
+          <Link
+            href={`/dashboard/campanas/${id}`}
+            className="w-fit rounded font-medium text-slate-700/90 hover:bg-blue-100 hover:text-blue-600"
+          >
+            <CiViewList className="h-6 w-6 cursor-pointer" />
+          </Link>
+        </div>
       </td>
     </tr>
   );
