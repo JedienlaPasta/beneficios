@@ -39,8 +39,7 @@ export default async function TablaEntregasDetalleCampaña({
 }
 
 function TableRow({ item }: { item: EntregaDetalleCampaña }) {
-  const { folio, beneficio, nombre, apellidos, rut, fecha } = item;
-
+  const { folio, nombre, apellidos, rut, fecha } = item;
   const fecha_entrega = formatearFecha(fecha);
 
   return (

@@ -20,7 +20,7 @@ export default async function DetalleCampaña(props: ActualizarCampañaProps) {
   // Search params (query, page, modal)
   const searchParams = await props.searchParams;
   const modal = searchParams?.modal || "";
-  const busqueda = searchParams?.query || "";
+  // const busqueda = searchParams?.query || "";
   const paginaActual = Number(searchParams?.page) || 1;
   // Params (id)
   const params = await props.params;
