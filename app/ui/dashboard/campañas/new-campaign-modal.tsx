@@ -3,7 +3,7 @@ import { RiCloseLine } from "react-icons/ri";
 import CampañaDropdown from "@/app/ui/dashboard/campañas/campaña-dropdown";
 import { useRouter } from "next/navigation";
 import Input from "@/app/ui/dashboard/campañas/nueva-campaña-input";
-import { crearCampaña } from "@/app/lib/actions";
+import { createCampaign } from "@/app/lib/actions";
 import { toast } from "sonner";
 import { useActionState, useEffect, useState } from "react";
 
@@ -12,10 +12,10 @@ export type FormState = {
   message?: string;
 };
 
-export default function NuevaCampañaModal() {
+export default function NewCampaignModal() {
   const router = useRouter();
   const [state, formAction] = useActionState<FormState, FormData>(
-    crearCampaña,
+    createCampaign,
     {
       success: false,
       message: "",

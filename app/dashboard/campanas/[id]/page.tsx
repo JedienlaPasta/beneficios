@@ -1,13 +1,13 @@
-import Buscar from "@/app/ui/dashboard/buscar";
+import Buscar from "@/app/ui/dashboard/searchbar";
 import Detalle from "@/app/ui/dashboard/campañas/detalle-campaña";
-import NuevaCampañaModal from "@/app/ui/dashboard/campañas/nueva-campaña-modal";
-import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/tabla-campañas-skeleton";
-import TablaEntregasDetalleCampaña from "@/app/ui/dashboard/campañas/tabla-entregas-detalle-campaña";
+import NuevaCampañaModal from "@/app/ui/dashboard/campañas/new-campaign-modal";
+import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/campaigns-table-skeleton";
+import TablaEntregasDetalleCampaña from "@/app/ui/dashboard/campañas/campaign-social-aid-table";
 import Modal from "@/app/ui/dashboard/modal";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
 
-type ActualizarCampañaProps = {
+type DetalleCampañaProps = {
   searchParams?: Promise<{
     query?: string;
     page?: string;
@@ -16,12 +16,13 @@ type ActualizarCampañaProps = {
   params: Promise<{ id: string }>;
 };
 
-export default async function DetalleCampaña(props: ActualizarCampañaProps) {
+export default async function DetalleCampaña(props: DetalleCampañaProps) {
   // Search params (query, page, modal)
   const searchParams = await props.searchParams;
   const modal = searchParams?.modal || "";
-  // const busqueda = searchParams?.query || "";
+  const query = searchParams?.query || "";
   const paginaActual = Number(searchParams?.page) || 1;
+  // const busqueda = searchParams?.query || "";
   // Params (id)
   const params = await props.params;
   const id = params.id;
@@ -59,7 +60,11 @@ export default async function DetalleCampaña(props: ActualizarCampañaProps) {
             <Buscar placeholder="Buscar campaña..." />
           </div>
           <Suspense fallback={<TablaCampañasSkeleton />}>
-            <TablaEntregasDetalleCampaña id={id} paginaActual={paginaActual} />
+            <TablaEntregasDetalleCampaña
+              id={id}
+              query={query}
+              paginaActual={paginaActual}
+            />
           </Suspense>
         </div>
       </div>
