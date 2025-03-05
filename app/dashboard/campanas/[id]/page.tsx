@@ -59,7 +59,7 @@ export default async function DetalleCampaña(props: ActualizarCampañaProps) {
             <Buscar placeholder="Buscar campaña..." />
           </div>
           <Suspense fallback={<TablaCampañasSkeleton />}>
-            <TablaEntregasDetalleCampaña id={id} />
+            <TablaEntregasDetalleCampaña id={id} paginaActual={paginaActual} />
           </Suspense>
         </div>
       </div>

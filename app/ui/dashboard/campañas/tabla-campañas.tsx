@@ -32,7 +32,7 @@ export default async function TablaCampañas({
             <th className="py-4 pr-14 text-right font-normal">Inicio</th>
             <th className="py-4 pr-14 text-right font-normal">Término</th>
             <th className="px-6 py-4 text-left font-normal">Estado</th>
-            <th className="py-4 pl-6 pr-10 text-right font-normal">Entregas</th>
+            <th className="py-4 pl-6 pr-10 text-left font-normal">Entregas</th>
             <th className="py-4 pr-10 text-right font-normal">Detalle</th>
           </tr>
         </thead>
@@ -81,21 +81,23 @@ function TableRow({
           {estado}
         </span>
       </td>
-      <td className="w-[10%] items-center py-3 pl-6 pr-10 text-right text-slate-700">
-        <div className="grid grid-cols-6 items-center gap-2 font-medium text-slate-700/90">
-          <div className="col-span-5 flex w-full justify-end">
-            <FiBox className="" />
+      <td className="w-[10%] items-center py-3 pl-6 pr-10 text-slate-700">
+        <div className="flex items-center gap-3 font-medium text-slate-700/90">
+          <div className="col-span-1 flex w-fit justify-start">
+            <FiBox />
           </div>
           {entregas}
         </div>
       </td>
       <td className="w-[10%] pl-6 pr-10 text-right">
-        <Link
-          href={`/dashboard/campanas/${id}`}
-          className="flex items-center justify-end font-medium text-slate-700/90"
-        >
-          <CiViewList className="h-6 w-6 cursor-pointer" />
-        </Link>
+        <div className="flex items-center justify-end">
+          <Link
+            href={`/dashboard/campanas/${id}`}
+            className="w-fit rounded font-medium text-slate-700/90 hover:bg-blue-100 hover:text-blue-600"
+          >
+            <CiViewList className="h-6 w-6 cursor-pointer" />
+          </Link>
+        </div>
       </td>
     </tr>
   );

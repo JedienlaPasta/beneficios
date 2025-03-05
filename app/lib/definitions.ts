@@ -3,6 +3,7 @@ export type Campaña = {
   nombre: string;
   fecha_inicio: Date;
   fecha_termino: Date;
+  descripcion: string;
   estado: "En curso" | "Finalizado";
   entregas: number;
   // icono: string;
@@ -36,7 +37,10 @@ export type EntregaDetalleCampaña = {
   folio: string;
   id_campaña: string;
   nombre: string;
-  fecha_inicio: Date;
+  apellidos: string;
+  rut: string;
+  beneficio: string;
+  fecha: Date;
   paginas?: number; // total de paginas
   cantidad_total?: number; // total de registros
 };
