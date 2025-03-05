@@ -4,19 +4,19 @@ import { FiSearch } from "react-icons/fi";
 import { useDebouncedCallback } from "use-debounce";
 // import { RiCloseLine } from "react-icons/ri";
 
-type BarraBuscarProps = {
+type SearchBarProps = {
   placeholder: string;
 };
-export default function Buscar({ placeholder }: BarraBuscarProps) {
+export default function SearchBar({ placeholder }: SearchBarProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
 
-  const manejarBusqueda = useDebouncedCallback((busqueda: string) => {
+  const handleSearch = useDebouncedCallback((query: string) => {
     const params = new URLSearchParams(searchParams);
     params.set("page", "1");
-    if (busqueda) {
-      params.set("query", busqueda);
+    if (query) {
+      params.set("query", query);
     } else {
       params.delete("query");
     }
@@ -30,7 +30,7 @@ export default function Buscar({ placeholder }: BarraBuscarProps) {
         <input
           type="text"
           placeholder={placeholder}
-          onChange={(e) => manejarBusqueda(e.target.value)}
+          onChange={(e) => handleSearch(e.target.value)}
           defaultValue={searchParams.get("query")?.toString()}
           className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
         />

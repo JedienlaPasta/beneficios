@@ -1,4 +1,4 @@
-export default function TablaActividadesSkeleton() {
+export default function ActivityTableSkeleton() {
   return (
     <div className="overflow-x-auto rounded-b-xl bg-white shadow-sm">
       <table className="w-full min-w-[44rem]">

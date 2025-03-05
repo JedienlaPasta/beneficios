@@ -3,29 +3,29 @@ import { FiBox } from "react-icons/fi";
 import { IoCardOutline, IoTicketOutline } from "react-icons/io5";
 import { TbDiaper } from "react-icons/tb";
 
-type CampañasActivasProps = {
+type ActiveCampaignsProps = {
   nombre: string;
   termina: string;
   entregas: number;
   icono: JSX.Element;
 };
 
-export default function CampañasActivas() {
+export default function ActiveCampaigns() {
   return (
     <div className="flex flex-wrap gap-4">
-      <CampañaActiva
+      <ActiveCapaign
         nombre="Vale de Gas"
         termina="27 Abr, 2025"
         entregas={126}
         icono={<IoTicketOutline />}
       />
-      <CampañaActiva
+      <ActiveCapaign
         nombre="Tarjeta de Comida"
         termina="04 Jun, 2025"
         entregas={83}
         icono={<IoCardOutline />}
       />
-      <CampañaActiva
+      <ActiveCapaign
         nombre="Pañales"
         termina="12 Sep, 2025"
         entregas={17}
@@ -35,12 +35,12 @@ export default function CampañasActivas() {
   );
 }
 
-function CampañaActiva({
+function ActiveCapaign({
   nombre,
   termina,
   entregas,
   icono,
-}: CampañasActivasProps) {
+}: ActiveCampaignsProps) {
   return (
     <div className="flex min-w-64 grow flex-col rounded-xl bg-white shadow-md shadow-slate-300">
       <div className="flex items-center justify-between px-7">

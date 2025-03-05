@@ -3,7 +3,7 @@
 import { z } from "zod";
 import postgres from "postgres";
 import { revalidatePath } from "next/cache";
-import { FormState } from "../ui/dashboard/campañas/nueva-campaña-modal";
+import { FormState } from "../ui/dashboard/campañas/new-campaign-modal";
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: "require" });
 
@@ -17,24 +17,27 @@ const FormSchema = z.object({
   descripcion: z.string(),
 });
 
-const CrearCampaña = FormSchema.omit({
+const CreateCampaign = FormSchema.omit({
   id: true,
   fechaInicio: true,
   estado: true,
   entregas: true,
 });
 // Add return type to the server action
-export async function crearCampaña(prevState: FormState, formData: FormData): Promise<FormState> {
+export async function createCampaign(
+  prevState: FormState,
+  formData: FormData,
+): Promise<FormState> {
   try {
-    const { nombre, fechaTermino, descripcion } = CrearCampaña?.parse({
+    const { nombre, fechaTermino, descripcion } = CreateCampaign?.parse({
       nombre: formData?.get("nombre"),
       fechaTermino: formData?.get("termino"),
       descripcion: formData?.get("descripcion"),
     });
     const fechaInicio = new Date();
-    const termino = new Date(fechaTermino+"T00:00:00-04:00");
-    console.log('Termino: ', fechaTermino);
-    console.log('Termino: ', termino.toString());
+    const termino = new Date(fechaTermino + "T00:00:00-04:00");
+    console.log("Termino: ", fechaTermino);
+    console.log("Termino: ", termino.toString());
     if (termino < fechaInicio) {
       throw new Error(
         "La fecha de término no puede ser menor a la fecha de inicio",
@@ -47,8 +50,8 @@ export async function crearCampaña(prevState: FormState, formData: FormData): P
       INSERT INTO campañas (nombre, fecha_inicio, fecha_termino, estado, entregas, descripcion)
       VALUES (${nombre}, ${fechaInicio}, ${termino}, ${estado}, ${entregas}, ${descripcion})
     `;
-    
-    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     revalidatePath("/dashboard/campanas");
 
     return { success: true, message: "Campaña creada exitosamente" };
@@ -56,7 +59,7 @@ export async function crearCampaña(prevState: FormState, formData: FormData): P
     console.error("Error al crear la campaña:", error);
     return {
       success: false,
-      message: "Error al crear la campaña"
+      message: "Error al crear la campaña",
     };
   }
 }

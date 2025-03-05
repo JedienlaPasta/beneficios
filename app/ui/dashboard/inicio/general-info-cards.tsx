@@ -2,7 +2,7 @@ import { HiOutlineGift } from "react-icons/hi2";
 import { HiOutlineUsers } from "react-icons/hi2";
 // import { HiOutlineClock } from "react-icons/hi2";
 
-export default function DatosGenerales() {
+export default function GeneralInfoCards() {
   const stats = [
     {
       title: "Campañas Activas",
@@ -57,39 +57,9 @@ export default function DatosGenerales() {
               {stat.change}
             </span>
           </div>
-
           <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600 opacity-0 transition-opacity group-hover:opacity-100" />
         </div>
       ))}
     </div>
   );
 }
-
-// Campaña
-// function CampañaActiva({
-//   nombre,
-//   fecha,
-//   entregado,
-// }: {
-//   nombre: string;
-//   fecha: string;
-//   entregado: number;
-// }) {
-//   return (
-//     <div className="w-60 shrink-0 overflow-hidden rounded-xl border border-slate-900/15 bg-slate-800 text-white">
-//       <h5 className="bg-slate-900 px-7 pb-2 pt-3 text-sm font-medium">
-//         {nombre}
-//       </h5>
-//       <div className="bg-red grid grid-cols-2 gap-7 px-7 pb-3 pt-2 text-sm">
-//         <span>
-//           <label className="text-xs">Término</label>
-//           <p className="text-xs">{fecha}</p>
-//         </span>
-//         <span>
-//           <label className="text-xs">Entregas</label>
-//           <p className="text-xs">{entregado}</p>
-//         </span>
-//       </div>
-//     </div>
-//   );
-// }

@@ -1,13 +1,53 @@
-export const formatearFecha = (fecha: Date) => {
-    const fechaEnEspañol = fecha.toLocaleString("es-ES", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    });
-    const fechaSpliteada = fechaEnEspañol.toString().split(" ");
-    const dia = fechaSpliteada[0];
-    const mes = fechaSpliteada[2][0].toUpperCase() + fechaSpliteada[2].slice(1, 3);
-    const año = fechaSpliteada[4];
+import clsx from "clsx";
+import { ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
-    return dia + " " + mes + ", " + año;
+export const formatDate = (date: Date) => {
+  const esDate = date.toLocaleString("es-ES", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const splitDate = esDate.toString().split(" ");
+  const dia = splitDate[0];
+  const mes = splitDate[2][0].toUpperCase() + splitDate[2].slice(1, 3);
+  const año = splitDate[4];
+
+  return dia + " " + mes + ", " + año;
 };
+
+export const formatNumber = (num: number) => {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+
+export const capitalize = (str: string) => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+export const capitalizeEachWord = (str: string) => {
+  return str.replace(/\w\S*/g, function (txt) {
+    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  });
+};
+
+export const getDV = (rut: string) => {
+  let sum = 0;
+  let multiplier = 2;
+  for (let i = rut.length - 1; i >= 0; i--) {
+    const digit = parseInt(rut.charAt(i), 10);
+    sum += digit * multiplier;
+    multiplier = (multiplier % 7) + 2;
+  }
+  const dv = 11 - (sum % 11);
+  if (dv === 11) {
+    return "0";
+  } else if (dv === 10) {
+    return "K";
+  } else {
+    return dv.toString();
+  }
+};
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}

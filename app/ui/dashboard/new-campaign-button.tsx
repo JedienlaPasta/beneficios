@@ -2,11 +2,7 @@
 import { FaPlus } from "react-icons/fa6";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function NuevoRegistroButton({
-  children,
-}: {
-  children: string;
-}) {
+export default function NewCampaignButton({ children }: { children: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 

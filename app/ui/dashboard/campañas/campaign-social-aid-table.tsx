@@ -1,21 +1,23 @@
-import { fetchEntregasCampaña } from "@/app/lib/data";
-import { EntregaDetalleCampaña } from "@/app/lib/definitions";
+import { fetchSocialAid } from "@/app/lib/data";
+import { SocialAid } from "@/app/lib/definitions";
 import Pagination from "../pagination";
-import { formatearFecha } from "@/app/lib/utils";
+import { formatDate, formatNumber, getDV } from "@/app/lib/utils";
 
-export default async function TablaEntregasDetalleCampaña({
+export default async function CampaignSocialAidsTable({
   id,
+  query,
   paginaActual,
 }: {
   id: string;
+  query: string;
   paginaActual: number;
 }) {
-  const { data, paginas } = (await fetchEntregasCampaña(id, paginaActual)) as {
-    data: EntregaDetalleCampaña[];
-    paginas: number;
+  const { data, pages } = (await fetchSocialAid(id, query, paginaActual)) as {
+    data: SocialAid[];
+    pages: number;
   };
 
-  const filas = data?.map((item: EntregaDetalleCampaña, index: number) => (
+  const filas = data?.map((item: SocialAid, index: number) => (
     <TableRow key={index} item={item} />
   ));
 
@@ -33,14 +35,15 @@ export default async function TablaEntregasDetalleCampaña({
         </thead>
         <tbody className="divide-y divide-slate-200/30">{filas}</tbody>
       </table>
-      <Pagination paginas={paginas} />
+      <Pagination pages={pages} />
     </div>
   );
 }
 
-function TableRow({ item }: { item: EntregaDetalleCampaña }) {
+function TableRow({ item }: { item: SocialAid }) {
   const { folio, nombre, apellidos, rut, fecha } = item;
-  const fecha_entrega = formatearFecha(fecha);
+  const fecha_entrega = formatDate(fecha);
+  const formatted_rut = formatNumber(Number(rut)) + (rut && "-" + getDV(rut));
 
   return (
     <tr className="text-nowrap text-sm tabular-nums transition-colors hover:bg-slate-200/50">
@@ -53,7 +56,9 @@ function TableRow({ item }: { item: EntregaDetalleCampaña }) {
       <td className="w-[30%] py-3 pl-10 pr-6 text-slate-600">
         {/* white space */}
       </td>
-      <td className="w-[15%] py-3 pr-14 text-right text-slate-600">{rut}</td>
+      <td className="w-[15%] py-3 pr-14 text-right text-slate-600">
+        {formatted_rut}
+      </td>
       <td className="w-[15%] py-3 pr-14 text-right text-slate-600">
         {fecha_entrega}
       </td>

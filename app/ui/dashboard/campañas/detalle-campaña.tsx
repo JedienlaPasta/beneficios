@@ -6,18 +6,15 @@ import { JSX } from "react";
 import Link from "next/link";
 import { BiEdit, BiTrash } from "react-icons/bi";
 import { fetchCampaignById } from "@/app/lib/data";
-import { Campaña } from "@/app/lib/definitions";
-import { formatearFecha } from "@/app/lib/utils";
+import { Campaign } from "@/app/lib/definitions";
+import { formatDate } from "@/app/lib/utils";
 
-export default async function Detalle({ id }: { id: string }) {
-  const { data } = (await fetchCampaignById(id)) as { data: Campaña[] };
-  // if (!data) {
-  //   return <p>No se encontró la campaña</p>;
-  // }
+export default async function Detail({ id }: { id: string }) {
+  const { data } = (await fetchCampaignById(id)) as { data: Campaign[] };
   const { nombre, fecha_inicio, fecha_termino, descripcion, estado, entregas } =
     data[0];
-  const inicio = formatearFecha(fecha_inicio);
-  const termino = formatearFecha(fecha_termino);
+  const inicio = formatDate(fecha_inicio);
+  const termino = formatDate(fecha_termino);
 
   return (
     <div className="items-centers relative flex flex-col justify-center">

@@ -1,46 +1,44 @@
 import { MdAutorenew } from "react-icons/md";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { BiFolderPlus } from "react-icons/bi";
-
-import { fetchActividadesUsuario } from "@/app/lib/data";
-import { formatearFecha } from "@/app/lib/utils";
+import { fetchUserActivity } from "@/app/lib/data";
+import { formatDate } from "@/app/lib/utils";
 import Pagination from "../pagination";
-import { Actividad } from "@/app/lib/definitions";
+import { Activity } from "@/app/lib/definitions";
 
-const ACTIVIDAD = [
+const ACTIVITY = [
   {
-    tipo: "Editar",
+    type: "Editar",
     color: "bg-blue-100 text-blue-400",
-    icono: <MdAutorenew />,
+    icon: <MdAutorenew />,
   },
   {
-    tipo: "Crear",
+    type: "Crear",
     color: "bg-green-100 text-green-400",
-    icono: <BiFolderPlus />,
+    icon: <BiFolderPlus />,
   },
   {
-    tipo: "Eliminar",
+    type: "Eliminar",
     color: "bg-red-100 text-red-400",
-    icono: <MdOutlineDeleteForever />,
+    icon: <MdOutlineDeleteForever />,
   },
 ];
 
-type TablaActividadesProps = {
-  busqueda: string;
-  paginaActual: number;
+type ActivityTableProps = {
+  query: string;
+  currentPage: number;
 };
-export default async function TablaActividades({
-  busqueda,
-  paginaActual,
-}: TablaActividadesProps) {
+export default async function ActivityTable({
+  query,
+  currentPage,
+}: ActivityTableProps) {
   const id = "51174ce0-a4ee-4e1c-8d44-dc35a3dff40f";
-  const { data, paginas } = (await fetchActividadesUsuario(
-    id,
-    busqueda,
-    paginaActual,
-  )) as { data: Actividad[]; paginas: number };
+  const { data, pages } = (await fetchUserActivity(id, query, currentPage)) as {
+    data: Activity[];
+    pages: number;
+  };
 
-  const filas = data?.map((item: Actividad, index: number) => (
+  const filas = data?.map((item: Activity, index: number) => (
     <TableRow key={index} item={item} />
   ));
 
@@ -55,36 +53,22 @@ export default async function TablaActividades({
         </thead>
         <tbody className="divide-y divide-slate-200/30">{filas}</tbody>
       </table>
-      <Pagination paginas={paginas} />
+      <Pagination pages={pages} />
     </div>
   );
 }
 
-function TableRow({
-  item,
-}: {
-  item: {
-    id_usuario: string;
-    accion: string;
-    dato: string;
-    fecha: Date;
-    nombre: string;
-    id_campaña?: string;
-    id_entrega?: string;
-    id_rsh?: string;
-  };
-}) {
+function TableRow({ item }: { item: Activity }) {
   const { nombre, accion, dato, fecha, id_campaña, id_entrega, id_rsh } = item;
+  const fechaActividad = formatDate(fecha);
 
-  const fechaActividad = formatearFecha(fecha);
-
-  const actividad = ACTIVIDAD.find((actividad) => actividad.tipo === accion);
+  const activityValues = ACTIVITY.find((activity) => activity.type === accion);
 
   return (
     <tr className="cursor-pointer text-nowrap text-sm tabular-nums transition-colors hover:bg-slate-200/50">
       <td className="flex items-center gap-3 py-4 pl-10 pr-6">
-        <span className={`rounded-xl p-1 text-lg ${actividad?.color}`}>
-          {actividad?.icono}{" "}
+        <span className={`rounded-xl p-1 text-lg ${activityValues?.color}`}>
+          {activityValues?.icon}{" "}
         </span>
         <div>
           <span className="font-medium text-slate-700">{nombre} </span>

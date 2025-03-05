@@ -1,4 +1,4 @@
-export type Campaña = {
+export type Campaign = {
   id: string;
   nombre: string;
   fecha_inicio: Date;
@@ -7,19 +7,11 @@ export type Campaña = {
   estado: "En curso" | "Finalizado";
   entregas: number;
   // icono: string;
-  paginas?: number; // total de paginas
-  cantidad_total?: number; // total de registros
+  pages?: number; // total de paginas
+  total?: number; // total de registros
 };
 
-export type CampañaHistorial = {
-  id: string;
-  nombre: string;
-  fecha_inicio: string;
-  fecha_termino: string;
-  icono: string;
-};
-
-export type Actividad = {
+export type Activity = {
   id: string;
   id_campaña?: string;
   id_entrega?: string;
@@ -29,11 +21,11 @@ export type Actividad = {
   accion: string;
   dato: string;
   fecha: Date;
-  paginas?: number; // total de paginas
-  cantidad_total?: number; // total de registros
+  pages?: number; // total de paginas
+  total?: number; // total de registros
 };
 
-export type EntregaDetalleCampaña = {
+export type SocialAid = {
   folio: string;
   id_campaña: string;
   nombre: string;
@@ -41,18 +33,6 @@ export type EntregaDetalleCampaña = {
   rut: string;
   beneficio: string;
   fecha: Date;
-  paginas?: number; // total de paginas
-  cantidad_total?: number; // total de registros
-};
-
-export type Usuario = {
-  id: string;
-  nombre: string;
-  correo: string;
-  password: string;
-  rol: "Administrador" | "Usuario";
-  estado: "Activo" | "Inactivo";
-  // icono: string;
-  paginas?: number; // total de paginas
-  cantidad_total?: number; // total de registros
+  pages?: number; // total de paginas
+  total?: number; // total de registros
 };
