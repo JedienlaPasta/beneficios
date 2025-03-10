@@ -6,6 +6,10 @@ export type Campaign = {
   descripcion: string;
   estado: "En curso" | "Finalizado";
   entregas: number;
+  tipo_dato: string;
+  tramo: string;
+  discapacidad: string;
+  adulto_mayor: string;
   // icono: string;
   pages?: number; // total de paginas
   total?: number; // total de registros

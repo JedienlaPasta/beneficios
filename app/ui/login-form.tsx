@@ -1,7 +1,11 @@
+"use client";
 import Link from "next/link";
-import SubmitButton from "./submit-button";
+import { SubmitButton } from "./dashboard/submit-button";
+import { useState } from "react";
 
 export default function LoginForm() {
+  const [isDisabled, setIsDisabled] = useState(false);
+
   return (
     <form className="flex flex-col gap-10">
       <div className="relative top-5 flex h-10 items-center gap-3 rounded-md border border-slate-300 bg-white px-4 shadow-sm transition-all focus-within:border-blue-500">
@@ -35,7 +39,9 @@ export default function LoginForm() {
         />
       </div>
       <Link href={"/dashboard"} className="mt-3 flex">
-        <SubmitButton disabled={false} />
+        <SubmitButton isDisabled={isDisabled} setIsDisabled={setIsDisabled}>
+          Verificando...
+        </SubmitButton>
       </Link>
     </form>
   );

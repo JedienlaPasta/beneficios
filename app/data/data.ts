@@ -106,17 +106,17 @@ export const tableData = [
   },
 ];
 
-export const listaCampañas = [
+export const campaignsList = [
   {
-    nombre: "Tarjeta de Comida",
-    tipo: "Código",
+    name: "Tarjeta de Comida",
+    type: "Código",
   },
   {
-    nombre: "Vale de Gas",
-    tipo: "Código",
+    name: "Vale de Gas",
+    type: "Código",
   },
   {
-    nombre: "Pañales",
-    tipo: "Talla",
+    name: "Pañales",
+    type: "Talla",
   },
 ];

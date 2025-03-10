@@ -1,40 +1,39 @@
 import Buscar from "@/app/ui/dashboard/searchbar";
-import Detalle from "@/app/ui/dashboard/campañas/detalle-campaña";
-import NuevaCampañaModal from "@/app/ui/dashboard/campañas/new-campaign-modal";
 import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/campaigns-table-skeleton";
-import TablaEntregasDetalleCampaña from "@/app/ui/dashboard/campañas/campaign-social-aid-table";
+import TablaEntregasDetalleCampaña from "@/app/ui/dashboard/campañas/[id]/campaign-social-aid-table";
 import Modal from "@/app/ui/dashboard/modal";
 import { Suspense } from "react";
-import { Toaster } from "sonner";
+import UpdateCampaignModal from "@/app/ui/dashboard/campañas/[id]/update/update-campaign-modal";
+import { fetchCampaignById } from "@/app/lib/data";
+import CampaignDetail from "@/app/ui/dashboard/campañas/[id]/campaign-detail";
 
-type DetalleCampañaProps = {
+type CampaignProps = {
   searchParams?: Promise<{
     query?: string;
     page?: string;
-    modal?: string;
+    update?: string;
   }>;
   params: Promise<{ id: string }>;
 };
 
-export default async function DetalleCampaña(props: DetalleCampañaProps) {
+export default async function Campaign(props: CampaignProps) {
   // Search params (query, page, modal)
   const searchParams = await props.searchParams;
-  const modal = searchParams?.modal || "";
+  const showUpdateModal = searchParams?.update || "";
   const query = searchParams?.query || "";
   const paginaActual = Number(searchParams?.page) || 1;
-  // const busqueda = searchParams?.query || "";
   // Params (id)
   const params = await props.params;
   const id = params.id;
+  const { data } = await fetchCampaignById(id);
 
   return (
     <div className="h-fit w-full px-6 py-8 text-slate-900 lg:px-10">
-      {modal === "open" && (
+      {showUpdateModal === "open" && (
         <Modal>
-          <NuevaCampañaModal />
+          <UpdateCampaignModal id={id} data={data} />
         </Modal>
       )}
-      <Toaster />
       <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
         <div>
           <h2 className="text-3xl font-bold text-slate-800">Detalle Campaña</h2>
@@ -42,11 +41,10 @@ export default async function DetalleCampaña(props: DetalleCampañaProps) {
             Gestionar datos de campaña y sus entregas asociadas.
           </p>
         </div>
-        {/* <NuevaCampañaButton>Nueva Campaña</NuevaCampañaButton> */}
       </div>
 
       <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
-        <Detalle id={id} />
+        <CampaignDetail id={id} />
         <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50">
           <div className="flex items-center justify-between px-10 pt-4 3xl:w-[96rem] 3xl:self-center">
             <div className="flex items-center gap-2">

@@ -45,8 +45,7 @@ export async function fetchCampaigns(query: string, currentPage: number) {
                 campañas.nombre ILIKE ${`%${query}%`}
             ORDER BY campañas.fecha_inicio DESC
             LIMIT ${resultsPerPage}
-            OFFSET ${offset}
-            `;
+            OFFSET ${offset}`;
     const pages = Math.ceil(Number(data[0]?.total) / resultsPerPage);
     return { data, pages };
   } catch (error) {
@@ -57,9 +56,7 @@ export async function fetchCampaigns(query: string, currentPage: number) {
 
 export async function fetchCampaignById(id: string) {
   try {
-    const data = await sql<
-      Campaign[]
-    >`SELECT * FROM campañas WHERE id = ${id} `;
+    const data = await sql<Campaign[]>`SELECT * FROM campañas WHERE id = ${id}`;
     return { data };
   } catch (error) {
     console.error("Error al obtener datos de la tabla de campañas:", error);
@@ -90,8 +87,7 @@ export async function fetchSocialAid(
               )
             ORDER BY entregas.fecha DESC
             LIMIT ${resultsPerPage}
-            OFFSET ${offset}
-            `;
+            OFFSET ${offset}`;
     const pages = Math.ceil(Number(data[0]?.total) / resultsPerPage);
     return { data, pages };
   } catch (error) {

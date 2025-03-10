@@ -4,7 +4,7 @@ import SearchBar from "@/app/ui/dashboard/searchbar";
 import { Suspense } from "react";
 import NewCampaignModal from "@/app/ui/dashboard/campañas/new-campaign-modal";
 import Modal from "@/app/ui/dashboard/modal";
-import NewCampaignButton from "@/app/ui/dashboard/new-campaign-button";
+import NewCampaignButton from "@/app/ui/dashboard/campañas/new-campaign-button";
 import { Toaster } from "sonner";
 import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/campaigns-table-skeleton";
 

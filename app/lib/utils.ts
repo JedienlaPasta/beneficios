@@ -16,6 +16,18 @@ export const formatDate = (date: Date) => {
   return dia + " " + mes + ", " + año;
 };
 
+// Takes: Wed Mar 05 2025 15:06:42 GMT-0300 (hora de verano de Chile) => Returns: 2025-03-05T18:06:42.000Z
+export const formatDateForDB = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toISOString();
+};
+
+// Takes: 2025-03-05T18:06:42.000Z => Returns: Wed Mar 05 2025 15:06:42 GMT-0300 (hora de verano de Chile)
+export const formatDateToLocal = (isoString: string) => {
+  const date = new Date(isoString);
+  return date.toString();
+};
+
 export const formatNumber = (num: number) => {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };

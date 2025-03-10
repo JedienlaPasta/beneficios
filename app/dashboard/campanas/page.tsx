@@ -2,11 +2,11 @@ import CampaignsTable from "@/app/ui/dashboard/campañas/campaigns-table";
 import ActiveCampaigns from "@/app/ui/dashboard/campañas/active-campaigns";
 import NewCampaignModal from "@/app/ui/dashboard/campañas/new-campaign-modal";
 import CampaignsTableSkeleton from "@/app/ui/dashboard/campañas/campaigns-table-skeleton";
-import NewCampaignButton from "@/app/ui/dashboard/new-campaign-button";
+import NewCampaignButton from "@/app/ui/dashboard/campañas/new-campaign-button";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import Modal from "@/app/ui/dashboard/modal";
 import { Suspense } from "react";
-import { Toaster } from "sonner";
+// import { Toaster } from "sonner";
 
 type CampaignsProps = {
   searchParams?: Promise<{ query?: string; page?: string; modal?: string }>;
@@ -25,7 +25,7 @@ export default async function Campaigns(props: CampaignsProps) {
           <NewCampaignModal />
         </Modal>
       )}
-      <Toaster />
+      {/* <Toaster /> */}
       <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
         <div>
           <h2 className="text-3xl font-bold text-slate-800">Campañas</h2>
