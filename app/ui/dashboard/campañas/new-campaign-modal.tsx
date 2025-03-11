@@ -2,7 +2,6 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { DatePicker } from "@/components/ui/datepicker";
 import { createCampaign } from "@/app/lib/actions";
 import Input from "@/app/ui/dashboard/campañas/new-campaign-input";
 import CampaignDropdown from "@/app/ui/dashboard/campañas/campaign-dropdown";
@@ -11,6 +10,8 @@ import { SubmitButton } from "../submit-button";
 import { Requirements } from "./[id]/update/update-form";
 import DataTypeCards from "./[id]/update/data-type-cards";
 import RequirementsCard from "./[id]/update/requirements-cards";
+import dayjs from "dayjs";
+import CustomAntdDatePicker from "@/app/ui/dashboard/datepicker";
 
 export type FormState = {
   success?: boolean;
@@ -19,7 +20,7 @@ export type FormState = {
 
 export default function NewCampaignModal() {
   const router = useRouter();
-  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [date, setDate] = useState<Date | null>(null);
   const [codigo, setCodigo] = useState("");
   const [fieldType, setFieldType] = useState("Código");
   const [criteria, setCriteria] = useState<Requirements>({
@@ -34,6 +35,18 @@ export default function NewCampaignModal() {
       message: "",
     },
   );
+
+  const datePickerHandler = (
+    pickerDate: dayjs.Dayjs | null,
+    dateString: string | string[],
+  ) => {
+    if (pickerDate) {
+      const dt = pickerDate.toDate();
+      setDate(dt);
+    } else {
+      setDate(null);
+    }
+  };
 
   useEffect(() => {
     if (state?.message) {
@@ -66,9 +79,8 @@ export default function NewCampaignModal() {
     formData.append("tramo", criteria.tramo.toString());
     formData.append("discapacidad", criteria.discapacidad.toString());
     formData.append("adultoMayor", criteria.adultoMayor.toString());
-
-    console.log(formData);
-    await formAction(formData);
+    formAction(formData);
+    // await formAction(formData);
   };
 
   return (
@@ -113,7 +125,11 @@ export default function NewCampaignModal() {
             </DataTypeCards>
           </div>
         </div>
-        <DatePicker label="Término" date={date} setDate={setDate} />
+        <CustomAntdDatePicker
+          label="Término"
+          placeholder="Seleccione una fecha"
+          setDate={datePickerHandler}
+        />
 
         <div className="flex flex-col gap-1">
           <p className="text-xs text-slate-500">Criterios de Aceptación</p>
@@ -154,7 +170,7 @@ export default function NewCampaignModal() {
 
 function CampaignCode({ descripcion }: { descripcion: string }) {
   return (
-    <span className="flex h-10 w-10 items-center justify-center rounded-md bg-blue-500 text-white">
+    <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500 text-white">
       {descripcion}
     </span>
   );

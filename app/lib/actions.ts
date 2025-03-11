@@ -1,5 +1,4 @@
 "use server";
-
 import { z } from "zod";
 import postgres from "postgres";
 import { revalidatePath } from "next/cache";
@@ -75,6 +74,8 @@ export async function createCampaign(
       new Date(fechaTermino) > fechaInicio ? "En curso" : "Finalizado";
     const entregas = 0;
 
+    console.log(formData);
+
     await sql`
       INSERT INTO campañas (nombre, fecha_inicio, fecha_termino, descripcion, tipo_dato, estado, entregas, tramo, discapacidad, adulto_mayor)
       VALUES (${nombre}, ${fechaInicio}, ${fechaTermino}, ${descripcion.toUpperCase()}, ${tipoDato}, ${estado}, ${entregas}, ${tramo}, ${discapacidad}, ${adultoMayor})
@@ -139,12 +140,20 @@ export async function updateCampaign(id: string, formData: FormData) {
       adultoMayor: formData.get("adultoMayor"),
     });
 
+    console.log("Fecha Inicio: " + new Date(fechaInicio));
+    console.log("Fecha Término: " + new Date(fechaTermino));
+
     if (!fechaInicio || !fechaTermino)
-      throw new Error("Las fechas son requeridas");
+      return {
+        success: false,
+        message: "Campos incompletos",
+      };
+
     if (new Date(fechaTermino) < new Date(fechaInicio))
-      throw new Error(
-        "La fecha de término no puede ser menor a la fecha de inicio",
-      );
+      return {
+        success: false,
+        message: "La fecha de término no puede ser menor a la fecha de inicio",
+      };
 
     await sql`
       UPDATE campañas
@@ -161,10 +170,10 @@ export async function updateCampaign(id: string, formData: FormData) {
     revalidatePath("/dashboard/campanas");
     return { success: true, message: "Campaña actualizada exitosamente" };
   } catch (error) {
-    console.error("Error al crear la campaña:", error);
+    console.error("Error al actualizar la campaña:", error);
     return {
       success: false,
-      message: "Error al crear la campaña",
+      message: "Error al actualizar la campaña",
     };
   }
 }

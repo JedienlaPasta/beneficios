@@ -113,6 +113,7 @@ Nombre Campaña Dropdown Input, el texto esta un poco corrido hacia abajo me par
 Botón "Ver Detalle" en la tabla de Campañas?
 
 Botón "Terminar Campaña", pendiente.
+Verificación "Eliminar Campaña", pendiente (preguntar si esta seguro de eliminarla).
 
 # Extras
 

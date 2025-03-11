@@ -22,21 +22,23 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
     router.push(`?${params.toString()}`);
   };
 
-  // Remove the formData parameter since it's not being used
   const handleDeleteButton = async () => {
-    try {
-      const response = await deleteCampaignWithId();
-      if (response.success) {
-        toast.success(response.message);
+    toast.promise(deleteCampaignWithId(), {
+      loading: "Eliminando campaña...",
+      success: async (response) => {
+        await new Promise((resolve) => setTimeout(resolve, 300));
         setTimeout(() => {
           router.back();
-        }, 300);
-      } else {
-        toast.error(response.message);
-      }
-    } catch (error) {
-      toast.error("Error al eliminar la campaña");
-    }
+        }, 500);
+        return {
+          message: response.message,
+        };
+      },
+      error: (error) => ({
+        message: "Error al eliminar la campaña",
+        description: "No se pudo eliminar la campaña. Intente nuevamente.",
+      }),
+    });
   };
 
   // Controladores del dropdown vvvv

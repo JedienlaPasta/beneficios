@@ -48,7 +48,7 @@ export default function Input({
         value={value}
         onChange={handleChange}
         maxLength={label === "Código Campaña" ? 2 : undefined}
-        className="h-10 w-full rounded-md border border-slate-300 bg-transparent bg-white px-4 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus-within:border-blue-500"
+        className="h-10 w-full rounded-lg border border-slate-300 bg-transparent bg-white px-4 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus-within:border-blue-500"
       />
       {/* {value && (
         <RiCloseLine

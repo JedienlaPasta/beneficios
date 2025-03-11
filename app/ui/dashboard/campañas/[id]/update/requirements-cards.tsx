@@ -1,6 +1,6 @@
 "use client";
 import clsx from "clsx";
-import { Criteria } from "./update-form";
+import { Requirements } from "./update-form";
 
 export default function RequirementsCard({
   name,
@@ -9,12 +9,12 @@ export default function RequirementsCard({
   isMarked,
   setIsMarked,
 }: {
-  name: keyof Criteria;
+  name: keyof Requirements;
   children: string;
   description?: string;
   isMarked: boolean;
   setIsMarked: (
-    prevState: Criteria | ((prevState: Criteria) => Criteria),
+    prevState: Requirements | ((prevState: Requirements) => Requirements),
   ) => void;
 }) {
   const handleClick = () => {

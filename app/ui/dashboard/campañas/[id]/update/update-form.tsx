@@ -1,14 +1,15 @@
 "use client";
-import { DatePicker } from "@/components/ui/datepicker";
 import Input from "../../new-campaign-input";
 import RequirementsCard from "./requirements-cards";
 import { CancelButton, SubmitButton } from "../../../submit-button";
 import { Campaign } from "@/app/lib/definitions";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DataTypeCards from "./data-type-cards";
 import { updateCampaign } from "@/app/lib/actions";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import CustomAntdDatePicker from "@/app/ui/dashboard/datepicker";
+import dayjs from "dayjs";
 
 export type Requirements = {
   tramo: boolean;
@@ -49,6 +50,11 @@ export default function UpdateForm({ data }: { data: Campaign[] }) {
     }
   };
 
+  useEffect(() => {
+    console.log("Fecha Inicio: " + updateFormData.fecha_inicio);
+    console.log("Fecha Termino: " + updateFormData.fecha_termino);
+  }, [updateFormData.fecha_inicio, updateFormData.fecha_termino]);
+
   // To handle server response
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
@@ -87,15 +93,17 @@ export default function UpdateForm({ data }: { data: Campaign[] }) {
           </DataTypeCards>
         </div>
       </div>
-      <DatePicker
-        date={new Date(updateFormData.fecha_inicio)}
-        setFormData={setUpdateFormData}
+      <CustomAntdDatePicker
         label="Inicio"
-      />
-      <DatePicker
-        date={new Date(updateFormData.fecha_termino)}
+        placeholder="Ingrese fecha de inicio"
+        defaultValue={dayjs(updateFormData.fecha_inicio)}
         setFormData={setUpdateFormData}
+      />
+      <CustomAntdDatePicker
         label="Término"
+        placeholder="Ingrese fecha de término"
+        defaultValue={dayjs(updateFormData.fecha_termino)}
+        setFormData={setUpdateFormData}
       />
       <div className="flex flex-col gap-1">
         <p className="text-xs text-slate-500">Criterios de Aceptación</p>

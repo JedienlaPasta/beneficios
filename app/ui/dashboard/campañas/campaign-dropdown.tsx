@@ -1,5 +1,4 @@
-// import { RiCloseLine } from "react-icons/ri";
-import { MdKeyboardArrowDown } from "react-icons/md";
+// import { MdKeyboardArrowDown } from "react-icons/md";
 import { useEffect, useRef, useState } from "react";
 import { campaignsList } from "@/app/data/data";
 
@@ -56,7 +55,7 @@ export default function CampaignDropdown({
         onChange={(e) => setCampaignName(e.target.value)}
         placeholder="Nombre campaña..."
         autoComplete="off"
-        className="h-10 w-full rounded-lg border border-slate-300 bg-transparent bg-white px-4 text-sm text-slate-700 shadow-sm outline-none transition-all placeholder:text-slate-400 focus-within:border-blue-500 focus:outline-none"
+        className="h-10 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm text-slate-700 shadow-sm outline-none transition-all placeholder:text-gray-400 focus-within:border-blue-500 focus:outline-none"
       />
       {/* <MdKeyboardArrowDown
         className={`absolute right-2 top-[42%] transform cursor-pointer text-3xl text-slate-400 transition duration-300 ${isOpen ? "rotate-[-180deg]" : ""}`}
