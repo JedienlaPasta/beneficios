@@ -36,10 +36,7 @@ export default function NewCampaignModal() {
     },
   );
 
-  const datePickerHandler = (
-    pickerDate: dayjs.Dayjs | null,
-    dateString: string | string[],
-  ) => {
+  const datePickerHandler = (pickerDate: dayjs.Dayjs | null) => {
     if (pickerDate) {
       const dt = pickerDate.toDate();
       setDate(dt);

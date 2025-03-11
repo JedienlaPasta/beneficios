@@ -34,7 +34,7 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
           message: response.message,
         };
       },
-      error: (error) => ({
+      error: () => ({
         message: "Error al eliminar la campaña",
         description: "No se pudo eliminar la campaña. Intente nuevamente.",
       }),
