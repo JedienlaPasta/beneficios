@@ -1,6 +1,6 @@
 import { fetchSocialAid } from "@/app/lib/data";
 import { SocialAid } from "@/app/lib/definitions";
-import Pagination from "../pagination";
+import Pagination from "../../pagination";
 import { formatDate, formatNumber, getDV } from "@/app/lib/utils";
 
 export default async function CampaignSocialAidsTable({
@@ -17,10 +17,6 @@ export default async function CampaignSocialAidsTable({
     pages: number;
   };
 
-  const filas = data?.map((item: SocialAid, index: number) => (
-    <TableRow key={index} item={item} />
-  ));
-
   return (
     <div className="overflow-x-auto rounded-b-xl bg-white shadow-md shadow-slate-300">
       <table className="w-full min-w-[44rem]">
@@ -33,7 +29,11 @@ export default async function CampaignSocialAidsTable({
             <th className="py-4 pr-14 text-right font-normal">Entrega</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-200/30">{filas}</tbody>
+        <tbody className="divide-y divide-slate-200/30">
+          {data?.map((item: SocialAid, index: number) => (
+            <TableRow key={index} item={item} />
+          ))}
+        </tbody>
       </table>
       <Pagination pages={pages} />
     </div>

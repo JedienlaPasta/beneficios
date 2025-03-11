@@ -2,7 +2,7 @@ import CampaignsTable from "@/app/ui/dashboard/campañas/campaigns-table";
 import ActiveCampaigns from "@/app/ui/dashboard/campañas/active-campaigns";
 import NuevaCampañaModal from "@/app/ui/dashboard/campañas/new-campaign-modal";
 import CampaignsTableSkeleton from "@/app/ui/dashboard/campañas/campaigns-table-skeleton";
-import NewCampaignButton from "@/app/ui/dashboard/new-campaign-button";
+import NewCampaignButton from "@/app/ui/dashboard/campañas/new-campaign-button";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import Modal from "@/app/ui/dashboard/modal";
 import { Suspense } from "react";

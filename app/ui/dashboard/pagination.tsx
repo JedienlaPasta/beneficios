@@ -23,7 +23,7 @@ export default function Pagination({ pages }: { pages: number }) {
     <li key={index}>
       <Link
         href={URLCurrentPage(numero)}
-        className={`${numero === currentPage ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white" : "bg-white hover:bg-slate-200"} text-slate-600" flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-xs`}
+        className={`${numero === currentPage ? "bg-gradient-to-r from-slate-700 to-slate-800 text-white" : "bg-white hover:bg-slate-200"} text-slate-600" flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-xs`}
       >
         {numero}
       </Link>

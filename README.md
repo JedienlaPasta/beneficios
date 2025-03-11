@@ -66,8 +66,6 @@ Descargar reporte completo de una campaña?
 
 Error Handlers.
 
-Revizar ingreso de fechas, estan un poco corridas por la zona horaria me parece.
-
 # Pendiente por pedir
 
 ¿Límite de 1 tipo campaña activa a la vez? Ej: 1 campaña de vales de gas, 1 campaña de tarjeta de comida, 1 campaña de pañales, etc.
@@ -102,4 +100,21 @@ RSH
 
 Cómo se estructurará el folio? Código predefinido para cada tipo de campaña? o dropdown con opción a que seleccionen el código o ingresen uno nuevo?
 
-Search bar -> Detalle Campaña (no esta configurada)
+Search bar -> Detalle Campaña (Buscar x folio tambien?)
+
+!Datepicker border-radius !== Input component border-radius
+
+Entregas => Entregas Hoy, Entregas Totales.
+
+Breadcrumbs.
+
+Nombre Campaña Dropdown Input, el texto esta un poco corrido hacia abajo me parece (revisar y arreglar).
+
+Botón "Ver Detalle" en la tabla de Campañas?
+
+Botón "Terminar Campaña", pendiente.
+Verificación "Eliminar Campaña", pendiente (preguntar si esta seguro de eliminarla).
+
+# Extras
+
+Decreto supremo 82
