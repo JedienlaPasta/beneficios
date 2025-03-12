@@ -1,10 +1,8 @@
 import TablaCampañas from "@/app/ui/dashboard/campañas/campaigns-table";
-import CampañasActivas from "@/app/ui/dashboard/campañas/active-campaigns";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import { Suspense } from "react";
 import NewCampaignModal from "@/app/ui/dashboard/campañas/new-campaign-modal";
 import Modal from "@/app/ui/dashboard/modal";
-import NewCampaignButton from "@/app/ui/dashboard/campañas/new-campaign-button";
 import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/campaigns-table-skeleton";
 import RSHGeneralInfo from "@/app/ui/dashboard/rsh/general-info";
 
