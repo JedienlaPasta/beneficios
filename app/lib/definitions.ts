@@ -27,12 +27,11 @@ export type Activity = {
 
 export type SocialAid = {
   folio: string;
-  id_campaña: string;
   nombre: string;
   apellidos: string;
   rut: string;
-  beneficio: string;
-  fecha: Date;
+  beneficio?: string;
+  fecha_entrega: Date;
   pages?: number; // total de paginas
   total?: number; // total de registros
 };
