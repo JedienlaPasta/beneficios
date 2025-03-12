@@ -1,12 +1,10 @@
 import TablaCampañas from "@/app/ui/dashboard/campañas/campaigns-table";
-import CampañasActivas from "@/app/ui/dashboard/campañas/active-campaigns";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import { Suspense } from "react";
 import NewCampaignModal from "@/app/ui/dashboard/campañas/new-campaign-modal";
 import Modal from "@/app/ui/dashboard/modal";
-import NewCampaignButton from "@/app/ui/dashboard/campañas/new-campaign-button";
-import { Toaster } from "sonner";
 import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/campaigns-table-skeleton";
+import RSHGeneralInfo from "@/app/ui/dashboard/rsh/general-info";
 
 type RSHProps = {
   searchParams?: Promise<{ query?: string; page?: string; modal?: string }>;
@@ -25,23 +23,19 @@ export default async function RSH(props: RSHProps) {
           <NewCampaignModal />
         </Modal>
       )}
-      <Toaster />
-      <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
-        <div>
-          <h2 className="text-3xl font-bold text-slate-800">
-            Registro Social de Hogares
-          </h2>
-          <p className="text-sm text-slate-600/70">
-            Gestionar registros de ciudadanos con RSH.
-          </p>
-        </div>
-        <NewCampaignButton>Ingresar Ciudadano</NewCampaignButton>
+      <div className="mb-6 flex flex-col justify-between 3xl:w-[96rem] 3xl:justify-self-center">
+        <h2 className="text-3xl font-bold text-slate-800">
+          Registro Social de Hogares
+        </h2>
+        <p className="text-sm text-slate-600/70">
+          Gestionar registros de ciudadanos con RSH.
+        </p>
       </div>
 
       <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
-        <CampañasActivas />
+        <RSHGeneralInfo />
         <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50">
-          <div className="flex items-center justify-between px-10 pt-4 3xl:w-[96rem] 3xl:self-center">
+          <div className="flex flex-wrap items-center justify-between gap-4 px-10 pt-4 3xl:w-[96rem] 3xl:self-center">
             <h2 className="text-lg font-semibold text-slate-800">
               Historial de Campañas
             </h2>

@@ -1,10 +1,10 @@
 import { MdAutorenew } from "react-icons/md";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { BiFolderPlus } from "react-icons/bi";
-import { fetchUserActivity } from "@/app/lib/data";
 import { formatDate } from "@/app/lib/utils";
 import Pagination from "../pagination";
 import { Activity } from "@/app/lib/definitions";
+import { fetchUserActivity } from "@/app/lib/data/auditoria";
 
 const ACTIVITY = [
   {
@@ -32,8 +32,7 @@ export default async function ActivityTable({
   query,
   currentPage,
 }: ActivityTableProps) {
-  const id = "51174ce0-a4ee-4e1c-8d44-dc35a3dff40f";
-  const { data, pages } = (await fetchUserActivity(id, query, currentPage)) as {
+  const { data, pages } = (await fetchUserActivity(query, currentPage)) as {
     data: Activity[];
     pages: number;
   };
@@ -59,7 +58,7 @@ export default async function ActivityTable({
 }
 
 function TableRow({ item }: { item: Activity }) {
-  const { nombre, accion, dato, fecha, id_campaña, id_entrega, id_rsh } = item;
+  const { nombre, accion, dato, fecha, id_mod } = item;
   const fechaActividad = formatDate(fecha);
 
   const activityValues = ACTIVITY.find((activity) => activity.type === accion);
@@ -73,9 +72,7 @@ function TableRow({ item }: { item: Activity }) {
         <div>
           <span className="font-medium text-slate-700">{nombre} </span>
           <span className="text-slate-500">{dato} </span>
-          <span className="text-blue-400">
-            {id_campaña || id_entrega || id_rsh}
-          </span>
+          <span className="text-blue-400">{id_mod}</span>
         </div>
       </td>
       <td className="py-4 pr-14 text-right text-slate-600">{fechaActividad}</td>

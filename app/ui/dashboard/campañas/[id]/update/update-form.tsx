@@ -3,9 +3,9 @@ import Input from "../../new-campaign-input";
 import RequirementsCard from "./requirements-cards";
 import { CancelButton, SubmitButton } from "../../../submit-button";
 import { Campaign } from "@/app/lib/definitions";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import DataTypeCards from "./data-type-cards";
-import { updateCampaign } from "@/app/lib/actions";
+import { updateCampaign } from "@/app/lib/actions/campaña";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import CustomAntdDatePicker from "@/app/ui/dashboard/datepicker";
@@ -36,7 +36,7 @@ export default function UpdateForm({ data }: { data: Campaign[] }) {
     formData.append("discapacidad", criteria.discapacidad.toString());
     formData.append("adultoMayor", criteria.adultoMayor.toString());
     const response = await updateCampaignWithId(formData);
-    console.log(response);
+    // console.log(response);
     if (response.success) {
       toast.success(response.message);
       setIsLoading(false);
@@ -49,11 +49,6 @@ export default function UpdateForm({ data }: { data: Campaign[] }) {
       setIsDisabled(false);
     }
   };
-
-  useEffect(() => {
-    console.log("Fecha Inicio: " + updateFormData.fecha_inicio);
-    console.log("Fecha Termino: " + updateFormData.fecha_termino);
-  }, [updateFormData.fecha_inicio, updateFormData.fecha_termino]);
 
   // To handle server response
   const [isLoading, setIsLoading] = useState(false);

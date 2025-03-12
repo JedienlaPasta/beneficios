@@ -1,11 +1,11 @@
-import Buscar from "@/app/ui/dashboard/searchbar";
 import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/campaigns-table-skeleton";
 import TablaEntregasDetalleCampaña from "@/app/ui/dashboard/campañas/[id]/campaign-social-aid-table";
 import Modal from "@/app/ui/dashboard/modal";
 import { Suspense } from "react";
 import UpdateCampaignModal from "@/app/ui/dashboard/campañas/[id]/update/update-campaign-modal";
-import { fetchCampaignById } from "@/app/lib/data";
 import CampaignDetail from "@/app/ui/dashboard/campañas/[id]/campaign-detail";
+import TableHeader from "@/app/ui/dashboard/table-header";
+import { fetchCampaignById } from "@/app/lib/data/campañas";
 
 type CampaignProps = {
   searchParams?: Promise<{
@@ -46,17 +46,14 @@ export default async function Campaign(props: CampaignProps) {
       <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
         <CampaignDetail id={id} />
         <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50">
-          <div className="flex items-center justify-between px-10 pt-4 3xl:w-[96rem] 3xl:self-center">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-slate-800">
-                Entregas de
-              </h2>
-              <span className="text-sm font-medium text-blue-500">
-                #CAM-01-25-GA
-              </span>
-            </div>
-            <Buscar placeholder="Buscar campaña..." />
-          </div>
+          <TableHeader>
+            <>
+              <p>Entregas de</p>
+              <p className="rounded-md bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-500">
+                #{id}
+              </p>
+            </>
+          </TableHeader>
           <Suspense fallback={<TablaCampañasSkeleton />}>
             <TablaEntregasDetalleCampaña
               id={id}

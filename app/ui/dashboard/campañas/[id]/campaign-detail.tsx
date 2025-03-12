@@ -1,10 +1,10 @@
-import { fetchCampaignById } from "@/app/lib/data";
 import { Campaign } from "@/app/lib/definitions";
 import { formatDate } from "@/app/lib/utils";
 import CampaignOptionsMenu from "./options-menu";
 import DetailRow from "./detail-card";
 import StaticRequirementsCard from "./static-card-requirements";
 import SocialAidsGivenResume from "./social-aids-given-resume";
+import { fetchCampaignById } from "@/app/lib/data/campañas";
 
 export default async function CampaignDetail({ id }: { id: string }) {
   const { data } = (await fetchCampaignById(id)) as { data: Campaign[] }; // Que tal si mejor hago el redirect normal, en el form y que aca de alguna forma no se haga el fetch

@@ -1,4 +1,4 @@
-import { fetchCampaignById } from "@/app/lib/data";
+import { fetchCampaignById } from "@/app/lib/data/campañas";
 import UpdateCampaignModal from "@/app/ui/dashboard/campañas/[id]/update/update-campaign-modal";
 
 export default async function UpdateCampaign(props: {
