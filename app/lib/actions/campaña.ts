@@ -2,7 +2,7 @@
 import { z } from "zod";
 import postgres from "postgres";
 import { revalidatePath } from "next/cache";
-import { FormState } from "../ui/dashboard/campañas/new-campaign-modal";
+import { FormState } from "../../ui/dashboard/campañas/new-campaign-modal";
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: "require" });
 

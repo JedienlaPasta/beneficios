@@ -2,11 +2,11 @@
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { FiSearch } from "react-icons/fi";
 import { useDebouncedCallback } from "use-debounce";
-// import { RiCloseLine } from "react-icons/ri";
 
 type SearchBarProps = {
   placeholder: string;
 };
+
 export default function SearchBar({ placeholder }: SearchBarProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -34,12 +34,6 @@ export default function SearchBar({ placeholder }: SearchBarProps) {
           defaultValue={searchParams.get("query")?.toString()}
           className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
         />
-        {/* {busqueda && (
-          <RiCloseLine
-            className="cursor-pointer text-xl text-slate-400 hover:text-slate-600"
-            onClick={() => setBusqueda("")}
-          />
-        )} */}
       </div>
     </div>
   );

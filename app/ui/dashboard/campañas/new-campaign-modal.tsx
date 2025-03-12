@@ -2,7 +2,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { createCampaign } from "@/app/lib/actions";
+import { createCampaign } from "@/app/lib/actions/campaña";
 import Input from "@/app/ui/dashboard/campañas/new-campaign-input";
 import CampaignDropdown from "@/app/ui/dashboard/campañas/campaign-dropdown";
 import { RiCloseLine } from "react-icons/ri";

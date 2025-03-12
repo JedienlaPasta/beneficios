@@ -5,7 +5,7 @@ import { TbRefresh } from "react-icons/tb";
 import { HiDotsHorizontal } from "react-icons/hi";
 import { GoStop } from "react-icons/go";
 import { useRouter, useSearchParams } from "next/navigation";
-import { deleteCampaign } from "@/app/lib/actions";
+import { deleteCampaign } from "@/app/lib/actions/campaña";
 import { toast } from "sonner";
 
 export default function CampaignOptionsMenu({ id }: { id: string }) {

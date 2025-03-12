@@ -114,6 +114,16 @@ Botón "Ver Detalle" en la tabla de Campañas?
 
 Botón "Terminar Campaña", pendiente.
 Verificación "Eliminar Campaña", pendiente (preguntar si esta seguro de eliminarla).
+Disable botones de cerrar modal una vez que envia el request al server, o al menos que no se haga el redirect si se cierra el modal.
+Icono de tabla vacia en caso de que no haya registros?
+Case insensitive search.
+
+Estructura DB en Neon.
+En Neon, cambiar tramo de boolean a int.
+
+Campañas => Vista Cartas / Vista Tablas. (reference: https://dribbble.com/shots/22281411-New-event-form)
+
+AHORA => RSH (pendiente) dropdown button [Ingresar RSH, Actualizar RSH, Importar RSH]
 
 # Extras
 

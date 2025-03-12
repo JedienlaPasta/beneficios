@@ -1,7 +1,7 @@
-import { fetchSocialAid } from "@/app/lib/data";
 import { SocialAid } from "@/app/lib/definitions";
 import Pagination from "../../pagination";
 import { formatDate, formatNumber, getDV } from "@/app/lib/utils";
+import { fetchSocialAid } from "@/app/lib/data/entregas";
 
 export default async function CampaignSocialAidsTable({
   id,

@@ -46,7 +46,7 @@ export default async function Home(props: HomeProps) {
         </div>
 
         <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50 shadow-md shadow-slate-300">
-          <div className="flex items-center justify-between px-10 pt-4 3xl:w-[96rem] 3xl:self-center">
+          <div className="flex flex-wrap items-center justify-between gap-4 px-10 pt-4 3xl:w-[96rem] 3xl:self-center">
             <h2 className="text-lg font-semibold text-slate-800">
               Tus Actividades
             </h2>

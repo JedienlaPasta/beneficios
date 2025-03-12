@@ -50,11 +50,11 @@ function ActiveCapaign({
         <div>
           <div className="flex items-center justify-between gap-4 pt-6 text-slate-700">
             <span className="flex flex-col items-start">
-              <h5 className="font-medium">{nombre}</h5>
+              <h5 className="font-medium text-slate-600">{nombre}</h5>
               <p className="font text-xs text-slate-500">Termina: {termina}</p>
             </span>
           </div>
-          <div className="flex items-center justify-start gap-2 pb-5 pt-2 text-slate-700">
+          <div className="flex items-center justify-start gap-2 pb-5 pt-1 text-slate-700">
             <p className="text-2xl font-bold">{entregas}</p>
             <FiBox className="text-2xl text-blue-500" />
           </div>
