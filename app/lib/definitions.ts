@@ -27,7 +27,7 @@ export type Activity = {
 
 export type SocialAid = {
   folio: string;
-  nombre: string;
+  nombres: string;
   apellidos: string;
   rut: string;
   beneficio?: string;
@@ -37,14 +37,20 @@ export type SocialAid = {
 };
 
 export type RSH = {
-  id: string;
-  nombre: string;
-  descripcion: string;
-  fecha_inicio: Date;
-  fecha_termino: Date;
-  estado: "En curso" | "Finalizado";
-  tipo_dato: string;
-  tramo: string;
+  rut: number;
+  dv: string;
+  nombres: string;
+  apellidos: string;
+  direccion: string;
+  tramo: number;
+  ultima_entrega: Date;
   discapacidad: string;
   adulto_mayor: string;
+  pages?: number; // total de paginas
+  total?: number; // total de registros
+};
+
+export type RSHInfo = {
+  ultima_actualizacion: Date;
+  total_registros: number;
 };

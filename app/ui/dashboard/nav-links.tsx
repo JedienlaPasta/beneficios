@@ -81,9 +81,9 @@ export default function NavLinks() {
             </span>
 
             {link.description && (
-              <div className="absolute left-full ml-3 hidden text-nowrap rounded-lg bg-slate-700 px-3 py-2 text-xs font-medium text-white opacity-0 shadow-lg transition-all duration-200 group-hover:opacity-100 lg:group-hover:block">
+              <div className="absolute left-full z-50 ml-3 hidden text-nowrap rounded-lg bg-slate-700 px-3 py-2 text-xs font-medium text-white opacity-0 shadow-lg transition-all duration-200 group-hover:opacity-100 lg:group-hover:block">
                 {link.description}
-                <div className="absolute -left-1 top-1/2 h-2 w-2 -translate-y-1/2 rotate-45 bg-slate-700" />
+                <div className="absolute -left-1 top-1/2 z-10 h-2 w-2 -translate-y-1/2 rotate-45 bg-slate-700" />
               </div>
             )}
           </Link>

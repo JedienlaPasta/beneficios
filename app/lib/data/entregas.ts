@@ -12,7 +12,7 @@ export async function fetchSocialAid(
   const offset = (currentPage - 1) * resultsPerPage;
   try {
     const data = await sql<SocialAid[]>`
-              SELECT entregas.folio, entregas.fecha_entrega, rsh.nombre, rsh.apellidos, rsh.rut,
+              SELECT entregas.folio, entregas.fecha_entrega, rsh.nombres, rsh.apellidos, rsh.rut,
               COUNT (*) OVER() AS total 
               FROM entregas 
               JOIN entrega ON entrega.folio = entregas.folio
@@ -20,7 +20,7 @@ export async function fetchSocialAid(
               WHERE 
                 entrega.id_campaña = ${id} 
                 AND (
-                  rsh.nombre ILIKE ${`%${query}%`} OR
+                  rsh.nombres ILIKE ${`%${query}%`} OR
                   rsh.apellidos ILIKE ${`%${query}%`} OR
                   rsh.rut ILIKE ${`%${query}%`} OR
                   entregas.folio ILIKE ${`%${query}%`}
