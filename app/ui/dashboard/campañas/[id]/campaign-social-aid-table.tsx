@@ -41,7 +41,7 @@ export default async function CampaignSocialAidsTable({
 }
 
 function TableRow({ item }: { item: SocialAid }) {
-  const { folio, nombre, apellidos, rut, fecha_entrega } = item;
+  const { folio, nombres, apellidos, rut, fecha_entrega } = item;
   const fecha = formatDate(fecha_entrega);
   const formatted_rut = formatNumber(Number(rut)) + (rut && "-" + getDV(rut));
 
@@ -51,7 +51,7 @@ function TableRow({ item }: { item: SocialAid }) {
         {folio}
       </td>
       <td className="w-[30%] py-3 pl-10 pr-6 text-slate-600">
-        {nombre} {apellidos}
+        {nombres} {apellidos}
       </td>
       <td className="w-[30%] py-3 pl-10 pr-6 text-slate-600">
         {/* white space */}
