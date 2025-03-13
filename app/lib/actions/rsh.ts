@@ -235,12 +235,9 @@ export async function importXLSXFile(
     }
 
     // Actualizar metadatos
-    await sql`
-      INSERT INTO rsh_info (ultima_actualizacion)
-      VALUES (NOW())
-      ON CONFLICT (id) DO UPDATE
-      SET ultima_actualizacion = NOW()
-    `;
+
+    await sql`DELETE FROM rsh_info`;
+    await sql` INSERT INTO rsh_info DEFAULT VALUES `;
 
     revalidatePath("/dashboard/rsh");
 
