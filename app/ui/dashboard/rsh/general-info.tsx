@@ -6,13 +6,14 @@ export default function RSHGeneralInfo({ data }: { data: RSHInfo[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const lastUodate = data[0].ultima_actualizacion.toString();
-  const lastUpdated =
-    lastUodate.split(" ")[2] +
-    " " +
-    lastUodate.split(" ")[1] +
-    ", " +
-    lastUodate.split(" ")[3];
+  const lastUpdate = data[0]?.ultima_actualizacion.toString();
+  const lastUpdated = data[0]
+    ? lastUpdate.split(" ")[2] +
+      " " +
+      lastUpdate.split(" ")[1] +
+      ", " +
+      lastUpdate.split(" ")[3]
+    : "No hay datos asociados";
 
   const handleClick = (modal: string) => {
     console.log(modal);
@@ -33,7 +34,9 @@ export default function RSHGeneralInfo({ data }: { data: RSHInfo[] }) {
             <h3 className="font-mediums text-xs uppercase tracking-wide text-slate-500">
               Ciudadanos Registrados
             </h3>
-            <p className="text-2xl font-bold">{data[0].total_registros}</p>
+            <p className="text-2xl font-bold">
+              {data[0] ? data[0].total_registros : "No hay registros"}
+            </p>
           </span>
           <span className="flex flex-col items-end justify-center">
             <p className="text-lg font-semibold text-slate-700 transition-colors duration-300 group-hover:text-white">
