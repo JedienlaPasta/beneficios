@@ -1,11 +1,11 @@
 import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/campaigns-table-skeleton";
 import TablaEntregasDetalleCampaña from "@/app/ui/dashboard/campañas/[id]/campaign-social-aid-table";
-import Modal from "@/app/ui/dashboard/modal";
+// import Modal from "@/app/ui/dashboard/modal";
 import { Suspense } from "react";
-import UpdateCampaignModal from "@/app/ui/dashboard/campañas/[id]/update/update-campaign-modal";
+// import UpdateCampaignModal from "@/app/ui/dashboard/campañas/[id]/update/update-campaign-modal";
 import CampaignDetail from "@/app/ui/dashboard/campañas/[id]/campaign-detail";
 import TableHeader from "@/app/ui/dashboard/table-header";
-import { fetchRSHById } from "@/app/lib/data/rsh";
+// import { fetchRSHById } from "@/app/lib/data/rsh";
 
 type RSHByIdProps = {
   searchParams?: Promise<{
@@ -19,21 +19,21 @@ type RSHByIdProps = {
 export default async function RSHById(props: RSHByIdProps) {
   // Search params (query, page, modal)
   const searchParams = await props.searchParams;
-  const showUpdateModal = searchParams?.update || "";
+  // const showUpdateModal = searchParams?.update || "";
   const query = searchParams?.query || "";
   const paginaActual = Number(searchParams?.page) || 1;
   // Params (id)
   const params = await props.params;
   const id = params.id;
-  const { data } = await fetchRSHById(id);
+  // const { data } = await fetchRSHById(id);
 
   return (
     <div className="h-fit w-full px-6 py-8 text-slate-900 lg:px-10">
-      {showUpdateModal === "open" && (
+      {/* {showUpdateModal === "open" && (
         <Modal>
           <UpdateCampaignModal id={id} data={data} />
         </Modal>
-      )}
+      )} */}
       <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
         <div>
           <h2 className="text-3xl font-bold text-slate-800">
