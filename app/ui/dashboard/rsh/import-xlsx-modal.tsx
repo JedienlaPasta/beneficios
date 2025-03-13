@@ -182,7 +182,8 @@ export default function ImportXLSXModal() {
     setIsDisabled(true);
     toast.info("Procesando archivo Excel...");
     formData.append("file", selectedFile);
-    formAction(formData);
+    console.log(formData);
+    // formAction(formData);
   };
 
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -239,23 +240,29 @@ export default function ImportXLSXModal() {
           onDrop={handleFileDrop}
           onDragOver={(e) => e.preventDefault()}
         >
-          <p className="text font-medium text-slate-700">
-            Arrastra y Suelta Aquí
-          </p>
-          <input
-            type="file"
-            id="fileInput"
-            name="file"
-            className="hidden"
-            accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
-            onChange={handleFileSelect}
-          />
-          <label
-            htmlFor="fileInput"
-            className="cursor-pointer text-xs text-slate-500"
-          >
-            Seleccionar Archivo Excel
-          </label>
+          {isLoading ? (
+            <Loader />
+          ) : (
+            <>
+              <p className="text font-medium text-slate-700">
+                Arrastra y Suelta Aquí
+              </p>
+              <input
+                type="file"
+                id="fileInput"
+                name="file"
+                className="hidden"
+                accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+                onChange={handleFileSelect}
+              />
+              <label
+                htmlFor="fileInput"
+                className="cursor-pointer text-xs text-slate-500"
+              >
+                Seleccionar Archivo Excel
+              </label>
+            </>
+          )}
         </div>
         <p className="text-xs text-slate-500">
           Solo archivos Excel (.xlsx, .xls)
@@ -264,17 +271,17 @@ export default function ImportXLSXModal() {
         {/* Import Status */}
         {selectedFile ? (
           <div className="flex flex-col gap-2">
-            <span className="flex justify-between">
+            <span className="flex items-center justify-between">
               <p className="text-sm text-slate-600">{selectedFile.name}</p>
               {isLoading && (
-                <p className="text-sm text-slate-600">Procesando...</p>
+                <p className="h-3 w-3 animate-pulse rounded-full bg-blue-500 text-sm text-slate-600"></p>
               )}
             </span>
             {isLoading && (
               <div className="h-2 w-full rounded bg-gray-200">
                 <div
                   className="h-full animate-pulse rounded bg-blue-500"
-                  style={{ width: "100%" }}
+                  style={{ width: "0%" }}
                 ></div>
               </div>
             )}
@@ -290,6 +297,17 @@ export default function ImportXLSXModal() {
           </SubmitButton>
         </div>
       </form>
+    </div>
+  );
+}
+
+function Loader() {
+  return (
+    <div className="relative mx-auto my-6 h-[40px] w-[40px]">
+      <div className='before:animate-loading absolute left-[6px] top-0 block h-[5px] w-[5px] rotate-[70deg] rounded-[10px] before:absolute before:right-0 before:h-[5px] before:w-[5px] before:rounded-[10px] before:bg-blue-400 before:content-[""]' />
+      <div className='before:animate-loading absolute right-0 top-[6px] block h-[5px] w-[5px] rotate-[160deg] rounded-[10px] before:absolute before:right-0 before:h-[5px] before:w-[5px] before:rounded-[10px] before:bg-blue-800 before:content-[""]' />
+      <div className='before:animate-loading absolute bottom-0 right-[6px] block h-[5px] w-[5px] rotate-[-110deg] rounded-[10px] before:absolute before:right-0 before:h-[5px] before:w-[5px] before:rounded-[10px] before:bg-blue-500 before:content-[""]' />
+      <div className='before:animate-loading absolute bottom-[6px] left-0 block h-[5px] w-[5px] rotate-[-20deg] rounded-[10px] before:absolute before:right-0 before:h-[5px] before:w-[5px] before:rounded-[10px] before:bg-blue-900 before:content-[""]' />
     </div>
   );
 }

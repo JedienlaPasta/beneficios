@@ -28,12 +28,11 @@ export default async function SocialAid(props: SocialAidProps) {
       <Toaster />
       <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
         <div>
-          <h2 className="text-3xl font-bold text-slate-800">Campañas</h2>
+          <h2 className="text-3xl font-bold text-slate-800">Entregas</h2>
           <p className="text-sm text-slate-600/70">
-            Gestionar campañas activas y historial de campañas.
+            Gestionar la entrega de beneficios a ciudadanos.
           </p>
         </div>
-        <NewCampaignButton>Nueva Campaña</NewCampaignButton>
       </div>
 
       <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">

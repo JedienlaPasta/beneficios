@@ -10,8 +10,8 @@ export default function Sidenav() {
         <span
           className={`${anton_sc.className} flex items-baseline gap-0.5 text-3xl font-bold text-slate-100`}
         >
-          <p className="text-blue-500">S</p>
-          <p className="text-2xl tracking-wider">IBAS</p>
+          <p className="text-4xl text-blue-500">S</p>
+          <p className="text-3xl tracking-wider">IBAS</p>
         </span>
       </div>
 
