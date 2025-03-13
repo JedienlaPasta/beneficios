@@ -122,9 +122,13 @@ Estructura DB en Neon.
 En Neon, cambiar tramo de boolean a int.
 
 Campañas => Vista Cartas / Vista Tablas. (reference: https://dribbble.com/shots/22281411-New-event-form)
+RSH => Detalles, Vista Cartas? / Vista Tablas (Toggle?)
 
 AHORA => RSH (pendiente) dropdown button [Ingresar RSH, Actualizar RSH, Importar RSH]
 
 # Extras
 
 Decreto supremo 82
+
+Fonts:
+Titan One
