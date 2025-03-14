@@ -7,6 +7,7 @@ import RSHTable from "@/app/ui/dashboard/rsh/rsh-table";
 import TableHeader from "@/app/ui/dashboard/table-header";
 import { fetchRSHInfo } from "@/app/lib/data/rsh";
 import ImportXLSXModal from "@/app/ui/dashboard/rsh/import-xlsx-modal";
+import ProtectedRoute from "@/app/dashboard/ProtectedRoute";
 
 type RSHProps = {
   searchParams?: Promise<{
@@ -27,39 +28,41 @@ export default async function RSH(props: RSHProps) {
   const { data } = await fetchRSHInfo();
 
   return (
-    <div className="h-fit w-full px-6 py-8 text-slate-900 lg:px-10">
-      {newcitizen === "open" && (
-        <Modal>
-          <NewCampaignModal />
-        </Modal>
-      )}
-      {importxlsx === "open" && (
-        <Modal>
-          <ImportXLSXModal />
-        </Modal>
-      )}
-      <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
-        <div>
-          <h2 className="text-3xl font-bold text-slate-800">
-            Registro Social de Hogares
-          </h2>
-          <p className="text-sm text-slate-600/70">
-            Gestionar registros de ciudadanos con RSH.
-          </p>
+    <ProtectedRoute isDashboardRoute={true}>
+      <div className="h-fit w-full px-6 py-8 text-slate-900 lg:px-10">
+        {newcitizen === "open" && (
+          <Modal>
+            <NewCampaignModal />
+          </Modal>
+        )}
+        {importxlsx === "open" && (
+          <Modal>
+            <ImportXLSXModal />
+          </Modal>
+        )}
+        <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
+          <div>
+            <h2 className="text-3xl font-bold text-slate-800">
+              Registro Social de Hogares
+            </h2>
+            <p className="text-sm text-slate-600/70">
+              Gestionar registros de ciudadanos con RSH.
+            </p>
+          </div>
         </div>
-      </div>
 
-      <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
-        <RSHGeneralInfo data={data} />
-        <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50">
-          <TableHeader>
-            <p>Ciudadanos Registrados</p>
-          </TableHeader>
-          <Suspense fallback={<TablaCampañasSkeleton />}>
-            <RSHTable query={query} currentPage={currentPage} />
-          </Suspense>
+        <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
+          <RSHGeneralInfo data={data} />
+          <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50">
+            <TableHeader>
+              <p>Ciudadanos Registrados</p>
+            </TableHeader>
+            <Suspense fallback={<TablaCampañasSkeleton />}>
+              <RSHTable query={query} currentPage={currentPage} />
+            </Suspense>
+          </div>
         </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }
