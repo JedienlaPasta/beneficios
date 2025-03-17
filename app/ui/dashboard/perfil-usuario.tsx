@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { HiChevronDown } from "react-icons/hi2";
 import { FiLogOut, FiUser } from "react-icons/fi";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export default function PerfilUsuario() {
@@ -15,7 +15,7 @@ export default function PerfilUsuario() {
   } | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
+  // const router = useRouter();
 
   useEffect(() => {
     // Get user session from localStorage

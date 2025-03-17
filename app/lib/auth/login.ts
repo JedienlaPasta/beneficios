@@ -5,14 +5,14 @@ import postgres from "postgres";
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: "require" });
 
-interface UserData {
-  nombre: string;
-  cargo: string;
-  rol: string;
-  correo: string;
-  id: string;
-  contraseña: string;
-}
+// interface UserData {
+//   nombre: string;
+//   cargo: string;
+//   rol: string;
+//   correo: string;
+//   id: string;
+//   contraseña: string;
+// }
 
 interface UserResponse {
   nombre: string;
