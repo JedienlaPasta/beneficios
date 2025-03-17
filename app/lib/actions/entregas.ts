@@ -193,7 +193,6 @@ export const createEntrega = async (id: string, formData: FormData) => {
     // Almacenamiento de documento generado
     const pdfBytesFilled = await pdfDoc.save();
     // Opcional: Almacenado localmente
-    // const outputPath = path.join(process.cwd(), "public", "docgenerado.pdf");
     const outputPath = path.join(
       process.cwd(),
       "public",
