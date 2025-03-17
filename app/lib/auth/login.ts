@@ -19,6 +19,7 @@ interface UserResponse {
   cargo: string;
   rol: string;
   correo: string;
+  id_usuario: string;
 }
 
 // const UserLoginFormSchema = z.object({
@@ -56,6 +57,7 @@ export async function authenticateUser(correo: string, contraseña: string) {
     }
 
     const userResponse: UserResponse = {
+      id_usuario: user.id,
       nombre: user.nombre,
       rol: user.rol,
       cargo: user.cargo,
