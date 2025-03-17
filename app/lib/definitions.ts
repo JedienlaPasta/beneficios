@@ -25,6 +25,7 @@ export type Activity = {
   total?: number; // total de registros
 };
 
+//Social
 export type SocialAid = {
   folio: string;
   nombres: string;
@@ -43,6 +44,20 @@ export type SocialAidTableRow = {
   observacion: string;
   nombre_usuario: string;
   fecha_entrega: Date;
+};
+
+// Modal Detalle Entregas
+export type SocialAidTableRowByFolio = {
+  folio: string;
+  fecha_entrega: Date;
+  nombre_usuario: string;
+  observacion: string;
+};
+
+// Modal Detalle Entrega
+export type SocialAidByFolio = {
+  detalle: string;
+  nombre_campaña: string;
 };
 
 export type RSHTableData = {

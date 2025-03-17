@@ -5,7 +5,10 @@ import SocialAidsTable from "@/app/ui/dashboard/entregas/social-aids-table";
 import ProtectedRoute from "@/app/dashboard/ProtectedRoute";
 
 type SocialAidProps = {
-  searchParams?: Promise<{ query?: string; page?: string }>;
+  searchParams?: Promise<{
+    query?: string;
+    page?: string;
+  }>;
 };
 
 export default async function SocialAid(props: SocialAidProps) {
