@@ -47,7 +47,7 @@ const capitalizeWords = (text: string): string =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 
-const convertDate = (dateString: any): Date | null => {
+const convertDate = (dateString: string): Date | null => {
   const str = String(dateString).padStart(8, "0");
   if (str.length !== 8) return null;
 
@@ -162,10 +162,10 @@ export async function importXLSXFile(
         direccion: `${values[75] || ""} ${values[3] || ""}`.trim(),
         tramo: values[70] ? String(values[70]) : "",
         folio: values[64] ? String(values[64]) : "",
-        fecha_nacimiento: convertDate(values[68]),
-        fecha_encuesta: convertDate(values[63]),
-        fecha_modificacion: convertDate(values[65]),
-        fecha_calificacion: convertDate(values[71]),
+        fecha_nacimiento: convertDate(String(values[68])),
+        fecha_encuesta: convertDate(String(values[63])),
+        fecha_modificacion: convertDate(String(values[65])),
+        fecha_calificacion: convertDate(String(values[71])),
       };
 
       // Validación adicional
