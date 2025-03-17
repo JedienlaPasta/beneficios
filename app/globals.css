@@ -6,6 +6,19 @@
   .scrollbar-gutter-stable {
     scrollbar-gutter: stable;
   }
+
+  .animate-cspin {
+    animation: spin 1500ms ease-in-out infinite;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(1080deg);
+  }
 }
 
 ::-webkit-scrollbar {

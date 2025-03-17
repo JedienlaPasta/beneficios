@@ -38,10 +38,7 @@ const CreateCampaign = CreateCampaignFormSchema.omit({
     adultoMayor: true,
   });
 // Add return type to the server action
-export async function createCampaign(
-  prevState: FormState,
-  formData: FormData,
-): Promise<FormState> {
+export async function createCampaign(formData: FormData): Promise<FormState> {
   try {
     console.log(formData);
     const {
@@ -63,18 +60,19 @@ export async function createCampaign(
     });
     const fechaInicio = new Date();
 
-    if (!fechaInicio || !fechaTermino)
-      throw new Error("Las fechas son requeridas");
-    if (new Date(fechaTermino) < fechaInicio) {
-      throw new Error(
-        "La fecha de término no puede ser menor a la fecha de inicio",
-      );
-    }
     const estado =
       new Date(fechaTermino) > fechaInicio ? "En curso" : "Finalizado";
     const entregas = 0;
 
-    console.log(formData);
+    if (!fechaInicio || !fechaTermino) {
+      throw new Error("Campos incompletos.");
+    }
+
+    if (new Date(fechaTermino) < new Date(fechaInicio)) {
+      throw new Error(
+        "La fecha de término no puede ser menor a la fecha de inicio.",
+      );
+    }
 
     await sql`
       INSERT INTO campañas (nombre, fecha_inicio, fecha_termino, descripcion, tipo_dato, estado, entregas, tramo, discapacidad, adulto_mayor)
@@ -82,12 +80,12 @@ export async function createCampaign(
     `;
 
     revalidatePath("/dashboard/campanas");
-    return { success: true, message: "Campaña creada exitosamente" };
+    return { success: true, message: "Campaña creada exitosamente." };
   } catch (error) {
-    console.error("Error al crear la campaña:", error);
+    console.error(error || "Error al crear la campaña.");
     return {
       success: false,
-      message: "Error al crear la campaña",
+      message: error instanceof Error ? error.message : String(error),
     };
   }
 }
@@ -152,7 +150,7 @@ export async function updateCampaign(id: string, formData: FormData) {
     if (new Date(fechaTermino) < new Date(fechaInicio))
       return {
         success: false,
-        message: "La fecha de término no puede ser menor a la fecha de inicio",
+        message: "La fecha de término no puede ser menor a la fecha de inicio.",
       };
 
     await sql`
@@ -168,7 +166,7 @@ export async function updateCampaign(id: string, formData: FormData) {
       `;
 
     revalidatePath("/dashboard/campanas");
-    return { success: true, message: "Campaña actualizada exitosamente" };
+    return { success: true, message: "Campaña actualizada exitosamente." };
   } catch (error) {
     console.error("Error al actualizar la campaña:", error);
     return {
@@ -187,12 +185,12 @@ export async function deleteCampaign(id: string) {
     `;
 
     revalidatePath("/dashboard/campanas");
-    return { success: true, message: "Campaña eliminada exitosamente" };
+    return { success: true, message: "Campaña eliminada exitosamente." };
   } catch (error) {
     console.error("Error al eliminar la campaña:", error);
     return {
       success: false,
-      message: "Error al eliminar la campaña",
+      message: "Error al eliminar la campaña.",
     };
   }
 }

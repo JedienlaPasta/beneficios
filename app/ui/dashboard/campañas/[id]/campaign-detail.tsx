@@ -29,7 +29,7 @@ export default async function CampaignDetail({ id }: { id: string }) {
 
   return (
     <div className="items-centers relative flex flex-col justify-center">
-      <div className="grid gap-4 rounded-xl border border-gray-200">
+      <div className="grid gap-4 rounded-xl">
         {/* Header Section */}
         <div className="flex items-center justify-between rounded-xl bg-white px-10 py-6">
           <div className="flex gap-4">
@@ -38,7 +38,7 @@ export default async function CampaignDetail({ id }: { id: string }) {
             </p>
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-semibold tracking-tight text-slate-800">
+                <h1 className="text-xl font-semibold tracking-tight text-slate-700">
                   {nombre}
                 </h1>
                 <div className="flex items-center gap-1 rounded-md bg-green-100 px-2 py-0.5">

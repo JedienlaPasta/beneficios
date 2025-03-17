@@ -1,7 +1,12 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
+import {
+  MdKeyboardArrowLeft,
+  MdKeyboardArrowRight,
+  MdKeyboardDoubleArrowLeft,
+  MdKeyboardDoubleArrowRight,
+} from "react-icons/md";
 
 export default function Pagination({ pages }: { pages: number }) {
   const pathname = usePathname();
@@ -10,7 +15,7 @@ export default function Pagination({ pages }: { pages: number }) {
 
   const URLCurrentPage = (pageNumber: number | string) => {
     const params = new URLSearchParams(searchParams);
-    params.set("page", pageNumber.toString());
+    params.set("page", pageNumber?.toString());
     return `${pathname}?${params.toString()}`;
   };
 
@@ -19,11 +24,32 @@ export default function Pagination({ pages }: { pages: number }) {
     pageNumber.push(i);
   }
 
-  const arrayPaginas = pageNumber.map((numero, index) => (
+  const visiblePagesArray = pageNumber.filter((numero) => {
+    if ((currentPage === 1 || currentPage === 2) && numero < 6) {
+      return true;
+    }
+    if (
+      (currentPage === pages - 1 || currentPage === pages) &&
+      numero > pages - 5
+    ) {
+      return true;
+    }
+    if (
+      numero === currentPage ||
+      (numero < currentPage && numero > currentPage - 3) ||
+      (numero > currentPage && numero < currentPage + 3)
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  });
+
+  const arrayPaginas = visiblePagesArray.map((numero, index) => (
     <li key={index}>
       <Link
         href={URLCurrentPage(numero)}
-        className={`${numero === currentPage ? "bg-gradient-to-r from-slate-700 to-slate-800 text-white" : "bg-white hover:bg-slate-200"} text-slate-600" flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-xs`}
+        className={`${numero === currentPage ? "bg-gradient-to-r from-slate-700 to-slate-800 text-white" : "bg-white hover:bg-slate-200"} text-slate-600" flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-xs`}
       >
         {numero}
       </Link>
@@ -41,31 +67,56 @@ export default function Pagination({ pages }: { pages: number }) {
       if (currentPage < pages) {
         return currentPage + 1;
       } else {
-        return pages;
+        return pages || 1;
       }
     }
   };
 
   return (
     <nav
-      className="flex items-center justify-between border-t border-gray-200/70 bg-white px-4 sm:px-0"
+      className="flex items-center justify-center border-t border-gray-200/70 bg-white px-4 sm:px-0"
       aria-label="Pagination"
     >
       <ul className="flex gap-2 p-2">
-        <Link
-          href={URLCurrentPage(calcularCambioPagina("left"))}
-          className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-200 hover:text-slate-600"
-        >
-          <MdKeyboardArrowLeft className="text-xl" />
-        </Link>
-
+        {/* First Page */}
+        <li>
+          <Link
+            href={URLCurrentPage(1)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-200 hover:text-slate-600"
+          >
+            <MdKeyboardDoubleArrowLeft className="text-xl" />
+          </Link>
+        </li>
+        {/* Arrow Left */}
+        <li>
+          <Link
+            href={URLCurrentPage(calcularCambioPagina("left"))}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-200 hover:text-slate-600"
+          >
+            <MdKeyboardArrowLeft className="text-xl" />
+          </Link>
+        </li>
+        {/* Visible Pages */}
         {arrayPaginas}
-        <Link
-          href={URLCurrentPage(calcularCambioPagina("right"))}
-          className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-200 hover:text-slate-600"
-        >
-          <MdKeyboardArrowRight className="text-xl" />
-        </Link>
+
+        {/* Arrow Right */}
+        <li>
+          <Link
+            href={URLCurrentPage(calcularCambioPagina("right"))}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-200 hover:text-slate-600"
+          >
+            <MdKeyboardArrowRight className="text-xl" />
+          </Link>
+        </li>
+        {/* Last Page */}
+        <li>
+          <Link
+            href={URLCurrentPage(pageNumber[pageNumber.length - 1] || 1)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-200 hover:text-slate-600"
+          >
+            <MdKeyboardDoubleArrowRight className="text-xl" />
+          </Link>
+        </li>
       </ul>
     </nav>
   );

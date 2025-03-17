@@ -16,13 +16,16 @@ export default async function Home(props: HomeProps) {
   const currentPage = Number(searchParams?.page) || 1;
 
   return (
-    <div className="h-fit w-full px-6 py-8 text-slate-900 lg:px-10">
+    <div>
       {/* {abrirModal && <NuevaCampañaModal closeModal={toggleModal} />} */}
       <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
         <div>
-          <h2 className="text-3xl font-bold text-slate-800">Inicio</h2>
+          <h2 className="text-2xl font-bold text-slate-800">
+            Bienvenid@ Kristina!
+          </h2>
           <p className="text-sm text-slate-600/70">
-            Datos generales y actividades personales.
+            Aquí podrás ver información general y sobre las actividades que has
+            realizado.
           </p>
         </div>
       </div>

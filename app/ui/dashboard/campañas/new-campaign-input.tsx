@@ -3,7 +3,8 @@ import { Campaign } from "@/app/lib/definitions";
 
 type InputProps = {
   label: string;
-  nombre: keyof Campaign;
+  nombre: string; // Change this from keyof Campaign to string
+  // nombre: keyof Campaign;
   type?: string;
   value?: string;
   defaultValue?: string;

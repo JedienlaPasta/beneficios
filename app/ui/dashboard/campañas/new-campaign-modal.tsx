@@ -1,5 +1,5 @@
 "use client";
-import { useActionState, useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createCampaign } from "@/app/lib/actions/campaña";
@@ -12,6 +12,7 @@ import DataTypeCards from "./[id]/update/data-type-cards";
 import RequirementsCard from "./[id]/update/requirements-cards";
 import dayjs from "dayjs";
 import CustomAntdDatePicker from "@/app/ui/dashboard/datepicker";
+import { campaignsList } from "@/app/data/data";
 
 export type FormState = {
   success?: boolean;
@@ -20,64 +21,77 @@ export type FormState = {
 
 export default function NewCampaignModal() {
   const router = useRouter();
+  const [campaignName, setCampaignName] = useState("");
   const [date, setDate] = useState<Date | null>(null);
-  const [codigo, setCodigo] = useState("");
+  const [code, setCode] = useState("");
   const [fieldType, setFieldType] = useState("Código");
   const [criteria, setCriteria] = useState<Requirements>({
     tramo: Boolean(false),
     discapacidad: Boolean(false),
     adultoMayor: Boolean(false),
   });
-  const [state, formAction] = useActionState<FormState, FormData>(
-    createCampaign,
-    {
-      success: false,
-      message: "",
-    },
-  );
+
+  const handleCampaignNameSelection = (value: string) => {
+    setCampaignName(value);
+    if (value === "Tarjeta de Comida") {
+      setCode("TA");
+      setFieldType("Código");
+    } else if (value === "Vale de Gas") {
+      setCode("GA");
+      setFieldType("Código");
+    } else if (value === "Pañales") {
+      setCode("PA");
+      setFieldType("Talla");
+    }
+  };
 
   const datePickerHandler = (pickerDate: dayjs.Dayjs | null) => {
     if (pickerDate) {
-      const dt = pickerDate.toDate();
-      setDate(dt);
+      const date = pickerDate.toDate();
+      setDate(date);
     } else {
       setDate(null);
     }
   };
 
-  useEffect(() => {
-    if (state?.message) {
-      if (state.success) {
-        toast.success(state.message);
-        setIsLoading(false);
-        setTimeout(() => {
-          router.back();
-        }, 1500);
-      } else {
-        toast.error(state.message);
-        setIsLoading(false);
-        setIsDisabled(false);
-      }
-    }
-  }, [state, router]);
-
   // Button handlers
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
-  const handleFormAction = async (formData: FormData) => {
+  const formAction = async (formData: FormData) => {
     setIsLoading(true);
     setIsDisabled(true);
-    toast.info("Guardando...");
 
+    formData.append("nombre", campaignName);
     formData.append("fechaTermino", date?.toString() || "");
-    formData.append("descripcion", codigo?.toString() || "");
+    formData.append("descripcion", code?.toString() || ""); // Cambiar "descripcion x code  aqui, en actions y en db"
     formData.append("tipoDato", fieldType);
     formData.append("tramo", criteria.tramo.toString());
     formData.append("discapacidad", criteria.discapacidad.toString());
     formData.append("adultoMayor", criteria.adultoMayor.toString());
-    formAction(formData);
-    // await formAction(formData);
+
+    toast.promise(
+      createCampaign(formData).then((response) => {
+        if (!response.success) {
+          throw new Error(response.message);
+        }
+        return response;
+      }),
+      {
+        loading: "Guardando...",
+        success: (response) => {
+          setIsLoading(false);
+          setTimeout(() => {
+            router.back();
+          }, 500);
+          return response.message;
+        },
+        error: (err) => {
+          setIsDisabled(false);
+          return err.message;
+        },
+      },
+    );
   };
 
   return (
@@ -93,8 +107,14 @@ export default function NewCampaignModal() {
         Elige el tipo de campaña que quieres ingresar y sus datos
         correspondientes.
       </p>
-      <form action={handleFormAction} className="flex flex-col gap-5 pt-2">
-        <CampaignDropdown label="Campaña" name={"nombre"} />
+      <form action={formAction} className="flex flex-col gap-5 pt-2">
+        <CampaignDropdown
+          label="Campaña"
+          name={"nombre"}
+          campaignsList={campaignsList}
+          campaignName={campaignName}
+          setCampaign={handleCampaignNameSelection}
+        />
         <div className="flex items-end gap-3">
           <div className="grow">
             <Input
@@ -102,11 +122,11 @@ export default function NewCampaignModal() {
               label="Código Campaña"
               type="text"
               nombre="descripcion"
-              value={codigo}
-              setData={setCodigo}
+              value={code}
+              setData={setCode}
             />
           </div>
-          <CampaignCode descripcion={codigo ? codigo.toUpperCase() : "##"} />
+          <CampaignCode descripcion={code ? code.toUpperCase() : "##"} />
         </div>
         <div className="flex flex-col gap-1">
           <p className="text-xs text-slate-500">Dato Asociado</p>
