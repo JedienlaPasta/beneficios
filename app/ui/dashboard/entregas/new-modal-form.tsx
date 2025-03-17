@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import CampaignDropdown from "../campañas/campaign-dropdown";
 import Input from "../campañas/new-campaign-input";
 import { SubmitButton } from "../submit-button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Campaign, RSH } from "@/app/lib/definitions";
 import { createEntrega } from "@/app/lib/actions/entregas";
 
@@ -24,11 +24,27 @@ export default function NewModalForm({
   data,
 }: NewModalFormProps) {
   const rut = data[0].rut;
-  const id_usuario = "efa3b8ac-7805-4622-abee-b04351e013cb";
+  // const id_usuario = "efa3b8ac-7805-4622-abee-b04351e013cb";
+  const [id_usuario, setIdUsuario] = useState("");
   const [observaciones, setObservaciones] = useState("");
   const [formFields, setFormFields] = useState<FormField[]>([
     { id: "", campaignName: "", detail: "", code: "" },
   ]);
+
+  useEffect(() => {
+    try {
+      const userSession = localStorage.getItem("userSession");
+      if (userSession) {
+        const userData = JSON.parse(userSession);
+        setIdUsuario(userData.id);
+      } else {
+        toast.error("No se encontró sesión de usuario");
+      }
+    } catch (error) {
+      console.error("Error getting user session:", error);
+      toast.error("Error al obtener la sesión de usuario");
+    }
+  }, []);
 
   const dropdownCampaigns = activeCampaigns?.map((campaign) => ({
     id: campaign.id,
@@ -52,6 +68,7 @@ export default function NewModalForm({
     formData.append("rut", rut.toString());
     formData.append("id_usuario", id_usuario);
     formData.append("observaciones", observaciones);
+
     const response = await createEntregaWithId(formData);
     console.log(response);
   };
