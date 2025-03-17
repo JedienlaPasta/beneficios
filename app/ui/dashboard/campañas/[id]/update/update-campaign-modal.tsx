@@ -1,8 +1,9 @@
-"use client";
+// "use client";
 import { Campaign } from "@/app/lib/definitions";
 import UpdateForm from "./update-form";
-import { RiCloseLine } from "react-icons/ri";
-import { useRouter } from "next/navigation";
+// import { RiCloseLine } from "react-icons/ri";
+// import { useRouter } from "next/navigation";
+import CloseModalButton from "../../../close-modal-button";
 
 export default function UpdateCampaignModal({
   id,
@@ -11,7 +12,7 @@ export default function UpdateCampaignModal({
   id: string;
   data: Campaign[];
 }) {
-  const router = useRouter();
+  // const router = useRouter();
 
   return (
     <div className="w-full max-w-[36rem] shrink-0 px-6 py-8 text-slate-900">
@@ -19,10 +20,7 @@ export default function UpdateCampaignModal({
         <div>
           <span className="flex items-center justify-between">
             <h2 className="text-lg font-bold">Actualizar Campaña</h2>
-            <RiCloseLine
-              className="cursor-pointer text-xl text-slate-400 hover:text-slate-600"
-              onClick={() => router.back()}
-            />
+            <CloseModalButton />
           </span>
           {/* <p className="text-sm text-slate-600/70">
             Cuidado con los datos a cambiar, esta acción es irreversible.

@@ -36,7 +36,16 @@ export type SocialAid = {
   total?: number; // total de registros
 };
 
-export type RSH = {
+export type SocialAidTableRow = {
+  folio: string;
+  nombre_campaña: string;
+  detalle: string;
+  observacion: string;
+  nombre_usuario: string;
+  fecha_entrega: Date;
+};
+
+export type RSHTableData = {
   rut: number;
   dv: string;
   nombres: string;
@@ -44,8 +53,6 @@ export type RSH = {
   direccion: string;
   tramo: number;
   ultima_entrega: Date;
-  discapacidad: string;
-  adulto_mayor: string;
   pages?: number; // total de paginas
   total?: number; // total de registros
 };
@@ -53,4 +60,29 @@ export type RSH = {
 export type RSHInfo = {
   ultima_actualizacion: Date;
   total_registros: number;
+};
+
+export type RSH = {
+  nombres: string;
+  apellidos: string;
+  rut: number;
+  direccion: string;
+  sector: string;
+  tramo: number;
+  telefono: number;
+  dv: string;
+  fecha_nacimiento: Date;
+  genero: string;
+  correo: string;
+  indigena: string;
+  fecha_calificacion: Date;
+  folio: string;
+  fecha_encuesta: Date;
+  nacionalidad: string;
+  fecha_modificacion: Date;
+  ultima_entrega: Date;
+  pages?: number; // total de paginas
+  total?: number; // total de registros
+
+  discapacidad: string;
 };

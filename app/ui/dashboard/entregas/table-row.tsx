@@ -1,7 +1,6 @@
-"use client";
 import { formatDate, formatNumber } from "@/app/lib/utils";
-// import Link from "next/link";
-// import { CiViewList } from "react-icons/ci";
+import Link from "next/link";
+import { CiViewList } from "react-icons/ci";
 
 export default function TableRow({
   item,
@@ -20,35 +19,49 @@ export default function TableRow({
     item;
   const formattedRut = formatNumber(rut) + (dv ? "-" + dv : "");
 
+  const stratumColor = [
+    [40, "bg-blue-200 text-blue-600 border-blue-400"],
+    [50, "bg-blue-200 text-blue-600 border-blue-400/80"],
+    [60, "bg-blue-200 text-blue-500 border-blue-300"],
+    [70, "bg-blue-200 text-blue-500 border-blue-300"],
+    [80, "bg-blue-100 text-blue-400 border-blue-200"],
+    [90, "bg-blue-100 text-blue-400 border-blue-200"],
+    [100, "bg-blue-100 text-blue-300 border-blue-100"],
+  ];
+
+  const stratum = tramo / 10 - 4;
+
   return (
     <tr className="text-nowrap text-sm tabular-nums transition-colors hover:bg-slate-200/50">
       <td className="group w-[10%] max-w-56 py-3 pl-10 pr-6 text-slate-700">
         <div className="overflow-hidden text-ellipsis">{formattedRut}</div>
       </td>
-      <td className="w-[30%] py-3 pl-10 pr-6 text-slate-700">
+      <td className="w-[25%] py-3 pl-10 pr-6 text-slate-700">
         {nombres + " " + apellidos}
       </td>
-      <td className="w-[15%] py-3 pr-14 text-left text-slate-600">
+      <td className="w-[20%] py-3 pr-14 text-left text-slate-600">
         {direccion}
       </td>
       <td className="w-[10%] px-6 py-3">
-        <span className="inline-block rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-xs font-medium text-blue-400">
+        <span
+          className={`inline-block rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-xs font-medium text-blue-400 ${stratumColor[stratum][1] || "bg-gray-50"}`}
+        >
           {tramo}%
         </span>
       </td>
       <td className="w-[15%] py-3 pr-14 text-right text-slate-600">
         {ultima_entrega ? formatDate(ultima_entrega) : ""}
       </td>
-      {/* <td className="w-[5%] pl-6 pr-10 text-right">
+      <td className="w-[5%] pl-6 pr-10 text-right">
         <div className="flex items-center justify-end">
           <Link
-            href={`/dashboard/rsh/${rut}`}
+            href={`/dashboard/entregas/${rut}`}
             className="w-fit rounded p-1 font-medium text-slate-700/90 hover:bg-blue-100 hover:text-blue-600"
           >
             <CiViewList className="h-6 w-6 cursor-pointer" />
           </Link>
         </div>
-      </td> */}
+      </td>
     </tr>
   );
 }

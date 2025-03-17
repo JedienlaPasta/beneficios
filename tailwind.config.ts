@@ -71,6 +71,16 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      keyframes: {
+        loading: {
+          "0%, 100%": { width: "5px", transform: "translateX(0)" },
+          "30%": { width: "25px", transform: "translateX(32px)" },
+          "60%": { width: "5px", right: "-1px", transform: "translateX(45px)" },
+        },
+      },
+      animation: {
+        loading: "loading 2s infinite",
+      },
     },
     screens: {
       xs: "375px",

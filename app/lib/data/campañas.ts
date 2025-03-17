@@ -32,3 +32,15 @@ export async function fetchCampaigns(query: string, currentPage: number) {
     return { data: [], pages: 0 };
   }
 }
+
+export async function fetchActiveCampaigns() {
+  try {
+    const data = await sql<Campaign[]>`
+              SELECT * FROM campañas WHERE fecha_termino > NOW()
+              `;
+    return { data };
+  } catch (error) {
+    console.error("Error al obtener datos de la tabla de campañas:", error);
+    return { data: [] };
+  }
+}

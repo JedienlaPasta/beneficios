@@ -1,11 +1,8 @@
 import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/campaigns-table-skeleton";
 import TablaEntregasDetalleCampaña from "@/app/ui/dashboard/campañas/[id]/campaign-social-aid-table";
-// import Modal from "@/app/ui/dashboard/modal";
 import { Suspense } from "react";
-// import UpdateCampaignModal from "@/app/ui/dashboard/campañas/[id]/update/update-campaign-modal";
 import CampaignDetail from "@/app/ui/dashboard/campañas/[id]/campaign-detail";
-import TableHeader from "@/app/ui/dashboard/table-header";
-// import { fetchRSHById } from "@/app/lib/data/rsh";
+import SearchBar from "@/app/ui/dashboard/searchbar";
 
 type RSHByIdProps = {
   searchParams?: Promise<{
@@ -28,7 +25,7 @@ export default async function RSHById(props: RSHByIdProps) {
   // const { data } = await fetchRSHById(id);
 
   return (
-    <div className="h-fit w-full px-6 py-8 text-slate-900 lg:px-10">
+    <div>
       {/* {showUpdateModal === "open" && (
         <Modal>
           <UpdateCampaignModal id={id} data={data} />
@@ -48,14 +45,15 @@ export default async function RSHById(props: RSHByIdProps) {
       <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
         <CampaignDetail id={id} />
         <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50">
-          <TableHeader>
-            <>
+          <div className="flex flex-wrap items-center justify-between gap-4 px-10 pt-4 3xl:w-[96rem] 3xl:self-center">
+            <span className="flex flex-wrap items-center gap-2 text-nowrap text-lg font-semibold text-slate-800">
               <p>Entregas de</p>
               <p className="rounded-md bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-500">
                 #{id}
               </p>
-            </>
-          </TableHeader>
+            </span>
+            <SearchBar placeholder="Buscar..." />
+          </div>
           <Suspense fallback={<TablaCampañasSkeleton />}>
             <TablaEntregasDetalleCampaña
               id={id}

@@ -6,12 +6,11 @@ export default function Sidenav() {
   return (
     <div className="fixed flex h-dvh w-72 flex-col bg-[#171a1f] text-slate-300">
       <div className="flex h-16 items-center gap-2 border-b border-slate-700/50 px-4">
-        {/* <div className="h-6 w-3 rounded bg-gradient-to-r from-blue-400 to-blue-500"></div> */}
         <span
           className={`${anton_sc.className} flex items-baseline gap-0.5 text-3xl font-bold text-slate-100`}
         >
-          <p className="text-blue-500">S</p>
-          <p className="text-2xl tracking-wider">IBAS</p>
+          <p className="text-4xl text-blue-500">S</p>
+          <p className="text-3xl tracking-wider">IBAS</p>
         </span>
       </div>
 

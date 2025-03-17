@@ -38,6 +38,7 @@ const links = [
     icon: <FaFileExcel className="h-5 w-5" />,
   },
 ];
+
 export default function NavLinks() {
   const pathname = usePathname();
   const splitPathname = pathname.split("/");

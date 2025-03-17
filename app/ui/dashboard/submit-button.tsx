@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 export function SubmitButton({
   children,
   isDisabled,
+  isLoading,
   setIsDisabled,
 }: {
   children: string;
   isDisabled: boolean;
+  isLoading?: boolean;
   setIsDisabled: (
     prevState: boolean | ((prevState: boolean) => boolean),
   ) => void;
@@ -29,8 +31,11 @@ export function SubmitButton({
       className={clsx(
         "flex h-10 grow items-center justify-center rounded-lg text-sm font-medium transition-all active:scale-95",
         {
-          "cursor-not-allowed bg-slate-200 text-slate-500": isDisabled,
+          "cursor-not-allowed bg-slate-300 text-slate-500":
+            isDisabled && !isLoading,
           "bg-blue-500 text-white hover:bg-blue-600": !isDisabled,
+          "animate-pulse cursor-not-allowed bg-blue-400 text-slate-100":
+            isLoading && isDisabled,
         },
       )}
     >
