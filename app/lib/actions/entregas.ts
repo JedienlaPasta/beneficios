@@ -192,6 +192,10 @@ export const createEntrega = async (id: string, formData: FormData) => {
 
     // Almacenamiento de documento generado
     const pdfBytesFilled = await pdfDoc.save();
+
+    // 1. Convert the PDF to a Base64 string so we can store it in a TEXT column
+    const pdfBase64 = Buffer.from(pdfBytesFilled).toString("base64");
+
     // Opcional: Almacenado localmente
     const outputPath = path.join(
       process.cwd(),
@@ -199,6 +203,52 @@ export const createEntrega = async (id: string, formData: FormData) => {
       `Acta de entrega inicial.pdf`,
     );
     fs.writeFileSync(outputPath, pdfBytesFilled);
+
+    // 2. Insert into la tabla "documentos"
+    await sql`
+      INSERT INTO documentos (
+        nombre_documento,
+        archivo,
+        tipo,
+        folio
+      )
+      VALUES (
+        ${"Acta de entrega inicial"}, 
+        ${pdfBase64},
+        ${".pdf"},
+        ${folio}
+      )
+      `;
+
+    // Supongamos que tienes el ID del documento que deseas recuperar el documento desde la bbdd
+    // const documentoId = "xxxxx-xxxx-xxxx...";
+
+    // const resultado = await sql`
+    //   SELECT archivo
+    //   FROM documentos
+    //   WHERE id = ${documentoId}
+    // `;
+
+    // if (resultado.count === 0) {
+    //   throw new Error("Documento no encontrado");
+    // }
+
+    // // 1. Leer la cadena base64 desde la base de datos
+    // const archivoBase64 = resultado[0].archivo;
+
+    // // 2. Decodificar la cadena base64 para obtener un Buffer con el PDF
+    // const archivoBuffer = Buffer.from(archivoBase64, "base64");
+
+    // // 3. Para “descargarlo” en un endpoint de tu API, por ejemplo con Next.js, podrías hacer:
+    // return new Response(archivoBuffer, {
+    //   headers: {
+    //     "Content-Type": "application/pdf",
+    //     "Content-Disposition": `attachment; filename="Acta_de_entrega_inicial.pdf"`,
+    //   },
+    // });
+
+    // // O si quieres “guardarlo” localmente en un archivo .pdf:
+    // fs.writeFileSync("Acta_de_entrega_inicial.pdf", archivoBuffer);
 
     return { success: true, message: "Entrega recibida" };
   } catch (error) {
