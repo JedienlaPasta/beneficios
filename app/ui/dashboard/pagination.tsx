@@ -23,7 +23,6 @@ export default function Pagination({ pages }: { pages: number }) {
   for (let i = 1; i <= pages; i++) {
     pageNumber.push(i);
   }
-  console.log(pageNumber);
 
   const visiblePagesArray = pageNumber.filter((numero) => {
     if ((currentPage === 1 || currentPage === 2) && numero < 6) {
@@ -45,8 +44,6 @@ export default function Pagination({ pages }: { pages: number }) {
       return false;
     }
   });
-
-  console.log(visiblePagesArray);
 
   const arrayPaginas = visiblePagesArray.map((numero, index) => (
     <li key={index}>
@@ -70,7 +67,7 @@ export default function Pagination({ pages }: { pages: number }) {
       if (currentPage < pages) {
         return currentPage + 1;
       } else {
-        return pages;
+        return pages || 1;
       }
     }
   };
@@ -81,7 +78,7 @@ export default function Pagination({ pages }: { pages: number }) {
       aria-label="Pagination"
     >
       <ul className="flex gap-2 p-2">
-        {/* Arrow Left */}
+        {/* First Page */}
         <li>
           <Link
             href={URLCurrentPage(1)}
@@ -90,25 +87,31 @@ export default function Pagination({ pages }: { pages: number }) {
             <MdKeyboardDoubleArrowLeft className="text-xl" />
           </Link>
         </li>
-        <Link
-          href={URLCurrentPage(calcularCambioPagina("left"))}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-200 hover:text-slate-600"
-        >
-          <MdKeyboardArrowLeft className="text-xl" />
-        </Link>
+        {/* Arrow Left */}
+        <li>
+          <Link
+            href={URLCurrentPage(calcularCambioPagina("left"))}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-200 hover:text-slate-600"
+          >
+            <MdKeyboardArrowLeft className="text-xl" />
+          </Link>
+        </li>
         {/* Visible Pages */}
         {arrayPaginas}
 
         {/* Arrow Right */}
-        <Link
-          href={URLCurrentPage(calcularCambioPagina("right"))}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-200 hover:text-slate-600"
-        >
-          <MdKeyboardArrowRight className="text-xl" />
-        </Link>
         <li>
           <Link
-            href={URLCurrentPage(pageNumber[pageNumber.length - 1])}
+            href={URLCurrentPage(calcularCambioPagina("right"))}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-200 hover:text-slate-600"
+          >
+            <MdKeyboardArrowRight className="text-xl" />
+          </Link>
+        </li>
+        {/* Last Page */}
+        <li>
+          <Link
+            href={URLCurrentPage(pageNumber[pageNumber.length - 1] || 1)}
             className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-200 hover:text-slate-600"
           >
             <MdKeyboardDoubleArrowRight className="text-xl" />

@@ -1,18 +1,35 @@
-// import { MdKeyboardArrowDown } from "react-icons/md";
 import { useEffect, useRef, useState } from "react";
-import { campaignsList } from "@/app/data/data";
+import { FormField } from "../entregas/new-modal-form";
+// import { campaignsList } from "@/app/data/data";
+
+type CampaignList = {
+  id: string;
+  name: string;
+  type: string;
+  code: string;
+};
 
 type CampañaDropdownProps = {
   label: string;
-  name: string;
+  name: keyof FormField | string;
+  campaignsList?: CampaignList[];
+  campaignName: string;
+  readOnly?: boolean;
+  setCampaign?: (prevState: string) => void; // x onChange()
+  setCampaignName?: (name: keyof FormField, prev: string) => void;
 };
 
 export default function CampaignDropdown({
   label,
   name,
+  campaignsList,
+  campaignName,
+  readOnly,
+  setCampaign,
+  setCampaignName,
 }: CampañaDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [campaignName, setCampaignName] = useState("");
+  // const [campaignName, setCampaignName] = useState("");
 
   const toggleDropdown = () => {
     setIsOpen((prev) => !prev);
@@ -38,11 +55,27 @@ export default function CampaignDropdown({
     };
   }, []);
 
+  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!setCampaign) return;
+    setCampaign(e.target.value);
+    console.log("first");
+  };
+
+  const handleCampaignSelection = (campaign: CampaignList) => {
+    if (!setCampaignName) return;
+    setCampaignName("campaignName", campaign.name);
+    setCampaignName("id", campaign.id);
+    setCampaignName("code", campaign.code);
+    console.log(
+      `Selected campaign: ${campaign.name}, ID: ${campaign.id}, CODE: ${campaign.code}`,
+    );
+  };
+
   return (
     <div
       ref={dropdownRef}
       onClick={toggleDropdown}
-      className="relative flex select-none flex-col gap-1"
+      className="relative flex grow select-none flex-col gap-1"
     >
       <label htmlFor={label} className="text-xs text-slate-500">
         {label}
@@ -52,22 +85,24 @@ export default function CampaignDropdown({
         name={name}
         type="text"
         value={campaignName}
-        onChange={(e) => setCampaignName(e.target.value)}
+        readOnly={readOnly}
+        onChange={(e) => handleOnChange(e)}
         placeholder="Nombre campaña..."
         autoComplete="off"
-        className="h-10 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm text-slate-700 shadow-sm outline-none transition-all placeholder:text-gray-400 focus-within:border-blue-500 focus:outline-none"
+        className={`${readOnly && "cursor-pointer"} h-10 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm text-slate-700 shadow-sm outline-none transition-all placeholder:text-gray-400 focus-within:border-blue-500 focus:outline-none`}
       />
-      {/* <MdKeyboardArrowDown
-        className={`absolute right-2 top-[42%] transform cursor-pointer text-3xl text-slate-400 transition duration-300 ${isOpen ? "rotate-[-180deg]" : ""}`}
-      /> */}
       {/* Dropdown List */}
       {isOpen && (
-        <ul className="absolute left-[-1px] top-16 z-10 w-[101%] divide-y overflow-hidden rounded-lg border border-gray-200 bg-white text-slate-700 shadow-lg">
-          {campaignsList.map((campaign, index) => (
+        <ul className="absolute left-[-1px] top-16 z-10 max-h-[146px] w-[101%] divide-y overflow-y-auto rounded-lg border border-gray-200 bg-white text-slate-700 shadow-lg">
+          {campaignsList?.map((campaign, index) => (
             <li
               key={index}
-              onClick={() => setCampaignName(campaign.name)}
-              className="flex w-full cursor-pointer flex-col px-4 py-[6px] text-sm hover:bg-sky-100"
+              onClick={(e) =>
+                setCampaign
+                  ? setCampaign(campaign.name)
+                  : handleCampaignSelection(campaign)
+              }
+              className="flex h-12 w-full cursor-pointer flex-col justify-center px-4 text-sm hover:bg-sky-100"
             >
               <span>{campaign.name}</span>
               <span className="text-xs text-slate-500">{campaign.type}</span>

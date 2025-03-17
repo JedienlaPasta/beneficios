@@ -1,141 +1,13 @@
-// "use client";
-// import { useActionState, useEffect, useState } from "react";
-// import { useRouter } from "next/navigation";
-// import { toast } from "sonner";
-// import { RiCloseLine } from "react-icons/ri";
-// import { SubmitButton } from "../submit-button";
-// import { importXLSXFile } from "@/app/lib/actions/rsh";
-
-// export type FormState = {
-//   success?: boolean;
-//   message?: string;
-// };
-
-// export default function ImportXLSXModal() {
-//   const router = useRouter();
-//   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-//   const [state, formAction] = useActionState<FormState, FormData>(
-//     importXLSXFile,
-//     {
-//       success: false,
-//       message: "",
-//     },
-//   );
-
-//   useEffect(() => {
-//     if (state?.message) {
-//       if (state.success) {
-//         toast.success(state.message);
-//         setIsLoading(false);
-//         setTimeout(() => {
-//           router.back();
-//         }, 1500);
-//       } else {
-//         toast.error(state.message);
-//         setIsLoading(false);
-//         setIsDisabled(false);
-//       }
-//     }
-//   }, [state, router]);
-
-//   // Button handlers
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [isDisabled, setIsDisabled] = useState(false);
-
-//   const handleFormAction = async (formData: FormData) => {
-//     if (!selectedFile) {
-//       toast.error("No se ha seleccionado ningún archivo.");
-//       return;
-//     }
-//     setIsLoading(true);
-//     setIsDisabled(true);
-//     toast.info("Guardando...");
-//     formData.append("file", selectedFile);
-//     formAction(formData);
-//   };
-
-//   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
-//     e.preventDefault();
-//     const file = e.dataTransfer?.files[0];
-//     if (file) setSelectedFile(file);
-//   };
-
-//   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const file = e.target.files?.[0];
-//     if (file) setSelectedFile(file);
-//   };
-
-//   return (
-//     <div className="grid max-h-dvh min-w-[26rem] max-w-[30rem] shrink-0 flex-col gap-4 overflow-y-auto rounded-xl bg-white p-8 shadow-xl">
-//       <div>
-//         <div className="flex items-center justify-between">
-//           <h2 className="text-lg font-semibold">Importar Registro</h2>
-//           <RiCloseLine
-//             className="cursor-pointer text-xl text-slate-400 hover:text-slate-600"
-//             onClick={() => router.back()}
-//           />
-//         </div>
-//         <p className="text-xs text-gray-500">
-//           Selecciona el archivo que deseas importar.
-//         </p>
-//       </div>
-//       <form
-//         action={handleFormAction}
-//         className="flex flex-col gap-2"
-//       >
-//         <div
-//           className="flex h-40 grow flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-slate-400/60"
-//           onDrop={handleFileDrop}
-//           onDragOver={(e) => e.preventDefault()}
-//         >
-//           <p className="text font-medium text-slate-700">
-//             Arrastra y Suelta Aquí
-//           </p>
-//           <input
-//             type="file"
-//             id="fileInput"
-//             className="hidden"
-//             accept=".xlsx,.xls"
-//             onChange={handleFileSelect}
-//           />
-//           <label
-//             htmlFor="fileInput"
-//             className="cursor-pointer text-xs text-slate-500"
-//           >
-//             Seleccionar Archivo
-//           </label>
-//         </div>
-//         <p className="text-xs text-slate-500">Solo archivos .xlsx,.xls</p>
-//         {/* Import Status */}
-//         <div className="flex flex-col gap-2">
-//           <span className="flex justify-between">
-//             <p className="text-sm text-slate-600">RSH-2025.pdf</p>
-//             <p className="text-sm text-slate-600">56%</p>
-//           </span>
-//           <div className="h-2 w-full rounded bg-gray-200">
-//             <div
-//               className="h-full animate-pulse rounded bg-blue-500"
-//               style={{ width: "56%" }}
-//             ></div>
-//           </div>
-//         </div>
-//         <div className="flex pt-3">
-//           <SubmitButton isDisabled={isDisabled} setIsDisabled={setIsDisabled}>
-//             {isLoading ? "Procesando..." : "Importar"}
-//           </SubmitButton>
-//         </div>
-//       </form>
-//     </div>
-//   );
-// }
-
 "use client";
-import { useActionState, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { RiCloseLine } from "react-icons/ri";
 import { SubmitButton } from "../submit-button";
 import { importXLSXFile } from "@/app/lib/actions/rsh";
+import xlsxImg from "@/public/xlsx.svg";
+import Image from "next/image";
+import { RiCloseCircleFill } from "react-icons/ri";
 
 export type FormState = {
   success?: boolean;
@@ -145,53 +17,61 @@ export type FormState = {
 export default function ImportXLSXModal() {
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [state, formAction] = useActionState<FormState, FormData>(
-    importXLSXFile,
-    {
-      success: false,
-      message: "",
-    },
-  );
-
-  useEffect(() => {
-    if (state?.message) {
-      if (state.success) {
-        toast.success(state.message);
-        setIsLoading(false);
-        setTimeout(() => {
-          router.back();
-        }, 1500);
-      } else {
-        toast.error(state.message);
-        setIsLoading(false);
-        setIsDisabled(false);
-      }
-    }
-  }, [state, router]);
 
   // Button handlers
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
-  const handleFormAction = async (formData: FormData) => {
+  const formAction = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setIsDisabled(true);
+
     if (!selectedFile) {
       toast.error("No se ha seleccionado ningún archivo.");
       return;
     }
-    setIsLoading(true);
-    setIsDisabled(true);
-    toast.info("Procesando archivo Excel...");
-    formData.append("file", selectedFile);
-    console.log(formData);
-    // formAction(formData);
+
+    const myFormData = new FormData();
+    myFormData.append("file", selectedFile);
+
+    toast.promise(
+      importXLSXFile(myFormData).then((response) => {
+        if (!response.success) {
+          throw new Error(response.message);
+        }
+        return response;
+      }),
+      {
+        loading: "Procesando archivo Excel...",
+        success: (response) => {
+          setIsLoading(false);
+          setTimeout(() => {
+            router.back();
+          }, 500);
+          return response.message;
+        },
+        error: (err) => {
+          setIsDisabled(false);
+          return err.message;
+        },
+      },
+    );
   };
+
+  useEffect(() => {
+    console.log("isLoading: " + isLoading);
+    console.log("isDisabled: " + isDisabled);
+  }, [isLoading, isDisabled]);
 
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const file = e.dataTransfer?.files[0];
-    if (file) {
+    const files = e.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const file = files[0];
       if (isExcelFile(file)) {
         setSelectedFile(file);
+        toast.success("Archivo Excel recibido.");
       } else {
         toast.error("Solo se permiten archivos Excel (.xlsx, .xls)");
       }
@@ -234,18 +114,24 @@ export default function ImportXLSXModal() {
           Selecciona el archivo Excel que deseas importar.
         </p>
       </div>
-      <form action={handleFormAction} className="flex flex-col gap-2">
+      <form onSubmit={formAction} className="flex flex-col gap-2">
         <div
           className="flex h-40 grow flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-slate-400/60"
           onDrop={handleFileDrop}
           onDragOver={(e) => e.preventDefault()}
         >
           {isLoading ? (
-            <Loader />
+            <>
+              {/* <Loader /> */}
+              <Spinner />
+              <p className="mt-1 text-xs text-slate-500">
+                Esto puede tardar 1 minuto...
+              </p>
+            </>
           ) : (
             <>
               <p className="text font-medium text-slate-700">
-                Arrastra y Suelta Aquí
+                Suelta aquí tu archivo
               </p>
               <input
                 type="file"
@@ -259,7 +145,7 @@ export default function ImportXLSXModal() {
                 htmlFor="fileInput"
                 className="cursor-pointer text-xs text-slate-500"
               >
-                Seleccionar Archivo Excel
+                Seleccionar archivo Excel
               </label>
             </>
           )}
@@ -271,26 +157,30 @@ export default function ImportXLSXModal() {
         {/* Import Status */}
         {selectedFile ? (
           <div className="flex flex-col gap-2">
-            <span className="flex items-center justify-between">
-              <p className="text-sm text-slate-600">{selectedFile.name}</p>
+            <span className="flex items-center justify-between gap-2 rounded-lg border border-gray-200 px-4 py-3">
+              <span className="flex items-center justify-between gap-2">
+                <Image className="h-6 w-6" src={xlsxImg} alt="xlsx.img" />
+                <p className="text-sm text-slate-600">{selectedFile.name}</p>
+              </span>
               {isLoading && (
-                <p className="h-3 w-3 animate-pulse rounded-full bg-blue-500 text-sm text-slate-600"></p>
+                <p className="h-3 w-3 shrink-0 grow-0 animate-pulse rounded-full bg-blue-500 text-sm text-slate-600"></p>
+              )}
+              {!isLoading && (
+                <button
+                  onClick={() => setSelectedFile(null)}
+                  className="rounded-full"
+                >
+                  <RiCloseCircleFill className="bg-slate-400s h-5 w-5 cursor-pointer rounded-full text-slate-500 hover:text-slate-600" />
+                </button>
               )}
             </span>
-            {isLoading && (
-              <div className="h-2 w-full rounded bg-gray-200">
-                <div
-                  className="h-full animate-pulse rounded bg-blue-500"
-                  style={{ width: "0%" }}
-                ></div>
-              </div>
-            )}
           </div>
         ) : null}
 
         <div className="flex pt-3">
           <SubmitButton
             isDisabled={isDisabled || !selectedFile}
+            isLoading={isLoading}
             setIsDisabled={setIsDisabled}
           >
             {isLoading ? "Procesando..." : "Importar"}
@@ -301,13 +191,19 @@ export default function ImportXLSXModal() {
   );
 }
 
-function Loader() {
+// function Loader() {
+//   return (
+//     <div className="relative mx-auto my-6 h-[40px] w-[40px]">
+//       <div className='absolute left-[6px] top-0 block h-[5px] w-[5px] rotate-[70deg] rounded-[10px] before:absolute before:right-0 before:h-[5px] before:w-[5px] before:animate-loading before:rounded-[10px] before:bg-blue-400 before:content-[""]' />
+//       <div className='absolute right-0 top-[6px] block h-[5px] w-[5px] rotate-[160deg] rounded-[10px] before:absolute before:right-0 before:h-[5px] before:w-[5px] before:animate-loading before:rounded-[10px] before:bg-blue-800 before:content-[""]' />
+//       <div className='absolute bottom-0 right-[6px] block h-[5px] w-[5px] rotate-[-110deg] rounded-[10px] before:absolute before:right-0 before:h-[5px] before:w-[5px] before:animate-loading before:rounded-[10px] before:bg-blue-500 before:content-[""]' />
+//       <div className='absolute bottom-[6px] left-0 block h-[5px] w-[5px] rotate-[-20deg] rounded-[10px] before:absolute before:right-0 before:h-[5px] before:w-[5px] before:animate-loading before:rounded-[10px] before:bg-blue-900 before:content-[""]' />
+//     </div>
+//   );
+// }
+
+export function Spinner() {
   return (
-    <div className="relative mx-auto my-6 h-[40px] w-[40px]">
-      <div className='before:animate-loading absolute left-[6px] top-0 block h-[5px] w-[5px] rotate-[70deg] rounded-[10px] before:absolute before:right-0 before:h-[5px] before:w-[5px] before:rounded-[10px] before:bg-blue-400 before:content-[""]' />
-      <div className='before:animate-loading absolute right-0 top-[6px] block h-[5px] w-[5px] rotate-[160deg] rounded-[10px] before:absolute before:right-0 before:h-[5px] before:w-[5px] before:rounded-[10px] before:bg-blue-800 before:content-[""]' />
-      <div className='before:animate-loading absolute bottom-0 right-[6px] block h-[5px] w-[5px] rotate-[-110deg] rounded-[10px] before:absolute before:right-0 before:h-[5px] before:w-[5px] before:rounded-[10px] before:bg-blue-500 before:content-[""]' />
-      <div className='before:animate-loading absolute bottom-[6px] left-0 block h-[5px] w-[5px] rotate-[-20deg] rounded-[10px] before:absolute before:right-0 before:h-[5px] before:w-[5px] before:rounded-[10px] before:bg-blue-900 before:content-[""]' />
-    </div>
+    <div className="animate-cspin h-5 w-5 rounded-full border-4 border-blue-200 border-t-blue-400 bg-white"></div>
   );
 }

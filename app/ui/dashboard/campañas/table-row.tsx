@@ -29,7 +29,6 @@ export default function TableRow({
       : "bg-slate-50 text-slate-700 border-slate-200";
 
   const copyToClipboard = async (text: string) => {
-    console.log(text);
     await navigator.clipboard.writeText(text);
     toast.success("Copiado al portapapeles");
   };

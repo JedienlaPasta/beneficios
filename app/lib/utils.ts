@@ -2,7 +2,8 @@ import clsx from "clsx";
 import { ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-export const formatDate = (date: Date) => {
+export const formatDate = (date: Date | null) => {
+  if (!date) return "";
   const esDate = date.toLocaleString("es-ES", {
     year: "numeric",
     month: "long",

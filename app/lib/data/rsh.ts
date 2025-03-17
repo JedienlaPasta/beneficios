@@ -5,7 +5,7 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
 export async function fetchRSHById(id: string) {
   try {
-    const data = await sql<RSH[]>`SELECT * FROM rsh WHERE id = ${id}`;
+    const data = await sql<RSH[]>`SELECT * FROM rsh WHERE rut = ${id}`;
     return { data };
   } catch (error) {
     console.error("Error al obtener datos de la tabla de campañas:", error);
@@ -13,8 +13,13 @@ export async function fetchRSHById(id: string) {
   }
 }
 
-export async function fetchRSH(query: string, currentPage: number) {
-  const resultsPerPage = 6;
+// Optimizar busquedas
+export async function fetchRSH(
+  query: string,
+  currentPage: number,
+  itemsPerPage?: number,
+) {
+  const resultsPerPage = itemsPerPage || 6;
   const offset = (currentPage - 1) * resultsPerPage || 0;
   try {
     const data = await sql<RSH[]>`
@@ -22,10 +27,7 @@ export async function fetchRSH(query: string, currentPage: number) {
     (SELECT MAX(entregas.fecha_entrega) FROM entregas WHERE entregas.rut = rsh.rut) AS ultima_entrega,
     COUNT (*) OVER() AS total
     FROM rsh
-      WHERE 
-          rsh.rut ILIKE ${`%${query}%`} OR
-          rsh.nombres ILIKE ${`%${query}%`} OR
-          rsh.direccion ILIKE ${`%${query}%`}
+      WHERE concat(rsh.rut, ' ', rsh.nombres, ' ', rsh.apellidos, ' ', rsh.direccion) ILIKE ${`%${query}%`}
       ORDER BY rsh.nombres ASC
       LIMIT ${resultsPerPage}
       OFFSET ${offset}

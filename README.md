@@ -126,6 +126,64 @@ RSH => Detalles, Vista Cartas? / Vista Tablas (Toggle?)
 
 AHORA => RSH (pendiente) dropdown button [Ingresar RSH, Actualizar RSH, Importar RSH]
 
+Fechas ingresadas en RSH corridas.
+
+Limitar tipo de campaña activa. x
+
+Generar id custom (folio entregas). +
+
+Breadcrumbs. +
+
+Barra busqueda, cambiar placeholder de acuerdo a la vista en la que se encuentre el usuario. +
+
+Arreglar layout tablas con grid.
+
+Arreglar pagination (saltos al cambiar de pagina).
+
+Arreglar los toast de crud, solo el de nueva campaña esta bien.
+
+===========================================================
+
+# Campos Formulario Beneficios
+
+Entregas:
+
+- Generar Folio
+- Observaciones
+- Fecha Entrega (Me parece que no sería automática)
+- RUT
+- ID Usuario
+
+Entrega:
+
+- ID_entrega
+- Detalle (Talla pañal, Monto, etc)
+- Folio
+- ID_Campaña
+
+Debiese tener un estado de Pendiente, Entregado, etc?
+Asi se registra la entrega en la db, luego de ingresada se pueden generar los documentos, y cuando vaya a ingresar los documentos pueda cambiar el estado a Entregado.
+
+Verificar que los campos no esten vacios en Modal Asignar Beneficios.
+
+Limitar cantidad de campañas activas tambien.
+
+HACER TABLA ENTREGAS +
+
+GENERAR DOCUMENTOS PDF / MODAL UPLOAD x
+
+MEJORAR MODAL INGRESO ENTREGAS - opcion de descarga y upload de archivo al ingresar las entregas?
+
+TABLA RSH DETALLE?
+
+REVISAR MODAL INGRESO CAMPAÑA/ACTUALIZAR CAMPAÑA +
+
+MODAL IMPORTAR x
+
+SALTO DE PAGINA x
+
+data/rsh.ts => optimizar busquedas
+
 # Extras
 
 Decreto supremo 82

@@ -41,11 +41,10 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
     });
   };
 
-  // Controladores del dropdown vvvv
-
   const dropdownOptionStyle =
     "pl-4 pr-6 py-3 divide-y flex items-center gap-2 cursor-pointer rounded-md group transition-all duration-300";
 
+  // Controladores del dropdown vvvv
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -60,9 +59,11 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   });
+
   const toggleModal = () => {
     setModalOpen((prev) => !prev);
   };
+
   return (
     <div
       ref={modalRef}

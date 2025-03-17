@@ -35,7 +35,6 @@ interface CitizenData {
   fecha_encuesta: Date | null;
   fecha_modificacion: Date | null;
   fecha_calificacion: Date | null;
-  fecha_actualizacion: Date | null;
 }
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: "require" });
@@ -94,7 +93,7 @@ const FileSchema = z.object({
 });
 
 export async function importXLSXFile(
-  prevState: FormState,
+  // prevState: FormState,
   formData: FormData,
 ): Promise<FormState> {
   try {
@@ -167,7 +166,6 @@ export async function importXLSXFile(
         fecha_encuesta: convertDate(values[63]),
         fecha_modificacion: convertDate(values[65]),
         fecha_calificacion: convertDate(values[71]),
-        fecha_actualizacion: formatCurrentDate(),
       };
 
       // Validación adicional
@@ -209,7 +207,6 @@ export async function importXLSXFile(
               "fecha_encuesta",
               "fecha_modificacion",
               "fecha_calificacion",
-              "fecha_actualizacion",
             ])}
             ON CONFLICT (rut) DO UPDATE SET
               telefono = EXCLUDED.telefono,
@@ -227,8 +224,7 @@ export async function importXLSXFile(
               fecha_nacimiento = EXCLUDED.fecha_nacimiento,
               fecha_encuesta = EXCLUDED.fecha_encuesta,
               fecha_modificacion = EXCLUDED.fecha_modificacion,
-              fecha_calificacion = EXCLUDED.fecha_calificacion,
-              fecha_actualizacion = EXCLUDED.fecha_actualizacion
+              fecha_calificacion = EXCLUDED.fecha_calificacion
           `;
         }
       });
