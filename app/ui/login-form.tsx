@@ -29,6 +29,10 @@ export default function LoginForm() {
       if (data.success) {
         // Store user session in localStorage for client-side access
         localStorage.setItem("userSession", JSON.stringify(data.user));
+        
+        // Set a cookie for server-side session validation
+        document.cookie = `userSession=${encodeURIComponent(JSON.stringify(data.user))};path=/;max-age=86400`;
+        
         router.push("/dashboard");
       } else {
         setError(data.error || "Error al iniciar sesión");
