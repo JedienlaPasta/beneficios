@@ -4,7 +4,10 @@ import { Suspense } from "react";
 import SocialAidsTable from "@/app/ui/dashboard/entregas/social-aids-table";
 
 type SocialAidProps = {
-  searchParams?: Promise<{ query?: string; page?: string }>;
+  searchParams?: Promise<{
+    query?: string;
+    page?: string;
+  }>;
 };
 
 export default async function SocialAid(props: SocialAidProps) {

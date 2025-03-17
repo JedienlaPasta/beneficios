@@ -7,12 +7,14 @@ import { fetchRSHById } from "@/app/lib/data/rsh";
 import NewButton from "@/app/ui/dashboard/new-button";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import SocialAidsDetailTable from "@/app/ui/dashboard/entregas/[id]/entregas-table";
+import EntregasTableModal from "@/app/ui/dashboard/entregas/[id]/entregas-table-modal";
 
 type CitizenRecordProps = {
   searchParams?: Promise<{
     query?: string;
     page?: string;
     newsocialaid?: string;
+    detailsModal?: string;
   }>;
   params: Promise<{ id: string }>;
 };
@@ -21,6 +23,7 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
   // Search params (query, page, modal)
   const searchParams = await props.searchParams;
   const newSocialAid = searchParams?.newsocialaid || "";
+  const detailsModal = searchParams?.detailsModal || "";
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
   // Params (id)
@@ -37,6 +40,11 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
       {newSocialAid === "open" && (
         <Modal>
           <NewSocialAidModal data={data} />
+        </Modal>
+      )}
+      {detailsModal && (
+        <Modal>
+          <EntregasTableModal folio={detailsModal} />
         </Modal>
       )}
       <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
