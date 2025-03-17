@@ -3,7 +3,7 @@
 import postgres from "postgres";
 import { z } from "zod";
 
-// Crear Entrega
+// Crear Entrega beneficio
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: "require" });
 
