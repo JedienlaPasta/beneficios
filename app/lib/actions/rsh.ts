@@ -60,14 +60,14 @@ const convertDate = (dateString: any): Date | null => {
     : new Date(year, month, day);
 };
 
-const formatCurrentDate = (): Date => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const day = now.getDate();
+// const formatCurrentDate = (): Date => {
+//   const now = new Date();
+//   const year = now.getFullYear();
+//   const month = now.getMonth();
+//   const day = now.getDate();
 
-  return new Date(year, month, day);
-};
+//   return new Date(year, month, day);
+// };
 
 const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
   const chunks = [];

@@ -97,7 +97,7 @@ export default function CampaignDropdown({
           {campaignsList?.map((campaign, index) => (
             <li
               key={index}
-              onClick={(e) =>
+              onClick={() =>
                 setCampaign
                   ? setCampaign(campaign.name)
                   : handleCampaignSelection(campaign)
