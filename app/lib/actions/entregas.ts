@@ -82,7 +82,7 @@ export const createEntrega = async (id: string, formData: FormData) => {
 
     console.log(code);
 
-    let folio: string;
+    let folio: string = "";
 
     await sql.begin(async (sql) => {
       const entrega = await sql`
