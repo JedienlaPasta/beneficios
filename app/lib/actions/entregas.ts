@@ -248,7 +248,7 @@ export const createEntrega = async (id: string, formData: FormData) => {
     // });
 
     // O si quieres “guardarlo” localmente en un archivo .pdf:
-    fs.writeFileSync("Acta_de_entrega_inicial.pdf", archivoBuffer);
+    // fs.writeFileSync("Acta_de_entrega_inicial.pdf", archivoBuffer);
 
     return { success: true, message: "Entrega recibida" };
   } catch (error) {
@@ -325,7 +325,6 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
   }
 };
 
-
 // eliminar documento mediante id
 export const deletePDFById = async (id: string) => {
   try {
@@ -379,7 +378,7 @@ export const downloadPDFById = async (id: string) => {
 
     // Get base64 string and document name
     const { archivo, nombre_documento } = document[0];
-    
+
     return {
       success: true,
       data: {
