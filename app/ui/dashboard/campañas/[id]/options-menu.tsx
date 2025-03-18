@@ -19,7 +19,13 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
   const handleUpdateButton = () => {
     const params = new URLSearchParams(searchParams);
     params.set("update", "open");
-    router.push(`?${params.toString()}`);
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
+
+  const closeModal = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete("update", "open");
+    router.replace(`?${params.toString()}`, { scroll: false });
   };
 
   const handleDeleteButton = async () => {
@@ -28,7 +34,7 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
       success: async (response) => {
         await new Promise((resolve) => setTimeout(resolve, 300));
         setTimeout(() => {
-          router.back();
+          closeModal();
         }, 500);
         return {
           message: response.message,

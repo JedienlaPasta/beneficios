@@ -3,9 +3,10 @@ import { toast } from "sonner";
 import CampaignDropdown from "../campañas/campaign-dropdown";
 import Input from "../campañas/new-campaign-input";
 import { SubmitButton } from "../submit-button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Campaign, RSH } from "@/app/lib/definitions";
 import { createEntrega } from "@/app/lib/actions/entregas";
+import { useSearchParams, useRouter } from "next/navigation";
 
 type NewModalFormProps = {
   activeCampaigns?: Campaign[];
@@ -24,11 +25,35 @@ export default function NewModalForm({
   data,
 }: NewModalFormProps) {
   const rut = data[0].rut;
-  const id_usuario = "efa3b8ac-7805-4622-abee-b04351e013cb";
+  const router = useRouter();
+  const [id_usuario, setIdUsuario] = useState("");
   const [observaciones, setObservaciones] = useState("");
   const [formFields, setFormFields] = useState<FormField[]>([
     { id: "", campaignName: "", detail: "", code: "" },
   ]);
+
+  useEffect(() => {
+    try {
+      const userSession = localStorage.getItem("userSession");
+      if (userSession) {
+        const userData = JSON.parse(userSession);
+        setIdUsuario(userData.id_usuario);
+      } else {
+        toast.error("No se encontró sesión de usuario");
+      }
+    } catch (error) {
+      console.error("Error getting user session:", error);
+      toast.error("Error al obtener la sesión de usuario");
+    }
+  }, []);
+
+  const searchParams = useSearchParams();
+
+  const closeModal = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete("newsocialaid", "open");
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
 
   const dropdownCampaigns = activeCampaigns?.map((campaign) => ({
     id: campaign.id,
@@ -43,17 +68,51 @@ export default function NewModalForm({
 
   const createEntregaWithId = createEntrega.bind(null, id_usuario);
 
-  const handleFormAction = async (formData: FormData) => {
+  const formAction = async (formData: FormData) => {
+    // e.preventDefault();
     setIsLoading(true);
     setIsDisabled(true);
-    toast.info("Guardando...");
+
+    if (formFields[0].campaignName === "") {
+      toast.error("Debe seleccionar al menos una campaña");
+      return;
+    }
+    formFields.forEach((item) => {
+      if (item.campaignName === "" || item.detail === "") {
+        toast.error("Los campos 'Campaña' y 'Detalle' son obligatorios");
+        return;
+      }
+    });
 
     formData.append("campaigns", JSON.stringify(formFields));
     formData.append("rut", rut.toString());
     formData.append("id_usuario", id_usuario);
     formData.append("observaciones", observaciones);
-    const response = await createEntregaWithId(formData);
-    console.log(response);
+
+    toast.promise(
+      createEntregaWithId(formData).then((response) => {
+        if (!response.success) {
+          throw new Error(response.message);
+        }
+        setIsLoading(false);
+        setIsDisabled(false);
+        return response;
+      }),
+      {
+        loading: "Guardando...",
+        success: (response) => {
+          setIsLoading(false);
+          setTimeout(() => {
+            closeModal();
+          }, 500);
+          return response.message;
+        },
+        error: (err) => {
+          setIsDisabled(false);
+          return err.message;
+        },
+      },
+    );
   };
 
   const handleFieldChange = (
@@ -77,7 +136,7 @@ export default function NewModalForm({
   };
 
   return (
-    <form action={handleFormAction} className="flex flex-col gap-5 pt-2">
+    <form action={formAction} className="flex flex-col gap-5 pt-2">
       {formFields.map((field, index) => (
         <div key={index} className="flex gap-3">
           <CampaignDropdown

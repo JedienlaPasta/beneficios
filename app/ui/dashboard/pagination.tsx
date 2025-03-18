@@ -1,6 +1,5 @@
 "use client";
-import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import {
   MdKeyboardArrowLeft,
   MdKeyboardArrowRight,
@@ -8,18 +7,31 @@ import {
   MdKeyboardDoubleArrowRight,
 } from "react-icons/md";
 
-export default function Pagination({ pages }: { pages: number }) {
+export default function Pagination({
+  pages,
+  preserveScroll = true,
+}: {
+  pages: number;
+  preserveScroll?: boolean;
+}) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const currentPage = Number(searchParams.get("page")) || 1;
 
-  const URLCurrentPage = (pageNumber: number | string) => {
+  const navigateToPage = (pageNumber: number | string) => {
     const params = new URLSearchParams(searchParams);
     params.set("page", pageNumber?.toString());
-    return `${pathname}?${params.toString()}`;
+    const url = `${pathname}?${params.toString()}`;
+
+    if (preserveScroll) {
+      router.replace(url, { scroll: false });
+    } else {
+      router.push(url);
+    }
   };
 
-  const pageNumber = [];
+  const pageNumber: number[] = [];
   for (let i = 1; i <= pages; i++) {
     pageNumber.push(i);
   }
@@ -47,12 +59,12 @@ export default function Pagination({ pages }: { pages: number }) {
 
   const arrayPaginas = visiblePagesArray.map((numero, index) => (
     <li key={index}>
-      <Link
-        href={URLCurrentPage(numero)}
+      <button
+        onClick={() => navigateToPage(numero)}
         className={`${numero === currentPage ? "bg-gradient-to-r from-slate-700 to-slate-800 text-white" : "bg-white hover:bg-slate-200"} text-slate-600" flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-xs`}
       >
         {numero}
-      </Link>
+      </button>
     </li>
   ));
 
@@ -80,42 +92,44 @@ export default function Pagination({ pages }: { pages: number }) {
       <ul className="flex gap-2 p-2">
         {/* First Page */}
         <li>
-          <Link
-            href={URLCurrentPage(1)}
+          <button
+            onClick={() => navigateToPage(1)}
             className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-200 hover:text-slate-600"
           >
             <MdKeyboardDoubleArrowLeft className="text-xl" />
-          </Link>
+          </button>
         </li>
         {/* Arrow Left */}
         <li>
-          <Link
-            href={URLCurrentPage(calcularCambioPagina("left"))}
+          <button
+            onClick={() => navigateToPage(calcularCambioPagina("left"))}
             className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-200 hover:text-slate-600"
           >
             <MdKeyboardArrowLeft className="text-xl" />
-          </Link>
+          </button>
         </li>
         {/* Visible Pages */}
         {arrayPaginas}
 
         {/* Arrow Right */}
         <li>
-          <Link
-            href={URLCurrentPage(calcularCambioPagina("right"))}
+          <button
+            onClick={() => navigateToPage(calcularCambioPagina("right"))}
             className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-200 hover:text-slate-600"
           >
             <MdKeyboardArrowRight className="text-xl" />
-          </Link>
+          </button>
         </li>
         {/* Last Page */}
         <li>
-          <Link
-            href={URLCurrentPage(pageNumber[pageNumber.length - 1] || 1)}
+          <button
+            onClick={() =>
+              navigateToPage(pageNumber[pageNumber.length - 1] || 1)
+            }
             className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-200 hover:text-slate-600"
           >
             <MdKeyboardDoubleArrowRight className="text-xl" />
-          </Link>
+          </button>
         </li>
       </ul>
     </nav>

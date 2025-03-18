@@ -9,7 +9,7 @@ export default function NewCampaignButton({ children }: { children: string }) {
   const handleClick = () => {
     const params = new URLSearchParams(searchParams);
     params.set("modal", "open");
-    router.push(`?${params.toString()}`);
+    router.replace(`?${params.toString()}`, { scroll: false });
   };
 
   return (
