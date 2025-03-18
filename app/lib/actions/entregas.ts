@@ -114,7 +114,8 @@ export const createEntrega = async (id: string, formData: FormData) => {
     });
 
     // Generación documento
-    const pdfPath = path.join(process.cwd(), "public", "ActaEntrega.pdf");
+    // const pdfPath = "/var/task/public/ActaEntrega.pdf";  ./ActaEntrega
+    const pdfPath = "./ActaEntrega.pdf";
     const pdfBytes = fs.readFileSync(pdfPath);
     const pdfDoc = await PDFDocument.load(pdfBytes);
 
