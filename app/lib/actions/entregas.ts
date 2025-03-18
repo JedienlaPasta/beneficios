@@ -3,7 +3,7 @@
 import postgres from "postgres";
 import { z } from "zod";
 import { PDFDocument } from "pdf-lib";
-import fs from "fs";
+// import fs from "fs";
 // import path from "path";
 
 interface CitizenData {
