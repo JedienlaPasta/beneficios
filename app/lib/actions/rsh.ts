@@ -3,6 +3,10 @@ import postgres from "postgres";
 import { revalidatePath } from "next/cache";
 import * as ExcelJS from "exceljs";
 import { FormState } from "@/app/ui/dashboard/campañas/new-campaign-modal";
+// Add these imports at the top
+import fs from "fs";
+import path from "path";
+import os from "os";
 
 // Crear RSH
 
@@ -254,10 +258,10 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
 
     // If this is a chunked upload
     if (fileName && !isNaN(chunkIndex) && !isNaN(totalChunks)) {
-      // Create temp directory if it doesn't exist
-      const fs = require("fs");
-      const path = require("path");
-      const os = require("os");
+      // Remove these require statements
+      // const fs = require("fs");
+      // const path = require("path");
+      // const os = require("os");
 
       const tempDir = path.join(os.tmpdir(), "excel-uploads");
       if (!fs.existsSync(tempDir)) {
@@ -297,8 +301,8 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
       writeStream.end();
 
       // Wait for the file to be fully written
-      await new Promise((resolve) => {
-        writeStream.on("finish", resolve);
+      await new Promise<void>((resolve) => {
+        writeStream.on("finish", () => resolve());
       });
 
       // Now process the complete file
