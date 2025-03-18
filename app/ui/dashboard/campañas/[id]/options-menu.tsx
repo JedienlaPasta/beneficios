@@ -34,7 +34,7 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
       success: async (response) => {
         await new Promise((resolve) => setTimeout(resolve, 300));
         setTimeout(() => {
-          closeModal;
+          closeModal();
         }, 500);
         return {
           message: response.message,
