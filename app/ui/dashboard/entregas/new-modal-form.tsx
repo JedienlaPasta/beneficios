@@ -36,7 +36,7 @@ export default function NewModalForm({
       const userSession = localStorage.getItem("userSession");
       if (userSession) {
         const userData = JSON.parse(userSession);
-        setIdUsuario(userData.id);
+        setIdUsuario(userData.id_usuario);
       } else {
         toast.error("No se encontró sesión de usuario");
       }

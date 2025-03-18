@@ -220,7 +220,7 @@ export const createEntrega = async (id: string, formData: FormData) => {
       )
       `;
 
-    // Supongamos que tienes el ID del documento que deseas recuperar el documento desde la bbdd
+    // OBTENER DOCUMENTO DESDE BASE DE DATOS y convertir de base64 a pdf
     // const documentoId = "xxxxx-xxxx-xxxx...";
 
     // const resultado = await sql`
@@ -249,6 +249,18 @@ export const createEntrega = async (id: string, formData: FormData) => {
 
     // // O si quieres “guardarlo” localmente en un archivo .pdf:
     // fs.writeFileSync("Acta_de_entrega_inicial.pdf", archivoBuffer);
+
+    // ------------------------ COMPROBACIÖN de que funciona el código para convertir doc a pdf desde base64 --------------------------
+    // 1. Convertir el PDF a Base64 ↑
+
+    // 2. Convertir de vuelta el Base64 a un Buffer para comprobar que se puede regenerar
+    const pdfBuffer = await Buffer.from(pdfBase64, "base64");
+
+    // 3. Guardar localmente el archivo en la carpeta `public`
+    const outputPathtest = path.join(process.cwd(), "public", "test.pdf");
+    fs.writeFileSync(outputPathtest, pdfBuffer);
+
+    console.log("PDF generado y guardado correctamente en:", outputPath);
 
     return { success: true, message: "Entrega recibida" };
   } catch (error) {
