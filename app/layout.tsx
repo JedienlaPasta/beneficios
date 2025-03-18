@@ -4,11 +4,10 @@ import { inter } from "./ui/fonts";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | ApoyoFacil El Quisco",
-    default: "ApoyoFacil El Quisco",
+    template: "%s | SIBAS - El Quisco ",
+    default: "SIBAS - Municipalidad El Quisco",
   },
-  description:
-    "Gestor de la entrega y registro de los beneficios sociales destinados a los habitantes de la comuna de El Quisco",
+  description: "Sistema Integrado de Beneficios y Asistencias Sociales",
 };
 
 export default function RootLayout({
