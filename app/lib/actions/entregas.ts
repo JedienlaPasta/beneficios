@@ -197,12 +197,12 @@ export const createEntrega = async (id: string, formData: FormData) => {
     const pdfBase64 = Buffer.from(pdfBytesFilled).toString("base64");
 
     // Opcional: Almacenado localmente
-    const outputPath = path.join(
-      process.cwd(),
-      "public",
-      `Acta de entrega inicial.pdf`,
-    );
-    fs.writeFileSync(outputPath, pdfBytesFilled);
+    // const outputPath = path.join(
+    //   process.cwd(),
+    //   "public",
+    //   `Acta de entrega inicial.pdf`,
+    // );
+    // fs.writeFileSync(outputPath, pdfBytesFilled);
 
     // 2. Insert into la tabla "documentos"
     await sql`
