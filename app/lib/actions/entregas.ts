@@ -3,8 +3,8 @@
 import postgres from "postgres";
 import { z } from "zod";
 import { PDFDocument } from "pdf-lib";
-import fs from "fs";
-import path from "path";
+// import fs from "fs";
+// import path from "path";
 
 interface CitizenData {
   telefono: string | null;
@@ -114,9 +114,13 @@ export const createEntrega = async (id: string, formData: FormData) => {
     });
 
     // Generación documento
-    const pdfPath = path.join(process.cwd(), "public", "ActaEntrega.pdf");
-    const pdfBytes = fs.readFileSync(pdfPath);
+    // const pdfPath = "/var/task/public/ActaEntrega.pdf";  ./ActaEntrega
+    const pdfUrl =
+      "https://raw.githubusercontent.com/JedienlaPasta/files/main/ActaEntrega.pdf";
+    const response = await fetch(pdfUrl);
+    const pdfBytes = await response.arrayBuffer();
     const pdfDoc = await PDFDocument.load(pdfBytes);
+    // const pdfBytes = fs.readFileSync(pdfPath);
 
     // Obtención de datos
 
