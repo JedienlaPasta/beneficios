@@ -3,9 +3,13 @@ import { SocialFiles } from "@/app/lib/definitions";
 import pdf from "@/public/pdf.png";
 import Image from "next/image";
 import { toast } from "sonner";
+import { deletePDFById, downloadPDFById } from "@/app/lib/actions/entregas";
+import { useRouter } from "next/navigation";
 
 export function Files({ item }: { item: SocialFiles }) {
-  const handleDelete = (e: React.MouseEvent) => {
+  const router = useRouter();
+
+  const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
     toast.custom((t) => (
@@ -26,11 +30,25 @@ export function Files({ item }: { item: SocialFiles }) {
         </div>
         <div className="flex border-t border-gray-200">
           <button
-            onClick={() => {
-              // Actual delete logic would go here
-              console.log("Confirmed delete:", item.nombre_documento);
-              toast.success("Documento eliminado");
-              toast.dismiss(t);
+            onClick={async () => {
+              try {
+                const response = await deletePDFById(item.id);
+
+                if (response.success) {
+                  toast.success("Documento eliminado correctamente");
+                  // Refresh the page to show updated document list
+                  router.refresh();
+                } else {
+                  toast.error(
+                    response.message || "Error al eliminar documento",
+                  );
+                }
+              } catch (error) {
+                toast.error("Error al eliminar documento");
+                console.error("Error deleting document:", error);
+              } finally {
+                toast.dismiss(t);
+              }
             }}
             className="flex w-full items-center justify-center rounded-none rounded-bl-lg border border-transparent p-3 text-sm font-medium text-red-600 hover:text-red-500 focus:outline-none"
           >
@@ -47,6 +65,49 @@ export function Files({ item }: { item: SocialFiles }) {
     ));
   };
 
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    // Create a toast ID to reference later
+    const toastId = toast.loading("Descargando documento...");
+
+    try {
+      const response = await downloadPDFById(item.id);
+
+      if (!response.success) {
+        toast.error(response.message || "Error al descargar documento", {
+          id: toastId,
+        });
+        return;
+      }
+
+      // Convert base64 to blob
+      const base64Response = response.data.content;
+      const binaryString = window.atob(base64Response);
+      const bytes = new Uint8Array(binaryString.length);
+
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      const blob = new Blob([bytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+
+      // Open PDF in new tab
+      const newWindow = window.open(url, "_blank");
+
+      // Set the document title to the filename
+      if (newWindow) {
+        newWindow.document.title = response.data.filename || "documento.pdf";
+      }
+
+      toast.success("Documento abierto correctamente", { id: toastId });
+    } catch (error) {
+      toast.error("Error al abrir documento", { id: toastId });
+      console.error("Error opening document:", error);
+    }
+  };
+
   return (
     <div className="group relative flex cursor-pointer flex-col items-center justify-center rounded-md bg-white p-3 shadow-sm transition-shadow hover:shadow">
       <Image className="mb-1 h-8 w-8" src={pdf} alt="pdf.img" />
@@ -61,11 +122,7 @@ export function Files({ item }: { item: SocialFiles }) {
       <div className="absolute inset-0 flex items-end justify-center gap-2 rounded-md bg-slate-800/70 pb-3 opacity-0 transition-opacity group-hover:opacity-100">
         <button
           className="flex h-8 w-8 items-center justify-center rounded bg-gray-500 text-white transition-transform hover:scale-110 hover:bg-blue-500 active:scale-90"
-          onClick={(e) => {
-            e.stopPropagation();
-            // Download logic here
-            console.log("Download:", item.nombre_documento);
-          }}
+          onClick={handleDownload}
           title="Descargar"
         >
           <svg

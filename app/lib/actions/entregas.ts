@@ -233,7 +233,7 @@ export const createEntrega = async (id: string, formData: FormData) => {
     //   throw new Error("Documento no encontrado");
     // }
 
-    // // 1. Leer la cadena base64 desde la base de datos
+    // 1. Leer la cadena base64 desde la base de datos
     // const archivoBase64 = resultado[0].archivo;
 
     // // 2. Decodificar la cadena base64 para obtener un Buffer con el PDF
@@ -247,8 +247,8 @@ export const createEntrega = async (id: string, formData: FormData) => {
     //   },
     // });
 
-    // // O si quieres “guardarlo” localmente en un archivo .pdf:
-    // fs.writeFileSync("Acta_de_entrega_inicial.pdf", archivoBuffer);
+    // O si quieres “guardarlo” localmente en un archivo .pdf:
+    fs.writeFileSync("Acta_de_entrega_inicial.pdf", archivoBuffer);
 
     return { success: true, message: "Entrega recibida" };
   } catch (error) {
@@ -261,14 +261,134 @@ export const createEntrega = async (id: string, formData: FormData) => {
 
 // Editar Entrega
 
-// Eliminar Entrega
+// Subir actas de cada entrega
 export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
   try {
-    const data = formData.get("file1");
-    console.log(data);
+    const fileCount = Number(formData.get("fileCount") || "0");
 
-    return { success: true, message: "Documentos Guardados" };
+    if (fileCount === 0) {
+      return {
+        success: false,
+        message: "No se han seleccionado documentos",
+      };
+    }
+
+    const uploadPromises = [];
+
+    for (let i = 0; i < fileCount; i++) {
+      const file = formData.get(`file${i}`) as File;
+
+      if (!file) continue;
+
+      const fileArrayBuffer = await file.arrayBuffer();
+      const fileBuffer = Buffer.from(fileArrayBuffer);
+      const fileBase64 = fileBuffer.toString("base64");
+
+      const fileName = file.name;
+      const fileType = ".pdf";
+      const fecha = new Date();
+      fecha.setMilliseconds(fecha.getMilliseconds() + i);
+
+      const insertPromise = sql`
+        INSERT INTO documentos (
+          fecha_guardado,
+          nombre_documento,
+          archivo,
+          tipo,
+          folio
+        )
+        VALUES (
+          ${fecha},
+          ${fileName},
+          ${fileBase64},
+          ${fileType},
+          ${folio}
+        )
+      `;
+
+      uploadPromises.push(insertPromise);
+    }
+
+    // Wait for all database insertions to complete
+    await Promise.all(uploadPromises);
+
+    // return { success: true, message: "Documentos Guardados" };
+    return {
+      success: true,
+      message: `${fileCount} documento(s) guardado(s) correctamente`,
+    };
   } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : String(error),
+    };
+  }
+};
+
+
+// eliminar documento mediante id
+export const deletePDFById = async (id: string) => {
+  try {
+    // Check if document exists before deleting
+    const document = await sql`
+      SELECT id FROM documentos
+      WHERE id = ${id}
+    `;
+
+    if (document.length === 0) {
+      return {
+        success: false,
+        message: "Documento no encontrado",
+      };
+    }
+
+    await sql`
+      DELETE FROM documentos
+      WHERE id = ${id}
+    `;
+
+    return {
+      success: true,
+      message: "Documento eliminado correctamente",
+    };
+  } catch (error) {
+    console.error("Error al eliminar documento:", error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : String(error),
+    };
+  }
+};
+
+// Descargar documento mediante id
+export const downloadPDFById = async (id: string) => {
+  try {
+    // Fetch document from database
+    const document = await sql`
+      SELECT archivo, nombre_documento
+      FROM documentos
+      WHERE id = ${id}
+    `;
+
+    if (document.length === 0) {
+      return {
+        success: false,
+        message: "Documento no encontrado",
+      };
+    }
+
+    // Get base64 string and document name
+    const { archivo, nombre_documento } = document[0];
+    
+    return {
+      success: true,
+      data: {
+        content: archivo,
+        filename: nombre_documento || "documento.pdf",
+      },
+    };
+  } catch (error) {
+    console.error("Error al descargar documento:", error);
     return {
       success: false,
       message: error instanceof Error ? error.message : String(error),

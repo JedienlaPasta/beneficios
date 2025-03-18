@@ -67,6 +67,7 @@ export type SocialFiles = {
   // archivo: string;
   nombre_documento: string;
   fecha_guardado: Date;
+  id: string;
 };
 
 export type RSHTableData = {

@@ -142,7 +142,7 @@ export async function fetchSocialAidsForCampaignDetail(
 export async function fetchFilesByFolio(folio: string) {
   try {
     const data = await sql<SocialFiles[]>`
-              SELECT documentos.fecha_guardado, documentos.nombre_documento, documentos.tipo
+              SELECT documentos.fecha_guardado, documentos.nombre_documento, documentos.tipo, documentos.id
               FROM documentos
               WHERE documentos.folio = ${folio}
               `;
