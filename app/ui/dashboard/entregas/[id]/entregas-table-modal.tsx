@@ -1,7 +1,7 @@
 import ModalForm from "./entregas-modal-form";
 import CloseModalButton from "../../close-modal-button";
 import { FaBoxOpen } from "react-icons/fa6";
-import pdf from "@/public/pdf.png";
+
 import {
   fetchFilesByFolio,
   fetchSocialAidsGeneralInfoByFolio,
@@ -9,7 +9,7 @@ import {
 } from "@/app/lib/data/entregas";
 import { SocialAidByFolio, SocialFiles } from "@/app/lib/definitions";
 import Link from "next/link";
-import Image from "next/image";
+import { Files } from "./files";
 
 export default async function EntregasTableModal({ folio }: { folio: string }) {
   const entregasResponse = await fetchSocialAidsGeneralInfoByFolio(folio);
@@ -17,7 +17,6 @@ export default async function EntregasTableModal({ folio }: { folio: string }) {
     entregasResponse.data[0];
   const entregaResponse = await fetchSocialAidsInfoByFolio(folio);
   const files = await fetchFilesByFolio(folio);
-  console.log(files);
 
   const fecha = fecha_entrega.toString().split(" ");
   const formattedDate = fecha[2] + " " + fecha[1] + ", " + fecha[3];
@@ -59,10 +58,10 @@ export default async function EntregasTableModal({ folio }: { folio: string }) {
             </button>
           </div>
 
-          {files.length > 0 ? (
+          {files.data.length > 0 ? (
             <div className="grid grid-cols-3 gap-3 rounded-lg border border-gray-100 bg-gray-50/50 p-3">
-              {files.map((item: SocialFiles) => (
-                <Files key={item.fecha_guardado.toString()} item={item} />
+              {files.data.map((item: SocialFiles, index) => (
+                <Files key={index} item={item} />
               ))}
             </div>
           ) : (
@@ -127,16 +126,16 @@ function EntregasItem({ item }: { item: SocialAidByFolio }) {
   );
 }
 
-function Files({ item }: { item: SocialFiles }) {
-  return (
-    <div className="flex cursor-pointer flex-col items-center justify-center rounded-md bg-white p-3 shadow-sm transition-shadow hover:shadow">
-      <Image className="mb-1 h-8 w-8" src={pdf} alt="pdf.img" />
-      <span className="w-full truncate text-center text-xs font-medium text-slate-700">
-        {item.nombre_documento || "Documento"}
-      </span>
-      <span className="text-center text-[10px] text-slate-500">
-        {item.tipo || ".pdf"}
-      </span>
-    </div>
-  );
-}
+// function Files({ item }: { item: SocialFiles }) {
+//   return (
+//     <div className="flex cursor-pointer flex-col items-center justify-center rounded-md bg-white p-3 shadow-sm transition-shadow hover:shadow">
+//       <Image className="mb-1 h-8 w-8" src={pdf} alt="pdf.img" />
+//       <span className="w-full truncate text-center text-xs font-medium text-slate-700">
+//         {item.nombre_documento || "Documento"}
+//       </span>
+//       <span className="text-center text-[10px] text-slate-500">
+//         {item.tipo || ".pdf"}
+//       </span>
+//     </div>
+//   );
+// }

@@ -146,7 +146,7 @@ export async function fetchFilesByFolio(folio: string) {
               FROM documentos
               WHERE documentos.folio = ${folio}
               `;
-    return data;
+    return { data };
   } catch (error) {
     console.error("Error al obtener datos de la tabla de entregas:", error);
     return { data: [] };
