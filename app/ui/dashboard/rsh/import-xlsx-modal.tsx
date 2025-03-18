@@ -21,42 +21,88 @@ export default function ImportXLSXModal() {
   // Button handlers
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const formAction = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setIsDisabled(true);
+    setUploadProgress(0);
 
     if (!selectedFile) {
       toast.error("No se ha seleccionado ningún archivo.");
       return;
     }
 
-    const myFormData = new FormData();
-    myFormData.append("file", selectedFile);
+    try {
+      // Chunk size: 2MB
+      const CHUNK_SIZE = 2 * 1024 * 1024;
+      const totalChunks = Math.ceil(selectedFile.size / CHUNK_SIZE);
+      let currentChunk = 0;
+      let start = 0;
+      let end = CHUNK_SIZE;
 
-    toast.promise(
-      importXLSXFile(myFormData).then((response) => {
+      // Create a toast that we'll update with progress
+      const toastId = toast.loading(`Subiendo archivo... (0/${totalChunks})`, {
+        duration: Infinity,
+      });
+
+      let finalResponse: FormState | null = null;
+
+      while (start < selectedFile.size) {
+        // Slice the file into chunks
+        const chunk = selectedFile.slice(start, end);
+        const formData = new FormData();
+
+        // Add chunk metadata
+        formData.append("file", chunk);
+        formData.append("fileName", selectedFile.name);
+        formData.append("chunkIndex", currentChunk.toString());
+        formData.append("totalChunks", totalChunks.toString());
+
+        // Send the chunk
+        const response = await importXLSXFile(formData);
+
         if (!response.success) {
           throw new Error(response.message);
         }
-        return response;
-      }),
-      {
-        loading: "Procesando archivo Excel...",
-        success: (response) => {
-          setIsLoading(false);
-          setTimeout(() => {
-            router.back();
-          }, 500);
-          return response.message;
-        },
-        error: (err) => {
-          setIsDisabled(false);
-          return err.message;
-        },
-      },
-    );
+
+        // Update progress
+        currentChunk++;
+        const progressPercent = Math.round((currentChunk / totalChunks) * 100);
+        setUploadProgress(progressPercent);
+
+        // Update toast message
+        toast.loading(`Subiendo archivo... (${currentChunk}/${totalChunks})`, {
+          id: toastId,
+        });
+
+        // If this is the last chunk, save the final response
+        if (currentChunk === totalChunks) {
+          finalResponse = response;
+        }
+
+        // Move to next chunk
+        start = end;
+        end = Math.min(start + CHUNK_SIZE, selectedFile.size);
+      }
+
+      // Dismiss the loading toast
+      toast.dismiss(toastId);
+
+      // Show success message
+      if (finalResponse) {
+        toast.success(finalResponse.message);
+        setIsLoading(false);
+        setTimeout(() => {
+          router.back();
+        }, 500);
+      }
+    } catch (err) {
+      setIsDisabled(false);
+      setIsLoading(false);
+      toast.error(err instanceof Error ? err.message : "Error desconocido");
+    }
   };
 
   useEffect(() => {
@@ -122,11 +168,23 @@ export default function ImportXLSXModal() {
         >
           {isLoading ? (
             <>
-              {/* <Loader /> */}
               <Spinner />
               <p className="mt-1 text-xs text-slate-500">
                 Esto puede tardar 1 minuto...
               </p>
+              {uploadProgress > 0 && (
+                <div className="mt-2 w-full max-w-[80%]">
+                  <div className="h-1.5 w-full rounded-full bg-gray-200">
+                    <div
+                      className="h-1.5 rounded-full bg-blue-500 transition-all duration-300"
+                      style={{ width: `${uploadProgress}%` }}
+                    ></div>
+                  </div>
+                  <p className="mt-1 text-center text-xs text-slate-500">
+                    {uploadProgress}%
+                  </p>
+                </div>
+              )}
             </>
           ) : (
             <>
@@ -190,17 +248,6 @@ export default function ImportXLSXModal() {
     </div>
   );
 }
-
-// function Loader() {
-//   return (
-//     <div className="relative mx-auto my-6 h-[40px] w-[40px]">
-//       <div className='absolute left-[6px] top-0 block h-[5px] w-[5px] rotate-[70deg] rounded-[10px] before:absolute before:right-0 before:h-[5px] before:w-[5px] before:animate-loading before:rounded-[10px] before:bg-blue-400 before:content-[""]' />
-//       <div className='absolute right-0 top-[6px] block h-[5px] w-[5px] rotate-[160deg] rounded-[10px] before:absolute before:right-0 before:h-[5px] before:w-[5px] before:animate-loading before:rounded-[10px] before:bg-blue-800 before:content-[""]' />
-//       <div className='absolute bottom-0 right-[6px] block h-[5px] w-[5px] rotate-[-110deg] rounded-[10px] before:absolute before:right-0 before:h-[5px] before:w-[5px] before:animate-loading before:rounded-[10px] before:bg-blue-500 before:content-[""]' />
-//       <div className='absolute bottom-[6px] left-0 block h-[5px] w-[5px] rotate-[-20deg] rounded-[10px] before:absolute before:right-0 before:h-[5px] before:w-[5px] before:animate-loading before:rounded-[10px] before:bg-blue-900 before:content-[""]' />
-//     </div>
-//   );
-// }
 
 export function Spinner() {
   return (
