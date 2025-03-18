@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { createCampaign } from "@/app/lib/actions/campaña";
 import Input from "@/app/ui/dashboard/campañas/new-campaign-input";
@@ -30,6 +30,14 @@ export default function NewCampaignModal() {
     discapacidad: Boolean(false),
     adultoMayor: Boolean(false),
   });
+
+  const searchParams = useSearchParams();
+
+  const closeModal = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete("modal", "open");
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
 
   const handleCampaignNameSelection = (value: string) => {
     setCampaignName(value);
@@ -82,7 +90,7 @@ export default function NewCampaignModal() {
         success: (response) => {
           setIsLoading(false);
           setTimeout(() => {
-            router.back();
+            closeModal();
           }, 500);
           return response.message;
         },
@@ -100,7 +108,7 @@ export default function NewCampaignModal() {
         <h2 className="text-lg font-bold">Crear Campaña</h2>
         <RiCloseLine
           className="cursor-pointer text-xl text-slate-400 hover:text-slate-600"
-          onClick={() => router.back()}
+          onClick={closeModal}
         />
       </div>
       <p className="text-xs text-gray-500">

@@ -38,12 +38,12 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
   return (
     <div>
       {newSocialAid === "open" && (
-        <Modal>
+        <Modal name="newsocialaid">
           <NewSocialAidModal data={data} />
         </Modal>
       )}
       {detailsModal && (
-        <Modal>
+        <Modal name="detailsModal">
           <EntregasTableModal folio={detailsModal} />
         </Modal>
       )}

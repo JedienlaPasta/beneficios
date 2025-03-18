@@ -31,12 +31,12 @@ export default async function RSH(props: RSHProps) {
     <ProtectedRoute isDashboardRoute={true}>
       <div>
         {newcitizen === "open" && (
-          <Modal>
+          <Modal name="newcitizen">
             <NewCitizenModal />
           </Modal>
         )}
         {importxlsx === "open" && (
-          <Modal>
+          <Modal name="importxlsx">
             <ImportXLSXModal />
           </Modal>
         )}

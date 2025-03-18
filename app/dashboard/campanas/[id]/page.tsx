@@ -30,7 +30,7 @@ export default async function Campaign(props: CampaignProps) {
   return (
     <div>
       {showUpdateModal === "open" && (
-        <Modal>
+        <Modal name="update">
           <UpdateCampaignModal id={id} data={data} />
         </Modal>
       )}

@@ -22,7 +22,7 @@ export default async function Campaigns(props: CampaignsProps) {
     <ProtectedRoute isDashboardRoute={true}>
       <div>
         {modal === "open" && (
-          <Modal>
+          <Modal name="modal">
             <NewCampaignModal />
           </Modal>
         )}

@@ -81,6 +81,13 @@ export function Files({ item }: { item: SocialFiles }) {
         return;
       }
 
+      if (!response.data) {
+        toast.error("No se encontró el contenido del documento", {
+          id: toastId,
+        });
+        return;
+      }
+
       // Convert base64 to blob
       const base64Response = response.data.content;
       const binaryString = window.atob(base64Response);

@@ -4,7 +4,7 @@ import { SubmitButton } from "../../submit-button";
 import pdf from "@/public/pdf.png";
 import { toast } from "sonner";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { uploadPDFByFolio } from "@/app/lib/actions/entregas";
 
@@ -18,6 +18,14 @@ export default function ModalForm({
   const router = useRouter();
   // Change to array of files
   const [selectedFiles, setSelectedFiles] = useState<File[]>(files || []);
+
+  const searchParams = useSearchParams();
+
+  const closeModal = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete("detailsModal", "open");
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
 
   // Button handlers
   const [isLoading, setIsLoading] = useState(false);
@@ -46,6 +54,8 @@ export default function ModalForm({
         if (!response.success) {
           throw new Error(response.message);
         }
+        setIsLoading(false);
+        setIsDisabled(false);
         return response;
       }),
       {
@@ -53,7 +63,8 @@ export default function ModalForm({
         success: (response) => {
           setIsLoading(false);
           setTimeout(() => {
-            router.back();
+            //Quitar closeModal()?
+            closeModal();
           }, 500);
           return response.message;
         },

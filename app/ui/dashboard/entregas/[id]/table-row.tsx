@@ -12,7 +12,10 @@ export default function TableRow({ item }: { item: SocialAidTableRow }) {
   const handleClick = () => {
     const params = new URLSearchParams(searchParams);
     params.set("detailsModal", folio);
-    router.push(`?${params.toString()}`);
+
+    // Use router.replace instead of router.push to avoid adding to history
+    // and add the scroll=false option to prevent scrolling to top
+    router.replace(`?${params.toString()}`, { scroll: false });
   };
 
   return (

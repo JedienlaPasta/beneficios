@@ -22,7 +22,7 @@ export default async function EntregasTableModal({ folio }: { folio: string }) {
   const formattedDate = fecha[2] + " " + fecha[1] + ", " + fecha[3];
 
   return (
-    <div className="grid max-h-dvh w-[30rem] max-w-[100%] shrink-0 flex-col gap-4 overflow-y-auto rounded-xl bg-white p-10 shadow-xl">
+    <div className="grid max-h-dvh w-[34rem] max-w-full shrink-0 flex-col gap-4 overflow-y-auto rounded-xl bg-white p-10 shadow-xl">
       <div className="flex flex-col gap-4">
         <section className="flex items-center justify-between border-b border-gray-100 pb-3">
           <h2 className="text-xl font-bold text-slate-700">#{folio}</h2>
@@ -125,17 +125,3 @@ function EntregasItem({ item }: { item: SocialAidByFolio }) {
     </div>
   );
 }
-
-// function Files({ item }: { item: SocialFiles }) {
-//   return (
-//     <div className="flex cursor-pointer flex-col items-center justify-center rounded-md bg-white p-3 shadow-sm transition-shadow hover:shadow">
-//       <Image className="mb-1 h-8 w-8" src={pdf} alt="pdf.img" />
-//       <span className="w-full truncate text-center text-xs font-medium text-slate-700">
-//         {item.nombre_documento || "Documento"}
-//       </span>
-//       <span className="text-center text-[10px] text-slate-500">
-//         {item.tipo || ".pdf"}
-//       </span>
-//     </div>
-//   );
-// }
