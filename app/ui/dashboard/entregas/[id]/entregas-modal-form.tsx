@@ -43,6 +43,14 @@ export default function ModalForm({
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
+  const searchParams = useSearchParams();
+
+  const closeModal = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete("detailsModal", "open");
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
+
   // Button handlers
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
