@@ -56,8 +56,17 @@ export type SocialAidTableRowByFolio = {
 
 // Modal Detalle Entrega
 export type SocialAidByFolio = {
+  id_campaña: string;
   detalle: string;
   nombre_campaña: string;
+  tipo_dato: string;
+};
+
+export type SocialFiles = {
+  tipo: string;
+  // archivo: string;
+  nombre_documento: string;
+  fecha_guardado: Date;
 };
 
 export type RSHTableData = {

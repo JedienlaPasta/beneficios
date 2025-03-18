@@ -3,6 +3,7 @@ import {
   SocialAid,
   SocialAidByFolio,
   SocialAidTableRowByFolio,
+  SocialFiles,
 } from "../definitions";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
@@ -91,7 +92,7 @@ export async function fetchSocialAidsGeneralInfoByFolio(folio: string) {
 export async function fetchSocialAidsInfoByFolio(folio: string) {
   try {
     const data = await sql<SocialAidByFolio[]>`
-            SELECT entrega.detalle, campañas.nombre as nombre_campaña
+            SELECT entrega.id_campaña, entrega.detalle, campañas.tipo_dato, campañas.nombre as nombre_campaña
               FROM entrega
               LEFT JOIN campañas ON entrega.id_campaña = campañas.id
               WHERE entrega.folio = ${folio}
@@ -135,5 +136,19 @@ export async function fetchSocialAidsForCampaignDetail(
   } catch (error) {
     console.error("Error al obtener datos de la tabla de entregas:", error);
     return { data: [], pages: 0 };
+  }
+}
+
+export async function fetchFilesByFolio(folio: string) {
+  try {
+    const data = await sql<SocialFiles[]>`
+              SELECT documentos.fecha_guardado, documentos.nombre_documento, documentos.tipo
+              FROM documentos
+              WHERE documentos.folio = ${folio}
+              `;
+    return data;
+  } catch (error) {
+    console.error("Error al obtener datos de la tabla de entregas:", error);
+    return { data: [] };
   }
 }

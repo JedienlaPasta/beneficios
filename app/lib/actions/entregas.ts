@@ -68,11 +68,11 @@ export const createEntrega = async (id: string, formData: FormData) => {
       campaigns: JSON.parse(formData.get("campaigns") as string),
       id_usuario: formData.get("id_usuario"),
     });
-    console.log("server");
-    console.log(id);
-    console.log(rut);
-    console.log(observaciones);
-    console.log(campaigns);
+    // console.log("server");
+    // console.log(id);
+    // console.log(rut);
+    // console.log(observaciones);
+    // console.log(campaigns);
 
     let code;
     if (campaigns.length === 0)
@@ -262,3 +262,16 @@ export const createEntrega = async (id: string, formData: FormData) => {
 // Editar Entrega
 
 // Eliminar Entrega
+export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
+  try {
+    const data = formData.get("file1");
+    console.log(data);
+
+    return { success: true, message: "Documentos Guardados" };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : String(error),
+    };
+  }
+};
