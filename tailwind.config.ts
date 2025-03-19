@@ -73,9 +73,13 @@ export default {
       },
       keyframes: {
         loading: {
-          "0%, 100%": { width: "5px", transform: "translateX(0)" },
-          "30%": { width: "25px", transform: "translateX(32px)" },
-          "60%": { width: "5px", right: "-1px", transform: "translateX(45px)" },
+          "0%, 100%": { width: "10px", transform: "translateX(0)" },
+          "30%": { width: "50px", transform: "translateX(52px)" },
+          "60%": {
+            width: "10px",
+            right: "-1px",
+            transform: "translateX(70px)",
+          },
         },
       },
       animation: {
