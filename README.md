@@ -183,6 +183,7 @@ MODAL IMPORTAR x
 SALTO DE PAGINA x
 
 data/rsh.ts => optimizar busquedas
+submit btns
 
 # Extras
 
@@ -190,3 +191,11 @@ Decreto supremo 82
 
 Fonts:
 Titan One
+
+# Comentarios
+
+SIBAS - Sistema Integrado de Beneficios y Asistencias Sociales
+
+Limite Cantidades: Tarjetas, etc // Stock?
+
+Boton Nueva Acta => Generar Nueva Acta.

@@ -25,6 +25,8 @@ export default async function CitizenDetail({ data }: { data: RSH[] }) {
     ultima_entrega,
   } = data[0];
 
+  console.log(data[0]);
+
   const formattedRut = formatNumber(rut) + (dv ? "-" + dv : "");
   const descripcion = nombres[0] + apellidos[0];
 

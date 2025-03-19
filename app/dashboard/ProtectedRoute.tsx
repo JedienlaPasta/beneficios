@@ -39,7 +39,9 @@ export default function ProtectedRoute({
         localStorage.removeItem("userSession"); // Eliminar sesión corrupta
       }
     }
-    setIsLoading(false);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
   }, []);
 
   useEffect(() => {
@@ -71,8 +73,24 @@ export default function ProtectedRoute({
   }, [isLoading, userSession, allowedRoles, router, isDashboardRoute]);
 
   if (isLoading) {
-    return <div>Loading...</div>; // Mostrar un indicador de carga mientras se obtiene la sesión
+    return (
+      <div className="absolute top-1/2 flex -translate-y-3/4 flex-col items-center 3xl:w-[96rem] 3xl:justify-self-center">
+        <Loading />
+        <p className="text-slate-600">Cargando...</p>
+      </div>
+    ); // Mostrar un indicador de carga mientras se obtiene la sesión
   }
 
   return <>{children}</>;
+}
+
+export function Loading() {
+  return (
+    <div className="relative my-6 h-[70px] w-[70px]">
+      <div className='absolute left-[10px] top-0 block h-[10px] w-[10px] rotate-[70deg] rounded-[10px] before:absolute before:right-0 before:h-[10px] before:w-[10px] before:animate-loading before:rounded-[10px] before:bg-[#3f93e0] before:content-[""]' />
+      <div className='absolute right-0 top-[10px] block h-[10px] w-[10px] rotate-[160deg] rounded-[10px] before:absolute before:right-0 before:h-[10px] before:w-[10px] before:animate-loading before:rounded-[10px] before:bg-[#1655a1] before:content-[""]' />
+      <div className='absolute bottom-0 right-[10px] block h-[10px] w-[10px] rotate-[-110deg] rounded-[10px] before:absolute before:right-0 before:h-[10px] before:w-[10px] before:animate-loading before:rounded-[10px] before:bg-[#3f93e0] before:content-[""]' />
+      <div className='absolute bottom-[10px] left-0 block h-[10px] w-[10px] rotate-[-20deg] rounded-[10px] before:absolute before:right-0 before:h-[10px] before:w-[10px] before:animate-loading before:rounded-[10px] before:bg-[#1655a1] before:content-[""]' />
+    </div>
+  );
 }

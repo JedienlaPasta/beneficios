@@ -45,8 +45,8 @@ function ActiveCapaign({
 }: ActiveCampaignsProps) {
   return (
     <div className="group relative flex min-w-64 flex-1 cursor-pointer flex-col overflow-hidden rounded-xl bg-white shadow-md shadow-slate-300 transition-all hover:shadow-lg hover:shadow-slate-400/40">
-      <div className="z-1 absolute left-[calc(100%-1rem)] top-0 h-60 w-[20rem] bg-gradient-to-b from-blue-500 to-blue-700 transition-all duration-500 group-hover:left-[calc(100%-8rem)] group-hover:-rotate-[-25deg]"></div>
-      <div className="z-10 flex items-center justify-between px-7">
+      <div className="absolute left-[calc(100%-1rem)] top-0 h-60 w-[20rem] bg-gradient-to-b from-blue-500 to-blue-700 transition-all duration-500 group-hover:left-[calc(100%-8rem)] group-hover:-rotate-[-25deg]"></div>
+      <div className="flex items-center justify-between px-7">
         <div>
           <div className="flex items-center justify-between gap-4 pt-6 text-slate-700">
             <span className="flex flex-col items-start">

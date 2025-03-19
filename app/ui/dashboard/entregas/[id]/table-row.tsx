@@ -30,7 +30,9 @@ export default function TableRow({ item }: { item: SocialAidTableRow }) {
           {nombre_campaña}
         </td> */}
       {/* <td className="w-[15%] py-3 pl-10 pr-6 text-slate-600">{detalle}</td> */}
-      <td className="w-[25%] py-3 pl-10 pr-6 text-slate-600">{observacion}</td>
+      <td className="w-[25%] py-3 pl-10 pr-6 text-slate-600">
+        {observacion || "No especifica"}
+      </td>
       <td className="w-[25%] py-3 pl-10 pr-6 text-slate-600">
         {nombre_usuario}
       </td>

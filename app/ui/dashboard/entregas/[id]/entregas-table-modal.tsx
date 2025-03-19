@@ -26,7 +26,7 @@ export default async function EntregasTableModal({ folio }: { folio: string }) {
       <div className="flex flex-col gap-4">
         <section className="flex items-center justify-between border-b border-gray-100 pb-3">
           <h2 className="text-xl font-bold text-slate-700">#{folio}</h2>
-          <CloseModalButton />
+          <CloseModalButton name="detailsModal" folio={folio} />
         </section>
 
         <section className="grid grid-cols-2 gap-5">

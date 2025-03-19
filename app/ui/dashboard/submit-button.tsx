@@ -1,6 +1,6 @@
 "use client";
 import clsx from "clsx";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export function SubmitButton({
   children,
@@ -45,20 +45,28 @@ export function SubmitButton({
 }
 
 export function CancelButton({
+  name,
   isDisabled,
   setIsDisabled,
 }: {
+  name: string;
   isDisabled: boolean;
   setIsDisabled: (
     prevState: boolean | ((prevState: boolean) => boolean),
   ) => void;
 }) {
   const router = useRouter();
-  console.log(isDisabled);
+  const searchParams = useSearchParams();
+
+  const closeModal = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete(name, "open");
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
 
   const handleSubmit = () => {
     setIsDisabled(true);
-    router.back();
+    closeModal();
   };
 
   return (

@@ -32,12 +32,12 @@ export default async function RSH(props: RSHProps) {
       <div>
         {newcitizen === "open" && (
           <Modal name="newcitizen">
-            <NewCitizenModal />
+            <NewCitizenModal name="newcitizen" />
           </Modal>
         )}
         {importxlsx === "open" && (
           <Modal name="importxlsx">
-            <ImportXLSXModal />
+            <ImportXLSXModal name="importxlsx" />
           </Modal>
         )}
         <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
