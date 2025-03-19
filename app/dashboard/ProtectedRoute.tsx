@@ -71,7 +71,11 @@ export default function ProtectedRoute({
   }, [isLoading, userSession, allowedRoles, router, isDashboardRoute]);
 
   if (isLoading) {
-    return <div>Loading...</div>; // Mostrar un indicador de carga mientras se obtiene la sesión
+    return (
+      <div className="flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
+        Loading...
+      </div>
+    ); // Mostrar un indicador de carga mientras se obtiene la sesión
   }
 
   return <>{children}</>;

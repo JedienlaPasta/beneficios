@@ -6,7 +6,7 @@ import { Campaign } from "@/app/lib/definitions";
 import { useState } from "react";
 import DataTypeCards from "./data-type-cards";
 import { updateCampaign } from "@/app/lib/actions/campaña";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import CustomAntdDatePicker from "@/app/ui/dashboard/datepicker";
 import dayjs from "dayjs";
@@ -27,6 +27,15 @@ export default function UpdateForm({ data }: { data: Campaign[] }) {
   });
   const updateCampaignWithId = updateCampaign.bind(null, updateFormData.id);
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const closeModal = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete("update", "open");
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
+
   const formAction = async (formData: FormData) => {
     formData.append("nombre", updateFormData.nombre);
     formData.append("fechaInicio", updateFormData.fecha_inicio.toString());
@@ -41,7 +50,7 @@ export default function UpdateForm({ data }: { data: Campaign[] }) {
       toast.success(response.message);
       setIsLoading(false);
       setTimeout(() => {
-        router.back();
+        closeModal();
       }, 1500);
     } else {
       toast.error(response.message);
@@ -53,7 +62,6 @@ export default function UpdateForm({ data }: { data: Campaign[] }) {
   // To handle server response
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = () => {
     setIsLoading(true);
@@ -131,6 +139,7 @@ export default function UpdateForm({ data }: { data: Campaign[] }) {
       </div>
       <div className="grid grid-cols-2 gap-3">
         <CancelButton
+          name="update"
           isDisabled={isDisabled}
           setIsDisabled={setIsDisabled}
         ></CancelButton>

@@ -18,7 +18,7 @@ export default async function NewSocialAidModal({
       {/* <div className="w-[1024px]"> */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold">Asignar Beneficios</h2>
-        <CloseModalButton />
+        <CloseModalButton name="newsocialaid" />
       </div>
       <p className="text-xs text-gray-500">
         Elige los beneficios que vas asignar junto con sus respectivos datos.

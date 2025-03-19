@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import Input from "@/app/ui/dashboard/campañas/new-campaign-input";
 import { RiCloseLine } from "react-icons/ri";
@@ -13,10 +13,18 @@ export type FormState = {
   message?: string;
 };
 
-export default function NewCitizenModal() {
+export default function NewCitizenModal({ name }: { name: string }) {
   const router = useRouter();
   const [date, setDate] = useState<Date | null>(null);
   const [codigo, setCodigo] = useState("");
+
+  const searchParams = useSearchParams();
+
+  const closeModal = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete(name, "open");
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
 
   const datePickerHandler = (pickerDate: dayjs.Dayjs | null) => {
     if (pickerDate) {
@@ -50,7 +58,7 @@ export default function NewCitizenModal() {
         </h2>
         <RiCloseLine
           className="cursor-pointer text-xl text-slate-400 hover:text-slate-600"
-          onClick={() => router.back()}
+          onClick={closeModal}
         />
       </div>
       <p className="text-xs text-gray-500">

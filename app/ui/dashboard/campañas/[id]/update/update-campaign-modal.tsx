@@ -20,7 +20,7 @@ export default function UpdateCampaignModal({
         <div>
           <span className="flex items-center justify-between">
             <h2 className="text-lg font-bold">Actualizar Campaña</h2>
-            <CloseModalButton />
+            <CloseModalButton name="update" />
           </span>
           {/* <p className="text-sm text-slate-600/70">
             Cuidado con los datos a cambiar, esta acción es irreversible.
