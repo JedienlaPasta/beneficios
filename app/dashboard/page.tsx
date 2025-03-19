@@ -5,6 +5,7 @@ import ActivityTableSkeleton from "@/app/ui/dashboard/inicio/activity-table-skel
 import Buscar from "@/app/ui/dashboard/searchbar";
 import { Suspense } from "react";
 import ProtectedRoute from "@/app/dashboard/ProtectedRoute";
+import WelcomeMessage from "@/app/ui/dashboard/inicio/welcome-message";
 
 type HomeProps = {
   searchParams?: Promise<{ query?: string; page?: string; modal?: string }>;
@@ -22,13 +23,7 @@ export default async function Home(props: HomeProps) {
         {/* {abrirModal && <NuevaCampañaModal closeModal={toggleModal} />} */}
         <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
           <div>
-            <h2 className="text-2xl font-bold text-slate-800">
-              Bienvenid@ Kristina!
-            </h2>
-            <p className="text-sm text-slate-600/70">
-              Aquí podrás ver información general y sobre las actividades que
-              has realizado.
-            </p>
+            <WelcomeMessage />
           </div>
         </div>
 
