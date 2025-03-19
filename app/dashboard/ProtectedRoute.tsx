@@ -74,7 +74,7 @@ export default function ProtectedRoute({
 
   if (isLoading) {
     return (
-      <div className="absolute top-1/2 flex -translate-y-3/4 flex-col items-center 3xl:w-[96rem] 3xl:justify-self-center">
+      <div className="absolute right-0 top-0 mx-auto flex h-dvh w-full flex-col items-center justify-center">
         <Loading />
         <p className="text-slate-600">Cargando...</p>
       </div>
