@@ -56,7 +56,7 @@ export default function LoginPage() {
       }
     };
 
-    // checkSession();
+    checkSession();
   }, [router]);
 
   if (isLoading) {
