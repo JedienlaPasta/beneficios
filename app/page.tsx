@@ -63,7 +63,7 @@ export default function LoginPage() {
     return (
       <main className="flex items-center justify-center bg-gray-200 md:h-screen">
         <div className="flex w-full max-w-[360px] flex-col gap-5 rounded-xl border border-gray-300 bg-white px-8 py-12 md:-mt-32">
-          <p className="text-center text-slate-500">Acceso Denegado</p>
+          <p className="text-center text-slate-500">Acceso Denegado :)</p>
           <p className="text-center text-slate-500">redirigiendo...</p>
         </div>
       </main>
