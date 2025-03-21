@@ -12,6 +12,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4  # Versión actualizada
 
+        # Prueba agregando un paso de verificación previa
+      - name: Validate Secrets
+        run: |
+          echo "Host: ${{ secrets.HOST }}"
+          echo "Username: ${{ secrets.USERNAME }}"
+          [ -z "${{ secrets.HOST }}" ] && echo "Error: HOST no está configurado" && exit 1
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3  # Versión más reciente
         with:
