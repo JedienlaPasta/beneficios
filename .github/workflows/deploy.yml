@@ -19,6 +19,7 @@ jobs:
         host: ${{ secrets.HOST }}  # Dirección IP o nombre del host del servidor (debe estar configurado en GitHub Secrets)
         username: ${{ secrets.USERNAME }}  # Nombre de usuario del servidor (debe estar configurado en GitHub Secrets)
         key: ${{ secrets.SSH_KEY }}  # Clave privada SSH para acceso (debe estar configurado en GitHub Secrets)
+        passphrase: ${{ secrets.PASSPHRASE }}
         port: 22  # Puerto SSH (comúnmente 22)
 
     - name: Pull latest changes and restart Podman containers
