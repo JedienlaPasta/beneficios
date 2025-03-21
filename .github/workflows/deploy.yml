@@ -11,6 +11,12 @@ jobs:
     timeout-minutes: 15
 
     steps:
+    - name: Check Network
+      run: |
+        ping -c 3 ${{ secrets.HOST }}
+        nc -vz ${{ secrets.HOST }} 22
+        ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+        
     - name: Check out the repository
       uses: actions/checkout@v2  # Acción para clonar el repositorio en el entorno de GitHub Actions
 
