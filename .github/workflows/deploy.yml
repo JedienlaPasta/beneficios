@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest  # El sistema operativo que se usará en GitHub Actions
+    timeout-minutes: 15
 
     steps:
     - name: Check out the repository
@@ -21,6 +22,7 @@ jobs:
         key: ${{ secrets.SSH_KEY }}  # Clave privada SSH para acceso (debe estar configurado en GitHub Secrets)
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         port: 22  # Puerto SSH (comúnmente 22)
+        timeout: 15m
 
     - name: Pull latest changes and restart Podman containers
       run: |
