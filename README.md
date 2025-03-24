@@ -130,17 +130,21 @@ Fechas ingresadas en RSH corridas.
 
 Limitar tipo de campaña activa. x
 
-Generar id custom (folio entregas). +
+Generar id custom (folio entregas). x
 
-Breadcrumbs. +
+Breadcrumbs. x
 
-Barra busqueda, cambiar placeholder de acuerdo a la vista en la que se encuentre el usuario. +
+Barra busqueda, cambiar placeholder de acuerdo a la vista en la que se encuentre el usuario. x
 
 Arreglar layout tablas con grid.
 
-Arreglar pagination (saltos al cambiar de pagina).
+Arreglar pagination (saltos al cambiar de pagina). x
 
-Arreglar los toast de crud, solo el de nueva campaña esta bien.
+Arreglar los toast de crud, solo el de nueva campaña esta bien. +
+
+Sidebar toggle.
+
+Actualizar cantidad de entregas?
 
 ===========================================================
 
@@ -162,7 +166,7 @@ Entrega:
 - ID_Campaña
 
 Debiese tener un estado de Pendiente, Entregado, etc?
-Asi se registra la entrega en la db, luego de ingresada se pueden generar los documentos, y cuando vaya a ingresar los documentos pueda cambiar el estado a Entregado.
+Asi se registra la entrega en la db, luego de ingresada se pueden generar los documentos, y cuando vaya a ingresar los documentos pueda cambiar el estado a Entregado. x
 
 Verificar que los campos no esten vacios en Modal Asignar Beneficios.
 
@@ -172,11 +176,11 @@ HACER TABLA ENTREGAS +
 
 GENERAR DOCUMENTOS PDF / MODAL UPLOAD x
 
-MEJORAR MODAL INGRESO ENTREGAS - opcion de descarga y upload de archivo al ingresar las entregas?
+MEJORAR MODAL INGRESO ENTREGAS - opcion de descarga y upload de archivo al ingresar las entregas? x
 
 TABLA RSH DETALLE?
 
-REVISAR MODAL INGRESO CAMPAÑA/ACTUALIZAR CAMPAÑA +
+REVISAR MODAL INGRESO CAMPAÑA/ACTUALIZAR CAMPAÑA x
 
 MODAL IMPORTAR x
 
@@ -184,6 +188,17 @@ SALTO DE PAGINA x
 
 data/rsh.ts => optimizar busquedas
 submit btns
+
+files 0/3 x
+
+documentos(estado) - pendiente. => tabla entregas
+
+Documentos adjuntos dentro de entregas-modal-form? asi puedo esconder el form con un boton de "adjuntar" y state.
+Estado entrega cambia cuando se guardan/eliminan los documentos? si hay 3 queda como terminado, si hay menos o se llega a eliminar alguno de los 3, cambia a pendiente. x
+
+Al ingresar la entrega, redirigir al modal de documentos adjuntos para que pueda descargar?
+
+Rehacer seccion de campañas activas.
 
 # Extras
 

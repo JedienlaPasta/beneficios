@@ -68,19 +68,12 @@ export const createEntrega = async (id: string, formData: FormData) => {
       campaigns: JSON.parse(formData.get("campaigns") as string),
       id_usuario: formData.get("id_usuario"),
     });
-    // console.log("server");
-    // console.log(id);
-    // console.log(rut);
-    // console.log(observaciones);
-    // console.log(campaigns);
 
     let code;
     if (campaigns.length === 0)
       throw new Error("No se seleccionó ninguna campaña");
     if (campaigns.length > 1) code = "DO";
     else code = campaigns[0].code;
-
-    console.log(code);
 
     let folio: string = "";
 
@@ -106,9 +99,9 @@ export const createEntrega = async (id: string, formData: FormData) => {
 
       const entregaQueries = campaigns.map((campaign) => {
         return sql`
-              INSERT INTO entrega (detalle, folio, id_campaña)
-              VALUES (${campaign.detail}, ${folio}, ${campaign.id})
-          `;
+          INSERT INTO entrega (detalle, folio, id_campaña)
+          VALUES (${campaign.detail}, ${folio}, ${campaign.id})
+        `;
       });
       await Promise.all(entregaQueries);
     });
@@ -313,10 +306,32 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
       uploadPromises.push(insertPromise);
     }
 
-    // Wait for all database insertions to complete
+    // Primero se insertan los documentos en la tabla "documentos"
     await Promise.all(uploadPromises);
 
-    // return { success: true, message: "Documentos Guardados" };
+    // Luego se actualiza el estado de la entrega en la tabla "entregas" de acuerdo a la cantidad de documentos
+    await sql.begin(async (tx) => {
+      const [{ count }] = await tx`
+        SELECT COUNT(*)::int AS count
+        FROM documentos
+        WHERE folio = ${folio}
+      `;
+
+      if (count === 3) {
+        await tx`
+          UPDATE Entregas
+          SET estado_documentos = 'Finalizado'
+          WHERE folio = ${folio}
+        `;
+      } else {
+        await tx`
+          UPDATE Entregas
+          SET estado_documentos = 'En Curso'
+          WHERE folio = ${folio}
+        `;
+      }
+    });
+
     return {
       success: true,
       message: `${fileCount} documento(s) guardado(s) correctamente`,
@@ -334,7 +349,7 @@ export const deletePDFById = async (id: string) => {
   try {
     // Check if document exists before deleting
     const document = await sql`
-      SELECT id FROM documentos
+      SELECT id, folio FROM documentos
       WHERE id = ${id}
     `;
 
@@ -345,10 +360,18 @@ export const deletePDFById = async (id: string) => {
       };
     }
 
-    await sql`
-      DELETE FROM documentos
-      WHERE id = ${id}
-    `;
+    await sql.begin(async (sql) => {
+      await sql`
+        DELETE FROM documentos
+        WHERE id = ${id}
+      `;
+
+      await sql`
+        UPDATE Entregas
+        SET estado_documentos = 'En Curso'
+        WHERE folio = ${document[0].folio}
+      `;
+    });
 
     return {
       success: true,

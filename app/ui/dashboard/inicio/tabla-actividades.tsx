@@ -42,16 +42,20 @@ export default async function ActivityTable({
   ));
 
   return (
-    <div className="overflow-x-auto rounded-b-xl bg-white">
-      <table className="w-full min-w-[44rem]">
-        <thead className="border-y border-slate-200/70 bg-slate-50 text-xs font-medium tracking-wider text-slate-600/70">
-          <tr>
-            <th className="py-4 pl-10 pr-6 text-left font-normal">ACTIVIDAD</th>
-            <th className="py-4 pr-14 text-right font-normal">FECHA</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-200/30">{filas}</tbody>
-      </table>
+    <div className="overflow-hidden rounded-b-xl bg-white">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[44rem]">
+          <thead className="border-y border-slate-200/70 bg-slate-50 text-xs font-medium tracking-wider text-slate-600/70">
+            <tr>
+              <th className="py-4 pl-10 pr-6 text-left font-normal">
+                ACTIVIDAD
+              </th>
+              <th className="py-4 pr-14 text-right font-normal">FECHA</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200/30">{filas}</tbody>
+        </table>
+      </div>
       <Pagination pages={pages} />
     </div>
   );

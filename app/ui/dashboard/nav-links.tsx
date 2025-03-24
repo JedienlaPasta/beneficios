@@ -1,5 +1,4 @@
 "use client";
-
 import { RiDashboardFill } from "react-icons/ri";
 import { FaBoxesStacked } from "react-icons/fa6";
 import { FaBoxOpen } from "react-icons/fa6";
@@ -39,7 +38,11 @@ const links = [
   },
 ];
 
-export default function NavLinks() {
+type NavLinksProps = {
+  setSidenavOpen: (prev: boolean) => void;
+};
+
+export default function NavLinks({ setSidenavOpen }: NavLinksProps) {
   const pathname = usePathname();
   const splitPathname = pathname.split("/");
   const parentPathname =
@@ -52,6 +55,7 @@ export default function NavLinks() {
 
         return (
           <Link
+            onClick={() => setSidenavOpen(false)}
             key={link.nombre}
             href={link.href}
             className={clsx(

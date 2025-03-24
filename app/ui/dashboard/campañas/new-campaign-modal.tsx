@@ -23,6 +23,7 @@ export default function NewCampaignModal() {
   const router = useRouter();
   const [campaignName, setCampaignName] = useState("");
   const [date, setDate] = useState<Date | null>(null);
+  const [stock, setStock] = useState("");
   const [code, setCode] = useState("");
   const [fieldType, setFieldType] = useState("Código");
   const [criteria, setCriteria] = useState<Requirements>({
@@ -73,6 +74,7 @@ export default function NewCampaignModal() {
     formData.append("nombre", campaignName);
     formData.append("fechaTermino", date?.toString() || "");
     formData.append("descripcion", code?.toString() || ""); // Cambiar "descripcion x code  aqui, en actions y en db"
+    formData.append("stock", stock?.toString() || ""); // Cambiar "descripcion x code  aqui, en actions y en db"
     formData.append("tipoDato", fieldType);
     formData.append("tramo", criteria.tramo.toString());
     formData.append("discapacidad", criteria.discapacidad.toString());
@@ -103,7 +105,7 @@ export default function NewCampaignModal() {
   };
 
   return (
-    <div className="grid max-h-dvh max-w-[30rem] shrink-0 flex-col gap-3 overflow-y-auto rounded-xl bg-white p-8 shadow-xl">
+    <div className="grid max-h-dvh w-full max-w-[30rem] shrink-0 flex-col gap-3 overflow-y-auto rounded-xl bg-white p-8 shadow-xl">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold">Crear Campaña</h2>
         <RiCloseLine
@@ -124,6 +126,16 @@ export default function NewCampaignModal() {
           setCampaign={handleCampaignNameSelection}
         />
         <div className="flex items-end gap-3">
+          <div className="grow">
+            <Input
+              placeHolder="Stock..."
+              label="Stock Inicial"
+              type="text"
+              nombre="stock"
+              value={stock}
+              setData={setStock}
+            />
+          </div>
           <div className="grow">
             <Input
               placeHolder="Código..."
@@ -195,7 +207,7 @@ export default function NewCampaignModal() {
 
 function CampaignCode({ descripcion }: { descripcion: string }) {
   return (
-    <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500 text-white">
+    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500 text-white">
       {descripcion}
     </span>
   );

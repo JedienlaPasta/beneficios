@@ -1,6 +1,8 @@
+"use client";
 import { formatDate, formatNumber } from "@/app/lib/utils";
-import Link from "next/link";
-import { CiViewList } from "react-icons/ci";
+// import Link from "next/link";
+import { useRouter } from "next/navigation";
+// import { CiViewList } from "react-icons/ci";
 
 export default function TableRow({
   item,
@@ -17,6 +19,7 @@ export default function TableRow({
 }) {
   const { rut, dv, nombres, apellidos, direccion, tramo, ultima_entrega } =
     item;
+  const router = useRouter();
   const formattedRut = formatNumber(rut) + (dv ? "-" + dv : "");
 
   const stratumColor = [
@@ -31,8 +34,15 @@ export default function TableRow({
 
   const stratum = tramo / 10 - 4;
 
+  const handleClick = () => {
+    router.push(`/dashboard/entregas/${rut}`);
+  };
+
   return (
-    <tr className="text-nowrap text-sm tabular-nums transition-colors hover:bg-slate-200/50">
+    <tr
+      onClick={handleClick}
+      className="cursor-pointer text-nowrap text-sm tabular-nums transition-colors hover:bg-slate-200/50"
+    >
       <td className="group w-[10%] max-w-56 py-3 pl-10 pr-6 text-slate-700">
         <div className="overflow-hidden text-ellipsis">{formattedRut}</div>
       </td>
@@ -42,17 +52,17 @@ export default function TableRow({
       <td className="w-[20%] py-3 pr-14 text-left text-slate-600">
         {direccion}
       </td>
-      <td className="w-[10%] px-6 py-3">
+      <td className="w-[5%] px-6 py-3">
         <span
           className={`inline-block rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-xs font-medium text-blue-400 ${stratumColor[stratum][1] || "bg-gray-50"}`}
         >
           {tramo}%
         </span>
       </td>
-      <td className="w-[15%] py-3 pr-14 text-right text-slate-600">
+      <td className="w-[20%] py-3 pr-14 text-right text-slate-600">
         {ultima_entrega ? formatDate(ultima_entrega) : ""}
       </td>
-      <td className="w-[5%] pl-6 pr-10 text-right">
+      {/* <td className="w-[5%] pl-6 pr-10 text-right">
         <div className="flex items-center justify-end">
           <Link
             href={`/dashboard/entregas/${rut}`}
@@ -61,7 +71,7 @@ export default function TableRow({
             <CiViewList className="h-6 w-6 cursor-pointer" />
           </Link>
         </div>
-      </td>
+      </td> */}
     </tr>
   );
 }

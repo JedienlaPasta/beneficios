@@ -47,7 +47,7 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
           <EntregasTableModal folio={detailsModal} />
         </Modal>
       )}
-      <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 3xl:w-[96rem] 3xl:justify-self-center">
         <div>
           <h2 className="text-2xl font-bold text-slate-800">
             Detalle Ciudadano

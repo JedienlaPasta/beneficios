@@ -5,7 +5,12 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
 export async function fetchRSHById(id: string) {
   try {
-    const data = await sql<RSH[]>`SELECT * FROM rsh WHERE rut = ${id}`;
+    const data = await sql<RSH[]>`
+      SELECT *,
+      (SELECT MAX(entregas.fecha_entrega) FROM entregas WHERE entregas.rut = ${id}) AS ultima_entrega
+      FROM rsh 
+      WHERE rut = ${id}
+      `;
     return { data };
   } catch (error) {
     console.error("Error al obtener datos de la tabla de campañas:", error);

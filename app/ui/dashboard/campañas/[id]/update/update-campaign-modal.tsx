@@ -15,7 +15,7 @@ export default function UpdateCampaignModal({
   // const router = useRouter();
 
   return (
-    <div className="w-full max-w-[36rem] shrink-0 px-6 py-8 text-slate-900">
+    <div className="w-full max-w-[36rem] shrink-0 text-slate-900">
       <div className="grid max-h-dvh overflow-y-auto rounded-xl bg-white p-8">
         <div>
           <span className="flex items-center justify-between">

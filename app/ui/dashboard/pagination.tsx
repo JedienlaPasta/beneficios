@@ -86,7 +86,7 @@ export default function Pagination({
 
   return (
     <nav
-      className="flex items-center justify-center border-t border-gray-200/70 bg-white px-4 sm:px-0"
+      className="flex items-center justify-end border-t border-gray-200/70 bg-white px-4 sm:px-0"
       aria-label="Pagination"
     >
       <ul className="flex gap-2 p-2">

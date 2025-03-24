@@ -15,7 +15,7 @@ export function SubmitButton({
     prevState: boolean | ((prevState: boolean) => boolean),
   ) => void;
 }) {
-  const btnText = isDisabled ? children : "Guardar";
+  const btnText = children;
 
   const handleSubmit = () => {
     setTimeout(() => {
