@@ -25,8 +25,6 @@ export default async function CitizenDetail({ data }: { data: RSH[] }) {
     ultima_entrega,
   } = data[0];
 
-  console.log(data[0]);
-
   const formattedRut = formatNumber(rut) + (dv ? "-" + dv : "");
   const descripcion = nombres[0] + apellidos[0];
 
@@ -47,9 +45,9 @@ export default async function CitizenDetail({ data }: { data: RSH[] }) {
     <div className="items-centers relative flex flex-col justify-center">
       <div className="grid gap-4 rounded-xl">
         {/* Header Section */}
-        <div className="flex items-center justify-between rounded-xl bg-white px-10 py-6">
+        <div className="flex flex-col items-start justify-between rounded-xl bg-white px-10 py-6 sm:flex-row sm:items-center">
           <div className="flex gap-4">
-            <p className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-base font-medium text-white shadow-sm">
+            <p className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-base font-medium text-white shadow-sm">
               {descripcion}
             </p>
             <div className="flex flex-col">
@@ -57,7 +55,7 @@ export default async function CitizenDetail({ data }: { data: RSH[] }) {
                 <h1 className="text-xl font-semibold tracking-tight text-slate-800">
                   {nombres + " " + apellidos}
                 </h1>
-                <div className="flex items-center gap-1 rounded-md bg-slate-200 px-2 py-0.5">
+                <div className="hidden items-center gap-1 rounded-md bg-slate-200 px-2 py-0.5 sm:flex">
                   <p className="text-xs font-medium text-slate-500">
                     {"F#" + folio}
                   </p>

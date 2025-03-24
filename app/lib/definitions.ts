@@ -41,7 +41,7 @@ export type SocialAidTableRow = {
   folio: string;
   nombre_campaña: string;
   detalle: string;
-  observacion: string;
+  estado_documentos: string;
   nombre_usuario: string;
   fecha_entrega: Date;
 };
@@ -52,6 +52,7 @@ export type SocialAidTableRowByFolio = {
   fecha_entrega: Date;
   nombre_usuario: string;
   observacion: string;
+  estado_documentos: string;
 };
 
 // Modal Detalle Entrega

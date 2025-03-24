@@ -52,7 +52,7 @@ export async function fetchSocialAidsByRUT(
   const offset = (currentPage - 1) * resultsPerPage;
   try {
     const data = await sql<SocialAid[]>`
-      SELECT entregas.folio, entregas.fecha_entrega, entregas.observacion, usuarios.nombre as nombre_usuario,
+      SELECT entregas.folio, entregas.fecha_entrega, entregas.estado_documentos, usuarios.nombre as nombre_usuario,
       COUNT (*) OVER() AS total 
       FROM entregas
       LEFT JOIN usuarios ON entregas.id_usuario = usuarios.id
@@ -76,7 +76,7 @@ export async function fetchSocialAidsByRUT(
 export async function fetchSocialAidsGeneralInfoByFolio(folio: string) {
   try {
     const data = await sql<SocialAidTableRowByFolio[]>`
-            SELECT entregas.folio, entregas.fecha_entrega, entregas.observacion, usuarios.nombre as nombre_usuario
+            SELECT entregas.folio, entregas.fecha_entrega, entregas.observacion, entregas.estado_documentos, usuarios.nombre as nombre_usuario
               FROM entregas
               LEFT JOIN usuarios ON entregas.id_usuario = usuarios.id
               WHERE entregas.folio = ${folio}

@@ -1,6 +1,6 @@
 "use client";
 import { SocialFiles } from "@/app/lib/definitions";
-import pdf from "@/public/pdf.png";
+import pdf from "@/public/pdf.svg";
 import Image from "next/image";
 import { toast } from "sonner";
 import { deletePDFById, downloadPDFById } from "@/app/lib/actions/entregas";
@@ -30,25 +30,31 @@ export function Files({ item }: { item: SocialFiles }) {
         </div>
         <div className="flex border-t border-gray-200">
           <button
-            onClick={async () => {
-              try {
-                const response = await deletePDFById(item.id);
+            onClick={() => {
+              // First dismiss the confirmation toast
+              toast.dismiss(t);
 
-                if (response.success) {
-                  toast.success("Documento eliminado correctamente");
-                  // Refresh the page to show updated document list
-                  router.refresh();
-                } else {
-                  toast.error(
-                    response.message || "Error al eliminar documento",
-                  );
-                }
-              } catch (error) {
-                toast.error("Error al eliminar documento");
-                console.error("Error deleting document:", error);
-              } finally {
-                toast.dismiss(t);
-              }
+              // Then after a small delay, show the promise toast
+              setTimeout(() => {
+                toast.promise(
+                  deletePDFById(item.id).then((response) => {
+                    if (!response.success) {
+                      throw new Error(response.message);
+                    }
+                    return response;
+                  }),
+                  {
+                    loading: "Eliminando...",
+                    success: (response) => {
+                      router.refresh();
+                      return response.message;
+                    },
+                    error: (err) => {
+                      return err.message;
+                    },
+                  },
+                );
+              }, 50); // Small delay to ensure first toast is gone
             }}
             className="flex w-full items-center justify-center rounded-none rounded-bl-lg border border-transparent p-3 text-sm font-medium text-red-600 hover:text-red-500 focus:outline-none"
           >

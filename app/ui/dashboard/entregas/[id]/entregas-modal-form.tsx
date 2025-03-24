@@ -1,31 +1,32 @@
 "use client";
 import { RiCloseCircleFill } from "react-icons/ri";
 import { SubmitButton } from "../../submit-button";
-import pdf from "@/public/pdf.png";
+import pdf from "@/public/pdf.svg";
 import { toast } from "sonner";
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { uploadPDFByFolio } from "@/app/lib/actions/entregas";
 
 export default function ModalForm({
   folio,
-  files,
+  savedFiles,
 }: {
   folio: string;
-  files?: File[];
+  savedFiles: number;
 }) {
   const router = useRouter();
   // Change to array of files
-  const [selectedFiles, setSelectedFiles] = useState<File[]>(files || []);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const totalFiles = savedFiles + selectedFiles.length;
 
-  const searchParams = useSearchParams();
+  // const searchParams = useSearchParams();
 
-  const closeModal = () => {
-    const params = new URLSearchParams(searchParams);
-    params.delete("detailsModal", "open");
-    router.replace(`?${params.toString()}`, { scroll: false });
-  };
+  // const closeModal = () => {
+  //   const params = new URLSearchParams(searchParams);
+  //   params.delete("detailsModal", "open");
+  //   router.replace(`?${params.toString()}`, { scroll: false });
+  // };
 
   // Button handlers
   const [isLoading, setIsLoading] = useState(false);
@@ -62,10 +63,11 @@ export default function ModalForm({
         loading: "Procesando archivos PDF...",
         success: (response) => {
           setIsLoading(false);
-          setTimeout(() => {
-            //Quitar closeModal()?
-            closeModal();
-          }, 500);
+          setSelectedFiles([]);
+          router.refresh();
+          // setTimeout(() => {
+          //   closeModal();
+          // }, 500);
           return response.message;
         },
         error: (err) => {
@@ -76,40 +78,41 @@ export default function ModalForm({
     );
   };
 
+  const handleFiles = (files: FileList | []) => {
+    const remainingSlots = 3 - totalFiles;
+    if (!files || files.length === 0) return;
+
+    // Early return if already at max files
+    if (totalFiles >= 3 || files.length > remainingSlots) {
+      toast.error("No se pueden agregar más de 3 archivos.");
+      return;
+    }
+
+    // Convert FileList to Array and filter for PDFs
+    const fileArray = Array.from(files)
+      .filter(isPDFFile)
+      .slice(0, remainingSlots);
+
+    if (fileArray.length === 0) {
+      toast.error("Solo se permiten archivos PDF (.pdf)");
+      return;
+    }
+
+    setSelectedFiles([...selectedFiles, ...fileArray]);
+    toast.success(`${fileArray.length} archivo(s) PDF recibido(s).`);
+  };
+
+  // files + selectedFiles.length > 3?? // Se borro
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const files = e.dataTransfer?.files;
-    if (files && files.length > 0) {
-      // Convert FileList to Array and filter for PDFs
-      const fileArray = Array.from(files).filter(isPDFFile);
-
-      if (fileArray.length === 0) {
-        toast.error("Solo se permiten archivos PDF (.pdf)");
-        return;
-      }
-
-      // Limit to 3 files
-      const newFiles = [...selectedFiles, ...fileArray].slice(0, 3);
-      setSelectedFiles(newFiles);
-      toast.success(`${fileArray.length} archivo(s) PDF recibido(s).`);
-    }
+    handleFiles(files);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
     const files = e.target.files;
-    if (files && files.length > 0) {
-      // Convert FileList to Array and filter for PDFs
-      const fileArray = Array.from(files).filter(isPDFFile);
-
-      if (fileArray.length === 0) {
-        toast.error("Solo se permiten archivos PDF (.pdf)");
-        return;
-      }
-
-      // Limit to 3 files total
-      const newFiles = [...selectedFiles, ...fileArray].slice(0, 3);
-      setSelectedFiles(newFiles);
-    }
+    handleFiles(files);
   };
 
   const removeFile = (index: number) => {
@@ -156,9 +159,7 @@ export default function ModalForm({
             >
               Seleccionar archivos PDF
             </label>
-            <p className="text-xs text-slate-500">
-              {selectedFiles.length}/3 archivos seleccionados
-            </p>
+            <p className="text-xs text-slate-500">({totalFiles}/3)</p>
           </>
         )}
       </div>
