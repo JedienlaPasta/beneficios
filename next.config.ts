@@ -1,11 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
-  experimental: {
-    serverActions: {
-      bodySizeLimit: "50mb",
-    },
+  serverRuntimeConfig: {
+    host: "0.0.0.0",
+    port: process.env.PORT || 8081,
   },
 };
 
 module.exports = nextConfig;
+
+
+
