@@ -37,7 +37,7 @@ export default async function Home(props: HomeProps) {
               <div className="group relative flex h-4 w-4 items-center justify-center rounded border border-green-400 bg-green-200"></div>
               <div className="group relative flex h-4 w-4 items-center justify-center rounded border border-green-500 bg-green-300"></div>
               <div className="group relative flex h-4 w-4 items-center justify-center rounded border border-green-600 bg-green-400"></div>
-              <p className="text-xs text-slate-400">Mucho :(</p>
+              <p className="text-xs text-slate-400">Mucho</p>
             </div>
           </div>
 
