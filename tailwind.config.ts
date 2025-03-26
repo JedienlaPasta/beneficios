@@ -81,9 +81,25 @@ export default {
             transform: "translateX(70px)",
           },
         },
+        square: {
+          "0%": { transform: "rotate(0deg) scale(1)" },
+          "25%": { transform: "rotate(90deg) scale(1.1)" },
+          "50%": { transform: "rotate(180deg) scale(1)" },
+          "75%": { transform: "rotate(270deg) scale(0.9)" },
+          "100%": { transform: "rotate(360deg) scale(1)" },
+        },
+        innerSquare: {
+          "0%": { transform: "rotate(0deg) scale(0.8)", opacity: "0.7" },
+          "25%": { transform: "rotate(-90deg) scale(1)", opacity: "0.9" },
+          "50%": { transform: "rotate(-180deg) scale(0.8)", opacity: "0.7" },
+          "75%": { transform: "rotate(-270deg) scale(1)", opacity: "0.9" },
+          "100%": { transform: "rotate(-360deg) scale(0.8)", opacity: "0.7" },
+        },
       },
       animation: {
         loading: "loading 2s infinite",
+        square: "square 3s ease-in-out infinite",
+        innerSquare: "innerSquare 3s ease-in-out infinite",
       },
     },
     screens: {

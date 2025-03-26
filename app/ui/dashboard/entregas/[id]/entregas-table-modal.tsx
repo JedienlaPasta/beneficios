@@ -11,6 +11,7 @@ import { SocialAidByFolio, SocialFiles } from "@/app/lib/definitions";
 import Link from "next/link";
 import { Files } from "./files";
 import { formatDate } from "@/app/lib/utils";
+import GetNewFileButton from "./new-file-button";
 
 export default async function EntregasTableModal({ folio }: { folio: string }) {
   const entregasResponse = await fetchSocialAidsGeneralInfoByFolio(folio);
@@ -27,7 +28,7 @@ export default async function EntregasTableModal({ folio }: { folio: string }) {
     estado_documentos === "Finalizado" ? "bg-blue-300" : "bg-orange-300";
 
   return (
-    <div className="relative grid max-h-dvh w-[34rem] max-w-full shrink-0 flex-col gap-4 overflow-y-auto rounded-xl bg-white p-10 shadow-xl">
+    <div className="relative grid max-h-dvh w-[30rem] max-w-full shrink-0 flex-col gap-4 overflow-y-auto rounded-xl bg-white p-10 shadow-xl md:w-[34rem]">
       <div className="flex flex-col gap-4">
         <section className="flex items-center justify-between border-b border-gray-200/80 pb-4">
           <div className="flex items-center gap-3">
@@ -81,9 +82,7 @@ export default async function EntregasTableModal({ folio }: { folio: string }) {
             <h3 className="text-sm font-medium text-slate-500">
               Documentos Adjuntos
             </h3>
-            <button className="flex items-center gap-1 rounded-md bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-600 transition-all hover:bg-blue-100 active:scale-95">
-              Nueva Acta
-            </button>
+            <GetNewFileButton folio={folio}>Nueva Acta</GetNewFileButton>
           </div>
 
           {files.data.length > 0 ? (

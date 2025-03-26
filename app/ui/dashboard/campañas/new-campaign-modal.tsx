@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { createCampaign } from "@/app/lib/actions/campaña";
@@ -67,21 +67,28 @@ export default function NewCampaignModal() {
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
-  const formAction = async (formData: FormData) => {
+  useEffect(() => {
+    console.log("isLoading: " + isLoading);
+    console.log("isDisabled: " + isDisabled);
+  }, [isLoading, isDisabled]);
+
+  const formAction = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setIsLoading(true);
     setIsDisabled(true);
 
-    formData.append("nombre", campaignName);
-    formData.append("fechaTermino", date?.toString() || "");
-    formData.append("descripcion", code?.toString() || ""); // Cambiar "descripcion x code  aqui, en actions y en db"
-    formData.append("stock", stock?.toString() || ""); // Cambiar "descripcion x code  aqui, en actions y en db"
-    formData.append("tipoDato", fieldType);
-    formData.append("tramo", criteria.tramo.toString());
-    formData.append("discapacidad", criteria.discapacidad.toString());
-    formData.append("adultoMayor", criteria.adultoMayor.toString());
+    const myFormData = new FormData();
+    myFormData.append("nombre", campaignName);
+    myFormData.append("fechaTermino", date?.toString() || "");
+    myFormData.append("descripcion", code.toString() || ""); // Cambiar "descripcion x code  aqui, en actions y en db"
+    myFormData.append("stock", stock.toString() || (0).toString());
+    myFormData.append("tipoDato", fieldType);
+    myFormData.append("tramo", criteria.tramo.toString());
+    myFormData.append("discapacidad", criteria.discapacidad.toString());
+    myFormData.append("adultoMayor", criteria.adultoMayor.toString());
 
     toast.promise(
-      createCampaign(formData).then((response) => {
+      createCampaign(myFormData).then((response) => {
         if (!response.success) {
           throw new Error(response.message);
         }
@@ -98,6 +105,7 @@ export default function NewCampaignModal() {
         },
         error: (err) => {
           setIsDisabled(false);
+          setIsLoading(false);
           return err.message;
         },
       },
@@ -117,7 +125,7 @@ export default function NewCampaignModal() {
         Elige el tipo de campaña que quieres ingresar y sus datos
         correspondientes.
       </p>
-      <form action={formAction} className="flex flex-col gap-5 pt-2">
+      <form onSubmit={formAction} className="flex flex-col gap-5 pt-2">
         <CampaignDropdown
           label="Campaña"
           name={"nombre"}
@@ -128,6 +136,7 @@ export default function NewCampaignModal() {
         <div className="flex items-end gap-3">
           <div className="grow">
             <Input
+              required={true}
               placeHolder="Stock..."
               label="Stock Inicial"
               type="text"
@@ -138,6 +147,7 @@ export default function NewCampaignModal() {
           </div>
           <div className="grow">
             <Input
+              required={true}
               placeHolder="Código..."
               label="Código Campaña"
               type="text"
@@ -197,7 +207,7 @@ export default function NewCampaignModal() {
             </RequirementsCard>
           </div>
         </div>
-        <SubmitButton isDisabled={isDisabled} setIsDisabled={setIsDisabled}>
+        <SubmitButton isDisabled={isDisabled}>
           {isLoading ? "Guardando..." : "Guardar"}
         </SubmitButton>
       </form>

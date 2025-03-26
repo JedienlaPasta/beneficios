@@ -89,6 +89,7 @@ export default function CampaignDropdown({
         onChange={(e) => handleOnChange(e)}
         placeholder="Nombre campaña..."
         autoComplete="off"
+        required
         className={`${readOnly && "cursor-pointer"} h-10 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm text-slate-700 shadow-sm outline-none transition-all placeholder:text-gray-400 focus-within:border-blue-500 focus:outline-none`}
       />
       {/* Dropdown List */}

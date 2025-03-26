@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { SquaresLoader } from "../ui/dashboard/loaders";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -41,7 +42,7 @@ export default function ProtectedRoute({
     }
     setTimeout(() => {
       setIsLoading(false);
-    }, 1000);
+    }, 1500);
   }, []);
 
   useEffect(() => {
@@ -74,23 +75,13 @@ export default function ProtectedRoute({
 
   if (isLoading) {
     return (
-      <div className="absolute right-0 top-0 mx-auto flex h-dvh w-full flex-col items-center justify-center">
-        <Loading />
-        <p className="text-slate-600">Cargando...</p>
+      <div className="absolute right-0 top-0 mx-auto flex h-dvh w-full flex-col items-center justify-center gap-4">
+        {/* <Loading /> */}
+        <SquaresLoader />
+        <p className="animate-pulse text-slate-600">Cargando...</p>
       </div>
     ); // Mostrar un indicador de carga mientras se obtiene la sesión
   }
 
   return <>{children}</>;
-}
-
-export function Loading() {
-  return (
-    <div className="relative my-6 h-[70px] w-[70px]">
-      <div className='absolute left-[10px] top-0 block h-[10px] w-[10px] rotate-[70deg] rounded-[10px] before:absolute before:right-0 before:h-[10px] before:w-[10px] before:animate-loading before:rounded-[10px] before:bg-[#3f93e0] before:content-[""]' />
-      <div className='absolute right-0 top-[10px] block h-[10px] w-[10px] rotate-[160deg] rounded-[10px] before:absolute before:right-0 before:h-[10px] before:w-[10px] before:animate-loading before:rounded-[10px] before:bg-[#1655a1] before:content-[""]' />
-      <div className='absolute bottom-0 right-[10px] block h-[10px] w-[10px] rotate-[-110deg] rounded-[10px] before:absolute before:right-0 before:h-[10px] before:w-[10px] before:animate-loading before:rounded-[10px] before:bg-[#3f93e0] before:content-[""]' />
-      <div className='absolute bottom-[10px] left-0 block h-[10px] w-[10px] rotate-[-20deg] rounded-[10px] before:absolute before:right-0 before:h-[10px] before:w-[10px] before:animate-loading before:rounded-[10px] before:bg-[#1655a1] before:content-[""]' />
-    </div>
-  );
 }

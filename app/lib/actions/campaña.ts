@@ -14,6 +14,7 @@ const CreateCampaignFormSchema = z.object({
   fechaTermino: z.string(),
   estado: z.enum(["En curso", "Finalizado"]),
   descripcion: z.string(),
+  stock: z.string().transform((str) => Number(str)),
   entregas: z.number(),
   tipoDato: z.string(),
   tramo: z.string().transform((str) => str === "true"),
@@ -32,6 +33,7 @@ const CreateCampaign = CreateCampaignFormSchema.omit({
     nombre: true,
     fechaTermino: true,
     descripcion: true,
+    stock: true,
     tipoDato: true,
     tramo: true,
     discapacidad: true,
@@ -45,6 +47,7 @@ export async function createCampaign(formData: FormData): Promise<FormState> {
       nombre,
       fechaTermino,
       descripcion,
+      stock,
       tipoDato,
       tramo,
       discapacidad,
@@ -53,12 +56,23 @@ export async function createCampaign(formData: FormData): Promise<FormState> {
       nombre: formData.get("nombre"),
       fechaTermino: formData.get("fechaTermino"),
       descripcion: formData.get("descripcion"),
+      stock: formData.get("stock"),
       tipoDato: formData.get("tipoDato"),
       tramo: formData.get("tramo"),
       discapacidad: formData.get("discapacidad"),
       adultoMayor: formData.get("adultoMayor"),
     });
+
     const fechaInicio = new Date();
+
+    const campaña = await sql`
+      SELECT * FROM campañas
+      WHERE nombre = ${nombre}
+    `;
+
+    if (campaña.length > 0 && new Date(fechaTermino) > fechaInicio) {
+      throw new Error("Ya existe una campaña activa con este nombre.");
+    }
 
     const estado =
       new Date(fechaTermino) > fechaInicio ? "En curso" : "Finalizado";
@@ -68,15 +82,15 @@ export async function createCampaign(formData: FormData): Promise<FormState> {
       throw new Error("Campos incompletos.");
     }
 
-    if (new Date(fechaTermino) < new Date(fechaInicio)) {
+    if (new Date(fechaTermino) < fechaInicio) {
       throw new Error(
         "La fecha de término no puede ser menor a la fecha de inicio.",
       );
     }
 
     await sql`
-      INSERT INTO campañas (nombre, fecha_inicio, fecha_termino, descripcion, tipo_dato, estado, entregas, tramo, discapacidad, adulto_mayor)
-      VALUES (${nombre}, ${fechaInicio}, ${fechaTermino}, ${descripcion.toUpperCase()}, ${tipoDato}, ${estado}, ${entregas}, ${tramo}, ${discapacidad}, ${adultoMayor})
+      INSERT INTO campañas (nombre, fecha_inicio, fecha_termino, descripcion, stock, tipo_dato, estado, entregas, tramo, discapacidad, adulto_mayor)
+      VALUES (${nombre}, ${fechaInicio}, ${fechaTermino}, ${descripcion.toUpperCase()}, ${stock}, ${tipoDato}, ${estado}, ${entregas}, ${tramo}, ${discapacidad}, ${adultoMayor})
     `;
 
     revalidatePath("/dashboard/campanas");

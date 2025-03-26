@@ -8,6 +8,7 @@ import { importXLSXFile } from "@/app/lib/actions/rsh";
 import xlsxImg from "@/public/xlsx.svg";
 import Image from "next/image";
 import { RiCloseCircleFill } from "react-icons/ri";
+import { Spinner } from "../loaders";
 
 export type FormState = {
   success?: boolean;
@@ -208,9 +209,3 @@ export default function ImportXLSXModal({ name }: { name: string }) {
 //     </div>
 //   );
 // }
-
-export function Spinner() {
-  return (
-    <div className="animate-cspin h-5 w-5 rounded-full border-4 border-blue-200 border-t-blue-400 bg-white"></div>
-  );
-}

@@ -59,19 +59,16 @@ export default function TableRow({
           {tramo}%
         </span>
       </td>
-      <td className="w-[20%] py-3 pr-14 text-right text-slate-600">
-        {ultima_entrega ? formatDate(ultima_entrega) : ""}
+      <td className="w-[20%] py-3 pr-14 text-right font-medium text-slate-600">
+        {ultima_entrega ? (
+          <div className="flex flex-col text-slate-600">
+            <span>{formatDate(ultima_entrega)}</span>
+            <span className="text-xs text-slate-400">Última Entrega</span>
+          </div>
+        ) : (
+          <div className="text-slate-400/80">Sin entregas</div>
+        )}
       </td>
-      {/* <td className="w-[5%] pl-6 pr-10 text-right">
-        <div className="flex items-center justify-end">
-          <Link
-            href={`/dashboard/entregas/${rut}`}
-            className="w-fit rounded p-1 font-medium text-slate-700/90 hover:bg-blue-100 hover:text-blue-600"
-          >
-            <CiViewList className="h-6 w-6 cursor-pointer" />
-          </Link>
-        </div>
-      </td> */}
     </tr>
   );
 }
