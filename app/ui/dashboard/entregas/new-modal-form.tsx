@@ -86,7 +86,7 @@ export default function NewModalForm({
 
     formData.append("campaigns", JSON.stringify(formFields));
     formData.append("rut", rut.toString());
-    formData.append("id_usuario", id_usuario);
+    // formData.append("id_usuario", id_usuario);
     formData.append("observaciones", observaciones);
 
     toast.promise(

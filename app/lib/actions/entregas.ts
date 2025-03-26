@@ -41,12 +41,10 @@ const sql = postgres(process.env.DATABASE_URL!, { ssl: "require" });
 
 // Crear Entrega
 const CreateEntregaFormSchema = z.object({
-  id_usuario: z.string(),
   rut: z.string(),
   observaciones: z.string(),
   campaigns: z.array(
     z.object({
-      //campaign_id
       id: z.string(),
       campaignName: z.string(),
       detail: z.string(),
@@ -59,7 +57,7 @@ const CreateEntrega = CreateEntregaFormSchema;
 
 export const createEntrega = async (id: string, formData: FormData) => {
   try {
-    const { rut, observaciones, campaigns, id_usuario } = CreateEntrega.parse({
+    const { rut, observaciones, campaigns } = CreateEntrega.parse({
       rut: formData.get("rut"),
       observaciones: formData.get("observaciones"),
       campaigns: JSON.parse(formData.get("campaigns") as string),
