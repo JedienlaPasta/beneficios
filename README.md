@@ -200,6 +200,16 @@ Al ingresar la entrega, redirigir al modal de documentos adjuntos para que pueda
 
 Rehacer seccion de campañas activas.
 
+Limitar campañas activas // stock. x
+
+Estado campaña de acuerdo a la fecha de termino. x
+
+Boton nueva acta.
+
+Skeletons.
+
+New Campaign => Update Campaign(actualizar esta ultima).
+
 # Extras
 
 Decreto supremo 82
@@ -211,6 +221,6 @@ Titan One
 
 SIBAS - Sistema Integrado de Beneficios y Asistencias Sociales
 
-Limite Cantidades: Tarjetas, etc // Stock?
+Limite Cantidades: Tarjetas, etc // Stock? x
 
 Boton Nueva Acta => Generar Nueva Acta.

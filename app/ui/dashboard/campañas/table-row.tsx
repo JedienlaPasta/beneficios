@@ -19,16 +19,19 @@ export default function TableRow({
     fecha_termino: Date;
   };
 }) {
-  const { id, nombre, entregas, estado, fecha_inicio, fecha_termino } = item;
+  const { id, nombre, entregas, fecha_inicio, fecha_termino } = item;
   const router = useRouter();
 
   const inicio = formatDate(fecha_inicio);
   const termino = formatDate(fecha_termino);
 
+  const now = new Date();
+  const estado = fecha_termino > now ? "En curso" : "Finalizado";
+
   const colorEstado =
     estado === "En curso"
-      ? "bg-green-50 text-green-700 border-green-200"
-      : "bg-slate-50 text-slate-700 border-slate-200";
+      ? "bg-green-100 text-green-500 border-green-200"
+      : "bg-slate-100 text-slate-500 border-slate-200";
 
   const copyToClipboard = async (text: string) => {
     await navigator.clipboard.writeText(text);
@@ -75,16 +78,6 @@ export default function TableRow({
       <td className="w-[15%] px-10 py-3 text-right text-slate-600">
         {termino}
       </td>
-      {/* <td className="w-[5%] pl-6 pr-10 text-right">
-        <div className="flex items-center justify-end">
-          <Link
-            href={`/dashboard/campanas/${id}`}
-            className="w-fit rounded p-1 font-medium text-slate-700/90 hover:bg-blue-100 hover:text-blue-600"
-          >
-            <CiViewList className="h-6 w-6 cursor-pointer" />
-          </Link>
-        </div>
-      </td> */}
     </tr>
   );
 }

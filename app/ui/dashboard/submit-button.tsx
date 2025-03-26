@@ -11,16 +11,18 @@ export function SubmitButton({
   children: string;
   isDisabled: boolean;
   isLoading?: boolean;
-  setIsDisabled: (
+  setIsDisabled?: (
     prevState: boolean | ((prevState: boolean) => boolean),
   ) => void;
 }) {
   const btnText = children;
 
   const handleSubmit = () => {
-    setTimeout(() => {
-      setIsDisabled(true);
-    }, 50);
+    if (setIsDisabled) {
+      setTimeout(() => {
+        setIsDisabled(true);
+      }, 50);
+    }
   };
 
   return (

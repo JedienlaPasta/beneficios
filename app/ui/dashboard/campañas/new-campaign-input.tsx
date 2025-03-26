@@ -7,9 +7,10 @@ type InputProps = {
   // nombre: keyof Campaign;
   type?: string;
   value?: string;
-  defaultValue?: string;
-  setData?: (prevState: string) => void;
+  required?: boolean;
+  // defaultValue?: string;
   placeHolder?: string;
+  setData?: (prevState: string) => void;
   setFormData?: (
     prevState: Campaign | ((prevState: Campaign) => Campaign),
   ) => void;
@@ -21,6 +22,7 @@ export default function Input({
   type,
   value,
   placeHolder,
+  required,
   setData,
   setFormData,
 }: InputProps) {
@@ -41,6 +43,7 @@ export default function Input({
         {label}
       </label>
       <input
+        required={required}
         id={label}
         name={nombre}
         type={type}

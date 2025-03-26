@@ -17,6 +17,18 @@ export const formatDate = (date: Date | null) => {
   return dia + " " + mes + ", " + año;
 };
 
+export const formatTime = (date: Date | null) => {
+  if (!date) return "";
+  const esTime = date.toLocaleString("es-ES", {
+    hour: "numeric",
+    minute: "numeric",
+  });
+  const splitTime = esTime.toString().split(" ");
+  const hora = splitTime[0];
+
+  return hora;
+};
+
 // Takes: Wed Mar 05 2025 15:06:42 GMT-0300 (hora de verano de Chile) => Returns: 2025-03-05T18:06:42.000Z
 export const formatDateForDB = (dateString: string) => {
   const date = new Date(dateString);
@@ -35,12 +47,6 @@ export const formatNumber = (num: number) => {
 
 export const capitalize = (str: string) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
-};
-
-export const capitalizeEachWord = (str: string) => {
-  return str.replace(/\w\S*/g, function (txt) {
-    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-  });
 };
 
 export const getDV = (rut: string) => {

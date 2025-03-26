@@ -4,6 +4,7 @@ export type Campaign = {
   fecha_inicio: Date;
   fecha_termino: Date;
   descripcion: string;
+  stock: number;
   estado: "En curso" | "Finalizado";
   entregas: number;
   tipo_dato: string;

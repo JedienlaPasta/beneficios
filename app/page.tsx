@@ -23,6 +23,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import LoginForm from "@/app/ui/login-form";
+import { SquaresLoader } from "./ui/dashboard/loaders";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -62,9 +63,16 @@ export default function LoginPage() {
   if (isLoading) {
     return (
       <main className="flex items-center justify-center bg-gray-200 md:h-screen">
-        <div className="flex w-full max-w-[360px] flex-col gap-5 rounded-xl border border-gray-300 bg-white px-8 py-12 md:-mt-32">
-          <p className="text-center text-slate-500">Acceso Denegado</p>
-          <p className="text-center text-slate-500">redirigiendo...</p>
+        <div className="relative w-full max-w-[360px] overflow-hidden rounded-xl border border-gray-200 bg-white px-8 py-10 shadow-lg md:-mt-32">
+          <div className="flex flex-col gap-4 text-center">
+            <h3 className="text-lg font-medium text-slate-700">
+              Verificando sesión
+            </h3>
+            <SquaresLoader />
+            <p className="animate-pulse text-sm text-slate-500">
+              Por favor espere mientras lo redirigimos...
+            </p>
+          </div>
         </div>
       </main>
     );
