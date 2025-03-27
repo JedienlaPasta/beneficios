@@ -1,5 +1,5 @@
 import { Campaign } from "@/app/lib/definitions";
-import { formatDate } from "@/app/lib/utils";
+import { formatDate } from "@/app/lib/utils/format";
 import CampaignOptionsMenu from "./options-menu";
 import DetailRow from "./detail-card";
 import StaticRequirementsCard from "./static-card-requirements";

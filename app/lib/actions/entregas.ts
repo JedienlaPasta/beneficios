@@ -1,8 +1,10 @@
 "use server";
-
 import postgres from "postgres";
 import { z } from "zod";
 import { PDFDocument } from "pdf-lib";
+import fs from "fs";
+import path from "path";
+import { compressPdfBuffer } from "../utils/pdf-compress";
 
 interface CitizenData {
   telefono: string | null;
@@ -401,108 +403,105 @@ type Entregas = {
   id_usuario: string;
 };
 
+type Campaigns = {
+  campaign_name: string;
+  detail: string;
+};
+
+// import { PDFDocument } from "pdf-lib";
+// import fs from "fs";
+// import path from "path";
+// import { exec } from "child_process"; // Para la compresión del PDF
+
 export const createAndDownloadPDFByFolio = async (folio: string) => {
   try {
     const entregaInfo = await sql<Entregas[]>`
-      SELECT observacion, rut, id_usuario
-      FROM entregas WHERE folio = ${folio}
-    `;
-
+            SELECT observacion, rut, id_usuario
+            FROM entregas WHERE folio = ${folio}
+        `;
     if (entregaInfo.length === 0) {
       return { success: false, error: "Entrega no encontrada", status: 404 };
     }
-    console.log(entregaInfo);
 
-    const campaigns = await sql<{ campaign_name: string; detail: string }[]>`
-      SELECT campañas.nombre as campaign_name, entrega.detalle as detail
-      FROM entrega 
-      JOIN campañas ON campañas.id = entrega.id_campaña
-      WHERE folio = ${folio} 
-    `;
-
+    const campaigns = await sql<Campaigns[]>`
+            SELECT campañas.nombre as campaign_name, entrega.detalle as detail
+            FROM entrega 
+            JOIN campañas ON campañas.id = entrega.id_campaña
+            WHERE folio = ${folio} 
+        `;
     if (campaigns.length === 0) {
       return { success: false, error: "Campañas no encontradas", status: 404 };
     }
-    console.log(campaigns);
 
     const { observacion, rut, id_usuario } = entregaInfo[0];
-    // Generar Acta de Entrega
-    const pdfUrl =
-      "https://raw.githubusercontent.com/JedienlaPasta/files/main/ActaEntrega.pdf";
-    const response = await fetch(pdfUrl);
-    const pdfBytes = await response.arrayBuffer();
+
+    const pdfBytes = fs.readFileSync(
+      path.join(process.cwd(), "public", "ActaEntrega.pdf"),
+    );
     const pdfDoc = await PDFDocument.load(pdfBytes);
 
-    // Datos del Ciudadano
-    const ciudadanofila = await sql`select * from rsh where rut = ${rut}`;
+    const ciudadanofila = await sql`SELECT * FROM rsh WHERE rut = ${rut}`;
     if (ciudadanofila.length === 0) {
       return { success: false, error: "Persona no encontrada", status: 404 };
     }
     const ciudadano = ciudadanofila[0] as CitizenData;
 
-    // Encargado
     const encargadofila =
-      await sql`select * from usuarios where id = ${id_usuario}`;
+      await sql`SELECT * FROM usuarios WHERE id = ${id_usuario}`;
     if (encargadofila.length === 0) {
       return { success: false, error: "Empleado no encontrado", status: 404 };
     }
     const encargado = encargadofila[0] as UserData;
 
-    // Asignación de valores a los campos del formulario
     const form = pdfDoc.getForm();
-
     form.getTextField("Folio").setText(String(folio));
     form
       .getTextField("NombreCiudadano")
-      .setText(String(ciudadano.nombres + " " + ciudadano.apellidos));
-    form
-      .getTextField("Rut")
-      .setText(String(ciudadano.rut + "-" + ciudadano.dv));
+      .setText(`${ciudadano.nombres} ${ciudadano.apellidos}`);
+    form.getTextField("Rut").setText(`${ciudadano.rut}-${ciudadano.dv}`);
     form.getTextField("Domicilio").setText(String(ciudadano.direccion));
-    form.getTextField("Tramo").setText(String(ciudadano.tramo + "%"));
-    form
-      .getTextField("Telefono")
-      .setText(String(ciudadano.telefono ? ciudadano.telefono : "No aplica"));
-
-    const fecha = new Date(); // Fecha actual
+    form.getTextField("Tramo").setText(`${ciudadano.tramo}%`);
+    form.getTextField("Telefono").setText(ciudadano.telefono || "No aplica");
     form
       .getTextField("FechaSolicitud")
-      .setText(String(fecha.toLocaleDateString()));
+      .setText(new Date().toLocaleDateString());
 
-    campaigns.forEach((campaign) => {
-      const { campaign_name, detail } = campaign;
-
+    campaigns.forEach(({ campaign_name, detail }) => {
       if (campaign_name.includes("Vale de Gas")) {
-        form.getTextField("CodigoGas").setText(String(detail));
+        form.getTextField("CodigoGas").setText(detail);
       } else if (campaign_name.includes("Pañales")) {
-        const pañalTypes = ["RN", "G", "XXG", "P", "XG", "Adultos"];
-        pañalTypes.forEach((tipo) => {
-          if (detail.includes(tipo)) {
-            form.getTextField(tipo).setText("X");
-          }
+        ["RN", "G", "XXG", "P", "XG", "Adultos"].forEach((tipo) => {
+          if (detail.includes(tipo)) form.getTextField(tipo).setText("X");
         });
       } else if (campaign_name.includes("Tarjeta de Comida")) {
-        form.getTextField("CodigoTarjeta").setText(String(detail));
+        form.getTextField("CodigoTarjeta").setText(detail);
       } else {
-        form.getTextField("Otros").setText(String(detail));
+        form.getTextField("Otros").setText(detail);
       }
     });
 
-    form.getTextField("Justificacion").setText(String(observacion));
-    form.getTextField("NombreProfesional").setText(String(encargado.nombre));
-    form.getTextField("Cargo").setText(String(encargado.cargo));
-    form
-      .getTextField("FechaEntrega")
-      .setText(String(fecha.toLocaleDateString()));
+    form.getTextField("Justificacion").setText(observacion);
+    form.getTextField("NombreProfesional").setText(encargado.nombre);
+    form.getTextField("Cargo").setText(encargado.cargo);
+    form.getTextField("FechaEntrega").setText(new Date().toLocaleDateString());
 
-    // Almacenamiento de documento generado
-    const pdfBytesFilled = await pdfDoc.save();
+    // Guardar el PDF en un Buffer
+    const pdfBuffer = await pdfDoc.save();
+
+    let finalBuffer;
+    try {
+      // Comprimir PDF con Ghostscript
+      finalBuffer = await compressPdfBuffer(Buffer.from(pdfBuffer));
+    } catch (error) {
+      console.error("Compression failed, using original PDF:", error);
+      finalBuffer = pdfBuffer;
+    }
 
     return {
       success: true,
       data: {
-        content: pdfBytesFilled,
-        filename: "Acta de entrega inicial.pdf",
+        content: finalBuffer.toString("base64"),
+        filename: `ActaEntrega_${folio}.pdf`,
       },
     };
   } catch (error) {

@@ -1,7 +1,7 @@
 "use client";
 import { SocialAidTableRow } from "@/app/lib/definitions";
 import { useRouter, useSearchParams } from "next/navigation";
-import { formatDate } from "@/app/lib/utils";
+import { formatDate } from "@/app/lib/utils/format";
 
 export default function TableRow({ item }: { item: SocialAidTableRow }) {
   const { folio, fecha_entrega, nombre_usuario, estado_documentos } = item;

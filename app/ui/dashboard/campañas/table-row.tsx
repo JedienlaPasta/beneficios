@@ -1,5 +1,5 @@
 "use client";
-import { formatDate } from "@/app/lib/utils";
+import { formatDate } from "@/app/lib/utils/format";
 // import Link from "next/link";
 import { useRouter } from "next/navigation";
 // import { CiViewList } from "react-icons/ci";
