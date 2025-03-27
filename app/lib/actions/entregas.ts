@@ -423,7 +423,7 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
       return { success: false, error: "Entrega no encontrada", status: 404 };
     }
 
-    const campaigns = await sql<{ campaign_name: string; detail: string }[]>`
+    const campaigns = await sql<Campaigns[]>`
             SELECT campañas.nombre as campaign_name, entrega.detalle as detail
             FROM entrega 
             JOIN campañas ON campañas.id = entrega.id_campaña
