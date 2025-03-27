@@ -10,7 +10,7 @@ import {
 import { SocialAidByFolio, SocialFiles } from "@/app/lib/definitions";
 import Link from "next/link";
 import { Files } from "./files";
-import { formatDate } from "@/app/lib/utils";
+import { formatDate } from "@/app/lib/utils/format";
 import GetNewFileButton from "./new-file-button";
 
 export default async function EntregasTableModal({ folio }: { folio: string }) {

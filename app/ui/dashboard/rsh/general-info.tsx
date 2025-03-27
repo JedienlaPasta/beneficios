@@ -1,6 +1,6 @@
 "use client";
 import { RSHInfo } from "@/app/lib/definitions";
-import { formatNumber } from "@/app/lib/utils";
+import { formatNumber } from "@/app/lib/utils/format";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function RSHGeneralInfo({ data }: { data: RSHInfo[] }) {

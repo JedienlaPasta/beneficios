@@ -1,4 +1,4 @@
-import { formatDate, formatNumber } from "@/app/lib/utils";
+import { formatDate, formatNumber } from "@/app/lib/utils/format";
 // import CampaignOptionsMenu from "../campañas/[id]/options-menu";
 import DetailRow from "../campañas/[id]/detail-card";
 import { RSH } from "@/app/lib/definitions";

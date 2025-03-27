@@ -30,24 +30,74 @@ export default function GetNewFileButton({ children, folio }: Props) {
         return;
       }
 
-      // Create blob directly from the Uint8Array
-      const pdfContent = response.data.content;
-      const blob = new Blob([pdfContent], { type: "application/pdf" });
-      const url = URL.createObjectURL(blob);
+      const base64Data = response.data.content;
+      const byteArray = Uint8Array.from(atob(base64Data), (c) =>
+        c.charCodeAt(0),
+      );
 
-      // Open PDF in new tab
-      const newWindow = window.open(url, "_blank");
-      console.log(response.data.filename);
-
-      // Set the document title to the filename
-      if (newWindow) {
-        newWindow.document.title = response.data.filename || "Documento.pdf";
+      if (byteArray.length < 500) {
+        throw new Error("Archivo PDF corrupto o inválido");
       }
 
-      toast.success("Documento abierto correctamente", { id: toastId });
+      const footerRange = byteArray.slice(-1024);
+      const footerText = new TextDecoder().decode(footerRange);
+      if (!footerText.includes("%%EOF")) {
+        throw new Error(
+          "Invalid PDF structure (missing EOF marker in last 1KB)",
+        );
+      }
+
+      const blob = new Blob([byteArray], { type: "application/pdf" });
+      if (!blob.type.includes("pdf")) {
+        throw new Error("Tipo de archivo inválido");
+      }
+      if (blob.size === 0) {
+        throw new Error("Archivo PDF vacío recibido");
+      }
+
+      const pdfUrl = URL.createObjectURL(blob);
+
+      const newWindow = window.open(pdfUrl, "_blank");
+
+      if (!newWindow) {
+        throw new Error(
+          "Popup bloqueado - Por favor permite ventanas emergentes para este sitio",
+        );
+      }
+
+      // Cleanup for when new tab closes
+      newWindow.addEventListener("load", () => {
+        // Delay revocation until window closes
+        const checkClosed = setInterval(() => {
+          if (newWindow.closed) {
+            URL.revokeObjectURL(pdfUrl);
+            clearInterval(checkClosed);
+          }
+        }, 1000);
+      });
+
+      // Boton de descarga en caso de que no se abra en una nueva pestaña
+      toast.success("Documento abierto en nueva pestaña", {
+        id: toastId,
+        action: {
+          label: "Descargar",
+          onClick: () => {
+            const a = document.createElement("a");
+            a.href = pdfUrl;
+            a.download = response.data.filename;
+            a.click();
+            URL.revokeObjectURL(pdfUrl);
+          },
+        },
+      });
     } catch (error) {
-      toast.error("Error al abrir documento", { id: toastId });
-      console.error("Error opening document:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Error desconocido";
+      toast.error(`Error al procesar documento: ${errorMessage}`, {
+        id: toastId,
+        duration: 5000,
+      });
+      console.error("PDF handling error:", error);
     }
   };
   return (

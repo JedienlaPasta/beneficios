@@ -1,7 +1,7 @@
 import { MdAutorenew } from "react-icons/md";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { BiFolderPlus } from "react-icons/bi";
-import { formatDate } from "@/app/lib/utils";
+import { formatDate } from "@/app/lib/utils/format";
 import Pagination from "../pagination";
 import { Activity } from "@/app/lib/definitions";
 import { fetchUserActivity } from "@/app/lib/data/auditoria";

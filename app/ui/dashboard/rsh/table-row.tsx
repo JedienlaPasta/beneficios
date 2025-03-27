@@ -1,5 +1,5 @@
 "use client";
-import { formatDate, formatNumber } from "@/app/lib/utils";
+import { formatDate, formatNumber } from "@/app/lib/utils/format";
 // import Link from "next/link";
 // import { CiViewList } from "react-icons/ci";
 
