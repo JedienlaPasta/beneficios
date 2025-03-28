@@ -253,7 +253,9 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
 
       const fileArrayBuffer = await file.arrayBuffer();
       const fileBuffer = Buffer.from(fileArrayBuffer);
-      const fileBase64 = fileBuffer.toString("base64");
+      const compressedBuffer = await compressPdfBuffer(fileBuffer);
+      // Acrchivo que se ingresa
+      const fileBase64 = compressedBuffer.toString("base64");
 
       const fileName = file.name;
       const fileType = ".pdf";

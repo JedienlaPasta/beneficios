@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { createCampaign } from "@/app/lib/actions/campaña";
@@ -12,7 +12,7 @@ import DataTypeCards from "./[id]/update/data-type-cards";
 import RequirementsCard from "./[id]/update/requirements-cards";
 import dayjs from "dayjs";
 import CustomAntdDatePicker from "@/app/ui/dashboard/datepicker";
-import { campaignsList } from "@/app/data/data";
+import { campaignsList } from "@/app/lib/data/static-data";
 
 export type FormState = {
   success?: boolean;
@@ -67,11 +67,6 @@ export default function NewCampaignModal() {
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
-  useEffect(() => {
-    console.log("isLoading: " + isLoading);
-    console.log("isDisabled: " + isDisabled);
-  }, [isLoading, isDisabled]);
-
   const formAction = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
@@ -100,7 +95,7 @@ export default function NewCampaignModal() {
           setIsLoading(false);
           setTimeout(() => {
             closeModal();
-          }, 500);
+          }, 1000);
           return response.message;
         },
         error: (err) => {

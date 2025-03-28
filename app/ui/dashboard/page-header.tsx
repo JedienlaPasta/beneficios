@@ -12,7 +12,6 @@ export default function PageHeader() {
       const userSession = localStorage.getItem("userSession");
       if (userSession) {
         const userData = JSON.parse(userSession);
-        console.log(userData);
         // setIdUsuario(userData.id_usuario);
         const name = userData.nombre.split(" ")[0];
         const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);

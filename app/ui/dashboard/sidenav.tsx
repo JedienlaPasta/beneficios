@@ -16,18 +16,19 @@ export default function Sidenav({ setSidenavOpen }: SidenavProps) {
       <div className="fixed z-20 flex h-dvh w-72 flex-col bg-[#171a1f] text-slate-300">
         <div className="flex h-20 items-center border-b border-slate-700/50 px-4">
           <div className="flex items-center gap-1">
-            <div className="rounded-xl bg-blue-600/20 p-2">
+            <div className="rounded-xl">
               <Image
                 width={48}
                 height={48}
                 alt="SIBAS Logo"
                 src={sibasImg}
+                priority
                 className="h-12 w-12 drop-shadow-lg"
               />
             </div>
             <div className="flex flex-col">
               <h1
-                className={`${anton_sc.className} bg-gradient-to-r from-blue-600 to-sky-400 bg-clip-text text-4xl tracking-wider text-transparent drop-shadow-md`}
+                className={`${anton_sc.className} bg-gradient-to-br from-blue-100 via-slate-200 to-slate-500 bg-clip-text text-4xl tracking-wider text-transparent drop-shadow-md`}
               >
                 IBAS
               </h1>

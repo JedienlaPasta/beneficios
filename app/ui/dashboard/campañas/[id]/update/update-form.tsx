@@ -36,45 +36,45 @@ export default function UpdateForm({ data }: { data: Campaign[] }) {
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
-  const formAction = async (formData: FormData) => {
-    formData.append("nombre", updateFormData.nombre);
-    formData.append("fechaInicio", updateFormData.fecha_inicio.toString());
-    formData.append("fechaTermino", updateFormData.fecha_termino.toString());
-    formData.append("tipoDato", fieldType);
-    formData.append("tramo", criteria.tramo.toString());
-    formData.append("discapacidad", criteria.discapacidad.toString());
-    formData.append("adultoMayor", criteria.adultoMayor.toString());
-    const response = await updateCampaignWithId(formData);
-    // console.log(response);
-    if (response.success) {
-      toast.success(response.message);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
+
+  const formAction = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setIsDisabled(true);
+
+    const myFormData = new FormData();
+
+    myFormData.append("nombre", updateFormData.nombre);
+    myFormData.append("fechaInicio", updateFormData.fecha_inicio.toString());
+    myFormData.append("fechaTermino", updateFormData.fecha_termino.toString());
+    myFormData.append("tipoDato", fieldType);
+    myFormData.append("tramo", criteria.tramo.toString());
+    myFormData.append("discapacidad", criteria.discapacidad.toString());
+    myFormData.append("adultoMayor", criteria.adultoMayor.toString());
+
+    const toastId = toast.loading("Guardando...");
+    try {
+      const response = await updateCampaignWithId(myFormData);
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+
+      toast.success(response.message, { id: toastId });
       setIsLoading(false);
-      setTimeout(() => {
-        closeModal();
-      }, 1500);
-    } else {
-      toast.error(response.message);
+      setTimeout(closeModal, 500);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Error desconocido";
+      toast.error(message, { id: toastId });
       setIsLoading(false);
       setIsDisabled(false);
     }
   };
 
-  // To handle server response
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDisabled, setIsDisabled] = useState(false);
-
-  const handleSubmit = () => {
-    setIsLoading(true);
-    setIsDisabled(true);
-    toast.info("Guardando...");
-  };
-
   return (
-    <form
-      action={formAction}
-      onSubmit={handleSubmit}
-      className="mt-2 grid w-full gap-5 bg-white"
-    >
+    <form onSubmit={formAction} className="mt-2 grid w-full gap-5 bg-white">
       <Input
         label="Nombre"
         nombre="nombre"

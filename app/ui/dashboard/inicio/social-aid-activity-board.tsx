@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { JSX } from "react";
-import outputData from "@/app/data/output.json";
+import outputData from "@/app/lib/data/output.json";
 
 export default function SocialAidActivityBoard() {
   const board: Array<JSX.Element> = [];

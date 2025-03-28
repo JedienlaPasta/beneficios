@@ -39,13 +39,13 @@ export async function authenticateUser(correo: string, contraseña: string) {
     const userRows = await sql`SELECT * FROM usuarios WHERE correo = ${correo}`;
 
     if (userRows.length === 0) {
-      return { success: false, error: "Usuario no encontrado", status: 404 };
+      return { success: false, error: "Credenciales incorrectas", status: 404 };
     }
 
     const user = userRows[0];
 
     if (!user) {
-      return { success: false, error: "Usuario no encontrado", status: 404 };
+      return { success: false, error: "Credenciales incorrectas", status: 404 };
     }
 
     // In a real implementation, use bcrypt to compare passwords
@@ -73,6 +73,7 @@ export async function authenticateUser(correo: string, contraseña: string) {
         cargo: user.cargo,
         correo: user.correo,
       },
+      message: "Bienvenido!",
     };
   } catch (error) {
     console.error("Error en la autenticación:", error);
@@ -90,6 +91,7 @@ export async function POST(req: Request) {
         success: authResult.success,
         user: authResult.user,
         error: authResult.error,
+        message: authResult.message, // Add this line
       },
       { status: authResult.status },
     );

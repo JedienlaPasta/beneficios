@@ -1,6 +1,7 @@
 "use client";
 import clsx from "clsx";
 import { useRouter, useSearchParams } from "next/navigation";
+import React from "react";
 
 export function SubmitButton({
   children,
@@ -8,7 +9,7 @@ export function SubmitButton({
   isLoading,
   setIsDisabled,
 }: {
-  children: string;
+  children: string | React.JSX.Element;
   isDisabled: boolean;
   isLoading?: boolean;
   setIsDisabled?: (
@@ -20,6 +21,7 @@ export function SubmitButton({
   const handleSubmit = () => {
     if (setIsDisabled) {
       setTimeout(() => {
+        console.log("wenas");
         setIsDisabled(true);
       }, 50);
     }
