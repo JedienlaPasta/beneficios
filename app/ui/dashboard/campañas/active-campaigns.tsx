@@ -3,7 +3,7 @@ import { formatDate } from "@/app/lib/utils/format";
 import Link from "next/link";
 
 type ActiveCampaignsProps = {
-  nombre: string;
+  nombre_campaña: string;
   termina: Date;
   entregas: number;
 };
@@ -17,7 +17,7 @@ export default async function ActiveCampaigns() {
         {data.map((campaign) => (
           <Link href={`/dashboard/campanas/${campaign.id}`} key={campaign.id}>
             <ActiveCampaign
-              nombre={campaign.nombre}
+              nombre_campaña={campaign.nombre_campaña}
               termina={campaign.fecha_termino}
               entregas={campaign.entregas}
             />
@@ -28,7 +28,11 @@ export default async function ActiveCampaigns() {
   );
 }
 
-function ActiveCampaign({ nombre, termina, entregas }: ActiveCampaignsProps) {
+function ActiveCampaign({
+  nombre_campaña,
+  termina,
+  entregas,
+}: ActiveCampaignsProps) {
   const fecha_termino = formatDate(termina);
   return (
     <div className="group relative flex min-w-64 flex-1 cursor-pointer flex-col overflow-hidden rounded-xl bg-white shadow-md shadow-slate-300 transition-all duration-300 hover:shadow-lg hover:shadow-slate-400/40">
@@ -56,7 +60,7 @@ function ActiveCampaign({ nombre, termina, entregas }: ActiveCampaignsProps) {
           </div>
           <div className="flex flex-col">
             <h5 className="text-sm font-bold uppercase text-slate-700 transition-colors duration-300 group-hover:text-blue-600">
-              {nombre}
+              {nombre_campaña}
             </h5>
             <p className="mt-1 flex items-center text-xs text-slate-500">
               <svg
