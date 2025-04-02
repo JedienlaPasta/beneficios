@@ -16,7 +16,10 @@ export async function connectToDB() {
         await pool.connect();
         return pool;
       } catch (reconnectError) {
-        console.log("Failed to reconnect to existing pool, creating new one");
+        console.log(
+          "Failed to reconnect to existing pool, creating new one",
+          reconnectError,
+        );
         // Continue to create a new pool
       }
     }

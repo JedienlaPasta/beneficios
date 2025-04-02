@@ -67,6 +67,7 @@ export default async function ActivityTable({
       </div>
     );
   } catch (error) {
+    console.log(error);
     return (
       <div className="flex flex-col justify-center rounded-b-xl border-t border-gray-200/80 bg-white p-6 text-center">
         <div className="mx-auto mb-2 flex items-center justify-center gap-2 rounded-full bg-amber-100/80 p-2 text-lg text-amber-500">

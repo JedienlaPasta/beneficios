@@ -256,7 +256,7 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
         .input("folio", sql.NVarChar, folio)
         .input("estado", sql.NVarChar, count === 3 ? "Finalizado" : "En Curso")
         .query(`
-        UPDATE Entregas
+        UPDATE entregas
         SET estado_documentos = @estado
         WHERE folio = @folio
       `);
@@ -383,17 +383,17 @@ export const downloadPDFById = async (id: string) => {
   }
 };
 
-type Entregas = {
-  folio: string;
-  observacion: string;
-  rut: string;
-  id_usuario: string;
-};
+// type Entregas = {
+//   folio: string;
+//   observacion: string;
+//   rut: string;
+//   id_usuario: string;
+// };
 
-type Campaigns = {
-  campaign_name: string;
-  detail: string;
-};
+// type Campaigns = {
+//   campaign_name: string;
+//   detail: string;
+// };
 
 // import { PDFDocument } from "pdf-lib";
 // import fs from "fs";

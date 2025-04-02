@@ -4,6 +4,7 @@ import { FaBoxOpen } from "react-icons/fa6";
 import Link from "next/link";
 import { fetchGeneralInfo } from "@/app/lib/data/inicio";
 import { formatNumber } from "@/app/lib/utils/format";
+import { JSX } from "react";
 
 export default async function GeneralInfoCards() {
   const response = await fetchGeneralInfo();
@@ -44,7 +45,7 @@ type InfoCardProps = {
   stat: {
     title: string;
     value: string;
-    icon: any;
+    icon: JSX.Element;
     changeType: string;
     to: string;
   };
