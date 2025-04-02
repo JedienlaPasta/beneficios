@@ -98,7 +98,7 @@ export default async function ActivityTable({
 }
 
 function TableRow({ item }: { item: Activity }) {
-  const { nombre, accion, dato, fecha, id_mod } = item;
+  const { nombre_usuario, accion, dato, fecha, id_mod } = item;
   const fechaActividad = formatDate(fecha);
 
   const activityValues = ACTIVITY.find((activity) => activity.type === accion);
@@ -110,7 +110,7 @@ function TableRow({ item }: { item: Activity }) {
           {activityValues?.icon}{" "}
         </span>
         <div>
-          <span className="font-medium text-slate-700">{nombre} </span>
+          <span className="font-medium text-slate-700">{nombre_usuario} </span>
           <span className="text-slate-500">{dato} </span>
           <span className="text-blue-400">{id_mod}</span>
         </div>
