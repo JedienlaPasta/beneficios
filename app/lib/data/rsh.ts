@@ -1,64 +1,108 @@
-import postgres from "postgres";
+import sql from "mssql";
 import { RSH, RSHInfo } from "../definitions";
-
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
+import { connectToDB } from "../utils/db-connection";
 
 export async function fetchRSHById(id: string) {
   try {
-    const data = await sql<RSH[]>`
-      SELECT *,
-      (SELECT MAX(entregas.fecha_entrega) FROM entregas WHERE entregas.rut = ${id}) AS ultima_entrega
-      FROM rsh 
-      WHERE rut = ${id}
-      `;
-    return { data };
+    const pool = await connectToDB();
+    const request = pool.request();
+    const result = await request.input("rut", sql.Int, id).query(`
+        SELECT rsh.*,
+        (SELECT MAX(fecha_entrega) FROM entregas WHERE rut = @rut) AS ultima_entrega
+        FROM rsh
+        WHERE rsh.rut = @rut
+      `);
+
+    return { data: result.recordset as RSH[] };
   } catch (error) {
-    console.error("Error al obtener datos de la tabla de campañas:", error);
+    console.error("Error al obtener registro social de hogares: ", error);
     return { data: [] };
   }
 }
 
-// Optimizar busquedas
 export async function fetchRSH(
   query: string,
   currentPage: number,
-  itemsPerPage?: number,
+  resultsPerPage: number,
 ) {
-  const resultsPerPage = itemsPerPage || 6;
   const offset = (currentPage - 1) * resultsPerPage || 0;
   try {
-    const data = await sql<RSH[]>`
-    SELECT rsh.rut, rsh.dv, rsh.nombres, rsh.apellidos, rsh.direccion, rsh.tramo,
-    (SELECT MAX(entregas.fecha_entrega) FROM entregas WHERE entregas.rut = rsh.rut) AS ultima_entrega,
-    COUNT (*) OVER() AS total
-    FROM rsh
-      WHERE concat(rsh.rut, ' ', rsh.nombres, ' ', rsh.apellidos, ' ', rsh.direccion) ILIKE ${`%${query}%`}
-      ORDER BY rsh.nombres ASC
-      LIMIT ${resultsPerPage}
-      OFFSET ${offset}
-      `;
-    const pages = Math.ceil(Number(data[0]?.total) / resultsPerPage);
-    return { data, pages };
+    const pool = await connectToDB();
+    const request = pool.request();
+    const result = await request
+      .input("query", sql.NVarChar, `%${query}%`)
+      .input("offset", sql.Int, offset)
+      .input("pageSize", sql.Int, resultsPerPage).query(`
+        SELECT rsh.rut, rsh.dv, rsh.nombres_rsh, rsh.apellidos_rsh, rsh.direccion, rsh.tramo,
+        (SELECT MAX(entregas.fecha_entrega) FROM entregas WHERE entregas.rut = rsh.rut) AS ultima_entrega,
+        COUNT (*) OVER() AS total
+        FROM rsh
+        WHERE concat(rsh.rut,' ', rsh.nombres_rsh,' ', rsh.apellidos_rsh,' ', rsh.direccion) LIKE @query
+        ORDER BY rsh.nombres_rsh ASC
+        OFFSET @offset ROWS
+        FETCH NEXT @pageSize ROWS ONLY
+        `);
+
+    const pages = Math.ceil(
+      Number(result.recordset[0]?.total) / resultsPerPage,
+    );
+    return { data: result.recordset as RSH[], pages };
   } catch (error) {
-    console.error("Error al obtener datos de la tabla de campañas:", error);
+    console.error("Error al obtener registro social de hogares: ", error);
     return { data: [], pages: 0 };
   }
 }
 
-export async function fetchRSHInfo() {
+export async function fetchRSHCount() {
   try {
-    const data = await sql<RSHInfo[]>`
-      SELECT rsh_info.ultima_actualizacion, rsh_count.total_registros
-      FROM rsh_info
-      CROSS JOIN (
-        SELECT COUNT(*) AS total_registros
-        FROM rsh
-      ) AS rsh_count
-      LIMIT 1
-      `;
-    return { data };
+    const pool = await connectToDB();
+    const request = pool.request();
+    const result = await request.query(`
+      SELECT COUNT(*) AS total_registros FROM rsh`);
+
+    // Check if result.recordset has data before returning
+    if (result.recordset && result.recordset.length > 0) {
+      return {
+        data: result.recordset as RSHInfo[],
+      };
+    } else {
+      return {
+        data: [{ total_registros: 0 }],
+      };
+    }
   } catch (error) {
-    console.error("Error al obtener datos de la tabla de campañas:", error);
-    return { data: [] };
+    console.error("Error al obtener total de registros de rsh:", error);
+    return {
+      data: [{ total_registros: 0 }],
+    };
+  }
+}
+
+export async function fetchRSHLastUpdate() {
+  try {
+    const pool = await connectToDB();
+    const request = pool.request();
+    const result = await request.query(`
+      SELECT TOP 1 rsh_info.ultima_actualizacion FROM rsh_info
+    `);
+
+    if (result.recordset && result.recordset.length > 0) {
+      return {
+        data: result.recordset as RSHInfo[],
+      };
+    } else {
+      return {
+        data: [{ ultima_actualizacion: null }],
+      };
+    }
+  } catch (error) {
+    console.error("Error al obtener ultima fecha de actualizacion:", error);
+    return {
+      data: [
+        {
+          ultima_actualizacion: null,
+        },
+      ],
+    };
   }
 }

@@ -12,14 +12,14 @@ export default function TableRow({
 }: {
   item: {
     id: string;
-    nombre: string;
+    nombre_campaña: string;
     entregas: number;
     estado: "En curso" | "Finalizado";
     fecha_inicio: Date;
     fecha_termino: Date;
   };
 }) {
-  const { id, nombre, entregas, fecha_inicio, fecha_termino } = item;
+  const { id, nombre_campaña, entregas, fecha_inicio, fecha_termino } = item;
   const router = useRouter();
 
   const inicio = formatDate(fecha_inicio);
@@ -58,7 +58,9 @@ export default function TableRow({
           </div>
         </div>
       </td>
-      <td className="w-[30%] py-3 font-medium text-slate-700">{nombre}</td>
+      <td className="w-[30%] py-3 font-medium text-slate-700">
+        {nombre_campaña}
+      </td>
       <td className="w-[10%] items-center py-3 text-slate-700">
         <div className="flex items-center gap-3 font-medium text-slate-700/90">
           <div className="col-span-1 flex w-fit justify-start">

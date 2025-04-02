@@ -1,24 +1,7 @@
-export type Campaign = {
-  id: string;
-  nombre: string;
-  fecha_inicio: Date;
-  fecha_termino: Date;
-  descripcion: string;
-  stock: number;
-  estado: "En curso" | "Finalizado";
-  entregas: number;
-  tipo_dato: string;
-  tramo: string;
-  discapacidad: string;
-  adulto_mayor: string;
-  pages?: number; // total de paginas
-  total?: number; // total de registros
-};
-
 export type Activity = {
   id: string;
-  id_mod?: string;
-  nombre: string;
+  id_mod: string;
+  nombre_usuario: string;
   accion: string;
   dato: string;
   fecha: Date;
@@ -26,11 +9,28 @@ export type Activity = {
   total?: number; // total de registros
 };
 
-//Social
+export type Campaign = {
+  id: string;
+  nombre_campaña: string;
+  fecha_inicio: Date;
+  fecha_termino: Date;
+  entregas: number;
+  code: string;
+  stock: number;
+  tipo_dato: string;
+  tramo: string;
+  estado: "En curso" | "Finalizado";
+  discapacidad: string;
+  adulto_mayor: string;
+  pages?: number; // total de paginas
+  total?: number; // total de registros
+};
+
+// Social (Entregas + RSH)
 export type SocialAid = {
   folio: string;
-  nombres: string;
-  apellidos: string;
+  nombres_rsh: string;
+  apellidos_rsh: string;
   rut: string;
   beneficio?: string;
   fecha_entrega: Date;
@@ -40,7 +40,7 @@ export type SocialAid = {
 
 export type SocialAidTableRow = {
   folio: string;
-  nombre_campaña: string;
+  nombre_campaña?: string;
   detalle: string;
   estado_documentos: string;
   nombre_usuario: string;
@@ -75,8 +75,8 @@ export type SocialFiles = {
 export type RSHTableData = {
   rut: number;
   dv: string;
-  nombres: string;
-  apellidos: string;
+  nombres_rsh: string;
+  apellidos_rsh: string;
   direccion: string;
   tramo: number;
   ultima_entrega: Date;
@@ -85,13 +85,13 @@ export type RSHTableData = {
 };
 
 export type RSHInfo = {
-  ultima_actualizacion: Date;
+  ultima_actualizacion: Date | null;
   total_registros: number;
 };
 
 export type RSH = {
-  nombres: string;
-  apellidos: string;
+  nombres_rsh: string;
+  apellidos_rsh: string;
   rut: number;
   direccion: string;
   sector: string;

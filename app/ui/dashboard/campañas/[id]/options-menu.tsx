@@ -26,6 +26,7 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
     const params = new URLSearchParams(searchParams);
     params.delete("update", "open");
     router.replace(`?${params.toString()}`, { scroll: false });
+    router.push("/dashboard/campanas");
   };
 
   const handleDeleteButton = async () => {

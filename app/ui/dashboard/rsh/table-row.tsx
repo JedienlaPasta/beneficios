@@ -1,7 +1,5 @@
 "use client";
 import { formatDate, formatNumber } from "@/app/lib/utils/format";
-// import Link from "next/link";
-// import { CiViewList } from "react-icons/ci";
 
 export default function TableRow({
   item,
@@ -9,15 +7,22 @@ export default function TableRow({
   item: {
     rut: number;
     dv: string;
-    nombres: string;
-    apellidos: string;
+    nombres_rsh: string;
+    apellidos_rsh: string;
     direccion: string;
     tramo: number;
     ultima_entrega: Date;
   };
 }) {
-  const { rut, dv, nombres, apellidos, direccion, tramo, ultima_entrega } =
-    item;
+  const {
+    rut,
+    dv,
+    nombres_rsh,
+    apellidos_rsh,
+    direccion,
+    tramo,
+    ultima_entrega,
+  } = item;
   const formattedRut = formatNumber(rut) + (dv ? "-" + dv : "");
 
   return (
@@ -26,7 +31,7 @@ export default function TableRow({
         <div className="overflow-hidden text-ellipsis">{formattedRut}</div>
       </td>
       <td className="w-[30%] py-3 pl-10 pr-6 text-slate-700">
-        {nombres + " " + apellidos}
+        {nombres_rsh + " " + apellidos_rsh}
       </td>
       <td className="w-[15%] py-3 pr-14 text-left text-slate-600">
         {direccion}
@@ -37,18 +42,12 @@ export default function TableRow({
         </span>
       </td>
       <td className="w-[15%] py-3 pr-14 text-right text-slate-600">
-        {ultima_entrega ? formatDate(ultima_entrega) : ""}
+        {ultima_entrega ? (
+          formatDate(ultima_entrega)
+        ) : (
+          <p className="text-xs font-medium text-slate-400">Sin entregas</p>
+        )}
       </td>
-      {/* <td className="w-[5%] pl-6 pr-10 text-right">
-        <div className="flex items-center justify-end">
-          <Link
-            href={`/dashboard/rsh/${rut}`}
-            className="w-fit rounded p-1 font-medium text-slate-700/90 hover:bg-blue-100 hover:text-blue-600"
-          >
-            <CiViewList className="h-6 w-6 cursor-pointer" />
-          </Link>
-        </div>
-      </td> */}
     </tr>
   );
 }

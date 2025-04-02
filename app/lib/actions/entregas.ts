@@ -1,18 +1,19 @@
 "use server";
-import postgres from "postgres";
+import sql from "mssql";
 import { z } from "zod";
 import { PDFDocument } from "pdf-lib";
 import fs from "fs";
 import path from "path";
 import { compressPdfBuffer } from "../utils/pdf-compress";
+import { connectToDB } from "../utils/db-connection";
 
 interface CitizenData {
   telefono: string | null;
   correo: string | null;
-  nombres: string;
+  nombres_rsh: string;
   apellidopaterno: string;
   apellidomaterno: string | null;
-  apellidos: string;
+  apellidos_rsh: string;
   rut: string;
   dv: string;
   indigena: string | null;
@@ -31,15 +32,13 @@ interface CitizenData {
 }
 
 interface UserData {
-  nombre: string;
+  nombre_usuario: string;
   cargo: string;
   rol: string;
   correo: string;
   id: string;
   contraseña: string;
 }
-
-const sql = postgres(process.env.DATABASE_URL!, { ssl: "require" });
 
 // Crear Entrega
 const CreateEntregaFormSchema = z.object({
@@ -57,13 +56,20 @@ const CreateEntregaFormSchema = z.object({
 
 const CreateEntrega = CreateEntregaFormSchema;
 
+// Listo
 export const createEntrega = async (id: string, formData: FormData) => {
+  console.log(id);
   try {
+    console.log("Starting createEntrega function");
     const { rut, observaciones, campaigns } = CreateEntrega.parse({
       rut: formData.get("rut"),
       observaciones: formData.get("observaciones"),
       campaigns: JSON.parse(formData.get("campaigns") as string),
-      id_usuario: formData.get("id_usuario"),
+    });
+    console.log("Parsed form data:", {
+      rut,
+      observaciones,
+      campaignsCount: campaigns.length,
     });
 
     let code;
@@ -74,152 +80,88 @@ export const createEntrega = async (id: string, formData: FormData) => {
 
     let folio: string = "";
 
-    await sql.begin(async (sql) => {
-      const entrega = await sql`
-        INSERT INTO entregas (folio, observacion, rut, id_usuario)
-        VALUES (
-            concat(
-                substring(replace(uuid_generate_v4()::text, '-', '') from 1 for 8), 
-                '-', 
-                to_char(current_date, 'YY'), 
-                '-', 
-                ${code}::TEXT
-            ),
-            ${observaciones},
-            ${rut},
-            ${id}
-        )
-        RETURNING folio
-      `;
+    const pool = await connectToDB();
+    let transaction: sql.Transaction | undefined;
+    try {
+      transaction = new sql.Transaction(pool);
+      await transaction.begin(sql.ISOLATION_LEVEL.READ_COMMITTED);
 
-      folio = entrega[0].folio;
+      // Generate a folio using MSSQL functions
+      const folioRequest = new sql.Request(transaction);
+      folioRequest
+        .input("observaciones", sql.NVarChar, observaciones)
+        .input("rut", sql.Int, rut)
+        .input("id", sql.UniqueIdentifier, id)
+        .input("code", sql.NVarChar, code);
 
-      // Se ingresa cada entrega en la tabla Entrega, y se actualiza la cantidad de entregas en la tabla Campañas
-      if (campaigns.length > 0) {
-        await Promise.all(
-          campaigns.flatMap((campaign) => [
-            sql`
-              INSERT INTO entrega (detalle, folio, id_campaña)
-              VALUES (${campaign.detail}, ${folio}, ${campaign.id})
-            `,
-            sql`
-              UPDATE campañas SET entregas = entregas + 1 WHERE id = ${campaign.id}
-            `,
-          ]),
-        );
+      const folioResult = await folioRequest.query(`
+          DECLARE @UUID UNIQUEIDENTIFIER = NEWID();
+          DECLARE @UUIDString NVARCHAR(50) = REPLACE(CAST(@UUID AS NVARCHAR(50)), '-', '');
+          DECLARE @ShortUUID NVARCHAR(8) = SUBSTRING(@UUIDString, 1, 8);
+          DECLARE @YearCode NVARCHAR(2) = RIGHT(CAST(YEAR(GETDATE()) AS NVARCHAR(4)), 2);
+          DECLARE @NewFolio NVARCHAR(50) = CONCAT(@ShortUUID, '-', @YearCode, '-', @code);
+          
+          INSERT INTO entregas (folio, observacion, fecha_entrega, rut, id_usuario)
+          OUTPUT INSERTED.folio
+          VALUES (
+            @NewFolio,
+            @observaciones,
+            GETUTCDATE(),
+            @rut,
+            @id
+          )
+      `);
+
+      // Check if there was an error message returned
+      if (
+        folioResult.recordset &&
+        folioResult.recordset[0] &&
+        folioResult.recordset[0].error_message
+      ) {
+        throw new Error(folioResult.recordset[0].error_message);
       }
-    });
 
-    // Generación documento
-    // const pdfPath = "/var/task/public/ActaEntrega.pdf";  ./ActaEntrega
-    // const pdfUrl =
-    //   "https://raw.githubusercontent.com/JedienlaPasta/files/main/ActaEntrega.pdf";
-    // const response = await fetch(pdfUrl);
-    // const pdfBytes = await response.arrayBuffer();
-    // const pdfDoc = await PDFDocument.load(pdfBytes);
-    // // const pdfBytes = fs.readFileSync(pdfPath);
+      // Check if we got a folio back
+      if (!folioResult.recordset || folioResult.recordset.length === 0) {
+        throw new Error("No se pudo generar el folio");
+      }
 
-    // // Obtención de datos
+      folio = folioResult.recordset[0].folio;
+      console.log("Generated folio:", folio);
 
-    // // Ciudadano
-    // const ciudadanofila = await sql`select * from rsh where rut = ${rut}`;
-    // if (ciudadanofila.length === 0) {
-    //   return { success: false, error: "Persona no encontrada", status: 404 };
-    // }
-    // const ciudadano = ciudadanofila[0] as CitizenData;
-    // if (!ciudadano) {
-    //   return { success: false, error: "Persona no encontrada", status: 404 };
-    // }
+      // Insert campaign details and update campaign counts
+      if (campaigns.length > 0) {
+        for (const campaign of campaigns) {
+          const campaignRequest = new sql.Request(transaction);
+          await campaignRequest
+            .input("detail", sql.NVarChar, campaign.detail)
+            .input("folio", sql.NVarChar, folio)
+            .input("campaignId", sql.UniqueIdentifier, campaign.id).query(`
+              INSERT INTO entrega (detalle, folio, id_campaña)
+              VALUES (@detail, @folio, @campaignId)
+            `);
 
-    // // Fecha actual
-    // const fecha = new Date();
+          const updateRequest = new sql.Request(transaction);
+          await updateRequest.input(
+            "campaignId",
+            sql.UniqueIdentifier,
+            campaign.id,
+          ).query(`
+              UPDATE campañas 
+              SET entregas = entregas + 1 
+              WHERE id = @campaignId
+            `);
+        }
+      }
 
-    // // Encargado
-    // const encargadofila =
-    //   await sql`select * from usuarios where id = ${id_usuario}`;
-    // if (encargadofila.length === 0) {
-    //   return { success: false, error: "Empleado no encontrado", status: 404 };
-    // }
-    // const encargado = encargadofila[0] as UserData;
-    // if (!encargado) {
-    //   return { success: false, error: "Empleado no encontrado", status: 404 };
-    // }
-
-    // // Asignación de valores a los campos del formulario
-    // const form = pdfDoc.getForm();
-
-    // form.getTextField("Folio").setText(String(folio));
-
-    // form
-    //   .getTextField("NombreCiudadano")
-    //   .setText(String(ciudadano.nombres + " " + ciudadano.apellidos));
-    // form
-    //   .getTextField("Rut")
-    //   .setText(String(ciudadano.rut + "-" + ciudadano.dv));
-    // form.getTextField("Domicilio").setText(String(ciudadano.direccion));
-    // form.getTextField("Tramo").setText(String(ciudadano.tramo + "%"));
-    // form
-    //   .getTextField("Telefono")
-    //   .setText(String(ciudadano.telefono ? ciudadano.telefono : "No aplica"));
-    // form
-    //   .getTextField("FechaSolicitud")
-    //   .setText(String(fecha.toLocaleDateString()));
-
-    // campaigns.forEach((campaign) => {
-    //   const { campaignName, detail } = campaign;
-
-    //   if (campaignName.includes("Vale de Gas")) {
-    //     form.getTextField("CodigoGas").setText(String(detail));
-    //   } else if (campaignName.includes("Pañales")) {
-    //     const pañalTypes = ["RN", "G", "XXG", "P", "XG", "Adultos"];
-    //     pañalTypes.forEach((tipo) => {
-    //       if (detail.includes(tipo)) {
-    //         form.getTextField(tipo).setText("X");
-    //       }
-    //     });
-    //   } else if (campaignName.includes("Tarjeta de Comida")) {
-    //     form.getTextField("CodigoTarjeta").setText(String(detail));
-    //   } else {
-    //     form.getTextField("Otros").setText(String(detail));
-    //   }
-    // });
-
-    // form.getTextField("Justificacion").setText(String(observaciones));
-    // form.getTextField("NombreProfesional").setText(String(encargado.nombre));
-    // form.getTextField("Cargo").setText(String(encargado.cargo));
-    // form
-    //   .getTextField("FechaEntrega")
-    //   .setText(String(fecha.toLocaleDateString()));
-
-    // // Almacenamiento de documento generado
-    // const pdfBytesFilled = await pdfDoc.save();
-
-    // // 1. Convert the PDF to a Base64 string so we can store it in a TEXT column
-    // const pdfBase64 = Buffer.from(pdfBytesFilled).toString("base64");
-
-    // // Opcional: Almacenado localmente
-    // // const outputPath = path.join(
-    // //   process.cwd(),
-    // //   "public",
-    // //   `Acta de entrega inicial.pdf`,
-    // // );
-    // // fs.writeFileSync(outputPath, pdfBytesFilled);
-
-    // // 2. Insert into la tabla "documentos"
-    // await sql`
-    //   INSERT INTO documentos (
-    //     nombre_documento,
-    //     archivo,
-    //     tipo,
-    //     folio
-    //   )
-    //   VALUES (
-    //     ${"Acta de entrega inicial"},
-    //     ${pdfBase64},
-    //     ${".pdf"},
-    //     ${folio}
-    //   )
-    //   `;
+      // Commit the transaction
+      await transaction.commit();
+    } catch (error) {
+      // If there's an error, roll back the transaction
+      if (transaction) await transaction.rollback();
+      console.error("Transaction error details:", error);
+      throw error;
+    }
 
     return { success: true, message: "Entrega recibida" };
   } catch (error) {
@@ -230,7 +172,7 @@ export const createEntrega = async (id: string, formData: FormData) => {
   }
 };
 
-// Editar Entrega
+// Editar Entrega ================================================================================= (pendiente)
 
 // Subir actas de cada entrega
 export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
@@ -244,6 +186,7 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
       };
     }
 
+    const pool = await connectToDB();
     const uploadPromises = [];
 
     for (let i = 0; i < fileCount; i++) {
@@ -262,7 +205,13 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
       const fecha = new Date();
       fecha.setMilliseconds(fecha.getMilliseconds() + i);
 
-      const insertPromise = sql`
+      const insertPromise = pool
+        .request()
+        .input("fecha", sql.DateTime, fecha)
+        .input("fileName", sql.NVarChar, fileName)
+        .input("fileBase64", sql.NVarChar, fileBase64)
+        .input("fileType", sql.NVarChar, fileType)
+        .input("folio", sql.NVarChar, folio).query(`
         INSERT INTO documentos (
           fecha_guardado,
           nombre_documento,
@@ -271,13 +220,13 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
           folio
         )
         VALUES (
-          ${fecha},
-          ${fileName},
-          ${fileBase64},
-          ${fileType},
-          ${folio}
+          @fecha,
+          @fileName,
+          @fileBase64,
+          @fileType,
+          @folio
         )
-      `;
+      `);
 
       uploadPromises.push(insertPromise);
     }
@@ -286,27 +235,37 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
     await Promise.all(uploadPromises);
 
     // Luego se actualiza el estado de la entrega en la tabla "entregas" de acuerdo a la cantidad de documentos
-    await sql.begin(async (tx) => {
-      const [{ count }] = await tx`
-        SELECT COUNT(*)::int AS count
-        FROM documentos
-        WHERE folio = ${folio}
-      `;
+    const transaction = new sql.Transaction(pool);
+    try {
+      await transaction.begin();
 
-      if (count === 3) {
-        await tx`
-          UPDATE Entregas
-          SET estado_documentos = 'Finalizado'
-          WHERE folio = ${folio}
-        `;
-      } else {
-        await tx`
-          UPDATE Entregas
-          SET estado_documentos = 'En Curso'
-          WHERE folio = ${folio}
-        `;
-      }
-    });
+      // Get document count
+      const countRequest = new sql.Request(transaction);
+      const countResult = await countRequest.input("folio", sql.NVarChar, folio)
+        .query(`
+        SELECT COUNT(*) AS count
+        FROM documentos
+        WHERE folio = @folio
+      `);
+
+      const count = countResult.recordset[0].count;
+
+      // Update status
+      const updateRequest = new sql.Request(transaction);
+      await updateRequest
+        .input("folio", sql.NVarChar, folio)
+        .input("estado", sql.NVarChar, count === 3 ? "Finalizado" : "En Curso")
+        .query(`
+        UPDATE Entregas
+        SET estado_documentos = @estado
+        WHERE folio = @folio
+      `);
+
+      await transaction.commit();
+    } catch (error) {
+      if (transaction) await transaction.rollback();
+      throw error;
+    }
 
     return {
       success: true,
@@ -323,31 +282,54 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
 // eliminar documento mediante id
 export const deletePDFById = async (id: string) => {
   try {
-    // Check if document exists before deleting
-    const document = await sql`
-      SELECT id, folio FROM documentos
-      WHERE id = ${id}
-    `;
+    const pool = await connectToDB();
 
-    if (document.length === 0) {
+    // Check if document exists before deleting
+    const documentRequest = pool.request().input("id", sql.NVarChar, id);
+    const documentResult = await documentRequest.query(`
+    SELECT id, folio FROM documentos
+    WHERE id = @id
+  `);
+
+    if (documentResult.recordset.length === 0) {
       return {
         success: false,
         message: "Documento no encontrado",
       };
     }
 
-    await sql.begin(async (sql) => {
-      await sql`
-        DELETE FROM documentos
-        WHERE id = ${id}
-      `;
+    const transaction = new sql.Transaction(pool);
+    try {
+      await transaction.begin();
 
-      await sql`
-        UPDATE Entregas
-        SET estado_documentos = 'En Curso'
-        WHERE folio = ${document[0].folio}
-      `;
-    });
+      // Delete document
+      const deleteRequest = new sql.Request(transaction).input(
+        "id",
+        sql.NVarChar,
+        id,
+      );
+      await deleteRequest.query(`
+      DELETE FROM documentos
+      WHERE id = @id
+    `);
+
+      // Update entregas status
+      const updateRequest = new sql.Request(transaction).input(
+        "folio",
+        sql.NVarChar,
+        documentResult.recordset[0].folio,
+      );
+      await updateRequest.query(`
+      UPDATE entregas
+      SET estado_documentos = 'En Curso'
+      WHERE folio = @folio
+    `);
+
+      await transaction.commit();
+    } catch (error) {
+      if (transaction) await transaction.rollback();
+      throw error;
+    }
 
     return {
       success: true,
@@ -365,14 +347,17 @@ export const deletePDFById = async (id: string) => {
 // Descargar documento mediante id
 export const downloadPDFById = async (id: string) => {
   try {
-    // Fetch document from database
-    const document = await sql`
-      SELECT archivo, nombre_documento
-      FROM documentos
-      WHERE id = ${id}
-    `;
+    const pool = await connectToDB();
 
-    if (document.length === 0) {
+    // Fetch document from database
+    const documentRequest = pool.request().input("id", sql.NVarChar, id);
+    const documentResult = await documentRequest.query(`
+    SELECT archivo, nombre_documento
+    FROM documentos
+    WHERE id = @id
+  `);
+
+    if (documentResult.recordset.length === 0) {
       return {
         success: false,
         message: "Documento no encontrado",
@@ -380,7 +365,7 @@ export const downloadPDFById = async (id: string) => {
     }
 
     // Get base64 string and document name
-    const { archivo, nombre_documento } = document[0];
+    const { archivo, nombre_documento } = documentResult.recordset[0];
 
     return {
       success: true,
@@ -417,49 +402,71 @@ type Campaigns = {
 
 export const createAndDownloadPDFByFolio = async (folio: string) => {
   try {
-    const entregaInfo = await sql<Entregas[]>`
-            SELECT observacion, rut, id_usuario
-            FROM entregas WHERE folio = ${folio}
-        `;
-    if (entregaInfo.length === 0) {
+    const pool = await connectToDB();
+    console.log(folio);
+
+    // Get delivery info
+    const entregaRequest = pool.request().input("folio", sql.NVarChar, folio);
+    const entregaResult = await entregaRequest.query(`
+      SELECT observacion, rut, id_usuario
+      FROM entregas 
+      WHERE folio = @folio
+    `);
+
+    if (entregaResult.recordset.length === 0) {
       return { success: false, error: "Entrega no encontrada", status: 404 };
     }
 
-    const campaigns = await sql<Campaigns[]>`
-            SELECT campañas.nombre as campaign_name, entrega.detalle as detail
-            FROM entrega 
-            JOIN campañas ON campañas.id = entrega.id_campaña
-            WHERE folio = ${folio} 
-        `;
-    if (campaigns.length === 0) {
+    // Get campaigns
+    const campaignsRequest = pool.request().input("folio", sql.NVarChar, folio);
+    const campaignsResult = await campaignsRequest.query(`
+    SELECT campañas.nombre_campaña as campaign_name, entrega.detalle as detail
+    FROM entrega 
+    JOIN campañas ON campañas.id = entrega.id_campaña
+    WHERE folio = @folio
+  `);
+
+    if (campaignsResult.recordset.length === 0) {
       return { success: false, error: "Campañas no encontradas", status: 404 };
     }
 
-    const { observacion, rut, id_usuario } = entregaInfo[0];
+    const { observacion, rut, id_usuario } = entregaResult.recordset[0];
+    const campaigns = campaignsResult.recordset;
 
     const pdfBytes = fs.readFileSync(
       path.join(process.cwd(), "public", "ActaEntrega.pdf"),
     );
     const pdfDoc = await PDFDocument.load(pdfBytes);
 
-    const ciudadanofila = await sql`SELECT * FROM rsh WHERE rut = ${rut}`;
-    if (ciudadanofila.length === 0) {
+    // Get citizen info
+    const ciudadanoRequest = pool.request().input("rut", sql.Int, rut);
+    const ciudadanoResult = await ciudadanoRequest.query(`
+      SELECT * FROM rsh WHERE rut = @rut
+    `);
+
+    if (ciudadanoResult.recordset.length === 0) {
       return { success: false, error: "Persona no encontrada", status: 404 };
     }
-    const ciudadano = ciudadanofila[0] as CitizenData;
+    const ciudadano = ciudadanoResult.recordset[0] as CitizenData;
 
-    const encargadofila =
-      await sql`SELECT * FROM usuarios WHERE id = ${id_usuario}`;
-    if (encargadofila.length === 0) {
+    // Get employee info
+    const encargadoRequest = pool
+      .request()
+      .input("id", sql.NVarChar, id_usuario);
+    const encargadoResult = await encargadoRequest.query(`
+      SELECT * FROM usuarios WHERE id = @id
+    `);
+
+    if (encargadoResult.recordset.length === 0) {
       return { success: false, error: "Empleado no encontrado", status: 404 };
     }
-    const encargado = encargadofila[0] as UserData;
+    const encargado = encargadoResult.recordset[0] as UserData;
 
     const form = pdfDoc.getForm();
     form.getTextField("Folio").setText(String(folio));
     form
       .getTextField("NombreCiudadano")
-      .setText(`${ciudadano.nombres} ${ciudadano.apellidos}`);
+      .setText(`${ciudadano.nombres_rsh} ${ciudadano.apellidos_rsh}`);
     form.getTextField("Rut").setText(`${ciudadano.rut}-${ciudadano.dv}`);
     form.getTextField("Domicilio").setText(String(ciudadano.direccion));
     form.getTextField("Tramo").setText(`${ciudadano.tramo}%`);
@@ -483,7 +490,7 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
     });
 
     form.getTextField("Justificacion").setText(observacion);
-    form.getTextField("NombreProfesional").setText(encargado.nombre);
+    form.getTextField("NombreProfesional").setText(encargado.nombre_usuario);
     form.getTextField("Cargo").setText(encargado.cargo);
     form.getTextField("FechaEntrega").setText(new Date().toLocaleDateString());
 

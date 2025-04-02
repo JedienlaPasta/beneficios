@@ -1,29 +1,43 @@
-import postgres from "postgres";
-import { Activity } from "../definitions";
+import sql from "mssql";
+import { connectToDB } from "../utils/db-connection";
 
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
-
-export async function fetchUserActivity(query: string, currentPage: number) {
-  const resultsPerPage = 6;
+export async function fetchUserActivity(
+  query: string,
+  currentPage: number,
+  resultsPerPage: number,
+) {
   const offset = (currentPage - 1) * resultsPerPage;
   try {
-    const data = await sql<Activity[]>`
-              SELECT usuarios.nombre, auditoria.accion, auditoria.dato, auditoria.fecha, auditoria.id_mod,
-              COUNT (*) OVER() AS total
-              FROM auditoria
-              JOIN usuarios ON auditoria.nombre_usuario = usuarios.nombre
-              WHERE
-                  usuarios.nombre ILIKE ${`%${query}%`} OR
-                  auditoria.dato ILIKE ${`%${query}%`}
-              ORDER BY auditoria.fecha DESC
-              LIMIT ${resultsPerPage}
-              OFFSET ${offset}
-              `;
+    const pool = await connectToDB();
+    const request = pool.request();
 
-    const pages = Math.ceil(Number(data[0]?.total) / resultsPerPage);
-    return { data, pages };
+    const result = await request
+      .input("query", sql.NVarChar, `%${query}%`)
+      .input("offset", sql.Int, offset)
+      .input("pageSize", sql.Int, resultsPerPage).query(`
+        SELECT usuarios.nombre_usuario, auditoria.accion, auditoria.dato, auditoria.fecha, auditoria.id_mod,
+        COUNT(*) OVER() AS total
+        FROM auditoria
+        JOIN usuarios ON auditoria.nombre_usuario = usuarios.nombre_usuario
+        WHERE
+          usuarios.nombre_usuario LIKE @query OR
+          auditoria.dato LIKE @query
+        ORDER BY auditoria.fecha DESC
+        OFFSET @offset ROWS
+        FETCH NEXT @pageSize ROWS ONLY
+      `);
+
+    const data = result.recordset;
+    const totalCount = data[0]?.total || 0;
+    const pages = Math.ceil(totalCount / resultsPerPage);
+
+    return {
+      data,
+      pages,
+      total: totalCount,
+    };
   } catch (error) {
-    console.error("Error al obtener datos de la tabla de auditoria:", error);
-    return { data: [], pages: 0 };
+    console.error("Database Error:", error);
+    throw new Error("Error al obtener actividades");
   }
 }

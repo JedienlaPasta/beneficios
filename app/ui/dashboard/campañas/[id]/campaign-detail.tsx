@@ -1,4 +1,3 @@
-import { Campaign } from "@/app/lib/definitions";
 import { formatDate } from "@/app/lib/utils/format";
 import CampaignOptionsMenu from "./options-menu";
 import DetailRow from "./detail-card";
@@ -7,18 +6,16 @@ import SocialAidsGivenResume from "./social-aids-stock-resume";
 import { fetchCampaignById } from "@/app/lib/data/campañas";
 
 export default async function CampaignDetail({ id }: { id: string }) {
-  const { data } = (await fetchCampaignById(id)) as { data: Campaign[] }; // Que tal si mejor hago el redirect normal, en el form y que aca de alguna forma no se haga el fetch
+  const { data } = await fetchCampaignById(id); // Que tal si mejor hago el redirect normal, en el form y que aca de alguna forma no se haga el fetch
   if (data.length === 0) {
-    // redirect("/dashboard/campanas");
     return null;
   }
   const {
-    nombre,
+    nombre_campaña,
     fecha_inicio,
     fecha_termino,
-    descripcion,
+    code,
     stock,
-    // estado,
     entregas,
     tipo_dato,
     tramo,
@@ -40,12 +37,12 @@ export default async function CampaignDetail({ id }: { id: string }) {
         <div className="flex items-center justify-between rounded-xl bg-white px-10 py-6">
           <div className="flex gap-4">
             <p className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-base font-medium text-white shadow-sm">
-              {descripcion}
+              {code}
             </p>
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-semibold tracking-tight text-slate-700">
-                  {nombre}
+                  {nombre_campaña}
                 </h1>
                 <div
                   className={`flex items-center gap-1.5 rounded-md px-2 py-0.5 ${colorEstado[0]}`}

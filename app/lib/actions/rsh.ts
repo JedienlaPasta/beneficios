@@ -1,9 +1,10 @@
 "use server";
-import postgres from "postgres";
+import sql from "mssql";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import * as ExcelJS from "exceljs";
 import { FormState } from "@/app/ui/dashboard/campañas/new-campaign-modal";
+import { connectToDB } from "../utils/db-connection";
 
 // Crear RSH
 
@@ -36,8 +37,6 @@ interface CitizenData {
   fecha_modificacion: Date | null;
   fecha_calificacion: Date | null;
 }
-
-const sql = postgres(process.env.DATABASE_URL!, { ssl: "require" });
 
 // Helpers
 const capitalizeWords = (text: string): string =>
@@ -174,66 +173,180 @@ export async function importXLSXFile(
         return;
       }
 
+      console.log("RUT: " + citizen.rut + " DV: " + citizen.dv);
+
       citizens.push(citizen);
       validRows++;
     });
 
-    // Bulk insert
-    if (citizens.length > 0) {
-      await sql.begin(async (sql) => {
-        const MAX_PARAMS = 65534;
-        const COLUMNS_COUNT = 18;
-        const CHUNK_SIZE = Math.floor(MAX_PARAMS / COLUMNS_COUNT);
+    const pool = await connectToDB();
 
+    // Bulk insert for MSSQL
+    if (citizens.length > 0) {
+      // Use a transaction for better performance
+      const transaction = new sql.Transaction(pool);
+      await transaction.begin();
+
+      try {
+        // Process in chunks to avoid parameter limits
+        const CHUNK_SIZE = 1000; // Reduced chunk size for stability
         const chunks = chunkArray(citizens, CHUNK_SIZE);
 
         for (const chunk of chunks) {
-          await sql`
-            INSERT INTO rsh ${sql(chunk, [
-              "telefono",
-              "correo",
-              "nombres",
-              "apellidos",
-              "rut",
-              "dv",
-              "indigena",
-              "genero",
-              "nacionalidad",
-              "sector",
-              "direccion",
-              "tramo",
-              "folio",
-              "fecha_nacimiento",
-              "fecha_encuesta",
-              "fecha_modificacion",
-              "fecha_calificacion",
-            ])}
-            ON CONFLICT (rut) DO UPDATE SET
-              telefono = EXCLUDED.telefono,
-              correo = EXCLUDED.correo,
-              nombres = EXCLUDED.nombres,
-              apellidos = EXCLUDED.apellidos,
-              dv = EXCLUDED.dv,
-              indigena = EXCLUDED.indigena,
-              genero = EXCLUDED.genero,
-              nacionalidad = EXCLUDED.nacionalidad,
-              sector = EXCLUDED.sector,
-              direccion = EXCLUDED.direccion,
-              tramo = EXCLUDED.tramo,
-              folio = EXCLUDED.folio,
-              fecha_nacimiento = EXCLUDED.fecha_nacimiento,
-              fecha_encuesta = EXCLUDED.fecha_encuesta,
-              fecha_modificacion = EXCLUDED.fecha_modificacion,
-              fecha_calificacion = EXCLUDED.fecha_calificacion
-          `;
+          // Process each citizen in the chunk with batch operations
+          for (const citizen of chunk) {
+            const request = new sql.Request(transaction);
+
+            try {
+              // Use MERGE statement for each record (still faster than separate check+insert/update)
+              await request
+                .input("rut", sql.Int, parseInt(citizen.rut, 10))
+                .input("dv", sql.Char(1), citizen.dv.toString().substring(0, 1))
+                .input(
+                  "nombres_rsh",
+                  sql.NVarChar(50),
+                  (citizen.nombres || "").substring(0, 50),
+                )
+                .input(
+                  "apellidos_rsh",
+                  sql.NVarChar(50),
+                  (citizen.apellidos || "").substring(0, 50),
+                )
+                .input(
+                  "direccion",
+                  sql.NVarChar(50),
+                  (citizen.direccion || "").substring(0, 50),
+                )
+                .input(
+                  "sector",
+                  sql.NVarChar(50),
+                  citizen.sector ? citizen.sector.substring(0, 50) : null,
+                )
+                .input(
+                  "telefono",
+                  sql.Int,
+                  citizen.telefono
+                    ? parseInt(citizen.telefono, 10) || null
+                    : null,
+                )
+                .input(
+                  "correo",
+                  sql.NVarChar(50),
+                  citizen.correo ? citizen.correo.substring(0, 50) : null,
+                )
+                .input(
+                  "tramo",
+                  sql.Int,
+                  citizen.tramo ? parseInt(citizen.tramo, 10) || 0 : 0,
+                )
+                .input(
+                  "genero",
+                  sql.NVarChar(20),
+                  citizen.genero ? citizen.genero.substring(0, 20) : null,
+                )
+                .input(
+                  "indigena",
+                  sql.NVarChar(20),
+                  citizen.indigena ? citizen.indigena.substring(0, 20) : null,
+                )
+                .input(
+                  "nacionalidad",
+                  sql.NVarChar(30),
+                  citizen.nacionalidad
+                    ? citizen.nacionalidad.substring(0, 30)
+                    : null,
+                )
+                .input(
+                  "folio",
+                  sql.Int,
+                  citizen.folio ? parseInt(citizen.folio, 10) || 0 : 0,
+                )
+                .input(
+                  "fecha_nacimiento",
+                  sql.DateTime2,
+                  citizen.fecha_nacimiento,
+                )
+                .input("fecha_encuesta", sql.DateTime2, citizen.fecha_encuesta)
+                .input(
+                  "fecha_calificacion",
+                  sql.DateTime2,
+                  citizen.fecha_calificacion,
+                )
+                .input(
+                  "fecha_modificacion",
+                  sql.DateTime2,
+                  citizen.fecha_modificacion,
+                ).query(`
+                  MERGE rsh AS target
+                  USING (SELECT 
+                    @rut as rut, @dv as dv, @nombres_rsh as nombres_rsh, @apellidos_rsh as apellidos_rsh,
+                    @direccion as direccion, @sector as sector, @telefono as telefono, @correo as correo,
+                    @tramo as tramo, @genero as genero, @indigena as indigena, @nacionalidad as nacionalidad,
+                    @folio as folio, @fecha_nacimiento as fecha_nacimiento, @fecha_calificacion as fecha_calificacion,
+                    @fecha_encuesta as fecha_encuesta, @fecha_modificacion as fecha_modificacion
+                  ) AS source
+                  ON target.rut = source.rut
+                  WHEN MATCHED THEN
+                    UPDATE SET
+                      dv = source.dv,
+                      nombres_rsh = source.nombres_rsh,
+                      apellidos_rsh = source.apellidos_rsh,
+                      direccion = source.direccion,
+                      sector = source.sector,
+                      telefono = source.telefono,
+                      correo = source.correo,
+                      tramo = source.tramo,
+                      genero = source.genero,
+                      indigena = source.indigena,
+                      nacionalidad = source.nacionalidad,
+                      folio = source.folio,
+                      fecha_nacimiento = source.fecha_nacimiento,
+                      fecha_calificacion = source.fecha_calificacion,
+                      fecha_encuesta = source.fecha_encuesta,
+                      fecha_modificacion = source.fecha_modificacion
+                  WHEN NOT MATCHED THEN
+                    INSERT (
+                      rut, dv, nombres_rsh, apellidos_rsh, direccion, sector, telefono, 
+                      correo, tramo, genero, indigena, nacionalidad, folio,
+                      fecha_nacimiento, fecha_calificacion, fecha_encuesta, fecha_modificacion
+                    )
+                    VALUES (
+                      source.rut, source.dv, source.nombres_rsh, source.apellidos_rsh, source.direccion, 
+                      source.sector, source.telefono, source.correo, source.tramo, source.genero, 
+                      source.indigena, source.nacionalidad, source.folio, source.fecha_nacimiento, 
+                      source.fecha_calificacion, source.fecha_encuesta, source.fecha_modificacion
+                    );
+                `);
+            } catch (err) {
+              console.error(
+                `Error processing citizen with RUT ${citizen.rut}:`,
+                err,
+              );
+              // Continue with next record - don't abort the whole transaction
+            }
+          }
         }
-      });
+
+        // Update metadata within the same transaction
+        await transaction.request().query("DELETE FROM rsh_info");
+        await transaction
+          .request()
+          .query("INSERT INTO rsh_info DEFAULT VALUES");
+
+        // Commit the transaction
+        await transaction.commit();
+      } catch (error) {
+        // Rollback on error
+        await transaction.rollback();
+        console.error("Transaction error:", error);
+        throw error;
+      }
     }
 
     // Actualizar metadatos
-
-    await sql`DELETE FROM rsh_info`;
-    await sql` INSERT INTO rsh_info DEFAULT VALUES `;
+    const metadataRequest = pool.request();
+    await metadataRequest.query("DELETE FROM rsh_info");
+    await metadataRequest.query("INSERT INTO rsh_info DEFAULT VALUES");
 
     revalidatePath("/dashboard/rsh");
 

@@ -13,18 +13,20 @@ type HomeProps = {
 
 export default async function Home(props: HomeProps) {
   const searchParams = await props.searchParams;
-  // const modal = searchParams?.modal || "";
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
 
   return (
     <ProtectedRoute isDashboardRoute={true}>
       <div>
-        {/* {abrirModal && <NuevaCampañaModal closeModal={toggleModal} />} */}
-        <PageHeader />
+        <Suspense fallback={<div>Loading...</div>}>
+          <PageHeader />
+        </Suspense>
 
         <div className="flex flex-col gap-6 overflow-hidden rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
-          <GeneralInfoCards />
+          <Suspense fallback={<div>Loading...</div>}>
+            <GeneralInfoCards />
+          </Suspense>
           <div className="items-centers w-fits flex flex-col justify-center gap-3 overflow-x-auto rounded-xl border border-slate-200 bg-white px-10 py-4 shadow-md shadow-slate-300">
             <h2 className="my-2 text-lg font-semibold text-slate-800">
               Entregas Realizadas

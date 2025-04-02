@@ -27,7 +27,6 @@ export default async function SocialAidsTable({
               <th className="text-nowrap py-4 pl-6 pr-14 text-right font-normal">
                 Última Entrega
               </th>
-              {/* <th className="py-4 pr-10 text-right font-normal">Detalle</th> */}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/30">

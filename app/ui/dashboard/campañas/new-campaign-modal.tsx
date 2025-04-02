@@ -75,7 +75,7 @@ export default function NewCampaignModal() {
     const myFormData = new FormData();
     myFormData.append("nombre", campaignName);
     myFormData.append("fechaTermino", date?.toString() || "");
-    myFormData.append("descripcion", code.toString() || ""); // Cambiar "descripcion x code  aqui, en actions y en db"
+    myFormData.append("code", code.toString() || "");
     myFormData.append("stock", stock.toString() || (0).toString());
     myFormData.append("tipoDato", fieldType);
     myFormData.append("tramo", criteria.tramo.toString());

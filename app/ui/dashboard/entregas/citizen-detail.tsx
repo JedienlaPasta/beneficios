@@ -5,8 +5,8 @@ import { RSH } from "@/app/lib/definitions";
 
 export default async function CitizenDetail({ data }: { data: RSH[] }) {
   const {
-    nombres,
-    apellidos,
+    nombres_rsh,
+    apellidos_rsh,
     rut,
     direccion,
     // sector,
@@ -26,7 +26,7 @@ export default async function CitizenDetail({ data }: { data: RSH[] }) {
   } = data[0];
 
   const formattedRut = formatNumber(rut) + (dv ? "-" + dv : "");
-  const descripcion = nombres[0] + apellidos[0];
+  const descripcion = nombres_rsh[0] + apellidos_rsh[0];
 
   const calculateAge = (birthdate: string) => {
     const today = new Date();
@@ -53,7 +53,7 @@ export default async function CitizenDetail({ data }: { data: RSH[] }) {
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-semibold tracking-tight text-slate-800">
-                  {nombres + " " + apellidos}
+                  {nombres_rsh + " " + apellidos_rsh}
                 </h1>
                 <div className="hidden items-center gap-1 rounded-md bg-slate-200 px-2 py-0.5 sm:flex">
                   <p className="text-xs font-medium text-slate-500">

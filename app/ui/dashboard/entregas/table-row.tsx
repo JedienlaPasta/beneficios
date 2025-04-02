@@ -10,15 +10,22 @@ export default function TableRow({
   item: {
     rut: number;
     dv: string;
-    nombres: string;
-    apellidos: string;
+    nombres_rsh: string;
+    apellidos_rsh: string;
     direccion: string;
     tramo: number;
     ultima_entrega: Date;
   };
 }) {
-  const { rut, dv, nombres, apellidos, direccion, tramo, ultima_entrega } =
-    item;
+  const {
+    rut,
+    dv,
+    nombres_rsh,
+    apellidos_rsh,
+    direccion,
+    tramo,
+    ultima_entrega,
+  } = item;
   const router = useRouter();
   const formattedRut = formatNumber(rut) + (dv ? "-" + dv : "");
 
@@ -47,7 +54,7 @@ export default function TableRow({
         <div className="overflow-hidden text-ellipsis">{formattedRut}</div>
       </td>
       <td className="w-[25%] py-3 pl-10 pr-6 text-slate-700">
-        {nombres + " " + apellidos}
+        {nombres_rsh + " " + apellidos_rsh}
       </td>
       <td className="w-[20%] py-3 pr-14 text-left text-slate-600">
         {direccion}

@@ -46,7 +46,7 @@ export default function UpdateForm({ data }: { data: Campaign[] }) {
 
     const myFormData = new FormData();
 
-    myFormData.append("nombre", updateFormData.nombre);
+    myFormData.append("nombre", updateFormData.nombre_campaña);
     myFormData.append("fechaInicio", updateFormData.fecha_inicio.toString());
     myFormData.append("fechaTermino", updateFormData.fecha_termino.toString());
     myFormData.append("tipoDato", fieldType);
@@ -77,9 +77,10 @@ export default function UpdateForm({ data }: { data: Campaign[] }) {
     <form onSubmit={formAction} className="mt-2 grid w-full gap-5 bg-white">
       <Input
         label="Nombre"
-        nombre="nombre"
-        value={updateFormData.nombre}
+        nombre="nombre_campaña"
+        value={updateFormData.nombre_campaña}
         setFormData={setUpdateFormData}
+        required
         type="text"
       />
       <div className="flex flex-col gap-1">

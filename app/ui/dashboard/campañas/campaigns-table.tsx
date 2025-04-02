@@ -11,7 +11,12 @@ export default async function CampaignsTable({
   query,
   currentPage,
 }: CampaignsTableProps) {
-  const { data, pages } = await fetchCampaigns(query, currentPage);
+  const resultsPerPage = 10;
+  const { data, pages } = await fetchCampaigns(
+    query,
+    currentPage,
+    resultsPerPage,
+  );
 
   return (
     <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300">
@@ -25,7 +30,6 @@ export default async function CampaignsTable({
               <th className="py-4 text-left font-normal">Estado</th>
               <th className="py-4 text-right font-normal">Inicio</th>
               <th className="py-4 pr-10 text-right font-normal">Término</th>
-              {/* <th className="py-4 pr-10 text-right font-normal">Detalle</th> */}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/30">

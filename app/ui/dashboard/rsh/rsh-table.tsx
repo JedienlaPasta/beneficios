@@ -8,8 +8,8 @@ type RSHTableProps = {
   currentPage: number;
 };
 export default async function RSHTable({ query, currentPage }: RSHTableProps) {
-  const { data, pages } = await fetchRSH(query, currentPage);
-  console.log(data);
+  const itemsPerPage = 10;
+  const { data, pages } = await fetchRSH(query, currentPage, itemsPerPage);
 
   return (
     <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300">

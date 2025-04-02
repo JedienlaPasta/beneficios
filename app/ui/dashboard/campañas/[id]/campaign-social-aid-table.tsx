@@ -13,10 +13,12 @@ export default async function CampaignSocialAidsTable({
   query: string;
   paginaActual: number;
 }) {
+  const itemsPerPage = 10;
   const { data, pages } = (await fetchSocialAidsForCampaignDetail(
     id,
     query,
     paginaActual,
+    itemsPerPage,
   )) as {
     data: SocialAid[];
     pages: number;
@@ -48,7 +50,7 @@ export default async function CampaignSocialAidsTable({
 }
 
 function TableRow({ item }: { item: SocialAid }) {
-  const { folio, nombres, apellidos, rut, fecha_entrega } = item;
+  const { folio, nombres_rsh, apellidos_rsh, rut, fecha_entrega } = item;
   const fecha = formatDate(fecha_entrega);
   const formatted_rut = formatNumber(Number(rut)) + (rut && "-" + getDV(rut));
 
@@ -58,7 +60,7 @@ function TableRow({ item }: { item: SocialAid }) {
         {folio}
       </td>
       <td className="w-[30%] py-3 pl-10 pr-6 text-slate-600">
-        {nombres} {apellidos}
+        {nombres_rsh} {apellidos_rsh}
       </td>
       <td className="w-[30%] py-3 pl-10 pr-6 text-slate-600">
         {/* white space */}

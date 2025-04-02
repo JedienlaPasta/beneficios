@@ -1,4 +1,4 @@
-import { SocialAidTableRow } from "@/app/lib/definitions";
+// import { SocialAidTableRow } from "@/app/lib/definitions";
 import Pagination from "../../pagination";
 import { fetchSocialAidsByRUT } from "@/app/lib/data/entregas";
 import TableRow from "./table-row";
@@ -14,14 +14,13 @@ export default async function SocialAidsDetailTable({
   query,
   currentPage,
 }: SocialAidsDetailTableProps) {
-  const { data, pages } = (await fetchSocialAidsByRUT(
+  const itemsPerPage = 10;
+  const { data, pages } = await fetchSocialAidsByRUT(
     rut,
     query,
     currentPage,
-  )) as {
-    data: SocialAidTableRow[];
-    pages: number;
-  };
+    itemsPerPage,
+  );
 
   return (
     <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300">
@@ -36,7 +35,7 @@ export default async function SocialAidsDetailTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/30">
-            {data?.map((item: SocialAidTableRow, index: number) => (
+            {data?.map((item, index: number) => (
               <TableRow key={index} item={item} />
             ))}
           </tbody>

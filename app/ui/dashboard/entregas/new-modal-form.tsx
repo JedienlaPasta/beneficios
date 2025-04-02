@@ -57,9 +57,9 @@ export default function NewModalForm({
 
   const dropdownCampaigns = activeCampaigns?.map((campaign) => ({
     id: campaign.id,
-    name: campaign.nombre,
+    name: campaign.nombre_campaña,
     type: campaign.tipo_dato,
-    code: campaign.descripcion,
+    code: campaign.code,
   }));
 
   // Button handlers
@@ -86,7 +86,6 @@ export default function NewModalForm({
 
     formData.append("campaigns", JSON.stringify(formFields));
     formData.append("rut", rut.toString());
-    // formData.append("id_usuario", id_usuario);
     formData.append("observaciones", observaciones);
 
     toast.promise(

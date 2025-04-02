@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
-import postgres from "postgres";
+import sql from "mssql";
+import { connectToDB } from "../utils/db-connection";
 // import { z } from "zod";
 // import bcrypt from "bcrypt";
-
-const sql = postgres(process.env.DATABASE_URL!, { ssl: "require" });
 
 // interface UserData {
 //   nombre: string;
@@ -35,43 +34,46 @@ interface UserResponse {
 
 export async function authenticateUser(correo: string, contraseña: string) {
   try {
-    // const user = await sql`SELECT * FROM usuarios WHERE correo = ${correo}` as UserData;
-    const userRows = await sql`SELECT * FROM usuarios WHERE correo = ${correo}`;
+    const pool = await connectToDB();
+    const userRequest = pool.request();
+    userRequest.input("correo", sql.VarChar, correo);
+    const user = await userRequest.query(
+      `SELECT TOP 1 * FROM usuarios WHERE correo = @correo`,
+    );
+    console.log(user);
 
-    if (userRows.length === 0) {
+    if (user.recordset.length === 0) {
       return { success: false, error: "Credenciales incorrectas", status: 404 };
     }
 
-    const user = userRows[0];
-
-    if (!user) {
+    if (!user.recordset[0].correo) {
       return { success: false, error: "Credenciales incorrectas", status: 404 };
     }
 
     // In a real implementation, use bcrypt to compare passwords
     // const isPasswordValid = await bcrypt.compare(contraseña, user.contraseña);
-    const isPasswordValid = contraseña === user.contraseña;
+    const isPasswordValid = contraseña === user.recordset[0].contraseña;
 
     if (!isPasswordValid) {
       return { success: false, error: "Credenciales incorrectas", status: 401 };
     }
 
     const userResponse: UserResponse = {
-      id_usuario: user.id,
-      nombre: user.nombre,
-      rol: user.rol,
-      cargo: user.cargo,
-      correo: user.correo,
+      id_usuario: user.recordset[0].id,
+      nombre: user.recordset[0].nombre_usuario,
+      rol: user.recordset[0].rol,
+      cargo: user.recordset[0].cargo,
+      correo: user.recordset[0].correo,
     };
     return {
       success: true,
       user: userResponse,
       status: 200,
       sessionData: {
-        nombre: user.nombre,
-        rol: user.rol,
-        cargo: user.cargo,
-        correo: user.correo,
+        nombre: user.recordset[0].nombre_usuario,
+        rol: user.recordset[0].rol,
+        cargo: user.recordset[0].cargo,
+        correo: user.recordset[0].correo,
       },
       message: "Bienvenido!",
     };

@@ -10,21 +10,21 @@ export default async function GeneralInfoCards() {
   const stats = [
     {
       title: "Campañas Activas",
-      value: formatNumber(response[0].active_campaigns) || "4",
+      value: formatNumber(response[0]?.active_campaigns) || "4",
       icon: <FaBoxesStacked className="h-5 w-5" />,
       to: "/dashboard/campanas",
       changeType: "positive",
     },
     {
       title: "Entregas",
-      value: formatNumber(response[0].total_entregas) || "98",
+      value: formatNumber(response[0]?.total_entregas) || "98",
       icon: <FaBoxOpen className="h-5 w-5" />,
       to: "/dashboard/entregas",
       changeType: "positive",
     },
     {
       title: "Beneficiarios",
-      value: formatNumber(response[0].total_beneficiarios) || "1.429",
+      value: formatNumber(response[0]?.total_beneficiarios) || "1.429",
       icon: <FaPersonCane className="h-5 w-5" />,
       to: "/dashboard/rsh",
       changeType: "positive",

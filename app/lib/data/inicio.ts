@@ -1,35 +1,38 @@
-import postgres from "postgres";
-
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
+import { connectToDB } from "../utils/db-connection";
 
 export async function fetchGeneralInfo() {
   try {
-    const data = sql.begin(async (sql) => {
-      const activeCampaigns = await sql`
-        SELECT COUNT (*) as active_campaigns
-        FROM campañas
-        WHERE fecha_inicio <= CURRENT_DATE AND fecha_termino >= NOW()
-        `;
-      const totalEntregas = await sql`
-        SELECT COUNT (*) as total_entregas
-        FROM entrega
-        `;
-      const totalBeneficiarios = await sql`
-        SELECT COUNT (*) as total_beneficiarios
-        FROM rsh
-        `;
-      return [
-        {
-          active_campaigns: activeCampaigns[0].active_campaigns,
-          total_entregas: totalEntregas[0].total_entregas,
-          total_beneficiarios: totalBeneficiarios[0].total_beneficiarios,
-        },
-      ];
-    });
+    const pool = await connectToDB();
+    const request = pool.request();
+
+    const activeCampaignsResult = await request.query(`
+      SELECT COUNT(*) as active_campaigns
+      FROM campañas
+      WHERE fecha_inicio <= GETDATE() AND fecha_termino >= GETDATE()
+    `);
+
+    const totalEntregasResult = await request.query(`
+      SELECT COUNT(*) as total_entregas
+      FROM entrega
+    `);
+
+    const totalBeneficiariosResult = await request.query(`
+      SELECT COUNT(*) as total_beneficiarios
+      FROM rsh
+    `);
+
+    const data = [
+      {
+        active_campaigns: activeCampaignsResult.recordset[0].active_campaigns,
+        total_entregas: totalEntregasResult.recordset[0].total_entregas,
+        total_beneficiarios:
+          totalBeneficiariosResult.recordset[0].total_beneficiarios,
+      },
+    ];
 
     return data;
   } catch (error) {
-    console.error("Error al obtener datos de la tabla de general_info:", error);
+    console.error("Error al obtener informacion general:", error);
     return [
       {
         active_campaigns: 0,

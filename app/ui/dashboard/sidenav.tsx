@@ -48,6 +48,7 @@ export default function Sidenav({ setSidenavOpen }: SidenavProps) {
           <Image
             width={60}
             // height={60}
+            loading="lazy"
             alt="El Quisco logo"
             src={elquiscoImg}
             className="object-contain"

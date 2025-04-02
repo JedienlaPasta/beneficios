@@ -32,33 +32,68 @@ export default async function ActivityTable({
   query,
   currentPage,
 }: ActivityTableProps) {
-  const { data, pages } = (await fetchUserActivity(query, currentPage)) as {
-    data: Activity[];
-    pages: number;
-  };
+  const rowsPerPage = 6;
 
-  const filas = data?.map((item: Activity, index: number) => (
-    <TableRow key={index} item={item} />
-  ));
+  try {
+    const { data, pages } = (await fetchUserActivity(
+      query,
+      currentPage,
+      rowsPerPage,
+    )) as {
+      data?: Activity[];
+      pages: number;
+    };
 
-  return (
-    <div className="overflow-hidden rounded-b-xl bg-white">
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[44rem]">
-          <thead className="border-y border-slate-200/70 bg-slate-50 text-xs font-medium tracking-wider text-slate-600/70">
-            <tr>
-              <th className="py-4 pl-10 pr-6 text-left font-normal">
-                ACTIVIDAD
-              </th>
-              <th className="py-4 pr-14 text-right font-normal">FECHA</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-200/30">{filas}</tbody>
-        </table>
+    return (
+      <div className="overflow-hidden rounded-b-xl bg-white">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[44rem]">
+            <thead className="border-y border-slate-200/70 bg-slate-50 text-xs font-medium tracking-wider text-slate-600/70">
+              <tr>
+                <th className="py-4 pl-10 pr-6 text-left font-normal">
+                  ACTIVIDAD
+                </th>
+                <th className="py-4 pr-14 text-right font-normal">FECHA</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200/30">
+              {data?.map((item: Activity, index: number) => (
+                <TableRow key={index} item={item} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <Pagination pages={pages} />
       </div>
-      <Pagination pages={pages} />
-    </div>
-  );
+    );
+  } catch (error) {
+    return (
+      <div className="flex flex-col justify-center rounded-b-xl border-t border-gray-200/80 bg-white p-6 text-center">
+        <div className="mx-auto mb-2 flex items-center justify-center gap-2 rounded-full bg-amber-100/80 p-2 text-lg text-amber-500">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
+        <h3 className="mb-1 text-lg font-medium text-slate-700">
+          Información no disponible
+        </h3>
+        <p className="text-sm text-slate-500">
+          Por favor, inténtelo de nuevo más tarde.
+        </p>
+      </div>
+    );
+  }
 }
 
 function TableRow({ item }: { item: Activity }) {
