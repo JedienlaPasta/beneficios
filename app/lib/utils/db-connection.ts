@@ -28,11 +28,14 @@ export async function connectToDB() {
     const config: sql.config = {
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
-      server: process.env.DB_SERVER || "localhost",
+      server: process.env.DB_HOST || "localhost",
       database: process.env.DB_NAME,
       options: {
-        encrypt: false, // For Azure use true
+        encrypt: true, // For Azure use true
         trustServerCertificate: true, // For local dev / self-signed certs
+        cryptoCredentialsDetails: {
+          minVersion: "TLSv1.2",
+        },
       },
       pool: {
         max: 10,

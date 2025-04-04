@@ -383,23 +383,6 @@ export const downloadPDFById = async (id: string) => {
   }
 };
 
-// type Entregas = {
-//   folio: string;
-//   observacion: string;
-//   rut: string;
-//   id_usuario: string;
-// };
-
-// type Campaigns = {
-//   campaign_name: string;
-//   detail: string;
-// };
-
-// import { PDFDocument } from "pdf-lib";
-// import fs from "fs";
-// import path from "path";
-// import { exec } from "child_process"; // Para la compresión del PDF
-
 export const createAndDownloadPDFByFolio = async (folio: string) => {
   try {
     const pool = await connectToDB();
@@ -408,10 +391,10 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
     // Get delivery info
     const entregaRequest = pool.request().input("folio", sql.NVarChar, folio);
     const entregaResult = await entregaRequest.query(`
-      SELECT observacion, rut, id_usuario
-      FROM entregas 
-      WHERE folio = @folio
-    `);
+    SELECT observacion, rut, id_usuario
+    FROM entregas 
+    WHERE folio = @folio
+  `);
 
     if (entregaResult.recordset.length === 0) {
       return { success: false, error: "Entrega no encontrada", status: 404 };

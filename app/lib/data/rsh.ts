@@ -33,12 +33,12 @@ export async function fetchRSH(
       .input("query", sql.NVarChar, `%${query}%`)
       .input("offset", sql.Int, offset)
       .input("pageSize", sql.Int, resultsPerPage).query(`
-        SELECT rsh.rut, rsh.dv, rsh.nombres_rsh, rsh.apellidos_rsh, rsh.direccion, rsh.tramo,
+        SELECT rsh.rut, rsh.dv, rsh.nombres_rsh, rsh.apellidos_rsh, rsh.direccion, rsh.sector, rsh.tramo,
         (SELECT MAX(entregas.fecha_entrega) FROM entregas WHERE entregas.rut = rsh.rut) AS ultima_entrega,
         COUNT (*) OVER() AS total
         FROM rsh
         WHERE concat(rsh.rut,' ', rsh.nombres_rsh,' ', rsh.apellidos_rsh,' ', rsh.direccion) LIKE @query
-        ORDER BY rsh.nombres_rsh ASC
+        ORDER BY rsh.apellidos_rsh ASC
         OFFSET @offset ROWS
         FETCH NEXT @pageSize ROWS ONLY
         `);

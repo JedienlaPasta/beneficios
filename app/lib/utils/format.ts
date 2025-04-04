@@ -44,3 +44,12 @@ export const formatNumber = (num: number) => {
 export const capitalize = (str: string) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
+
+export const capitalizeAll = (str?: string) => {
+  if (!str) return "";
+  return str
+    .toLowerCase()
+    .split(" ")
+    .map((word) => capitalize(word))
+    .join(" ");
+};
