@@ -5,70 +5,95 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { deletePDFById, downloadPDFById } from "@/app/lib/actions/entregas";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export function Files({ item }: { item: SocialFiles }) {
+  const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
+  const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const router = useRouter();
 
-  const handleDelete = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const deleteFileWithId = deletePDFById.bind(null, item.id);
 
-    toast.custom((t) => (
-      <div
-        className={`pointer-events-auto flex w-full max-w-md flex-col rounded-lg bg-white shadow-lg`}
-      >
-        <div className="p-4">
-          <div className="flex items-start">
-            <div className="ml-3 flex-1">
-              <p className="text-sm font-medium text-gray-900">
-                ¿Eliminar documento?
-              </p>
-              <p className="mt-1 text-sm text-gray-500">
-                Esta acción no se puede deshacer.
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="flex border-t border-gray-200">
-          <button
-            onClick={() => {
-              // First dismiss the confirmation toast
-              toast.dismiss(t);
+  // const handleDelete = async (e: React.MouseEvent) => {
+  //   e.stopPropagation();
 
-              // Then after a small delay, show the promise toast
-              setTimeout(() => {
-                toast.promise(
-                  deletePDFById(item.id).then((response) => {
-                    if (!response.success) {
-                      throw new Error(response.message);
-                    }
-                    return response;
-                  }),
-                  {
-                    loading: "Eliminando...",
-                    success: (response) => {
-                      router.refresh();
-                      return response.message;
-                    },
-                    error: (err) => {
-                      return err.message;
-                    },
-                  },
-                );
-              }, 50); // Small delay to ensure first toast is gone
-            }}
-            className="flex w-full items-center justify-center rounded-none rounded-bl-lg border border-transparent p-3 text-sm font-medium text-red-600 hover:text-red-500 focus:outline-none"
-          >
-            Eliminar
-          </button>
-          <button
-            onClick={() => toast.dismiss(t)}
-            className="flex w-full items-center justify-center rounded-none rounded-br-lg border border-transparent p-3 text-sm font-medium text-gray-700 hover:text-gray-500 focus:outline-none"
-          >
-            Cancelar
-          </button>
-        </div>
-      </div>
-    ));
+  //   toast.custom((t) => (
+  //     <div
+  //       className={`pointer-events-auto flex w-full max-w-md flex-col rounded-lg bg-white shadow-lg`}
+  //     >
+  //       <div className="p-4">
+  //         <div className="flex items-start">
+  //           <div className="ml-3 flex-1">
+  //             <p className="text-sm font-medium text-gray-900">
+  //               ¿Eliminar documento?
+  //             </p>
+  //             <p className="mt-1 text-sm text-gray-500">
+  //               Esta acción no se puede deshacer.
+  //             </p>
+  //           </div>
+  //         </div>
+  //       </div>
+  //       <div className="flex border-t border-gray-200">
+  //         <button
+  //           onClick={() => {
+  //             // First dismiss the confirmation toast
+  //             toast.dismiss(t);
+
+  //             // Then after a small delay, show the promise toast
+  //             setTimeout(() => {
+  //               toast.promise(
+  //                 deletePDFById(item.id).then((response) => {
+  //                   if (!response.success) {
+  //                     throw new Error(response.message);
+  //                   }
+  //                   return response;
+  //                 }),
+  //                 {
+  //                   loading: "Eliminando...",
+  //                   success: (response) => {
+  //                     router.refresh();
+  //                     return response.message;
+  //                   },
+  //                   error: (err) => {
+  //                     return err.message;
+  //                   },
+  //                 },
+  //               );
+  //             }, 50); // Small delay to ensure first toast is gone
+  //           }}
+  //           className="flex w-full items-center justify-center rounded-none rounded-bl-lg border border-transparent p-3 text-sm font-medium text-red-600 hover:text-red-500 focus:outline-none"
+  //         >
+  //           Eliminar
+  //         </button>
+  //         <button
+  //           onClick={() => toast.dismiss(t)}
+  //           className="flex w-full items-center justify-center rounded-none rounded-br-lg border border-transparent p-3 text-sm font-medium text-gray-700 hover:text-gray-500 focus:outline-none"
+  //         >
+  //           Cancelar
+  //         </button>
+  //       </div>
+  //     </div>
+  //   ));
+  // };
+
+  const handleDeleteButton = async () => {
+    setShowConfirmModal(true);
+  };
+
+  const confirmDelete = async () => {
+    setIsDisabled(true);
+    toast.promise(deleteFileWithId(), {
+      loading: "Eliminando...",
+      success: (response) => {
+        setShowConfirmModal(false);
+        setIsDisabled(false);
+        router.refresh();
+        return response.message;
+      },
+      error: (err) => {
+        return err.message;
+      },
+    });
   };
 
   const handleDownload = async (e: React.MouseEvent) => {
@@ -155,7 +180,7 @@ export function Files({ item }: { item: SocialFiles }) {
         </button>
         <button
           className="flex h-8 w-8 items-center justify-center rounded bg-gray-500 text-white transition-transform hover:scale-110 hover:bg-red-500 active:scale-90"
-          onClick={handleDelete}
+          onClick={handleDeleteButton}
           title="Eliminar"
         >
           <svg
@@ -174,6 +199,37 @@ export function Files({ item }: { item: SocialFiles }) {
           </svg>
         </button>
       </div>
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+            <h3 className="mb-3 text-lg font-medium text-gray-900">
+              Confirmar eliminación
+            </h3>
+            <p className="mb-6 text-sm text-gray-500">
+              ¿Estás seguro de que deseas eliminar este documento? Esta acción
+              no se puede deshacer.
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                type="button"
+                disabled={isDisabled}
+                onClick={() => setShowConfirmModal(false)}
+                className={`rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 ${isDisabled ? "cursor-not-allowed" : "hover:bg-gray-200"}`}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={isDisabled}
+                onClick={confirmDelete}
+                className={`rounded-md px-4 py-2 text-sm font-medium text-white ${isDisabled ? "cursor-not-allowed bg-red-300" : "bg-red-500 hover:bg-red-600"}`}
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

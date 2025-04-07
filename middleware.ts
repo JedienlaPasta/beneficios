@@ -14,30 +14,35 @@ export async function middleware(request: NextRequest) {
   try {
     // Intentar parsear la cookie
     userSession = JSON.parse(userSessionCookie);
+
+    // Verificar que la sesión tenga la estructura esperada
+    if (!userSession || typeof userSession !== "object" || !userSession.rol) {
+      throw new Error("Sesión inválida");
+    }
   } catch (error) {
     console.error("Error al parsear la sesión del usuario:", error);
-    return NextResponse.redirect(new URL("/", request.url));
+    // Limpiar la cookie inválida
+    const response = NextResponse.redirect(new URL("/", request.url));
+    response.cookies.delete("userSession");
+    return response;
   }
 
   const path = request.nextUrl.pathname;
 
   // Verificar acceso a cualquier ruta bajo /dashboard
   if (path.startsWith("/dashboard")) {
-    // Si no hay sesión activa, redirigir al inicio
-    if (!userSession) {
-      return NextResponse.redirect(new URL("/", request.url));
+    // Verificar acceso a rutas específicas según el rol
+    if (
+      path.startsWith("/dashboard/registros") &&
+      userSession.rol !== "Administrador"
+    ) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
-    // Verificar acceso a la ruta /dashboard/registros (solo administradores)
-    if (path.startsWith("/dashboard/registros")) {
-      if (userSession.rol !== "Administrador") {
-        return NextResponse.redirect(new URL("/", request.url));
-      }
-    }
-    // Para cualquier otra ruta bajo /dashboard (rsh, beneficios, entregas, etc.), solo verificar que haya sesión
-    else if (!userSession) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
+    // Aquí puedes agregar más verificaciones de permisos para otras rutas
+    // if (path.startsWith("/dashboard/otra-ruta-protegida") && !tienePermiso(userSession)) {
+    //   return NextResponse.redirect(new URL("/dashboard", request.url));
+    // }
   }
 
   return NextResponse.next();

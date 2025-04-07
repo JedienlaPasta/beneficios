@@ -56,12 +56,12 @@ function InfoCard({ stat }: InfoCardProps) {
     <Link
       key={stat.title}
       href={stat.to}
-      className="group cursor-pointer overflow-hidden rounded-xl bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-slate-300/80 dark:bg-slate-800 dark:shadow-slate-900/30 last:lg:col-span-2 last:2xl:col-span-1"
+      className="group cursor-pointer overflow-hidden rounded-xl bg-white p-6 shadow-md shadow-slate-300/70 transition-all duration-300 hover:shadow-lg hover:shadow-slate-300/80 last:lg:col-span-2 last:2xl:col-span-1"
     >
       {/* Card header with icon and title */}
       <div className="relative flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="rounded-lg bg-blue-500/20 p-3 text-blue-600 shadow-sm transition-all group-hover:bg-blue-500/25">
+          <div className="size-10 place-content-center place-items-center rounded-lg bg-blue-500/20 text-blue-600 shadow-sm transition-all group-hover:bg-blue-500/25">
             {stat.icon}
           </div>
           <p className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">

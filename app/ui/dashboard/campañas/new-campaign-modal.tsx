@@ -93,9 +93,10 @@ export default function NewCampaignModal() {
         loading: "Guardando...",
         success: (response) => {
           setIsLoading(false);
-          setTimeout(() => {
-            closeModal();
-          }, 1000);
+          // setTimeout(() => {
+          //   closeModal();
+          // }, 1000);
+          closeModal();
           return response.message;
         },
         error: (err) => {
@@ -132,6 +133,7 @@ export default function NewCampaignModal() {
           <div className="grow">
             <Input
               required={true}
+              htmlId={true}
               placeHolder="Stock..."
               label="Stock Inicial"
               type="text"
@@ -143,6 +145,7 @@ export default function NewCampaignModal() {
           <div className="grow">
             <Input
               required={true}
+              htmlId={true}
               placeHolder="Código..."
               label="Código Campaña"
               type="text"

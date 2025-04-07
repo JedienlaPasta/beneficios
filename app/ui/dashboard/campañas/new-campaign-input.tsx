@@ -2,7 +2,8 @@
 import { Campaign } from "@/app/lib/definitions";
 
 type InputProps = {
-  label: string;
+  label?: string;
+  htmlId: boolean;
   nombre: string; // Change this from keyof Campaign to string
   // nombre: keyof Campaign;
   type?: string;
@@ -18,6 +19,7 @@ type InputProps = {
 
 export default function Input({
   label,
+  htmlId,
   nombre,
   type,
   value,
@@ -39,9 +41,14 @@ export default function Input({
 
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={label} className="text-xs text-slate-500">
-        {label}
-      </label>
+      {label && (
+        <label
+          htmlFor={htmlId ? label : undefined}
+          className="text-xs text-slate-500"
+        >
+          {label}
+        </label>
+      )}
       <input
         required={required}
         id={label}
@@ -54,12 +61,6 @@ export default function Input({
         maxLength={label === "Código Campaña" ? 2 : undefined}
         className="h-10 w-full rounded-lg border border-slate-300 bg-transparent bg-white px-4 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus-within:border-blue-500"
       />
-      {/* {value && (
-        <RiCloseLine
-          className="cursor-pointer text-xl text-slate-400 hover:text-slate-600"
-          onClick={() => setValue("")}
-        />
-      )} */}
     </div>
   );
 }

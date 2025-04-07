@@ -56,9 +56,7 @@ const CreateEntregaFormSchema = z.object({
 
 const CreateEntrega = CreateEntregaFormSchema;
 
-// Listo
 export const createEntrega = async (id: string, formData: FormData) => {
-  console.log(id);
   try {
     console.log("Starting createEntrega function");
     const { rut, observaciones, campaigns } = CreateEntrega.parse({
@@ -98,7 +96,7 @@ export const createEntrega = async (id: string, formData: FormData) => {
           DECLARE @UUID UNIQUEIDENTIFIER = NEWID();
           DECLARE @UUIDString NVARCHAR(50) = REPLACE(CAST(@UUID AS NVARCHAR(50)), '-', '');
           DECLARE @ShortUUID NVARCHAR(8) = SUBSTRING(@UUIDString, 1, 8);
-          DECLARE @YearCode NVARCHAR(2) = RIGHT(CAST(YEAR(GETDATE()) AS NVARCHAR(4)), 2);
+          DECLARE @YearCode NVARCHAR(2) = RIGHT(CAST(YEAR(GETUTCDATE()) AS NVARCHAR(4)), 2);
           DECLARE @NewFolio NVARCHAR(50) = CONCAT(@ShortUUID, '-', @YearCode, '-', @code);
           
           INSERT INTO entregas (folio, observacion, fecha_entrega, rut, id_usuario)
@@ -173,6 +171,70 @@ export const createEntrega = async (id: string, formData: FormData) => {
 };
 
 // Editar Entrega ================================================================================= (pendiente)
+
+export const deleteEntregaByFolio = async (folio: string) => {
+  try {
+    const pool = await connectToDB();
+    let transaction = new sql.Transaction(pool);
+
+    try {
+      await transaction.begin();
+      // Check if entrega exists
+      const folioRequest = new sql.Request(transaction);
+      const folioResult = await folioRequest.input("folio", sql.NVarChar, folio)
+        .query(`
+        SELECT folio FROM entregas WHERE folio = @folio
+      `);
+
+      if (folioResult.recordset.length === 0) {
+        return { success: false, message: "Entrega no encontrada" };
+      }
+
+      // Get campaign IDs to update campaign counts
+      const campaignRequest = new sql.Request(transaction);
+      const campaignResult = await campaignRequest.input(
+        "folio",
+        sql.NVarChar,
+        folio,
+      ).query(`
+        SELECT id_campaña FROM entrega WHERE folio = @folio
+      `);
+
+      // Update campaign counts
+      for (const campaign of campaignResult.recordset) {
+        const updateRequest = new sql.Request(transaction);
+        await updateRequest.input(
+          "campaignId",
+          sql.UniqueIdentifier,
+          campaign.id_campaña,
+        ).query(`
+          UPDATE campañas
+          SET entregas = entregas - 1
+          WHERE id = @campaignId AND entregas > 0
+        `);
+      }
+
+      // Delete the entrega record (this will cascade to entrega and documentos if set up)
+      const deleteRequest = new sql.Request(transaction);
+      await deleteRequest.input("folio", sql.NVarChar, folio).query(`
+        DELETE FROM entregas WHERE folio = @folio
+      `);
+
+      await transaction.commit();
+      return { success: true, message: "Entregas eliminadas correctamente" };
+    } catch (error) {
+      // Rollback transaction on error
+      await transaction.rollback();
+      throw error;
+    }
+  } catch (error) {
+    console.error("Error al eliminar entregas:", error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : String(error),
+    };
+  }
+};
 
 // Subir actas de cada entrega
 export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
@@ -386,7 +448,6 @@ export const downloadPDFById = async (id: string) => {
 export const createAndDownloadPDFByFolio = async (folio: string) => {
   try {
     const pool = await connectToDB();
-    console.log(folio);
 
     // Get delivery info
     const entregaRequest = pool.request().input("folio", sql.NVarChar, folio);

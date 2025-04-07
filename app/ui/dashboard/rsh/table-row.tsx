@@ -31,36 +31,18 @@ export default function TableRow({
     ultima_entrega,
   } = item;
   const formattedRut = formatNumber(rut) + (dv ? "-" + dv : "");
-  const tramoBarsLength = 10 - tramo / 10;
-  const tramoBars: JSX.Element[] = [];
-  // for (let i = 0; i < tramoBarsLength; i++) {
-  //   tramoBars.push(
-  //     <span
-  //       key={i}
-  //       className="inline-block h-2.5 w-[16%] rounded-[3px] border border-blue-200 bg-blue-50"
-  //     ></span>,
-  //   );
-  // }
-  for (let i = 0; i < 6; i++) {
-    tramoBars.push(
-      <span
-        key={i}
-        className={`inline-block h-2.5 w-[16%] rounded-[3px] border border-blue-200 ${i < tramoBarsLength ? "bg-gradient-to-br from-sky-300 to-blue-400" : "bg-blue-50"}`}
-      ></span>,
-    );
-  }
 
   return (
     <tr className="grid grid-cols-26 gap-9 text-nowrap px-6 text-sm tabular-nums transition-colors hover:bg-slate-50">
       <td className="group col-span-4 flex items-center py-4 text-slate-600">
-        <div className="">{formattedRut}</div>
+        {formattedRut}
       </td>
       <td className="col-span-6 py-4 text-slate-600">
-        <div className="">{apellidos_rsh}</div>
+        {apellidos_rsh}
         <div className="mt-1 text-xs text-slate-500/90">{nombres_rsh}</div>
       </td>
       <td className="col-span-8 py-4 text-left text-slate-600">
-        <p className="">{direccion}</p>
+        {direccion}
         <p className="mt-1 text-xs text-slate-500/90">{sector}</p>
       </td>
       <td className="col-span-4 flex flex-col justify-center py-4">

@@ -83,8 +83,8 @@ export async function createCampaign(formData: FormData): Promise<FormState> {
     const result = await request.input("nombre", sql.NVarChar, nombre).query(`
         SELECT *,
           CASE 
-            WHEN campañas.fecha_inicio > GETDATE() THEN 'Pendiente'
-            WHEN campañas.fecha_inicio <= GETDATE() AND campañas.fecha_termino >= GETDATE() THEN 'En Curso'
+            WHEN campañas.fecha_inicio > GETUTCDATE() THEN 'Pendiente'
+            WHEN campañas.fecha_inicio <= GETUTCDATE() AND campañas.fecha_termino >= GETUTCDATE() THEN 'En Curso'
             ELSE 'Finalizado'
           END AS estado
         FROM campañas
@@ -102,7 +102,7 @@ export async function createCampaign(formData: FormData): Promise<FormState> {
 
     await request
       .input("nombre_campaña", sql.NVarChar, nombre)
-      .input("fechaInicio", sql.DateTime, fechaInicio)
+      .input("fechaInicio", sql.DateTime, new Date(fechaInicio.toISOString()))
       .input(
         "fechaTermino",
         sql.DateTime,
@@ -249,18 +249,102 @@ export async function updateCampaign(id: string, formData: FormData) {
 export async function deleteCampaign(id: string) {
   try {
     const pool = await connectToDB();
-    await pool.request().input("id", sql.NVarChar, id).query(`
+    let transaction = new sql.Transaction(pool);
+    try {
+      await transaction.begin();
+      const campaignRequest = new sql.Request(transaction);
+      const campaignResult = await campaignRequest.input(
+        "id",
+        sql.UniqueIdentifier,
+        id,
+      ).query(`
+        SELECT *
+        FROM campañas
+        WHERE id = @id
+      `);
+
+      if (campaignResult.recordset.length === 0) {
+        await transaction.rollback();
+        return { success: false, message: "No se encontró la campaña." };
+      }
+
+      const deleteCampaignRequest = new sql.Request(transaction);
+      await deleteCampaignRequest.input("id", sql.UniqueIdentifier, id).query(`
         DELETE FROM campañas
         WHERE id = @id
       `);
 
-    revalidatePath("/dashboard/campanas");
-    return { success: true, message: "Campaña eliminada exitosamente." };
+      await transaction.commit();
+
+      revalidatePath("/dashboard/campanas");
+      return { success: true, message: "Campaña eliminada exitosamente." };
+    } catch (error) {
+      // Rollback transaction on error
+      await transaction.rollback();
+      throw error;
+    }
   } catch (error) {
     console.error("Error al eliminar la campaña:", error);
     return {
       success: false,
       message: "Error al eliminar la campaña.",
+    };
+  }
+}
+
+// Terminar Campaña
+export async function endCampaignById(id: string) {
+  try {
+    const pool = await connectToDB();
+    let transaction = new sql.Transaction(pool);
+    try {
+      await transaction.begin();
+      const campaignRequest = new sql.Request(transaction);
+      const campaignResult = await campaignRequest.input(
+        "id",
+        sql.UniqueIdentifier,
+        id,
+      ).query(`
+          SELECT *,
+                CASE 
+                  WHEN fecha_termino < GETUTCDATE() THEN 1
+                  ELSE 0
+                END AS is_finished
+          FROM campañas
+          WHERE id = @id
+        `);
+
+      if (campaignResult.recordset.length === 0) {
+        await transaction.rollback();
+        return { success: false, message: "No se encontró la campaña." };
+      }
+
+      if (campaignResult.recordset[0].is_finished) {
+        await transaction.rollback();
+        return { success: false, message: "La campaña ya está finalizada." };
+      }
+
+      const endCampaignRequest = new sql.Request(transaction);
+      await endCampaignRequest.input("id", sql.UniqueIdentifier, id).query(`
+        UPDATE campañas
+        SET fecha_termino = GETUTCDATE()
+        WHERE id = @id
+      `);
+
+      await transaction.commit();
+
+      revalidatePath("/dashboard/campanas");
+      return { success: true, message: "Campaña finalizada exitosamente." };
+    } catch (error) {
+      // Rollback transaction on error
+      await transaction.rollback();
+      throw error;
+    }
+  } catch (error) {
+    console.error("Error al finalizar la campaña:", error);
+    return {
+      success: false,
+      message: "Error al finalizar la campaña.",
     };
   }
 }

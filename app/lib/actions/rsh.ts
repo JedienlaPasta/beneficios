@@ -181,14 +181,7 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
       try {
         // Check database context and permissions
         const checkRequest = new sql.Request(transaction);
-        console.log("Checking database context and permissions...");
-
-        // Get current database name
-        const dbResult = await checkRequest.query(
-          "SELECT DB_NAME() AS current_db",
-        );
-        const currentDb = dbResult.recordset[0].current_db;
-        console.log(`Current database: ${currentDb}`);
+        console.log("Iniciando importación RSH...");
 
         // Check if table type exists and is accessible - search across all schemas
         const typeCheckResult = await checkRequest.query(`
@@ -204,14 +197,10 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
         let schemaName = "dbo"; // Default schema
 
         if (typeCheckResult.recordset.length === 0) {
-          console.log(
-            "RSHTableType not found in any schema. Will use temporary table approach.",
-          );
           useTemporaryTable = true;
         } else {
           const typeInfo = typeCheckResult.recordset[0];
           schemaName = typeInfo.schema_name;
-          console.log(`Found RSHTableType in schema: ${schemaName}`);
         }
 
         // Check if stored procedure exists
@@ -226,39 +215,25 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
 
         let procSchemaName = "dbo"; // Default schema
 
-        if (procCheckResult.recordset.length === 0) {
-          console.log(
-            "sp_MergeRSHBatch not found. Will use direct SQL approach.",
-          );
-        } else {
+        if (procCheckResult.recordset.length > 0) {
           const procInfo = procCheckResult.recordset[0];
           procSchemaName = procInfo.schema_name;
-          console.log(`Found sp_MergeRSHBatch in schema: ${procSchemaName}`);
         }
 
-        // Skip creation attempts for table type and stored procedure
-        // since they're already created in the database
-
         // Define CHUNK_SIZE once and create chunks array once
-        const CHUNK_SIZE = 2000; // Increased for even better performance
+        const CHUNK_SIZE = 2000;
         const chunks = chunkArray(citizens, CHUNK_SIZE);
-        console.log("after chunks");
-
-        // Process all chunks using batch processing
-        console.log(
-          `Processing ${chunks.length} chunks with batch processing...`,
-        );
+        console.log(`Procesando ${chunks.length} lotes de datos...`);
 
         for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
           const currentChunk = chunks[chunkIndex];
           console.log(
-            `Processing chunk ${chunkIndex + 1}/${chunks.length} with ${currentChunk.length} records`,
+            `Lote ${chunkIndex + 1}/${chunks.length}: ${currentChunk.length} registros`,
           );
 
           // For the first chunk, try with a smaller batch size to test
           if (chunkIndex === 0) {
-            const testChunk = currentChunk.slice(0, 10); // Just try with 10 records first
-            console.log(`Testing with first 10 records of chunk 1`);
+            const testChunk = currentChunk.slice(0, 10);
 
             try {
               const testRequest = new sql.Request(transaction);
@@ -300,19 +275,11 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
               tvp.columns.add("fecha_modificacion", sql.DateTime2(7), {
                 nullable: true,
               });
-              console.log("TVP structure defined successfully");
 
-              // Build batch insert for all records in the chunk
-              let insertCount = 0;
               // Insert test data into TVP
               for (const citizen of testChunk) {
                 const rutInt = parseInt(citizen.rut, 10);
-                if (isNaN(rutInt)) {
-                  console.log(
-                    `Skipping record with invalid RUT: ${citizen.rut}`,
-                  );
-                  continue;
-                }
+                if (isNaN(rutInt)) continue;
 
                 // Ensure required fields have values
                 if (
@@ -322,12 +289,8 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
                   !citizen.direccion ||
                   !citizen.tramo ||
                   !citizen.folio
-                ) {
-                  console.log(
-                    `Skipping record with missing required fields: RUT ${citizen.rut}`,
-                  );
+                )
                   continue;
-                }
 
                 try {
                   // Add row to TVP
@@ -350,17 +313,8 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
                     citizen.fecha_encuesta || null,
                     citizen.fecha_modificacion || null,
                   );
-                  insertCount++;
-
-                  // Log progress periodically
-                  if (insertCount % 500 === 0) {
-                    console.log(`Added ${insertCount} records to TVP so far`);
-                  }
                 } catch (rowError) {
-                  console.error(
-                    `Error adding row for RUT ${citizen.rut}:`,
-                    rowError,
-                  );
+                  console.error(`Error en RUT ${citizen.rut}:`, rowError);
                   throw rowError;
                 }
               }
@@ -368,10 +322,8 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
               // Execute the stored procedure with the TVP
               testRequest.input("RSHData", tvp);
               await testRequest.execute(`${procSchemaName}.sp_MergeRSHBatch`);
-
-              console.log("Test batch processed successfully");
             } catch (testErr) {
-              console.error("Test batch failed:", testErr);
+              console.error("Error en prueba inicial:", testErr);
               throw testErr;
             }
           }
@@ -415,16 +367,12 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
             tvp.columns.add("fecha_modificacion", sql.DateTime2(7), {
               nullable: true,
             });
-            console.log("TVP structure defined successfully");
 
             // Build batch insert for all records in the chunk
             let insertCount = 0;
             for (const citizen of currentChunk) {
               const rutInt = parseInt(citizen.rut, 10);
-              if (isNaN(rutInt)) {
-                console.log(`Skipping record with invalid RUT: ${citizen.rut}`);
-                continue;
-              }
+              if (isNaN(rutInt)) continue;
 
               // Ensure required fields have values
               if (
@@ -434,12 +382,8 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
                 !citizen.direccion ||
                 !citizen.tramo ||
                 !citizen.folio
-              ) {
-                console.log(
-                  `Skipping record with missing required fields: RUT ${citizen.rut}`,
-                );
+              )
                 continue;
-              }
 
               try {
                 // Add row to TVP
@@ -463,60 +407,28 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
                   citizen.fecha_modificacion || null,
                 );
                 insertCount++;
-
-                // Log progress periodically
-                if (insertCount % 500 === 0) {
-                  console.log(`Added ${insertCount} records to TVP`);
-                }
               } catch (rowError) {
-                console.error(
-                  `Error adding row for RUT ${citizen.rut}:`,
-                  rowError,
-                );
+                console.error(`Error en RUT ${citizen.rut}:`, rowError);
                 throw rowError;
               }
             }
 
             // If we have valid records, execute the stored procedure
             if (insertCount > 0) {
+              batchRequest.input("RSHData", tvp);
+              await batchRequest.execute(`${procSchemaName}.sp_MergeRSHBatch`);
               console.log(
-                `Attempting to execute stored procedure with ${insertCount} records`,
-              );
-              try {
-                // Execute the stored procedure with the TVP
-                batchRequest.input("RSHData", tvp);
-                console.log("Input parameter added successfully");
-                await batchRequest.execute(
-                  `${procSchemaName}.sp_MergeRSHBatch`,
-                );
-                console.log("Stored procedure executed successfully");
-
-                console.log(
-                  `Merged ${insertCount} records for chunk ${chunkIndex + 1}`,
-                );
-              } catch (execError) {
-                console.error("Error executing stored procedure:", execError);
-                if (execError instanceof Error) {
-                  console.error("Error cause:", execError.cause);
-                  console.error("Error stack:", execError.stack);
-                }
-                throw execError;
-              }
-            } else {
-              console.log(
-                `No valid records in chunk ${chunkIndex + 1}, skipping`,
+                `Lote ${chunkIndex + 1} completado: ${insertCount} registros`,
               );
             }
-
-            console.log(`Completed chunk ${chunkIndex + 1}/${chunks.length}`);
           } catch (spError) {
-            console.error("Batch processing error:", spError);
+            console.error("Error en procesamiento de lote:", spError);
             throw spError;
           }
         }
 
         // Update rsh_info table
-        console.log("Updating rsh_info table...");
+        console.log("Actualizando tabla rsh_info...");
         await transaction.request().query("DELETE FROM rsh_info");
         await transaction
           .request()
@@ -530,13 +442,10 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = seconds % 60;
         console.log(
-          `Transaction completed in ${minutes > 0 ? `${minutes}m ` : ""}${remainingSeconds}s (${elapsedTime}ms)`,
+          `Importación completada en ${minutes > 0 ? `${minutes}m ` : ""}${remainingSeconds}s (${elapsedTime}ms)`,
         );
-
-        // No need to clean up objects - they're permanent by design
-        console.log("Transaction committed successfully");
       } catch (error) {
-        console.error("Transaction error details:", error);
+        console.error("Error en transacción:", error);
 
         // Check for permission-related errors
         const errorMessage =
@@ -547,9 +456,7 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
           errorMessage.includes("access");
 
         if (isPermissionError) {
-          console.error(
-            "Database permission error - please check user permissions",
-          );
+          console.error("Error de permisos en la base de datos");
           return {
             success: false,
             message:
@@ -559,9 +466,9 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
 
         try {
           await transaction.rollback();
-          console.log("Transaction rolled back successfully");
+          console.log("Transacción revertida");
         } catch (rollbackError) {
-          console.error("Error during rollback:", rollbackError);
+          console.error("Error al revertir transacción:", rollbackError);
         }
         throw error;
       }

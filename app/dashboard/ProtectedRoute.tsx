@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { SquaresLoader } from "../ui/dashboard/loaders";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -40,48 +39,47 @@ export default function ProtectedRoute({
         localStorage.removeItem("userSession"); // Eliminar sesión corrupta
       }
     }
-    setTimeout(() => {
+
+    // Use a shorter timeout for better UX
+    const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1500);
+    }, 800);
+
+    // Clean up timeout to prevent memory leaks
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     if (!isLoading) {
       // Si no hay sesión activa, redirigir al inicio
       if (!userSession) {
-        console.warn("No hay sesión activa. Redirigiendo a /");
         router.replace("/"); // Redirigir si no hay sesión
-      } else if (isDashboardRoute) {
+        return;
+      }
+
+      if (isDashboardRoute) {
+        // Check for specific route restrictions
+        const pathname = window.location.pathname;
+
         // Si es una ruta de /dashboard, validamos el rol de administrador para /dashboard/registros
         if (
-          window.location.pathname === "/dashboard/registros" &&
+          pathname === "/dashboard/registros" &&
           userSession.rol !== "Administrador"
         ) {
-          console.warn(
-            "Acceso denegado a /dashboard/registros. Redirigiendo a /",
-          );
-          router.replace("/"); // Redirigir si no es Admin
-        } else if (
+          router.replace("/dashboard"); // Redirect to dashboard instead of home
+          return;
+        }
+
+        // Si hay roles permitidos, validamos que el usuario tenga uno de los roles permitidos
+        if (
           allowedRoles.length > 0 &&
           !allowedRoles.includes(userSession.rol)
         ) {
-          // Si hay roles permitidos, validamos que el usuario tenga uno de los roles permitidos
-          console.warn("Acceso denegado por rol. Redirigiendo a /");
-          router.replace("/"); // Redirigir si el rol no tiene acceso
+          router.replace("/dashboard"); // Redirect to dashboard instead of home
         }
       }
     }
   }, [isLoading, userSession, allowedRoles, router, isDashboardRoute]);
-
-  if (isLoading) {
-    return (
-      <div className="absolute right-0 top-0 mx-auto flex h-dvh w-full flex-col items-center justify-center gap-4">
-        {/* <Loading /> */}
-        <SquaresLoader />
-        <p className="animate-pulse text-slate-600">Cargando...</p>
-      </div>
-    ); // Mostrar un indicador de carga mientras se obtiene la sesión
-  }
 
   return <>{children}</>;
 }

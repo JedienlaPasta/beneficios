@@ -8,7 +8,7 @@ export async function fetchGeneralInfo() {
     const activeCampaignsResult = await request.query(`
       SELECT COUNT(*) as active_campaigns
       FROM campañas
-      WHERE fecha_inicio <= GETDATE() AND fecha_termino >= GETDATE()
+      WHERE fecha_inicio <= GETUTCDATE() AND fecha_termino >= GETUTCDATE()
     `);
 
     const totalEntregasResult = await request.query(`

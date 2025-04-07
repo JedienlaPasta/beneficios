@@ -12,7 +12,7 @@ export default async function RSHTable({ query, currentPage }: RSHTableProps) {
   const { data, pages } = await fetchRSH(query, currentPage, itemsPerPage);
 
   return (
-    <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300">
+    <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300/70">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[44rem] border-collapse">
           <thead className="border-y border-slate-200/80 bg-slate-50 text-xs uppercase tracking-wider text-slate-600/70">

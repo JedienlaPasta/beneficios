@@ -1,9 +1,10 @@
 import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/campaigns-table-skeleton";
 import { Suspense } from "react";
-import CitizenDetail from "@/app/ui/dashboard/entregas/citizen-detail";
+import CitizenDetail, {
+  CitizenDetailSkeleton,
+} from "@/app/ui/dashboard/entregas/citizen-detail";
 import Modal from "@/app/ui/dashboard/modal";
 import NewSocialAidModal from "@/app/ui/dashboard/entregas/new-social-aid-modal";
-import { fetchRSHById } from "@/app/lib/data/rsh";
 import NewButton from "@/app/ui/dashboard/new-button";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import SocialAidsDetailTable from "@/app/ui/dashboard/entregas/[id]/entregas-table";
@@ -28,18 +29,13 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
   const currentPage = Number(searchParams?.page) || 1;
   // Params (id)
   const params = await props.params;
-  const id = params.id;
-
-  const { data } = await fetchRSHById(id);
-  if (data.length === 0) {
-    return null;
-  }
+  const rut = params.id;
 
   return (
     <div>
       {newSocialAid === "open" && (
         <Modal name="newsocialaid">
-          <NewSocialAidModal data={data} />
+          <NewSocialAidModal rut={rut} />
         </Modal>
       )}
       {detailsModal && (
@@ -60,21 +56,22 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
       </div>
 
       <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
-        <CitizenDetail data={data} />
+        <Suspense fallback={<CitizenDetailSkeleton />}>
+          <CitizenDetail rut={rut} />
+        </Suspense>
         <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50">
           <div className="flex flex-wrap items-center justify-between gap-4 px-10 pt-4 3xl:w-[96rem] 3xl:self-center">
             <span className="flex flex-wrap items-center gap-2 text-nowrap text-lg font-semibold text-slate-800">
               <p>Beneficios Recibidos</p>
               <p className="rounded-md bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-500">
-                #{id}
+                #{rut}
               </p>
             </span>
             <SearchBar placeholder="Buscar..." />
           </div>
           <Suspense fallback={<TablaCampañasSkeleton />}>
-            {/* POR HACER, TABLA ENTREGAS */}
             <SocialAidsDetailTable
-              rut={id}
+              rut={rut}
               query={query}
               currentPage={currentPage}
             />

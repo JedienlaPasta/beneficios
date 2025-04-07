@@ -5,13 +5,18 @@ import { TbRefresh } from "react-icons/tb";
 import { HiDotsHorizontal } from "react-icons/hi";
 import { GoStop } from "react-icons/go";
 import { useRouter, useSearchParams } from "next/navigation";
-import { deleteCampaign } from "@/app/lib/actions/campaña";
+import { deleteCampaign, endCampaignById } from "@/app/lib/actions/campaña";
 import { toast } from "sonner";
+import ConfirmModal from "../../confirmation-modal";
 
 export default function CampaignOptionsMenu({ id }: { id: string }) {
+  const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
+  const [showConfirmEndModal, setShowConfirmEndModal] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const deleteCampaignWithId = deleteCampaign.bind(null, id);
+  const endCampaignWithId = endCampaignById.bind(null, id);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -29,14 +34,19 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
     router.push("/dashboard/campanas");
   };
 
-  const handleDeleteButton = async () => {
+  const handleDeleteButton = () => {
+    setShowConfirmDeleteModal(true);
+  };
+
+  const confirmDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setIsDisabled(true);
     toast.promise(deleteCampaignWithId(), {
       loading: "Eliminando campaña...",
       success: async (response) => {
-        await new Promise((resolve) => setTimeout(resolve, 300));
-        setTimeout(() => {
-          closeModal();
-        }, 500);
+        setShowConfirmDeleteModal(false);
+        setIsDisabled(false);
+        closeModal();
         return {
           message: response.message,
         };
@@ -45,6 +55,26 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
         message: "Error al eliminar la campaña",
         description: "No se pudo eliminar la campaña. Intente nuevamente.",
       }),
+    });
+  };
+
+  const handleEndCampaingButton = () => {
+    setShowConfirmEndModal(true);
+  };
+
+  const confirmEndCampaing = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setIsDisabled(true);
+    toast.promise(endCampaignWithId(), {
+      loading: "Terminando campaña...",
+      success: async (response) => {
+        setShowConfirmEndModal(false);
+        setIsDisabled(false);
+        closeModal();
+        return {
+          message: response.message,
+        };
+      },
     });
   };
 
@@ -68,14 +98,15 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
   });
 
   const toggleModal = () => {
-    setModalOpen((prev) => !prev);
+    if (!showConfirmDeleteModal && !showConfirmEndModal)
+      setModalOpen((prev) => !prev);
   };
 
   return (
     <div
       ref={modalRef}
       onClick={toggleModal}
-      className="relative cursor-pointer select-none text-xl"
+      className={`relative select-none text-xl ${showConfirmDeleteModal || showConfirmEndModal ? "" : "cursor-pointer"}`}
     >
       <HiDotsHorizontal className="borders h-7 w-7 flex-1 rounded-md bg-gray-200/75 p-1 hover:bg-gray-200" />
       {modalOpen && (
@@ -97,17 +128,71 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
               <span className="rounded-md p-1 transition-all duration-300 group-hover:bg-red-200/80">
                 <BiTrash className="text-slate-400 group-hover:text-red-400" />
               </span>
-              <span className="border-none text-left">Eliminar Registro</span>
+              <span className="border-none text-left">Eliminar Campaña</span>
             </button>
           </li>
-          <li className={`hover:bg-orange-100/80 ${dropdownOptionStyle}`}>
-            <span className="rounded-md p-1 transition-all duration-300 group-hover:bg-orange-200/80">
-              <GoStop className="text-slate-400 group-hover:text-orange-400" />
-            </span>
-            {"Terminar Campaña"}
+          <li>
+            <button
+              onClick={handleEndCampaingButton}
+              className={`w-full hover:bg-red-100/80 ${dropdownOptionStyle}`}
+            >
+              <span className="rounded-md p-1 transition-all duration-300 group-hover:bg-orange-200/80">
+                <GoStop className="text-slate-400 group-hover:text-orange-400" />
+              </span>
+              <span className="border-none text-left">Terminar Campaña</span>
+            </button>
           </li>
         </ul>
       )}
+      {/* Modal de confirmación */}
+      {showConfirmDeleteModal && (
+        <ConfirmModal
+          id={id}
+          isDisabled={isDisabled}
+          setShowConfirmModal={setShowConfirmDeleteModal}
+          action={(id, e) => confirmDelete(e)}
+          content="Eliminar"
+        />
+      )}
+      {showConfirmEndModal && (
+        <ConfirmModal
+          id={id}
+          isDisabled={isDisabled}
+          setShowConfirmModal={setShowConfirmEndModal}
+          action={(id, e) => confirmEndCampaing(e)}
+          content="Terminar"
+        />
+      )}
     </div>
   );
+}
+
+{
+  /* <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        //   <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+        //     <h3 className="mb-3 text-lg font-medium text-gray-900">
+        //       Confirmar eliminación
+        //     </h3>
+        //     <p className="mb-6 text-sm text-gray-500">
+        //       ¿Estás seguro de que deseas eliminar esta entrega? Esta acción no
+        //       se puede deshacer.
+        //     </p>
+        //     <div className="flex justify-end space-x-4">
+        //       <button
+        //         type="button"
+        //         onClick={() => setShowConfirmModal(false)}
+        //         className={`rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 ${isDisabled ? "cursor-not-allowed" : "hover:bg-gray-200"}`}
+        //       >
+        //         Cancelar
+        //       </button>
+        //       <button
+        //         type="button"
+        //         onClick={(e) => confirmDelete(e)}
+        //         className={`rounded-md px-4 py-2 text-sm font-medium text-white ${isDisabled ? "cursor-not-allowed bg-red-300" : "bg-red-500 hover:bg-red-600"}`}
+        //       >
+        //         Eliminar
+        //       </button>
+        //     </div>
+        //   </div>
+        // </div> */
 }

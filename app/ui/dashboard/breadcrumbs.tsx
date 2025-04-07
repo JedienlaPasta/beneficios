@@ -34,7 +34,7 @@ export default function Breadcrumbs() {
   return (
     <nav
       aria-label="breadcrumb"
-      className="flex h-full items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center"
+      className="flex h-full items-center justify-between"
     >
       <ol className="flex text-sm text-gray-400">
         {breadCrumbs.map((item, index) => (

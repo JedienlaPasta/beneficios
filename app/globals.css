@@ -27,6 +27,10 @@
   height: 10px;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 ::-webkit-scrollbar-thumb {
   background: #889cb1;
   border-radius: 100vh;

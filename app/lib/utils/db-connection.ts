@@ -43,7 +43,7 @@ export async function connectToDB() {
         idleTimeoutMillis: 30000,
       },
       connectionTimeout: 15000,
-      requestTimeout: 15000,
+      requestTimeout: 30000, // Increased from 15000 to 30000 to match your query timeout
     };
 
     pool = await new sql.ConnectionPool(config).connect();

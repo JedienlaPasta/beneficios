@@ -152,12 +152,17 @@ export async function fetchSocialAidsForCampaignDetail(
     const pool = await connectToDB();
     const request = pool.request();
     const result = await request
-      .input("id", sql.NVarChar, id)
+      .input("id", sql.UniqueIdentifier, id) // Changed to UniqueIdentifier if id is a UUID
       .input("query", sql.NVarChar, `%${query}%`)
       .input("offset", sql.Int, offset)
       .input("pageSize", sql.Int, resultsPerPage).query(`
-        SELECT rsh.nombres_rsh, rsh.apellidos_rsh, rsh.rut, entregas.folio, entregas.fecha_entrega,
-        COUNT (*) OVER() AS total
+        SELECT 
+          rsh.nombres_rsh, 
+          rsh.apellidos_rsh, 
+          rsh.rut, 
+          entregas.folio, 
+          entregas.fecha_entrega,
+          COUNT(*) OVER() AS total
         FROM entregas
         JOIN entrega ON entrega.folio = entregas.folio
         JOIN rsh ON rsh.rut = entregas.rut
@@ -172,7 +177,12 @@ export async function fetchSocialAidsForCampaignDetail(
         ORDER BY entregas.fecha_entrega DESC
         OFFSET @offset ROWS
         FETCH NEXT @pageSize ROWS ONLY
-        `);
+      `);
+
+    // Early return if no results
+    if (result.recordset.length === 0) {
+      return { data: [], pages: 0 };
+    }
 
     const pages = Math.ceil(
       Number(result.recordset[0]?.total) / resultsPerPage,

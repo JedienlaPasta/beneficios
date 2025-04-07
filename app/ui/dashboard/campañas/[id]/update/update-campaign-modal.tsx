@@ -1,14 +1,10 @@
-import { Campaign } from "@/app/lib/definitions";
 import UpdateForm from "./update-form";
 import CloseModalButton from "../../../close-modal-button";
+import { fetchCampaignById } from "@/app/lib/data/campañas";
 
-export default function UpdateCampaignModal({
-  id,
-  data,
-}: {
-  id: string;
-  data: Campaign[];
-}) {
+export default async function UpdateCampaignModal({ id }: { id: string }) {
+  const { data } = await fetchCampaignById(id);
+
   return (
     <div className="w-full max-w-[36rem] shrink-0 text-slate-900">
       <div className="grid max-h-dvh overflow-y-auto rounded-xl bg-white p-8">

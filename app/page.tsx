@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import LoginForm from "@/app/ui/login-form";
 import { SquaresLoader } from "./ui/dashboard/loaders";
@@ -14,11 +14,11 @@ export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 
-  const randomImage = () => {
+  // Move randomImage outside component or use useMemo to prevent recalculation on re-renders
+  const currentImage = useMemo(() => {
     const randomIndex = Math.floor(Math.random() * loginImages.length);
     return loginImages[randomIndex];
-  };
-  const currentImage = randomImage();
+  }, []);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -42,9 +42,12 @@ export default function LoginPage() {
       } catch (error) {
         console.error("Error checking session:", error);
       } finally {
-        setTimeout(() => {
+        // Use a shorter timeout for better UX
+        const timer = setTimeout(() => {
           setIsLoading(false);
-        }, 1400);
+        }, 800);
+
+        return () => clearTimeout(timer);
       }
     };
 
@@ -77,7 +80,7 @@ export default function LoginPage() {
       <Toaster />
       {/* Animated background elements */}
       <div className="absolute -left-16 -top-16 h-64 w-64 animate-pulse rounded-full bg-blue-500/10 blur-3xl"></div>
-      <div className="absolute bottom-12 right-12 z-10 h-96 w-96 animate-pulse rounded-full bg-blue-600/10 blur-3xl"></div>
+      {/* <div className="absolute bottom-12 right-12 z-10 h-96 w-96 animate-pulse rounded-full bg-blue-600/10 blur-3xl"></div> */}
       <div className="absolute left-1/4 top-1/3 h-48 w-48 animate-pulse rounded-full bg-indigo-500/5 blur-2xl"></div>
 
       {/* Improved header with subtle glow */}
@@ -105,7 +108,7 @@ export default function LoginPage() {
       </div>
 
       {/* Left side - Login form */}
-      <div className="relative flex w-2/5 flex-col items-center justify-center px-8">
+      <div className="relative flex w-full flex-col items-center justify-center px-8 md:w-3/5 lg:w-2/5">
         <div className="w-full max-w-[30rem] overflow-hidden p-8 pb-4">
           <div className="mb-6 flex flex-col">
             <h1 className="mb-2 text-4xl font-bold text-slate-800">
@@ -147,7 +150,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right side - Image with overlay */}
-      <div className="relative h-full w-3/5">
+      <div className="relative hidden h-full w-2/5 md:block lg:w-3/5">
         {/* Gradient transitions */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/10 to-indigo-900/20 mix-blend-multiply"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-slate-900/30"></div>

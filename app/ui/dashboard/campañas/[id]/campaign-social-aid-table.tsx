@@ -3,6 +3,7 @@ import Pagination from "../../pagination";
 import { formatDate, formatNumber } from "@/app/lib/utils/format";
 import { fetchSocialAidsForCampaignDetail } from "@/app/lib/data/entregas";
 import { getDV } from "@/app/lib/utils/get-dv";
+import CampaignSocialAidsTableSkeleton from "./table-skeleton";
 
 export default async function CampaignSocialAidsTable({
   id,
@@ -14,18 +15,15 @@ export default async function CampaignSocialAidsTable({
   paginaActual: number;
 }) {
   const itemsPerPage = 10;
-  const { data, pages } = (await fetchSocialAidsForCampaignDetail(
+  const { data, pages } = await fetchSocialAidsForCampaignDetail(
     id,
     query,
     paginaActual,
     itemsPerPage,
-  )) as {
-    data: SocialAid[];
-    pages: number;
-  };
+  );
 
   return (
-    <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300">
+    <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300/70">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[44rem]">
           <thead className="border-y border-slate-200/70 bg-slate-50 text-left text-xs font-medium uppercase tracking-wider text-slate-600/70">

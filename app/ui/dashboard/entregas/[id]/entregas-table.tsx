@@ -23,7 +23,7 @@ export default async function SocialAidsDetailTable({
   );
 
   return (
-    <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300">
+    <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300/70">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[44rem]">
           <thead className="border-y border-slate-200/70 bg-slate-50 text-left text-xs font-medium uppercase tracking-wider text-slate-600/70">

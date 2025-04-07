@@ -2,11 +2,11 @@ import sql from "mssql";
 import { RSH, RSHInfo } from "../definitions";
 import { connectToDB } from "../utils/db-connection";
 
-export async function fetchRSHById(id: string) {
+export async function fetchRSHByRUT(rut: string) {
   try {
     const pool = await connectToDB();
     const request = pool.request();
-    const result = await request.input("rut", sql.Int, id).query(`
+    const result = await request.input("rut", sql.Int, rut).query(`
         SELECT rsh.*,
         (SELECT MAX(fecha_entrega) FROM entregas WHERE rut = @rut) AS ultima_entrega
         FROM rsh

@@ -68,6 +68,7 @@ export default function NewCitizenModal({ name }: { name: string }) {
         <div className="flex grow gap-3">
           <Input
             placeHolder="Código..."
+            htmlId={true}
             label="Nombre Ciudadano"
             type="text"
             nombre="descripcion"
