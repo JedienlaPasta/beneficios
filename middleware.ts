@@ -5,6 +5,11 @@ import { jwtVerify } from "jose";
 const protectedRoutes = ["/dashboard"];
 const publicRoutes = ["/", "/login", "/register"];
 
+const roleRestrictedRoutes = {
+  "/dashboard/usuarios": ["administrador"],
+  "/dashboard/auditoria": ["administrador"],
+};
+
 // Secret key for verifying JWTs - should match the one in session.ts
 const secretKey = new TextEncoder().encode(
   process.env.JWT_SECRET || "your-secret-key-at-least-32-characters-long",
@@ -38,8 +43,40 @@ export default async function middleware(request: NextRequest) {
     }
   }
 
+  // Verificar autenticación básica
   if (isProtectedRoute && !session?.userId) {
     return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  // Verificar restricciones de rol
+  if (session?.userId) {
+    // Comprobar si la ruta actual requiere un rol específico
+    for (const [routePath, allowedRoles] of Object.entries(
+      roleRestrictedRoutes,
+    )) {
+      if (path === routePath || path.startsWith(`${routePath}/`)) {
+        // Get the userRole cookie instead of using the JWT
+        const userRoleCookie = request.cookies.get("userRole")?.value;
+
+        if (!userRoleCookie) {
+          return NextResponse.redirect(new URL("/dashboard", request.url));
+        }
+
+        try {
+          const userData = JSON.parse(decodeURIComponent(userRoleCookie));
+          const userRole = userData.rol?.toLowerCase();
+
+          if (!userRole || !allowedRoles.includes(userRole)) {
+            // Redirigir a dashboard si no tiene permisos
+            return NextResponse.redirect(new URL("/dashboard", request.url));
+          }
+        } catch (error) {
+          console.error("Error parsing userRole cookie:", error);
+          return NextResponse.redirect(new URL("/dashboard", request.url));
+        }
+        break;
+      }
+    }
   }
 
   if (isPublicRoute && session?.userId) {

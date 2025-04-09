@@ -4,7 +4,8 @@ import { BiFolderPlus } from "react-icons/bi";
 import { formatDate } from "@/app/lib/utils/format";
 import Pagination from "../pagination";
 import { Activity } from "@/app/lib/definitions";
-import { fetchUserActivity } from "@/app/lib/data/auditoria";
+import { fetchUserActivityById } from "@/app/lib/data/auditoria";
+import { getSession } from "@/app/lib/session";
 
 const ACTIVITY = [
   {
@@ -34,8 +35,16 @@ export default async function ActivityTable({
 }: ActivityTableProps) {
   const rowsPerPage = 6;
 
+  const userSession = await getSession();
+  if (!userSession) {
+    return null;
+  }
+  const userId = String(userSession.userId);
+  console.log(userId);
+
   try {
-    const { data, pages } = (await fetchUserActivity(
+    const { data, pages } = (await fetchUserActivityById(
+      userId,
       query,
       currentPage,
       rowsPerPage,

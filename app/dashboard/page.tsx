@@ -44,9 +44,27 @@ export default async function Home(props: HomeProps) {
           <GeneralInfoCards />
         </Suspense>
         <div className="items-centers w-fits flex flex-col justify-center gap-3 overflow-x-auto rounded-xl border border-slate-200 bg-white px-10 py-4 shadow-md shadow-slate-300/70">
-          <h2 className="my-2 text-lg font-semibold text-slate-800">
-            Entregas Realizadas
-          </h2>
+          <div className="flex w-full items-center justify-between">
+            <h2 className="my-2 text-lg font-semibold text-slate-800">
+              Entregas Realizadas
+            </h2>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-slate-500">Año:</span>
+              <select 
+                className="rounded-md border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
+                defaultValue={new Date().getFullYear()}
+              >
+                {[...Array(5)].map((_, i) => {
+                  const year = new Date().getFullYear() - i;
+                  return (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          </div>
           <SocialAidActivityBoard />
           <div className="flex w-fit flex-nowrap justify-end gap-1 self-start rounded-lg border border-slate-200 px-2 py-1">
             <p className="text-xs text-slate-400">Poco</p>

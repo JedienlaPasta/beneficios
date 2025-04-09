@@ -19,12 +19,12 @@ export default function RoleGuard({
     // Get user role from the non-httpOnly cookie
     try {
       const cookies = document.cookie.split(";");
-      const userRoleCookie = cookies.find(cookie => 
-        cookie.trim().startsWith("userRole=")
+      const userRoleCookie = cookies.find((cookie) =>
+        cookie.trim().startsWith("userRole="),
       );
-      
+
       if (!userRoleCookie) {
-        console.log("No userRole cookie found");
+        // console.log("No userRole cookie found");
         setHasAccess(false);
         return;
       }
@@ -34,17 +34,17 @@ export default function RoleGuard({
         setHasAccess(false);
         return;
       }
-      
+
       const userData = JSON.parse(decodeURIComponent(cookieValue));
-      
+
       if (!userData || !userData.rol) {
-        console.log("Invalid user role data in cookie");
+        // console.log("Invalid user role data in cookie");
         setHasAccess(false);
         return;
       }
 
       const hasRole = allowedRoles.includes(userData.rol);
-      console.log(`User role: ${userData.rol}, Access granted: ${hasRole}`);
+      // console.log(`User role: ${userData.rol}, Access granted: ${hasRole}`);
       setHasAccess(hasRole);
     } catch (error) {
       console.error("Error checking user role:", error);

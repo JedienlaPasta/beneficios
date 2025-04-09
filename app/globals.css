@@ -31,6 +31,12 @@ html {
   scrollbar-gutter: stable;
 }
 
+@media (max-width: 768px) {
+  html {
+    max-height: 100svh;
+  }
+}
+
 ::-webkit-scrollbar-thumb {
   background: #889cb1;
   border-radius: 100vh;

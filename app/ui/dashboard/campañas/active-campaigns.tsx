@@ -11,7 +11,6 @@ type ActiveCampaignsProps = {
 
 export default async function ActiveCampaigns() {
   const { data } = await fetchActiveCampaigns();
-  console.log(data);
   return (
     <>
       <div className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-3">

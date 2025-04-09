@@ -34,8 +34,8 @@ const links = [
     description: "Registro Social de Hogares",
   },
   {
-    nombre: "Registros",
-    href: "/dashboard/registros",
+    nombre: "Auditoría",
+    href: "/dashboard/auditoria",
     icon: <FaFileLines className="h-5 w-5" />,
   },
   {
@@ -61,7 +61,7 @@ export default function NavLinks({ setSidenavOpen }: NavLinksProps) {
         const isActive = parentPathname === link.href;
 
         // For admin-only links
-        if (link.nombre === "Registros" || link.nombre === "Usuarios") {
+        if (link.nombre === "Auditoría" || link.nombre === "Usuarios") {
           return (
             <RoleGuard key={link.nombre} allowedRoles={["Administrador"]}>
               <Link

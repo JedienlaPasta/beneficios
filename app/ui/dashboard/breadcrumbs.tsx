@@ -15,7 +15,7 @@ export default function Breadcrumbs() {
       if (path === "campanas") return [path, "Campañas"];
       if (path === "entregas") return [path, "Entregas"];
       if (path === "rsh") return [path, "RSH"];
-      if (path === "registros") return [path, "Registros"];
+      if (path === "auditoria") return [path, "Auditoría"];
       if (path === "usuarios") return [path, "Usuarios"];
       else return [path, path];
     });
