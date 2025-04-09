@@ -78,7 +78,9 @@ export async function fetchActiveCampaigns() {
     const pool = await connectToDB();
     const request = pool.request();
     const result = await request.query(`
-      SELECT * FROM campañas WHERE fecha_inicio <= GETUTCDATE() AND fecha_termino >= GETUTCDATE()
+      SELECT * FROM campañas 
+      WHERE fecha_inicio <= GETUTCDATE() AND fecha_termino >= GETUTCDATE()
+      ORDER BY fecha_inicio DESC
       `);
     return { data: result.recordset as Campaign[] };
   } catch (error) {

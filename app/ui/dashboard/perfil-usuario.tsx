@@ -4,34 +4,11 @@ import { HiChevronDown } from "react-icons/hi2";
 import { FiLogOut, FiUser } from "react-icons/fi";
 import Link from "next/link";
 import { toast } from "sonner";
+import { logoutAction } from "@/app/lib/actions/auth";
 
-export default function PerfilUsuario() {
-  const [userSession, setUserSession] = useState<{
-    nombre: string;
-    cargo: string;
-    rol: string;
-    correo: string;
-  } | null>(null);
+export default function PerfilUsuario({ userData }: { userData: any }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Get user session from localStorage
-    const sessionData = localStorage.getItem("userSession");
-    if (sessionData) {
-      try {
-        const parsedData = JSON.parse(sessionData);
-        setUserSession({
-          ...parsedData,
-          nombre:
-            parsedData.nombre.charAt(0).toUpperCase() +
-            parsedData.nombre.slice(1),
-        });
-      } catch (error) {
-        console.error("Error parsing user session:", error);
-      }
-    }
-  }, []);
 
   useEffect(() => {
     // Close dropdown when clicking outside
@@ -52,25 +29,10 @@ export default function PerfilUsuario() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("/api/auth/logout", {
-        method: "POST",
-      });
+      await logoutAction();
+      toast.success("Sesión cerrada correctamente");
 
-      if (response.ok) {
-        // Clear localStorage
-        localStorage.removeItem("userSession");
-
-        // Clear cookie by setting expiration to past date
-        document.cookie =
-          "userSession=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-
-        toast.success("Sesión cerrada correctamente");
-
-        // Force a complete page reload to clear any cached state
-        window.location.href = "/";
-      } else {
-        toast.error("Error al cerrar sesión");
-      }
+      // The redirect is handled by the server action
     } catch (error) {
       console.error("Error during logout:", error);
       toast.error("Error de conexión");
@@ -85,15 +47,15 @@ export default function PerfilUsuario() {
       >
         <div className="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-blue-500 to-blue-600">
           <div className="flex h-full w-full items-center justify-center text-lg font-medium text-white">
-            {userSession ? userSession.nombre.charAt(0) : "U"}
+            {userData ? userData.nombre_usuario.charAt(0) : "U"}
           </div>
         </div>
         <div className="flex-1">
           <p className="text-sm font-medium text-slate-200">
-            {userSession ? userSession.nombre : "Cargando..."}
+            {userData ? userData.nombre_usuario : "Cargando..."}
           </p>
           <p className="text-xs text-slate-400">
-            {userSession ? userSession.cargo : "..."}
+            {userData ? userData.cargo : "..."}
           </p>
         </div>
         <HiChevronDown

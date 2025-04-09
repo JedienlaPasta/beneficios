@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { FormField } from "../entregas/new-modal-form";
+
+type FormField = {
+  id: string;
+  campaignName: string;
+  detail: string;
+  code: string;
+};
 
 type CampaignList = {
   id: string;

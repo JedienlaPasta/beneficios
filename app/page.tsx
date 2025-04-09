@@ -1,78 +1,23 @@
 "use client";
-import { Suspense, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import LoginForm from "@/app/ui/login-form";
-import { SquaresLoader } from "./ui/dashboard/loaders";
+// import { SquaresLoader } from "./ui/dashboard/loaders";
 import Image from "next/image";
 import { loginImages } from "@/public/login-images/quisco/index";
+import defaultImage from "@/public/login-images/quisco/8.webp";
 import sibasImg from "@/public/logo_S.svg";
 import quiscoImg from "@/public/elquisco.svg";
 import { anton_sc } from "./ui/fonts";
 import { Toaster } from "sonner";
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
+  const [currentImage, setCurrentImage] = useState(defaultImage);
 
-  // Move randomImage outside component or use useMemo to prevent recalculation on re-renders
-  const currentImage = useMemo(() => {
-    const randomIndex = Math.floor(Math.random() * loginImages.length);
-    return loginImages[randomIndex];
-  }, []);
-
+  // Update the image after component mounts (client-side only)
   useEffect(() => {
-    // Check if user is already logged in
-    const checkSession = async () => {
-      try {
-        // First check localStorage
-        const userSession = localStorage.getItem("userSession");
-
-        if (userSession) {
-          // Verify the session is valid by checking with the server
-          const response = await fetch("/api/auth/check-session");
-          const data = await response.json();
-
-          if (data.authenticated) {
-            return router.push("/dashboard");
-          } else {
-            // If server says session is invalid, clear localStorage
-            localStorage.removeItem("userSession");
-          }
-        }
-      } catch (error) {
-        console.error("Error checking session:", error);
-      } finally {
-        // Use a shorter timeout for better UX
-        const timer = setTimeout(() => {
-          setIsLoading(false);
-        }, 800);
-
-        return () => clearTimeout(timer);
-      }
-    };
-
-    checkSession();
-  }, [router]);
-
-  if (isLoading) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-100 to-slate-300">
-        <div className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white/80 p-8 shadow-xl backdrop-blur-sm md:-mt-32">
-          <div className="flex flex-col items-center gap-6 text-center">
-            <div className="space-y-2">
-              <h3 className="text-xl font-semibold text-slate-800">
-                Verificando sesión
-              </h3>
-              <p className="animate-pulse text-sm text-slate-600">
-                Por favor espere mientras lo redirigimos...
-              </p>
-            </div>
-            <SquaresLoader />
-          </div>
-        </div>
-      </main>
-    );
-  }
+    const randomIndex = Math.floor(Math.random() * loginImages.length);
+    setCurrentImage(loginImages[randomIndex]);
+  }, []);
 
   // New Login Page Test
   return (
@@ -162,7 +107,7 @@ export default function LoginPage() {
           height={1400}
           priority
           className="h-full w-full object-cover"
-          quality={85} // Reduce quality slightly for smaller file size
+          quality={90} // Reduce quality slightly for smaller file size
           placeholder="blur" // Add blur placeholder while loading
           sizes="(max-width: 768px) 100vw, 50vw" // Responsive sizing
         />

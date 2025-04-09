@@ -2,30 +2,26 @@
 import { toast } from "sonner";
 import Input from "../campañas/new-campaign-input";
 import { SubmitButton } from "../submit-button";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Campaign } from "@/app/lib/definitions";
 import { createEntrega } from "@/app/lib/actions/entregas";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
+// Update the props type to include userId
 type NewModalFormProps = {
   activeCampaigns?: Campaign[];
   rut: string;
-};
-
-export type FormField = {
-  id: string;
-  campaignName: string;
-  detail: string;
-  code: string;
+  userId: string; // Add this new prop
 };
 
 export default function NewModalForm({
   activeCampaigns,
   rut,
+  userId, // Receive userId as a prop
 }: NewModalFormProps) {
   const router = useRouter();
-  const [idUsuario, setIdUsuario] = useState("");
+  // Remove the state for idUsuario since we're getting it from props
   const [observaciones, setObservaciones] = useState("");
 
   // Initialize selectedCampaigns with a lazy initializer function
@@ -44,21 +40,6 @@ export default function NewModalForm({
     return {};
   });
 
-  useEffect(() => {
-    try {
-      const userSession = localStorage.getItem("userSession");
-      if (userSession) {
-        const userData = JSON.parse(userSession);
-        setIdUsuario(userData.id_usuario);
-      } else {
-        toast.error("No se encontró sesión de usuario");
-      }
-    } catch (error) {
-      console.error("Error getting user session:", error);
-      toast.error("Error al obtener la sesión de usuario");
-    }
-  }, []);
-
   const searchParams = useSearchParams();
 
   const closeModal = () => {
@@ -71,7 +52,8 @@ export default function NewModalForm({
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
-  const createEntregaWithId = createEntrega.bind(null, idUsuario);
+  // Update this line to use the userId prop directly
+  const createEntregaWithId = createEntrega.bind(null, userId);
 
   const handleCheckboxChange = (campaignId: string) => {
     setSelectedCampaigns((prev) => ({
@@ -265,7 +247,6 @@ export default function NewModalForm({
                     <div className="border-t border-slate-100 bg-slate-50 p-3">
                       <Input
                         placeHolder={`Ingrese ${campaign.tipo_dato.toLowerCase()}...`}
-                        htmlId={false}
                         type="text"
                         nombre={`detail-${campaign.id}`}
                         value={selectedCampaigns[campaign.id]?.detail || ""}
@@ -291,7 +272,6 @@ export default function NewModalForm({
       <Input
         placeHolder="Observaciones..."
         label="Observaciones"
-        htmlId={true}
         type="text"
         nombre="observaciones"
         value={observaciones}

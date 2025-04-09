@@ -3,12 +3,12 @@ import { Suspense } from "react";
 import CitizenDetail, {
   CitizenDetailSkeleton,
 } from "@/app/ui/dashboard/entregas/citizen-detail";
-import Modal from "@/app/ui/dashboard/modal";
 import NewSocialAidModal from "@/app/ui/dashboard/entregas/new-social-aid-modal";
 import NewButton from "@/app/ui/dashboard/new-button";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import SocialAidsDetailTable from "@/app/ui/dashboard/entregas/[id]/entregas-table";
 import EntregasTableModal from "@/app/ui/dashboard/entregas/[id]/entregas-table-modal";
+import { Modal } from "@/app/ui/dashboard/modal";
 
 type CitizenRecordProps = {
   searchParams?: Promise<{

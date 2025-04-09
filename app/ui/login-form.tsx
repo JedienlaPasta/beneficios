@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { loginAction } from "@/app/lib/actions/auth";
 import { useRouter } from "next/navigation";
-import { SubmitButton } from "./dashboard/submit-button";
+import { useState } from "react";
 import { toast } from "sonner";
+import { SubmitButton } from "./dashboard/submit-button";
 
 export default function LoginForm() {
   const [isDisabled, setIsDisabled] = useState(false);
@@ -11,117 +12,81 @@ export default function LoginForm() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const formAction = async (formData: FormData) => {
     setIsDisabled(true);
-    setError("");
 
-    const toastId = toast.loading("Verificando...");
+    const toastId = toast.loading("Iniciando sesión...");
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Error en la respuesta del servidor");
+      const response = await loginAction(formData);
+      if (!response.success) {
+        throw new Error(response.error);
       }
 
-      toast.success(data.message, { id: toastId });
-      // Store user session in localStorage for client-side access
-      localStorage.setItem("userSession", JSON.stringify(data.user));
-      // Set a cookie for server-side session validation
-      document.cookie = `userSession=${encodeURIComponent(JSON.stringify(data.user))};path=/;max-age=86400`;
-
+      toast.success(response.message, { id: toastId });
       router.push("/dashboard");
-
-      // if (data.success) {
-      //   // Store user session in localStorage for client-side access
-      //   localStorage.setItem("userSession", JSON.stringify(data.user));
-
-      //   // Set a cookie for server-side session validation
-      //   document.cookie = `userSession=${encodeURIComponent(JSON.stringify(data.user))};path=/;max-age=86400`;
-
-      //   router.push("/dashboard");
-      // } else {
-      //   setError(data.error || "Error al iniciar sesión");
-      //   setIsDisabled(false);
-      // }
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Error desconocido";
+        error instanceof Error ? error.message : "Error al iniciar sesión";
       toast.error(message, { id: toastId });
-      console.error("Error durante el login:", error);
-      setError(message);
       setIsDisabled(false);
+      setError(message);
     }
   };
 
   return (
-    <div>
-      <form className="flex flex-col gap-10" onSubmit={handleSubmit}>
-        <div
-          className={`relative top-5 flex h-10 items-center gap-3 rounded-md border bg-white px-4 shadow-sm transition-all focus-within:border-blue-500 ${error ? "border-red-500" : "border-slate-300"}`}
+    <form action={formAction} className="flex flex-col gap-4">
+      {/* Tus campos de formulario */}
+      <div>
+        <label
+          htmlFor="email"
+          className={`block text-xs ${error ? "text-red-500" : "text-slate-400"}`}
         >
-          <label
-            htmlFor="email"
-            className={`absolute left-0 top-[-1.25rem] text-xs ${error ? "text-red-500" : "text-slate-400"}`}
-          >
-            Correo
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="tu@empresa.com"
-            className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
-          />
-        </div>
-        <div
-          className={`relative top-5 flex h-10 items-center gap-3 rounded-md border bg-white px-4 shadow-sm transition-all focus-within:border-blue-500 ${error ? "border-red-500" : "border-slate-300"}`}
+          Correo electrónico
+        </label>
+        <input
+          type="email"
+          id="email"
+          name="correo"
+          autoComplete="email"
+          required
+          placeholder="tu@empresa.com"
+          className={`mt-1 block h-11 w-full rounded-md border px-3 py-2 text-sm outline-none ${error ? "border-red-500" : "border-gray-300 focus:border-blue-400"}`}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </div>
+
+      <div>
+        <label
+          htmlFor="password"
+          className={`block text-xs ${error ? "text-red-500" : "text-slate-400"}`}
         >
-          <label
-            htmlFor="password"
-            className={`absolute left-0 top-[-1.25rem] text-xs ${error ? "text-red-500" : "text-slate-400"}`}
-          >
-            Contraseña
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Contraseña"
-            className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
-          />
-        </div>
-        {error && (
-          <div className="relative">
-            <div className="absolute left-0 top-0 text-sm text-red-500">
-              {error}
-            </div>
+          Contraseña
+        </label>
+        <input
+          type="password"
+          id="password"
+          name="contraseña"
+          autoComplete="current-password"
+          required
+          placeholder="Contraseña"
+          className={`mt-1 block h-11 w-full rounded-md border px-3 py-2 text-sm outline-none ${error ? "border-red-500" : "border-gray-300 focus:border-blue-400"}`}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+      </div>
+      {error && (
+        <div className="relative">
+          <div className="absolute left-0 top-0 text-sm text-red-500">
+            {error}
           </div>
-        )}
-        <div className="mt-2 flex">
-          <SubmitButton
-            isDisabled={isDisabled || !email || !password}
-            setIsDisabled={setIsDisabled}
-          >
-            {isDisabled ? "Verificando..." : "Iniciar sesión"}
-          </SubmitButton>
         </div>
-      </form>
-    </div>
+      )}
+      <div className="mt-2 flex">
+        <SubmitButton isDisabled={isDisabled || !email || !password}>
+          {isDisabled ? "Verificando..." : "Iniciar sesión"}
+        </SubmitButton>
+      </div>
+    </form>
   );
 }

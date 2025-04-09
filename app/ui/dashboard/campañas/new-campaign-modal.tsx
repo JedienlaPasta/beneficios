@@ -82,30 +82,47 @@ export default function NewCampaignModal() {
     myFormData.append("discapacidad", criteria.discapacidad.toString());
     myFormData.append("adultoMayor", criteria.adultoMayor.toString());
 
-    toast.promise(
-      createCampaign(myFormData).then((response) => {
-        if (!response.success) {
-          throw new Error(response.message);
-        }
-        return response;
-      }),
-      {
-        loading: "Guardando...",
-        success: (response) => {
-          setIsLoading(false);
-          // setTimeout(() => {
-          //   closeModal();
-          // }, 1000);
-          closeModal();
-          return response.message;
-        },
-        error: (err) => {
-          setIsDisabled(false);
-          setIsLoading(false);
-          return err.message;
-        },
-      },
-    );
+    // toast.promise(
+    //   createCampaign(myFormData).then((response) => {
+    //     if (!response.success) {
+    //       throw new Error(response.message);
+    //     }
+    //     return response;
+    //   }),
+    //   {
+    //     loading: "Guardando...",
+    //     success: (response) => {
+    //       setIsLoading(false);
+    //       // setTimeout(() => {
+    //       //   closeModal();
+    //       // }, 1000);
+    //       closeModal();
+    //       return response.message;
+    //     },
+    //     error: (err) => {
+    //       setIsDisabled(false);
+    //       setIsLoading(false);
+    //       return err.message;
+    //     },
+    //   },
+    // );
+    const toastId = toast.loading("Guardando...");
+    try {
+      const response = await createCampaign(myFormData);
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+
+      toast.success(response.message, { id: toastId });
+      setIsLoading(false);
+      setTimeout(closeModal, 300);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Error desconocido";
+      toast.error(message, { id: toastId });
+      setIsLoading(false);
+      setIsDisabled(false);
+    }
   };
 
   return (
@@ -133,7 +150,6 @@ export default function NewCampaignModal() {
           <div className="grow">
             <Input
               required={true}
-              htmlId={true}
               placeHolder="Stock..."
               label="Stock Inicial"
               type="text"
@@ -145,7 +161,6 @@ export default function NewCampaignModal() {
           <div className="grow">
             <Input
               required={true}
-              htmlId={true}
               placeHolder="Código..."
               label="Código Campaña"
               type="text"

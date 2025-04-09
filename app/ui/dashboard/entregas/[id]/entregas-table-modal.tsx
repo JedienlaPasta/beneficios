@@ -13,6 +13,7 @@ import { Files } from "./files";
 import { formatDate, formatTime } from "@/app/lib/utils/format";
 import GetNewFileButton from "./new-file-button";
 import DeleteEntregasButton from "./delete-button";
+import RoleGuard from "@/app/ui/auth/role-guard";
 
 export default async function EntregasTableModal({ folio }: { folio: string }) {
   const entregasResponse = await fetchSocialAidsGeneralInfoByFolio(folio);
@@ -76,7 +77,9 @@ export default async function EntregasTableModal({ folio }: { folio: string }) {
               <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
               Beneficios Recibidos
             </h3>
-            <DeleteEntregasButton folio={folio} />
+            <RoleGuard allowedRoles={["Administrador"]}>
+              <DeleteEntregasButton folio={folio} />
+            </RoleGuard>
           </div>
           <div className="flex flex-col gap-2.5">
             {entregaResponse.data.map((item) => (

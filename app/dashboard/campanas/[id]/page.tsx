@@ -1,4 +1,3 @@
-import Modal from "@/app/ui/dashboard/modal";
 import { Suspense } from "react";
 import UpdateCampaignModal from "@/app/ui/dashboard/campañas/[id]/update/update-campaign-modal";
 import CampaignDetail, {
@@ -7,6 +6,7 @@ import CampaignDetail, {
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import CampaignSocialAidsTable from "@/app/ui/dashboard/campañas/[id]/campaign-social-aid-table";
 import CampaignSocialAidsTableSkeleton from "@/app/ui/dashboard/campañas/[id]/table-skeleton";
+import { Modal } from "@/app/ui/dashboard/modal";
 
 type CampaignProps = {
   searchParams?: Promise<{

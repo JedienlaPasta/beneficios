@@ -11,6 +11,7 @@ type ActiveCampaignsProps = {
 
 export default async function ActiveCampaigns() {
   const { data } = await fetchActiveCampaigns();
+  console.log(data);
   return (
     <>
       <div className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-3">
@@ -42,7 +43,7 @@ function ActiveCampaign({
 
       {/* Card content */}
       <div className="relative z-10 flex items-center justify-between px-6 py-5">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition-all duration-500 group-hover:bg-blue-600 group-hover:text-white">
             <FaBoxOpen />
           </div>

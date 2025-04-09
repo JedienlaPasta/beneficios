@@ -26,13 +26,15 @@ export default function TableRow({ item }: { item: SocialAidTableRow }) {
   return (
     <tr
       onClick={handleClick}
-      className="h-12 cursor-pointer text-nowrap text-sm tabular-nums transition-colors hover:bg-slate-200/50"
+      className="grid cursor-pointer grid-cols-26 text-nowrap text-sm tabular-nums transition-colors hover:bg-slate-200/50"
     >
-      <td className="flex h-12 min-h-12 w-[30%] items-center px-10 text-slate-600">
+      <td className="col-span-5 flex min-h-12 items-center px-10 text-slate-600">
         {folio}
       </td>
-      <td className="w-[30%] py-3 text-slate-600">{nombre_usuario}</td>
-      <td className="h-11 min-h-11 w-[15%] text-slate-600">
+      <td className="col-span-13 flex items-center py-3 text-slate-600">
+        {nombre_usuario}
+      </td>
+      <td className="col-span-4 flex h-11 min-h-11 items-center self-center text-slate-600">
         <div
           className={`flex w-fit items-center gap-2 rounded-md px-2 py-1 ${estadoTextColor}`}
         >
@@ -42,7 +44,7 @@ export default function TableRow({ item }: { item: SocialAidTableRow }) {
           <p className="z-10">{estado_documentos}</p>
         </div>
       </td>
-      <td className="py-30 w-[25%] px-10 text-right text-slate-600">
+      <td className="col-span-4 flex items-center justify-end px-10 py-3 text-right text-slate-600">
         <div>
           <p>{fecha}</p>
           <p className="text-xs text-slate-500">{hora}</p>

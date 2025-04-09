@@ -63,7 +63,7 @@ export default function UpdateForm({ data }: { data: Campaign[] }) {
 
       toast.success(response.message, { id: toastId });
       setIsLoading(false);
-      setTimeout(closeModal, 500);
+      setTimeout(closeModal, 300);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Error desconocido";

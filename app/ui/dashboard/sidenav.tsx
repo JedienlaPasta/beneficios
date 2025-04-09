@@ -7,9 +7,10 @@ import elquiscoImg from "@/public/elquisco.svg";
 
 type SidenavProps = {
   setSidenavOpen: (prev: boolean) => void;
+  userData: any;
 };
 
-export default function Sidenav({ setSidenavOpen }: SidenavProps) {
+export default function Sidenav({ setSidenavOpen, userData }: SidenavProps) {
   return (
     <div className="z-20 flex min-h-screen w-72 flex-col bg-[#171a1f] text-slate-300">
       <div className="flex h-20 min-h-[5rem] shrink-0 items-center border-b border-slate-700/50 px-4">
@@ -60,7 +61,7 @@ export default function Sidenav({ setSidenavOpen }: SidenavProps) {
             </div>
 
             <div className="border-t border-slate-700/50 px-4 py-4">
-              <PerfilUsuario />
+              <PerfilUsuario userData={userData} />
             </div>
           </div>
         </div>

@@ -3,7 +3,6 @@ import { Campaign } from "@/app/lib/definitions";
 
 type InputProps = {
   label?: string;
-  htmlId: boolean;
   nombre: string; // Change this from keyof Campaign to string
   // nombre: keyof Campaign;
   type?: string;
@@ -19,7 +18,6 @@ type InputProps = {
 
 export default function Input({
   label,
-  htmlId,
   nombre,
   type,
   value,
@@ -42,10 +40,7 @@ export default function Input({
   return (
     <div className="flex flex-col gap-1">
       {label && (
-        <label
-          htmlFor={htmlId ? label : undefined}
-          className="text-xs text-slate-500"
-        >
+        <label htmlFor={label} className="text-xs text-slate-500">
           {label}
         </label>
       )}

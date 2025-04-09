@@ -5,6 +5,7 @@ import StaticRequirementsCard from "./static-card-requirements";
 import SocialAidsGivenResume from "./social-aids-stock-resume";
 import { fetchCampaignById } from "@/app/lib/data/campañas";
 import { redirect } from "next/navigation"; // Changed import from next/dist/server/api-utils to next/navigation
+import RoleGuard from "@/app/ui/auth/role-guard";
 
 export default async function CampaignDetail({ id }: { id: string }) {
   const { data } = await fetchCampaignById(id);
@@ -60,7 +61,9 @@ export default async function CampaignDetail({ id }: { id: string }) {
               <p className="text-sm font-medium text-slate-500">{tipo_dato}</p>
             </div>
           </div>
-          <CampaignOptionsMenu id={id} />
+          <RoleGuard allowedRoles={["Administrador"]}>
+            <CampaignOptionsMenu id={id} />
+          </RoleGuard>
         </div>
 
         {/* Details Grid */}

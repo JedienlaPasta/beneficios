@@ -24,8 +24,8 @@ export default async function CampaignsTable({
         <table className="w-full min-w-[44rem] border-collapse">
           <thead className="border-y border-slate-200/80 bg-slate-50 text-xs uppercase tracking-wider text-slate-600/70">
             <tr className="grid grid-cols-26 items-center gap-9 px-6 text-left">
-              <th className="col-span-6 py-4 text-left font-normal">Id</th>
-              <th className="col-span-6 py-4 text-left font-normal">Campaña</th>
+              <th className="col-span-5 py-4 text-left font-normal">Id</th>
+              <th className="col-span-7 py-4 text-left font-normal">Campaña</th>
               <th className="col-span-3 py-4 text-left font-normal">
                 Entregas
               </th>

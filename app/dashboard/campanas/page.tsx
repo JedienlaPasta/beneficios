@@ -5,10 +5,9 @@ import ActiveCampaigns, {
 import NewCampaignModal from "@/app/ui/dashboard/campañas/new-campaign-modal";
 import CampaignsTableSkeleton from "@/app/ui/dashboard/campañas/campaigns-table-skeleton";
 import NewCampaignButton from "@/app/ui/dashboard/campañas/new-campaign-button";
-import Modal from "@/app/ui/dashboard/modal";
 import { Suspense } from "react";
 import SearchBar from "@/app/ui/dashboard/searchbar";
-import ProtectedRoute from "@/app/dashboard/ProtectedRoute";
+import { Modal } from "@/app/ui/dashboard/modal";
 
 type CampaignsProps = {
   searchParams?: Promise<{ query?: string; page?: string; modal?: string }>;
@@ -21,43 +20,41 @@ export default async function Campaigns(props: CampaignsProps) {
   const currentPage = Number(searchParams?.page) || 1;
 
   return (
-    <ProtectedRoute isDashboardRoute={true}>
-      <div>
-        {modal === "open" && (
-          <Modal name="modal">
-            <NewCampaignModal />
-          </Modal>
-        )}
-        <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-800">Campañas</h2>
-            <p className="text-sm text-slate-600/70">
-              Gestiona las campañas activas y accede al historial de cada una de
-              ellas.
-            </p>
-          </div>
-          <NewCampaignButton>Nueva Campaña</NewCampaignButton>
+    <div>
+      {modal === "open" && (
+        <Modal name="modal">
+          <NewCampaignModal />
+        </Modal>
+      )}
+      <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800">Campañas</h2>
+          <p className="text-sm text-slate-600/70">
+            Gestiona las campañas activas y accede al historial de cada una de
+            ellas.
+          </p>
         </div>
+        <NewCampaignButton>Nueva Campaña</NewCampaignButton>
+      </div>
 
-        <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
-          <Suspense fallback={<ActiveCampaignsSkeleton />}>
-            <ActiveCampaigns />
-          </Suspense>
+      <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
+        <Suspense fallback={<ActiveCampaignsSkeleton />}>
+          <ActiveCampaigns />
+        </Suspense>
 
-          <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50">
-            <div className="flex flex-wrap items-center justify-between gap-4 px-6 pt-4 3xl:w-[96rem] 3xl:self-center">
-              <span className="flex flex-wrap items-center gap-2 text-nowrap text-lg font-semibold text-slate-800">
-                <p>Historial de Campañas</p>
-              </span>
-              {/* Search bar should be outside Suspense since it doesn't depend on async data */}
-              <SearchBar placeholder="Buscar..." />
-            </div>
-            <Suspense fallback={<CampaignsTableSkeleton />}>
-              <CampaignsTable query={query} currentPage={currentPage} />
-            </Suspense>
+        <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50">
+          <div className="flex flex-wrap items-center justify-between gap-4 px-6 pt-4 3xl:w-[96rem] 3xl:self-center">
+            <span className="flex flex-wrap items-center gap-2 text-nowrap text-lg font-semibold text-slate-800">
+              <p>Historial de Campañas</p>
+            </span>
+            {/* Search bar should be outside Suspense since it doesn't depend on async data */}
+            <SearchBar placeholder="Buscar..." />
           </div>
+          <Suspense fallback={<CampaignsTableSkeleton />}>
+            <CampaignsTable query={query} currentPage={currentPage} />
+          </Suspense>
         </div>
       </div>
-    </ProtectedRoute>
+    </div>
   );
 }

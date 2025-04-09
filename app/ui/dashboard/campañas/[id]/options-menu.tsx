@@ -27,13 +27,6 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
-  const closeModal = () => {
-    const params = new URLSearchParams(searchParams);
-    params.delete("update", "open");
-    router.replace(`?${params.toString()}`, { scroll: false });
-    router.push("/dashboard/campanas");
-  };
-
   const handleDeleteButton = () => {
     setShowConfirmDeleteModal(true);
   };
@@ -46,7 +39,8 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
       success: async (response) => {
         setShowConfirmDeleteModal(false);
         setIsDisabled(false);
-        closeModal();
+        router.refresh();
+        router.push("/dashboard/campanas");
         return {
           message: response.message,
         };
@@ -70,7 +64,7 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
       success: async (response) => {
         setShowConfirmEndModal(false);
         setIsDisabled(false);
-        closeModal();
+        router.refresh();
         return {
           message: response.message,
         };
@@ -165,34 +159,4 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
       )}
     </div>
   );
-}
-
-{
-  /* <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        //   <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
-        //     <h3 className="mb-3 text-lg font-medium text-gray-900">
-        //       Confirmar eliminación
-        //     </h3>
-        //     <p className="mb-6 text-sm text-gray-500">
-        //       ¿Estás seguro de que deseas eliminar esta entrega? Esta acción no
-        //       se puede deshacer.
-        //     </p>
-        //     <div className="flex justify-end space-x-4">
-        //       <button
-        //         type="button"
-        //         onClick={() => setShowConfirmModal(false)}
-        //         className={`rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 ${isDisabled ? "cursor-not-allowed" : "hover:bg-gray-200"}`}
-        //       >
-        //         Cancelar
-        //       </button>
-        //       <button
-        //         type="button"
-        //         onClick={(e) => confirmDelete(e)}
-        //         className={`rounded-md px-4 py-2 text-sm font-medium text-white ${isDisabled ? "cursor-not-allowed bg-red-300" : "bg-red-500 hover:bg-red-600"}`}
-        //       >
-        //         Eliminar
-        //       </button>
-        //     </div>
-        //   </div>
-        // </div> */
 }

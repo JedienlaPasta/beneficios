@@ -27,11 +27,17 @@ export default async function SocialAidsDetailTable({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[44rem]">
           <thead className="border-y border-slate-200/70 bg-slate-50 text-left text-xs font-medium uppercase tracking-wider text-slate-600/70">
-            <tr>
-              <th className="py-4 pl-10 text-left font-normal">Folio</th>
-              <th className="py-4 text-left font-normal">Encargado</th>
-              <th className="py-4 font-normal">Documentos</th>
-              <th className="py-4 pr-10 text-right font-normal">Entrega</th>
+            <tr className="grid grid-cols-26">
+              <th className="col-span-5 py-4 pl-10 text-left font-normal">
+                Folio
+              </th>
+              <th className="col-span-13 py-4 text-left font-normal">
+                Encargado
+              </th>
+              <th className="col-span-4 py-4 font-normal">Documentos</th>
+              <th className="col-span-4 py-4 pr-10 text-right font-normal">
+                Entrega
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/30">
