@@ -40,7 +40,6 @@ export default async function ActivityTable({
     return null;
   }
   const userId = String(userSession.userId);
-  console.log(userId);
 
   try {
     const { data, pages } = (await fetchUserActivityById(

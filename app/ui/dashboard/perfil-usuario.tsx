@@ -40,7 +40,7 @@ export default function PerfilUsuario({ userData }: { userData: any }) {
   };
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative outline-none" ref={dropdownRef}>
       <button
         className="flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-slate-800"
         onClick={() => setDropdownOpen(!dropdownOpen)}

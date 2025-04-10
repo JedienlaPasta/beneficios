@@ -36,10 +36,7 @@ export function Modal({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center">
-      <div
-        className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm"
-        onClick={handleClick}
-      />
+      <div className="fixed inset-0 bg-gray-900/50" onClick={handleClick} />
       <div className="fixed flex h-dvh grow items-center">{children}</div>
     </div>
   );
@@ -88,7 +85,8 @@ export function UserManagementModal({ title, children, onClose }: ModalProps) {
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    // Aqui
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4">
       <div
         ref={modalRef}
         className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-xl"

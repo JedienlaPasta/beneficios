@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { JSX } from "react";
 import outputData from "@/app/lib/data/output.json";
 
-export default function SocialAidActivityBoard() {
+export default function HeatMapTable() {
   const board: Array<JSX.Element> = [];
   outputData.forEach((item) => {
     board.push(<BoardCube key={item.index} state={item.state} />);

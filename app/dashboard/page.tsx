@@ -1,5 +1,5 @@
 import GeneralInfoCards from "@/app/ui/dashboard/inicio/general-info-cards";
-import SocialAidActivityBoard from "@/app/ui/dashboard/inicio/social-aid-activity-board";
+import HeatMapTable from "@/app/ui/dashboard/inicio/heatmap-table";
 import ActivityTable from "@/app/ui/dashboard/inicio/tabla-actividades";
 import ActivityTableSkeleton from "@/app/ui/dashboard/inicio/activity-table-skeleton";
 import Buscar from "@/app/ui/dashboard/searchbar";
@@ -50,7 +50,7 @@ export default async function Home(props: HomeProps) {
             </h2>
             <div className="flex items-center gap-2">
               <span className="text-sm text-slate-500">Año:</span>
-              <select 
+              <select
                 className="rounded-md border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
                 defaultValue={new Date().getFullYear()}
               >
@@ -65,7 +65,7 @@ export default async function Home(props: HomeProps) {
               </select>
             </div>
           </div>
-          <SocialAidActivityBoard />
+          <HeatMapTable />
           <div className="flex w-fit flex-nowrap justify-end gap-1 self-start rounded-lg border border-slate-200 px-2 py-1">
             <p className="text-xs text-slate-400">Poco</p>
             <div className="group relative flex h-4 w-4 items-center justify-center rounded border border-slate-200 bg-slate-100"></div>

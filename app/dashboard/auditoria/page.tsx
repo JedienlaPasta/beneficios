@@ -5,10 +5,11 @@ import SearchBar from "@/app/ui/dashboard/searchbar";
 import { fetchActivity } from "@/app/lib/data/auditoria";
 
 type PageProps = {
-  searchParams?: { query?: string; page?: string; modal?: string };
+  searchParams?: Promise<{ query?: string; page?: string; modal?: string }>;
 };
 
-export default function Auditoria({ searchParams }: PageProps) {
+export default async function Auditoria(props: PageProps) {
+  const searchParams = await props.searchParams;
   const currentPage = Number(searchParams?.page) || 1;
   const query = searchParams?.query || "";
 

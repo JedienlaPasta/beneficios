@@ -1,18 +1,24 @@
+import { getUserById } from "@/app/lib/data/users";
+import { getSession } from "@/app/lib/session";
 import UserProfile from "@/app/ui/dashboard/perfil/profile";
-import { cookies } from "next/headers";
 
 export default async function ProfilePage() {
-  const cookiesInstance = await cookies();
-  const userSessionCookie = cookiesInstance.get("userSession");
-
-  const parsedUserSession = userSessionCookie?.value
-    ? JSON.parse(userSessionCookie?.value)
-    : null;
-
-  if (!userSessionCookie?.value) {
+  const userSession = await getSession();
+  if (!userSession) {
     return (
       <div className="flex h-full items-center justify-center">
         <p className="text-slate-500">Cargando información de perfil...</p>
+      </div>
+    );
+  }
+
+  const userData = await getUserById(String(userSession?.userId));
+  if (!userData) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <p className="text-slate-500">
+          No se pudo cargar la información del usuario.
+        </p>
       </div>
     );
   }
@@ -22,8 +28,7 @@ export default async function ProfilePage() {
       <h1 className="mb-8 text-2xl font-bold text-slate-800">
         Perfil de Usuario
       </h1>
-
-      <UserProfile userSession={parsedUserSession} />
+      <UserProfile userData={userData} />
     </div>
   );
 }

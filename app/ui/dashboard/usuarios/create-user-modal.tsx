@@ -10,53 +10,53 @@ import RolDropdown from "./roles-dropdown";
 export function CreateUserModal({ onClose }: { onClose: () => void }) {
   const [isDisabled, setIsDisabled] = useState(false);
   const [rol, setRol] = useState<string>("");
-  
+
   // Add form validation state
   const [formData, setFormData] = useState({
     nombre: "",
     correo: "",
     cargo: "",
-    password: ""
+    password: "",
   });
-  
+
   // Track form validity
   const [isFormValid, setIsFormValid] = useState(false);
-  
+
   // Update form data when inputs change and validate form
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     const updatedFormData = {
       ...formData,
-      [name]: value
+      [name]: value,
     };
     setFormData(updatedFormData);
-    
+
     // Validate form directly here
     const { nombre, correo, cargo, password } = updatedFormData;
-    const isValid = 
-      nombre.trim() !== "" && 
-      correo.trim() !== "" && 
-      cargo.trim() !== "" && 
+    const isValid =
+      nombre.trim() !== "" &&
+      correo.trim() !== "" &&
+      cargo.trim() !== "" &&
       password.trim() !== "" &&
       rol.trim() !== "";
-      
+
     setIsFormValid(isValid);
   };
-  
+
   // We can remove the useEffect since validation happens in handleInputChange
   // But we need to handle rol changes separately
   const handleRolChange = (newRol: string) => {
     setRol(newRol);
-    
+
     // Re-validate the form when rol changes
     const { nombre, correo, cargo, password } = formData;
-    const isValid = 
-      nombre.trim() !== "" && 
-      correo.trim() !== "" && 
-      cargo.trim() !== "" && 
+    const isValid =
+      nombre.trim() !== "" &&
+      correo.trim() !== "" &&
+      cargo.trim() !== "" &&
       password.trim() !== "" &&
       newRol.trim() !== "";
-      
+
     setIsFormValid(isValid);
   };
 

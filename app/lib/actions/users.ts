@@ -4,6 +4,7 @@ import { connectToDB } from "../utils/db-connection";
 import sql from "mssql";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcrypt";
+// import { logAction } from "./auditoria";
 
 // Add a function to hash passwords
 async function hashPassword(password: string): Promise<string> {
@@ -13,7 +14,6 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 export async function createUser(formData: FormData) {
-  console.log(formData);
   const nombre = formData.get("nombre") as string;
   const correo = formData.get("correo") as string;
   const cargo = formData.get("cargo") as string;
@@ -70,6 +70,15 @@ export async function createUser(formData: FormData) {
           @estado
         )
       `);
+
+    // Log the action
+    // After successful user creation, log the action
+    // await logAction(
+    //   "Crear",
+    //   `creó el usuario ${nombre}`,
+    //   "usuarios", // or you could use the new user's ID if available
+    //   // userId is optional, it will use the session if not provided
+    // );
 
     revalidatePath("/dashboard/usuarios");
     return { success: true, message: "Usuario creado exitosamente" };

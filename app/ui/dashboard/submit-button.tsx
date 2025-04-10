@@ -21,7 +21,6 @@ export function SubmitButton({
   const handleSubmit = () => {
     if (setIsDisabled) {
       setTimeout(() => {
-        console.log("wenas");
         setIsDisabled(true);
       }, 50);
     }

@@ -6,7 +6,7 @@ import { Toaster } from "sonner";
 
 export default function DashboardLayoutClient({
   children,
-  userData
+  userData,
 }: {
   children: ReactNode;
   userData: any;

@@ -17,6 +17,7 @@ export default function Breadcrumbs() {
       if (path === "rsh") return [path, "RSH"];
       if (path === "auditoria") return [path, "Auditoría"];
       if (path === "usuarios") return [path, "Usuarios"];
+      if (path === "perfil") return [path, "Perfil"];
       else return [path, path];
     });
     return breadCrumbs;
