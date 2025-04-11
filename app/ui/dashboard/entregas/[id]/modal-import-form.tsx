@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { uploadPDFByFolio } from "@/app/lib/actions/entregas";
 
-export default function ModalForm({
+export default function ModalImportForm({
   folio,
   savedFiles,
 }: {

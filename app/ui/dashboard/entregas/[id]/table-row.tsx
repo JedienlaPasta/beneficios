@@ -18,10 +18,10 @@ export default function TableRow({ item }: { item: SocialAidTableRow }) {
 
   const estadoTextColor =
     estado_documentos === "Finalizado"
-      ? "bg-blue-100 text-blue-500"
-      : "bg-orange-100/80 text-orange-500/70";
+      ? "bg-slate-100 text-slate-500"
+      : "bg-yellow-100 text-yellow-500";
   const estadoDotColor =
-    estado_documentos === "Finalizado" ? "bg-blue-300" : "bg-orange-300";
+    estado_documentos === "Finalizado" ? "bg-slate-300" : "bg-yellow-400";
 
   return (
     <tr

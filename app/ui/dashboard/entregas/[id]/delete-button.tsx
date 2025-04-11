@@ -48,7 +48,7 @@ export default function DeleteEntregasButton({ folio }: { folio: string }) {
         type="button"
         onClick={handleDeleteButton}
         title="Eliminar Entregas"
-        className="rounded-md bg-red-50 px-4 py-1 text-sm font-medium text-red-400 transition-all duration-300 hover:bg-red-100"
+        className="rounded-md bg-red-50 px-4 py-1.5 text-sm font-medium text-red-400 transition-all duration-300 hover:bg-red-100"
       >
         Eliminar
       </button>

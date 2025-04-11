@@ -7,8 +7,9 @@ import NewSocialAidModal from "@/app/ui/dashboard/entregas/new-social-aid-modal"
 import NewButton from "@/app/ui/dashboard/new-button";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import SocialAidsDetailTable from "@/app/ui/dashboard/entregas/[id]/entregas-table";
-import EntregasTableModal from "@/app/ui/dashboard/entregas/[id]/entregas-table-modal";
+import ModalEntregasDetail from "@/app/ui/dashboard/entregas/[id]/modal-entregas-detail";
 import { Modal } from "@/app/ui/dashboard/modal";
+import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/modal-context";
 
 type CitizenRecordProps = {
   searchParams?: Promise<{
@@ -40,7 +41,8 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
       )}
       {detailsModal && (
         <Modal name="detailsModal">
-          <EntregasTableModal folio={detailsModal} />
+          <ModalEntregasDetailContext folio={detailsModal} />
+          {/* <ModalEntregasDetail folio={detailsModal} /> */}
         </Modal>
       )}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 3xl:w-[96rem] 3xl:justify-self-center">

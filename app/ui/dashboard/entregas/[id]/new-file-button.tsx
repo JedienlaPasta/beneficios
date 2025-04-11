@@ -103,7 +103,7 @@ export default function GetNewFileButton({ children, folio }: Props) {
   return (
     <button
       onClick={handleClick}
-      className="flex items-center gap-1 rounded-md bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-600 transition-all hover:bg-blue-100 active:scale-95"
+      className="flex items-center gap-1 rounded-md bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-600 transition-all hover:bg-blue-100 active:scale-95"
     >
       {children}
     </button>
