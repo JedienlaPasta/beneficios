@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { formatDate } from "@/app/lib/utils/format";
+import { capitalize, formatDate, formatTime } from "@/app/lib/utils/format";
 import { MdAutorenew } from "react-icons/md";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { BiFolderPlus } from "react-icons/bi";
-import Pagination from "../pagination";
+import Pagination from "./pagination";
 
 const ACTIVITY = [
   {
@@ -26,24 +26,22 @@ const ACTIVITY = [
 ];
 
 type AuditLog = {
-  id?: string;
-  id_mod?: string;
-  usuario?: string;
-  nombre_usuario?: string;
+  // id?: string;
   accion: string;
-  modulo?: string;
-  dato?: string;
-  detalles?: string;
+  comentario_accion: string;
+  comentario_nombre?: string;
   fecha: string;
-  ip?: string;
+  id_usuario: string;
+  nombre_usuario: string;
+  id_registro_mod?: string;
 };
 
-export default function AuditTable({ 
-  logs, 
-  totalPages = 1 
-}: { 
+export default function AuditTable({
+  logs,
+  totalPages,
+}: {
   logs: AuditLog[];
-  totalPages?: number;
+  totalPages: number;
 }) {
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
 
@@ -81,21 +79,26 @@ export default function AuditTable({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[44rem]">
           <thead className="border-y border-slate-200/70 bg-slate-50 text-xs font-medium tracking-wider text-slate-600/70">
-            <tr>
-              <th className="py-4 pl-10 pr-6 text-left font-normal">
+            <tr className="grid grid-cols-26">
+              <th className="col-span-8 py-4 pl-10 pr-6 text-left font-normal">
                 ACTIVIDAD
               </th>
-              <th className="py-4 pr-14 text-right font-normal">FECHA</th>
+              <th className="col-span-12 py-4 pr-14 text-right font-normal">
+                ID REGISTRO MODIFICADO
+              </th>
+              <th className="col-span-6 py-4 pr-14 text-right font-normal">
+                FECHA
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/30">
             {logs.map((log, index) => (
               <tr
-                key={log.id || log.id_mod || index}
-                className="cursor-pointer text-nowrap text-sm tabular-nums transition-colors hover:bg-slate-200/50"
+                key={String(log.id_registro_mod) + index}
+                className="grid cursor-pointer grid-cols-26 items-center text-nowrap text-sm tabular-nums transition-colors hover:bg-slate-200/50"
                 onClick={() => setSelectedLog(log)}
               >
-                <td className="flex items-center gap-3 py-4 pl-10 pr-6">
+                <td className="col-span-8 flex items-center gap-3 py-4 pl-10 pr-6">
                   <span
                     className={`rounded-xl p-1 text-lg ${getActivityStyle(log.accion).color}`}
                   >
@@ -103,21 +106,35 @@ export default function AuditTable({
                   </span>
                   <div>
                     <span className="font-medium text-slate-700">
-                      {log.nombre_usuario || log.usuario || "Usuario"}{" "}
+                      {log.nombre_usuario || "Usuario"}{" "}
                     </span>
-                    <span className="text-slate-500">{log.dato || log.accion} </span>
-                    <span className="text-blue-400">{log.modulo || log.id_mod}</span>
+                    <span className="text-slate-500">
+                      {log.comentario_accion || log.accion}{" "}
+                    </span>
+                    <span className="text-blue-400">
+                      {log.comentario_nombre}
+                    </span>
                   </div>
                 </td>
-                <td className="py-4 pr-14 text-right text-slate-600">
-                  {formatDate(new Date(log.fecha))}
+                <td className="col-span-12 py-4 pr-14 text-right text-slate-500">
+                  <span className="">
+                    {log.id_registro_mod || "No disponible"}
+                  </span>
+                </td>
+                <td className="col-span-6 py-4 pr-14 text-right text-slate-600">
+                  <div className="text-slate-600">
+                    {formatDate(new Date(log.fecha))}
+                  </div>
+                  <div className="text-xs text-slate-500/80">
+                    {formatTime(new Date(log.fecha))}
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      
+
       {totalPages > 1 && <Pagination pages={totalPages} />}
 
       {/* Details Modal */}
@@ -130,15 +147,15 @@ export default function AuditTable({
             <div className="mb-4 grid grid-cols-2 gap-4">
               <div>
                 <p className="text-xs font-medium text-slate-500">Usuario</p>
-                <p className="text-sm text-slate-900">{selectedLog.nombre_usuario || selectedLog.usuario || "N/A"}</p>
+                <p className="text-sm text-slate-900">
+                  {selectedLog.nombre_usuario || "No disponible"}
+                </p>
               </div>
               <div>
                 <p className="text-xs font-medium text-slate-500">Acción</p>
-                <p className="text-sm text-slate-900">{selectedLog.accion}</p>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-slate-500">Módulo</p>
-                <p className="text-sm text-slate-900">{selectedLog.modulo || "N/A"}</p>
+                <p className="text-sm text-slate-900">
+                  {capitalize(selectedLog.accion)}
+                </p>
               </div>
               <div>
                 <p className="text-xs font-medium text-slate-500">Fecha</p>
@@ -146,31 +163,23 @@ export default function AuditTable({
                   {formatDate(new Date(selectedLog.fecha))}
                 </p>
               </div>
-              {selectedLog.ip && (
-                <div>
-                  <p className="text-xs font-medium text-slate-500">IP</p>
-                  <p className="text-sm text-slate-900">{selectedLog.ip}</p>
-                </div>
-              )}
-              {selectedLog.id_mod && (
-                <div>
-                  <p className="text-xs font-medium text-slate-500">ID Módulo</p>
-                  <p className="text-sm text-slate-900">{selectedLog.id_mod}</p>
-                </div>
-              )}
-            </div>
-            {selectedLog.detalles && (
-              <div className="mb-4">
-                <p className="text-xs font-medium text-slate-500">Detalles</p>
-                <pre className="mt-1 max-h-60 overflow-auto rounded-md bg-slate-50 p-3 text-xs text-slate-800">
-                  {selectedLog.detalles}
-                </pre>
+              <div>
+                <p className="text-xs font-medium text-slate-500">
+                  Id Registro Alterado
+                </p>
+                <p className="text-sm text-slate-900">
+                  {selectedLog.id_registro_mod || "No disponible"}
+                </p>
               </div>
-            )}
-            {selectedLog.dato && (
+            </div>
+            {selectedLog.comentario_accion && (
               <div className="mb-4">
                 <p className="text-xs font-medium text-slate-500">Dato</p>
-                <p className="text-sm text-slate-900">{selectedLog.dato}</p>
+                <p className="text-sm text-slate-900">
+                  {capitalize(selectedLog.comentario_accion) +
+                    " " +
+                    (selectedLog.comentario_nombre || "")}
+                </p>
               </div>
             )}
             <div className="flex justify-end">
@@ -191,21 +200,11 @@ export default function AuditTable({
 function getActivityStyle(action: string) {
   const actionLower = action.toLowerCase();
 
-  if (
-    actionLower.includes("crear") ||
-    actionLower.includes("agregar") ||
-    actionLower.includes("nuevo")
-  ) {
+  if (actionLower.includes("crear"))
     return ACTIVITY.find((a) => a.type === "crear") || ACTIVITY[1];
-  }
 
-  if (
-    actionLower.includes("eliminar") ||
-    actionLower.includes("borrar") ||
-    actionLower.includes("remover")
-  ) {
+  if (actionLower.includes("eliminar"))
     return ACTIVITY.find((a) => a.type === "eliminar") || ACTIVITY[2];
-  }
 
   // Default to edit for any other action
   return ACTIVITY.find((a) => a.type === "editar") || ACTIVITY[0];

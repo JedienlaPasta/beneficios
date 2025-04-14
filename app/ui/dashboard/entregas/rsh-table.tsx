@@ -1,18 +1,14 @@
-import { RSHTableData } from "@/app/lib/definitions";
-import Pagination from "../pagination";
+import Pagination from "@/app/ui/dashboard/pagination";
 import { fetchRSH } from "@/app/lib/data/rsh";
-import TableRow from "./table-row";
+import RSHTableRow from "./rsh-table-row";
 
-type SocialAidsProps = {
+type RSHTableProps = {
   query: string;
   currentPage: number;
 };
-
-export default async function SocialAidsTable({
-  query,
-  currentPage,
-}: SocialAidsProps) {
-  const { data, pages } = await fetchRSH(query, currentPage, 8);
+export default async function RSHTable({ query, currentPage }: RSHTableProps) {
+  const itemsPerPage = 8;
+  const { data, pages } = await fetchRSH(query, currentPage, itemsPerPage);
 
   return (
     <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300/70">
@@ -30,7 +26,9 @@ export default async function SocialAidsTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/80">
-            {data?.map((item, index) => <TableRow key={index} item={item} />)}
+            {data?.map((item, index) => (
+              <RSHTableRow key={index} item={item} />
+            ))}
           </tbody>
         </table>
       </div>

@@ -1,8 +1,8 @@
 "use client";
-import { formatDate, formatNumber } from "@/app/lib/utils/format";
+import { formatDate, formatRUT } from "@/app/lib/utils/format";
 import { useRouter } from "next/navigation";
 
-export default function TableRow({
+export default function RSHTableRow({
   item,
 }: {
   item: {
@@ -27,7 +27,7 @@ export default function TableRow({
     ultima_entrega,
   } = item;
   const router = useRouter();
-  const formattedRut = formatNumber(rut) + (dv ? "-" + dv : "");
+  const formattedRut = formatRUT(rut);
 
   const handleClick = () => {
     router.push(`/dashboard/entregas/${rut}`);

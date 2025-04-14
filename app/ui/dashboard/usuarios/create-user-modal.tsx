@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { SubmitButton } from "../submit-button";
-import { createUser } from "@/app/lib/actions/users";
+import { createUser } from "@/app/lib/actions/usuarios";
 import { UserManagementModal } from "../modal";
 import RolDropdown from "./roles-dropdown";
 

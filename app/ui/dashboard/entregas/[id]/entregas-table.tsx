@@ -1,26 +1,22 @@
-// import { SocialAidTableRow } from "@/app/lib/definitions";
 import Pagination from "../../pagination";
-import { fetchSocialAidsByRUT } from "@/app/lib/data/entregas";
-import TableRow from "./table-row";
+import TableRow from "./entregas-table-row";
 
-type SocialAidsDetailTableProps = {
+type Props = {
   rut: string;
   query: string;
   currentPage: number;
 };
 
-export default async function SocialAidsDetailTable({
+// Update the EntregasTable component to fetch its own data
+import { fetchEntregasByRUT } from "@/app/lib/data/entregas";
+
+export default async function EntregasTable({
   rut,
   query,
   currentPage,
-}: SocialAidsDetailTableProps) {
-  const itemsPerPage = 10;
-  const { data, pages } = await fetchSocialAidsByRUT(
-    rut,
-    query,
-    currentPage,
-    itemsPerPage,
-  );
+}: Props) {
+  const entregasData = await fetchEntregasByRUT(rut, query, currentPage, 10);
+  const { data, pages } = entregasData;
 
   return (
     <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300/70">

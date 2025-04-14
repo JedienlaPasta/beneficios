@@ -41,6 +41,14 @@ export async function authenticateUser(correo: string, contraseña: string) {
       };
     }
 
+    if (user.recordset[0].estado === "Deshabilitado") {
+      return {
+        success: false,
+        message: "Cuenta Suspendida",
+        status: 401,
+      };
+    }
+
     const userData: UserData = {
       id: user.recordset[0].id,
       nombre: user.recordset[0].nombre_usuario,

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { FiEdit2, FiTrash2, FiEye, FiEyeOff } from "react-icons/fi";
 import { EditUserModal } from "./edit-user-modal";
 import { DeleteUserModal } from "./delete-user-modal";
-import { toggleUserStatus } from "@/app/lib/actions/users";
+import { toggleUserStatus } from "@/app/lib/actions/usuarios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 

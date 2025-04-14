@@ -69,10 +69,10 @@ function ActiveCampaign({
           </div>
         </div>
         <div className="flex flex-col items-end">
-          <span className="relative right-0 text-2xl font-bold text-blue-500 transition-all duration-500 group-hover:right-3 group-hover:text-blue-50">
+          <span className="relative right-0 text-2xl font-bold text-slate-600 transition-all duration-500 group-hover:right-3 group-hover:text-blue-50">
             {entregas}
           </span>
-          <span className="text-xs font-medium uppercase tracking-wider text-blue-300">
+          <span className="text-xs font-medium uppercase tracking-wider text-slate-400 transition-all duration-500 group-hover:text-blue-300">
             Entregas
           </span>
         </div>

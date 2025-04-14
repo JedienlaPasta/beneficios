@@ -7,7 +7,7 @@ import { RSHGeneralInfoSkeleton } from "./rsh-info-skeleton";
 export default async function RSHGeneralInfo() {
   return (
     <div className="flex flex-wrap gap-6">
-      <InfoCardWrapper modal="newcitizen">
+      <InfoCardWrapper disabled modal="newcitizen">
         {/* Decorative gradient element */}
         <div className="absolute left-[calc(100%-1rem)] top-0 h-60 w-[20rem] bg-gradient-to-b from-blue-500 to-blue-700 transition-all duration-500 group-hover:left-[calc(100%-8rem)] group-hover:-rotate-[-25deg]"></div>
 

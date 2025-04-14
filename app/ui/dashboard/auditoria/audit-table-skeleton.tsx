@@ -1,4 +1,4 @@
-export default function ActivityTableSkeleton() {
+export default function AuditTableSkeleton() {
   return (
     <div className="overflow-x-auto rounded-b-xl bg-white shadow-sm">
       <table className="w-full min-w-[44rem]">
@@ -9,18 +9,17 @@ export default function ActivityTableSkeleton() {
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-200/30">
-          <TableRowSkeleton />
-          <TableRowSkeleton />
-          <TableRowSkeleton />
-          <TableRowSkeleton />
+          <AuditTableRowSkeleton />
+          <AuditTableRowSkeleton />
+          <AuditTableRowSkeleton />
+          <AuditTableRowSkeleton />
         </tbody>
       </table>
-      {/* <Pagination paginas={paginas} /> */}
     </div>
   );
 }
 
-function TableRowSkeleton() {
+function AuditTableRowSkeleton() {
   return (
     <tr className="w-full cursor-pointer text-nowrap text-sm tabular-nums transition-colors hover:bg-gray-200/90">
       <td className="flex gap-3 whitespace-nowrap py-4 pl-10 pr-6">

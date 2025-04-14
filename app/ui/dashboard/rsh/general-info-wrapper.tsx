@@ -3,14 +3,20 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 type InfoCardWrapperProps = {
   children: React.ReactNode;
+  disabled?: boolean;
   modal: string;
 };
 
-export function InfoCardWrapper({ children, modal }: InfoCardWrapperProps) {
+export function InfoCardWrapper({
+  children,
+  disabled,
+  modal,
+}: InfoCardWrapperProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const handleClick = (modal: string) => {
+    if (disabled) return;
     const params = new URLSearchParams(searchParams);
     params.set(modal, "open");
     router.push("?" + params.toString());

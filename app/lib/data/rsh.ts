@@ -25,6 +25,11 @@ export async function fetchRSH(
   currentPage: number,
   resultsPerPage: number,
 ) {
+  const flattenQuery = query.replace(/[.]/g, "");
+  // si no se agrega el dv no son necesarios estos slice
+  if (flattenQuery.length === 8) query = flattenQuery.slice(0, 7);
+  if (flattenQuery.length === 9) query = flattenQuery.slice(0, 8);
+  else query = flattenQuery;
   const offset = (currentPage - 1) * resultsPerPage || 0;
   try {
     const pool = await connectToDB();

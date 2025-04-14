@@ -35,7 +35,28 @@ import { connectToDB } from "../utils/db-connection";
 //   }
 // }
 
-export async function fetchSocialAids(
+export async function fetchEntrega(folio: string) {
+  try {
+    const pool = await connectToDB();
+    const request = pool.request();
+    const result = await request.input("folio", sql.NVarChar, `%${folio}%`)
+      .query(`
+        SELECT TOP 1 entregas.folio, entregas.fecha_entrega, entregas.estado_documentos, entregas.rut, rsh.nombres_rsh, rsh.apellidos_rsh
+        FROM entregas
+        JOIN rsh ON entregas.rut = rsh.rut
+        WHERE
+          entregas.folio = @folio
+      `);
+
+    return { data: result.recordset };
+  } catch (error) {
+    console.error("Error al obtener datos de la tabla de entregas:", error);
+    return { data: [], pages: 0 };
+  }
+}
+
+// No se usa?
+export async function fetchEntregas(
   query: string,
   currentPage: number,
   resultsPerPage: number,
@@ -48,24 +69,31 @@ export async function fetchSocialAids(
       .input("query", sql.NVarChar, `%${query}%`)
       .input("offset", sql.Int, offset)
       .input("pageSize", sql.Int, resultsPerPage).query(`
-        SELECT *
+        SELECT entregas.folio, entregas.fecha_entrega, entregas.estado_documentos, entregas.rut, rsh.nombres_rsh, rsh.apellidos_rsh,
+        COUNT(*) OVER() AS total
         FROM entregas
+        JOIN rsh ON entregas.rut = rsh.rut
+        WHERE
+          entregas.rut LIKE @query OR
+          entregas.folio LIKE @query OR
+          concat(rsh.nombres_rsh,' ', rsh.apellidos_rsh) LIKE @query
         ORDER BY entregas.fecha_entrega DESC
         OFFSET @offset ROWS
         FETCH NEXT @pageSize ROWS ONLY
       `);
 
-    const pages = Math.ceil(
-      Number(result.recordset[0]?.total) / resultsPerPage,
-    );
-    return { data: result.recordset as SocialAid[], pages };
+    let pages = 0;
+    if (result.recordset.length > 0) {
+      pages = Math.ceil(Number(result.recordset[0]?.total) / resultsPerPage);
+    }
+    return { data: result.recordset, pages };
   } catch (error) {
     console.error("Error al obtener datos de la tabla de entregas:", error);
     return { data: [], pages: 0 };
   }
 }
 
-export async function fetchSocialAidsByRUT(
+export async function fetchEntregasByRUT(
   rut: string,
   query: string,
   currentPage: number,
@@ -75,14 +103,28 @@ export async function fetchSocialAidsByRUT(
   try {
     const pool = await connectToDB();
     const request = pool.request();
+
+    // Optimize the query by:
+    // 1. Using a more efficient COUNT method
+    // 2. Adding an index hint if you have an index on rut and folio
+    // 3. Only calculating COUNT when needed (first page)
+    const countQuery =
+      currentPage === 1
+        ? `COUNT(*) OVER() AS total`
+        : `CAST(0 AS INT) AS total`;
+
     const result = await request
       .input("rut", sql.NVarChar, rut)
       .input("query", sql.NVarChar, `%${query}%`)
       .input("offset", sql.Int, offset)
       .input("pageSize", sql.Int, resultsPerPage).query(`
-        SELECT entregas.folio, entregas.fecha_entrega, entregas.estado_documentos, usuarios.nombre_usuario,
-        COUNT (*) OVER() AS total 
-        FROM entregas
+        SELECT 
+          entregas.folio, 
+          entregas.fecha_entrega, 
+          entregas.estado_documentos, 
+          usuarios.nombre_usuario,
+          ${countQuery}
+        FROM entregas WITH (INDEX(IX_entregas_rut_folio))
         LEFT JOIN usuarios ON entregas.id_usuario = usuarios.id
         WHERE 
           entregas.rut = @rut AND
@@ -92,9 +134,26 @@ export async function fetchSocialAidsByRUT(
         FETCH NEXT @pageSize ROWS ONLY
       `);
 
-    const pages = Math.ceil(
-      Number(result.recordset[0]?.total) / resultsPerPage,
-    );
+    // If we're not on the first page, we need to get the total count separately
+    let pages = 0;
+    if (currentPage === 1 && result.recordset.length > 0) {
+      pages = Math.ceil(Number(result.recordset[0]?.total) / resultsPerPage);
+    } else if (currentPage > 1) {
+      // Only execute count query when needed (not on first page)
+      const countResult = await request
+        .input("rut", sql.NVarChar, rut)
+        .input("query", sql.NVarChar, `%${query}%`).query(`
+          SELECT COUNT(*) AS total
+          FROM entregas
+          WHERE 
+            entregas.rut = @rut AND
+            entregas.folio LIKE @query
+        `);
+      pages = Math.ceil(
+        Number(countResult.recordset[0]?.total) / resultsPerPage,
+      );
+    }
+
     return { data: result.recordset as SocialAidTableRow[], pages };
   } catch (error) {
     console.error("Error al obtener datos de la tabla de entregas:", error);
@@ -103,7 +162,7 @@ export async function fetchSocialAidsByRUT(
 }
 
 // Returns Entregas[] de length = 1
-export async function fetchSocialAidsGeneralInfoByFolio(folio: string) {
+export async function fetchEntregasGeneralInfoByFolio(folio: string) {
   try {
     const pool = await connectToDB();
     const request = pool.request();
@@ -122,7 +181,7 @@ export async function fetchSocialAidsGeneralInfoByFolio(folio: string) {
 }
 
 // Returns Entrega[] de length = los que hayan
-export async function fetchSocialAidsInfoByFolio(folio: string) {
+export async function fetchEntregasInfoByFolio(folio: string) {
   try {
     const pool = await connectToDB();
     const request = pool.request();
@@ -141,12 +200,17 @@ export async function fetchSocialAidsInfoByFolio(folio: string) {
 }
 
 // Tabla de Detalle de Campaña.
-export async function fetchSocialAidsForCampaignDetail(
+export async function fetchEntregasForCampaignDetail(
   id: string,
   query: string,
   currentPage: number,
   resultsPerPage: number,
 ) {
+  const flattenQuery = query.replace(/[.]/g, "");
+  // si no se agrega el dv no son necesarios estos slice
+  if (flattenQuery.length === 8) query = flattenQuery.slice(0, 7);
+  if (flattenQuery.length === 9) query = flattenQuery.slice(0, 8);
+  else query = flattenQuery;
   const offset = (currentPage - 1) * resultsPerPage;
   try {
     const pool = await connectToDB();

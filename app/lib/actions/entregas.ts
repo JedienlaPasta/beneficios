@@ -6,6 +6,7 @@ import fs from "fs";
 import path from "path";
 import { compressPdfBuffer } from "../utils/pdf-compress";
 import { connectToDB } from "../utils/db-connection";
+import { logAction } from "./auditoria";
 
 interface CitizenData {
   telefono: string | null;
@@ -161,6 +162,8 @@ export const createEntrega = async (id: string, formData: FormData) => {
       throw error;
     }
 
+    await logAction("Crear", "registró una nueva entrega", "", folio);
+
     return { success: true, message: "Entrega recibida" };
   } catch (error) {
     return {
@@ -221,6 +224,7 @@ export const deleteEntregaByFolio = async (folio: string) => {
       `);
 
       await transaction.commit();
+      await logAction("Eliminar", "eliminó la entrega", "", folio);
       return { success: true, message: "Entregas eliminadas correctamente" };
     } catch (error) {
       // Rollback transaction on error
@@ -329,6 +333,7 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
       throw error;
     }
 
+    await logAction("Subir", `subió ${fileCount} documento(s)`, "PDF", folio);
     return {
       success: true,
       message: `${fileCount} documento(s) guardado(s) correctamente`,
@@ -393,6 +398,12 @@ export const deletePDFById = async (id: string) => {
       throw error;
     }
 
+    await logAction(
+      "Eliminar",
+      "eliminó 1 documento",
+      "PDF",
+      documentResult.recordset[0].folio,
+    );
     return {
       success: true,
       message: "Documento eliminado correctamente",
@@ -414,7 +425,7 @@ export const downloadPDFById = async (id: string) => {
     // Fetch document from database
     const documentRequest = pool.request().input("id", sql.NVarChar, id);
     const documentResult = await documentRequest.query(`
-    SELECT archivo, nombre_documento
+    SELECT archivo, nombre_documento, folio
     FROM documentos
     WHERE id = @id
   `);
@@ -429,6 +440,12 @@ export const downloadPDFById = async (id: string) => {
     // Get base64 string and document name
     const { archivo, nombre_documento } = documentResult.recordset[0];
 
+    await logAction(
+      "Descargar",
+      "descargó 1 documento",
+      "PDF",
+      documentResult.recordset[0].folio,
+    );
     return {
       success: true,
       data: {
@@ -550,6 +567,7 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
       finalBuffer = pdfBuffer;
     }
 
+    await logAction("Crear", "generó nueva acta de entrega", "PDF", folio);
     return {
       success: true,
       data: {

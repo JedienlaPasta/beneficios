@@ -6,6 +6,7 @@ import * as ExcelJS from "exceljs";
 import { FormState } from "@/app/ui/dashboard/campañas/new-campaign-modal";
 import { connectToDB } from "../utils/db-connection";
 import { capitalizeAll } from "../utils/format";
+import { logAction } from "./auditoria";
 
 // Crear RSH
 
@@ -473,6 +474,8 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
         throw error;
       }
     }
+
+    await logAction("importar", "actualizó", "RSH");
 
     revalidatePath("/dashboard/rsh");
 

@@ -55,7 +55,7 @@ export default function DeleteEntregasButton({ folio }: { folio: string }) {
 
       {/* Modal de confirmación */}
       {showConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50">
           <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
             <h3 className="mb-3 text-lg font-medium text-gray-900">
               Confirmar eliminación

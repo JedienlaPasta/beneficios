@@ -43,6 +43,11 @@ const links = [
     href: "/dashboard/usuarios",
     icon: <FaUserGear className="h-5 w-5" />,
   },
+  {
+    nombre: "Prueba",
+    href: "/dashboard/prueba",
+    icon: <FaUserGear className="h-5 w-5" />,
+  },
 ];
 
 type NavLinksProps = {

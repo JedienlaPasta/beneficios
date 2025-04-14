@@ -9,7 +9,7 @@ import {
 } from "@/app/lib/definitions";
 import Link from "next/link";
 import { Files } from "./files";
-import { formatDate, formatTime } from "@/app/lib/utils/format";
+import { formatDate, formatRUT, formatTime } from "@/app/lib/utils/format";
 import GetNewFileButton from "./new-file-button";
 import DeleteEntregasButton from "./delete-button";
 import RoleGuard from "@/app/ui/auth/role-guard";
@@ -17,6 +17,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion"; // Add this import
 
 type Props = {
+  rut: string;
   folio: string;
   entregas: SocialAidTableRowByFolio;
   entrega: SocialAidByFolio[];
@@ -24,6 +25,7 @@ type Props = {
 };
 
 export default function ModalEntregasDetail({
+  rut,
   folio,
   entregas,
   entrega,
@@ -32,13 +34,14 @@ export default function ModalEntregasDetail({
   const [tab, setTab] = useState("Beneficios");
   const { nombre_usuario, fecha_entrega, observacion, estado_documentos } =
     entregas;
+  const formattedRUT = formatRUT(rut);
 
   return (
     <motion.div
       layout
       layoutRoot
       transition={{ layout: { duration: 0.25 } }}
-      className="scrollbar-hide relative grid h-fit max-h-dvh w-[30rem] max-w-full shrink-0 flex-col gap-5 overflow-y-auto rounded-xl bg-white p-8 shadow-xl transition-all duration-500 md:w-[34rem]"
+      className="relative grid h-fit max-h-dvh w-[30rem] max-w-full shrink-0 gap-5 overflow-y-auto rounded-xl bg-white p-8 shadow-xl transition-all duration-500 scrollbar-hide md:w-[34rem]"
     >
       <div className="flex flex-col gap-4">
         {/* Header */}
@@ -56,6 +59,7 @@ export default function ModalEntregasDetail({
                 <p className="text-sm">{estado_documentos}</p>
               </div>
             </div>
+            <span className="text-xs">Beneficiario: {formattedRUT}</span>
           </div>
           <CloseModalButton name="detailsModal" folio={folio} />
         </section>
@@ -64,7 +68,7 @@ export default function ModalEntregasDetail({
         <section className="flex border-b border-gray-200">
           <button
             onClick={() => setTab("Beneficios")}
-            className={`relative px-4 py-2 text-sm font-medium transition-colors ${
+            className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors ${
               tab === "Beneficios"
                 ? "text-blue-600"
                 : "text-slate-500 hover:text-slate-700"
@@ -77,7 +81,7 @@ export default function ModalEntregasDetail({
           </button>
           <button
             onClick={() => setTab("Importar")}
-            className={`relative px-4 py-2 text-sm font-medium transition-colors ${
+            className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors ${
               tab === "Importar"
                 ? "text-blue-600"
                 : "text-slate-500 hover:text-slate-700"
@@ -96,7 +100,7 @@ export default function ModalEntregasDetail({
             {tab === "Beneficios" ? (
               <motion.div
                 key="beneficios"
-                initial={{ opacity: 0, y: 10, height: 450 }}
+                initial={{ opacity: 0, y: 10, height: 460 }}
                 animate={{ opacity: 1, y: 0, height: "auto" }}
                 exit={{ opacity: 0, y: -10, height: 440 }}
                 transition={{
@@ -155,7 +159,7 @@ export default function ModalEntregasDetail({
                 key="importar"
                 initial={{ opacity: 0, y: 10, height: 440 }}
                 animate={{ opacity: 1, y: 0, height: "auto" }}
-                exit={{ opacity: 0, y: -10, height: 450 }}
+                exit={{ opacity: 0, y: -10, height: 460 }}
                 transition={{
                   duration: 0.3,
                   height: { duration: 0.4 },

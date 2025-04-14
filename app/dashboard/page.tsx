@@ -1,7 +1,5 @@
 import GeneralInfoCards from "@/app/ui/dashboard/inicio/general-info-cards";
 import HeatMapTable from "@/app/ui/dashboard/inicio/heatmap-table";
-import ActivityTable from "@/app/ui/dashboard/inicio/tabla-actividades";
-import ActivityTableSkeleton from "@/app/ui/dashboard/inicio/activity-table-skeleton";
 import Buscar from "@/app/ui/dashboard/searchbar";
 import { Suspense } from "react";
 import PageHeader from "../ui/dashboard/page-header";
@@ -9,6 +7,8 @@ import { ActiveCampaignsSkeleton } from "../ui/dashboard/campañas/active-campai
 import { capitalize } from "../lib/utils/format";
 import { getSession } from "../lib/session";
 import { getUserData } from "../lib/data/usuario";
+import { AuditLogsTable } from "../ui/dashboard/inicio/audit-table-logs";
+import AuditTableSkeleton from "../ui/dashboard/inicio/audit-table-skeleton";
 
 type HomeProps = {
   searchParams?: Promise<{ query?: string; page?: string; modal?: string }>;
@@ -84,8 +84,8 @@ export default async function Home(props: HomeProps) {
             </h2>
             <Buscar placeholder="Buscar..." />
           </div>
-          <Suspense fallback={<ActivityTableSkeleton />}>
-            <ActivityTable query={query} currentPage={currentPage} />
+          <Suspense fallback={<AuditTableSkeleton />}>
+            <AuditLogsTable query={query} currentPage={currentPage} />
           </Suspense>
         </div>
       </div>

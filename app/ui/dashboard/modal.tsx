@@ -7,7 +7,6 @@ import { FiX } from "react-icons/fi";
 export function Modal({
   name,
   children,
-  position,
 }: {
   name: string;
   children: React.ReactNode;
@@ -22,22 +21,12 @@ export function Modal({
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
-  if (position === "bottom") {
-    return (
-      <div className="fixed inset-0 z-50">
-        <div
-          className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm"
-          onClick={handleClick}
-        />
-        <div className="fixed bottom-0">{children}</div>
-      </div>
-    );
-  }
-
   return (
     <div className="fixed inset-0 z-50 flex justify-center">
       <div className="fixed inset-0 bg-gray-900/50" onClick={handleClick} />
-      <div className="fixed flex h-dvh grow items-center">{children}</div>
+      <div className="items-centers fixed flex h-dvh grow items-center">
+        {children}
+      </div>
     </div>
   );
 }

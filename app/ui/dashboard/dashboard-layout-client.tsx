@@ -1,5 +1,5 @@
 "use client";
-import { ReactNode, useState } from "react";
+import React, { useState } from "react";
 import Sidenav from "./sidenav";
 import { HiMenuAlt2 } from "react-icons/hi";
 import { Toaster } from "sonner";
@@ -8,7 +8,7 @@ export default function DashboardLayoutClient({
   children,
   userData,
 }: {
-  children: ReactNode;
+  children: React.ReactNode;
   userData: any;
 }) {
   const [sidenavOpen, setSidenavOpen] = useState(false);

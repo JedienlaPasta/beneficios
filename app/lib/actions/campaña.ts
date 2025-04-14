@@ -6,6 +6,7 @@ import { FormState } from "../../ui/dashboard/campañas/new-campaign-modal";
 import { connectToDB } from "../utils/db-connection";
 import sql from "mssql";
 import { Campaign } from "../definitions";
+import { logAction } from "./auditoria";
 
 // const sql = postgres(process.env.DATABASE_URL!, { ssl: "require" });
 
@@ -100,7 +101,8 @@ export async function createCampaign(formData: FormData): Promise<FormState> {
 
     const entregas = 0;
 
-    await request
+    // Modified query to return the inserted ID
+    const insertResult = await request
       .input("nombre_campaña", sql.NVarChar, nombre)
       .input("fechaInicio", sql.DateTime, new Date(fechaInicio.toISOString()))
       .input(
@@ -116,9 +118,14 @@ export async function createCampaign(formData: FormData): Promise<FormState> {
       .input("discapacidad", sql.Bit, discapacidad)
       .input("adultoMayor", sql.Bit, adultoMayor).query(`
         INSERT INTO campañas (nombre_campaña, fecha_inicio, fecha_termino, code, stock, tipo_dato, entregas, tramo, discapacidad, adulto_mayor)
+        OUTPUT INSERTED.id
         VALUES (@nombre_campaña, @fechaInicio, @fechaTermino, @code, @stock, @tipoDato, @entregas, @tramo, @discapacidad, @adultoMayor)
         `);
 
+    // Get the ID from the result
+    const newCampaignId = insertResult.recordset[0].id;
+
+    await logAction("Crear", "creó la campaña", nombre, newCampaignId);
     revalidatePath("/dashboard/campanas");
     return { success: true, message: "Campaña creada exitosamente." };
   } catch (error) {
@@ -234,6 +241,7 @@ export async function updateCampaign(id: string, formData: FormData) {
         WHERE id = @id
         `);
 
+    await logAction("Editar", "editó la campaña", nombre_campaña, id);
     revalidatePath("/dashboard/campanas");
     return { success: true, message: "Campaña actualizada exitosamente." };
   } catch (error) {
@@ -276,6 +284,12 @@ export async function deleteCampaign(id: string) {
 
       await transaction.commit();
 
+      await logAction(
+        "Eliminar",
+        "eliminó la campaña",
+        campaignResult.recordset[0].nombre_campaña,
+        id,
+      );
       revalidatePath("/dashboard/campanas");
       return { success: true, message: "Campaña eliminada exitosamente." };
     } catch (error) {
@@ -333,6 +347,12 @@ export async function endCampaignById(id: string) {
 
       await transaction.commit();
 
+      await logAction(
+        "Editó",
+        "finalizó la campaña",
+        campaignResult.recordset[0].nombre_campaña,
+        id,
+      );
       revalidatePath("/dashboard/campanas");
       return { success: true, message: "Campaña finalizada exitosamente." };
     } catch (error) {

@@ -1,3 +1,5 @@
+import { getDV } from "./get-dv";
+
 export const formatDate = (date: Date | null) => {
   if (!date) return "";
   const esDate = date.toLocaleString("es-ES", {
@@ -39,6 +41,10 @@ export const formatDateToLocal = (isoString: string) => {
 
 export const formatNumber = (num: number | string) => {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+
+export const formatRUT = (rut: string | number) => {
+  return formatNumber(rut) + "-" + getDV(String(rut));
 };
 
 export const capitalize = (str: string) => {

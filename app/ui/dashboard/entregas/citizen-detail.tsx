@@ -1,11 +1,15 @@
 import { formatDate, formatNumber } from "@/app/lib/utils/format";
 import DetailRow from "../campañas/[id]/detail-card";
-import { fetchRSHByRUT } from "@/app/lib/data/rsh";
 import { redirect } from "next/navigation";
+import { fetchRSHByRUT } from "@/app/lib/data/rsh";
 
-export default async function CitizenDetail({ rut }: { rut: string }) {
-  const response = await fetchRSHByRUT(rut);
-  if (response?.data.length === 0) {
+type Props = {
+  rut: string;
+};
+
+export default async function CitizenDetail({ rut }: Props) {
+  const { data } = await fetchRSHByRUT(rut);
+  if (data?.length === 0) {
     redirect("/dashboard/entregas");
   }
   const {
@@ -26,7 +30,7 @@ export default async function CitizenDetail({ rut }: { rut: string }) {
     nacionalidad,
     fecha_modificacion,
     ultima_entrega,
-  } = response?.data[0];
+  } = data[0];
 
   const formattedRut = formatNumber(rut) + (dv ? "-" + dv : "");
   const descripcion = nombres_rsh[0] + apellidos_rsh[0];

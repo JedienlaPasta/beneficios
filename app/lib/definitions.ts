@@ -1,10 +1,12 @@
 export type Activity = {
-  id: string;
-  id_mod: string;
-  nombre_usuario: string;
+  // id: string;
   accion: string;
-  dato: string;
-  fecha: Date;
+  comentario_accion: string;
+  comentario_nombre?: string;
+  fecha: string;
+  id_usuario: string;
+  nombre_usuario: string;
+  id_registro_mod?: string;
   pages?: number; // total de paginas
   total?: number; // total de registros
 };

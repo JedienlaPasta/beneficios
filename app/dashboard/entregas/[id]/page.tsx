@@ -6,10 +6,10 @@ import CitizenDetail, {
 import NewSocialAidModal from "@/app/ui/dashboard/entregas/new-social-aid-modal";
 import NewButton from "@/app/ui/dashboard/new-button";
 import SearchBar from "@/app/ui/dashboard/searchbar";
-import SocialAidsDetailTable from "@/app/ui/dashboard/entregas/[id]/entregas-table";
-import ModalEntregasDetail from "@/app/ui/dashboard/entregas/[id]/modal-entregas-detail";
+import EntregasTable from "@/app/ui/dashboard/entregas/[id]/entregas-table";
 import { Modal } from "@/app/ui/dashboard/modal";
 import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/modal-context";
+import { Spinner } from "@/app/ui/dashboard/loaders";
 
 type CitizenRecordProps = {
   searchParams?: Promise<{
@@ -41,8 +41,9 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
       )}
       {detailsModal && (
         <Modal name="detailsModal">
-          <ModalEntregasDetailContext folio={detailsModal} />
-          {/* <ModalEntregasDetail folio={detailsModal} /> */}
+          <Suspense fallback={<Spinner />}>
+            <ModalEntregasDetailContext folio={detailsModal} rut={rut} />
+          </Suspense>
         </Modal>
       )}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 3xl:w-[96rem] 3xl:justify-self-center">
@@ -72,11 +73,7 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
             <SearchBar placeholder="Buscar..." />
           </div>
           <Suspense fallback={<TablaCampañasSkeleton />}>
-            <SocialAidsDetailTable
-              rut={rut}
-              query={query}
-              currentPage={currentPage}
-            />
+            <EntregasTable rut={rut} query={query} currentPage={currentPage} />
           </Suspense>
         </div>
       </div>

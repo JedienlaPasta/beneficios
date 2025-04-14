@@ -1,7 +1,7 @@
 import { SocialAid } from "@/app/lib/definitions";
 import Pagination from "../../pagination";
 import { formatDate, formatNumber } from "@/app/lib/utils/format";
-import { fetchSocialAidsForCampaignDetail } from "@/app/lib/data/entregas";
+import { fetchEntregasForCampaignDetail } from "@/app/lib/data/entregas";
 import { getDV } from "@/app/lib/utils/get-dv";
 import CampaignSocialAidsTableSkeleton from "./table-skeleton";
 
@@ -15,7 +15,7 @@ export default async function CampaignSocialAidsTable({
   paginaActual: number;
 }) {
   const itemsPerPage = 10;
-  const { data, pages } = await fetchSocialAidsForCampaignDetail(
+  const { data, pages } = await fetchEntregasForCampaignDetail(
     id,
     query,
     paginaActual,

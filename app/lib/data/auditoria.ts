@@ -13,10 +13,10 @@ export async function fetchUserActivityById(
     const request = pool.request();
 
     const result = await request
-      .input("userId", sql.NVarChar, userId)
+      .input("userId", sql.UniqueIdentifier, userId)
       .input("offset", sql.Int, offset)
       .input("pageSize", sql.Int, resultsPerPage).query(`
-        SELECT nombre_usuario, accion, dato, fecha, id_mod,
+        SELECT accion, comentario_accion, comentario_nombre, fecha, id_usuario, nombre_usuario, id_registro_mod,
         COUNT(*) OVER() AS total
         FROM auditoria
         WHERE
@@ -55,7 +55,7 @@ export async function fetchActivity(
       .input("query", sql.NVarChar, `%${query}%`)
       .input("offset", sql.Int, offset)
       .input("pageSize", sql.Int, resultsPerPage).query(`
-        SELECT nombre_usuario, accion, dato, fecha, id_mod,
+        SELECT accion, comentario_accion, comentario_nombre, fecha, id_usuario, nombre_usuario, id_registro_mod,
         COUNT(*) OVER() AS total
         FROM auditoria
         WHERE
@@ -66,13 +66,13 @@ export async function fetchActivity(
       `);
 
     const data = result.recordset;
-    const totalCount = data[0]?.total || 0;
-    const pages = Math.ceil(totalCount / resultsPerPage);
+    const pages = Math.ceil(
+      Number(result.recordset[0]?.total) / resultsPerPage,
+    );
 
     return {
       data,
-      pages,
-      total: totalCount,
+      total: pages,
     };
   } catch (error) {
     console.error("Database Error:", error);

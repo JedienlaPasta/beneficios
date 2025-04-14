@@ -4,7 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { UserManagementModal } from "../modal";
 import { User } from "@/app/lib/data/users";
-import { deleteUser } from "@/app/lib/actions/users";
+import { deleteUser } from "@/app/lib/actions/usuarios";
 
 export function DeleteUserModal({
   user,

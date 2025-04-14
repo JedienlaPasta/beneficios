@@ -1,8 +1,7 @@
 import { Suspense } from "react";
-import Pagination from "@/app/ui/dashboard/pagination";
-import AuditTable from "@/app/ui/dashboard/auditoria/audit-table";
 import SearchBar from "@/app/ui/dashboard/searchbar";
-import { fetchActivity } from "@/app/lib/data/auditoria";
+import { AuditLogsTable } from "@/app/ui/dashboard/auditoria/audit-table-logs";
+import AuditTableSkeleton from "@/app/ui/dashboard/auditoria/audit-table-skeleton";
 
 type PageProps = {
   searchParams?: Promise<{ query?: string; page?: string; modal?: string }>;
@@ -32,41 +31,8 @@ export default async function Auditoria(props: PageProps) {
           <SearchBar placeholder="Buscar..." />
         </div>
         <Suspense fallback={<AuditTableSkeleton />}>
-          <AuditLogsTable currentPage={currentPage} query={query} />
+          <AuditLogsTable query={query} currentPage={currentPage} />
         </Suspense>
-      </div>
-    </div>
-  );
-}
-
-async function AuditLogsTable({
-  currentPage,
-  query,
-}: {
-  currentPage: number;
-  query: string;
-}) {
-  const { data, total } = await fetchActivity(query, currentPage, 10);
-
-  return (
-    <>
-      <AuditTable logs={data} />
-      <Pagination pages={total} />
-    </>
-  );
-}
-
-function AuditTableSkeleton() {
-  return (
-    <div className="p-4">
-      <div className="mb-4 h-8 w-full animate-pulse rounded-md bg-slate-200"></div>
-      <div className="space-y-3">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-16 w-full animate-pulse rounded-md bg-slate-100"
-          ></div>
-        ))}
       </div>
     </div>
   );
