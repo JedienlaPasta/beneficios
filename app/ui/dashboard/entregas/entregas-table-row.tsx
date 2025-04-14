@@ -23,7 +23,6 @@ export default function EntregasTableRow({
     apellidos_rsh: string;
   };
 }) {
-  console.log(item);
   const {
     rut,
     folio,

@@ -67,6 +67,16 @@ export default function NewCampaignModal() {
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
+  // Form validation
+  const isFormValid = () => {
+    return (
+      campaignName.trim() !== "" &&
+      stock.trim() !== "" &&
+      code.trim() !== "" &&
+      date !== null
+    );
+  };
+
   const formAction = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
@@ -82,30 +92,6 @@ export default function NewCampaignModal() {
     myFormData.append("discapacidad", criteria.discapacidad.toString());
     myFormData.append("adultoMayor", criteria.adultoMayor.toString());
 
-    // toast.promise(
-    //   createCampaign(myFormData).then((response) => {
-    //     if (!response.success) {
-    //       throw new Error(response.message);
-    //     }
-    //     return response;
-    //   }),
-    //   {
-    //     loading: "Guardando...",
-    //     success: (response) => {
-    //       setIsLoading(false);
-    //       // setTimeout(() => {
-    //       //   closeModal();
-    //       // }, 1000);
-    //       closeModal();
-    //       return response.message;
-    //     },
-    //     error: (err) => {
-    //       setIsDisabled(false);
-    //       setIsLoading(false);
-    //       return err.message;
-    //     },
-    //   },
-    // );
     const toastId = toast.loading("Guardando...");
     try {
       const response = await createCampaign(myFormData);
@@ -220,7 +206,7 @@ export default function NewCampaignModal() {
             </RequirementsCard>
           </div>
         </div>
-        <SubmitButton isDisabled={isDisabled}>
+        <SubmitButton isDisabled={isDisabled || !isFormValid()}>
           {isLoading ? "Guardando..." : "Guardar"}
         </SubmitButton>
       </form>

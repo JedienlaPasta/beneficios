@@ -279,10 +279,7 @@ export default function NewModalForm({
       />
 
       <div className="mt-2 flex">
-        <SubmitButton
-          isDisabled={isDisabled || !isFormValid()}
-          setIsDisabled={setIsDisabled}
-        >
+        <SubmitButton isDisabled={isDisabled || !isFormValid()}>
           {isLoading ? "Guardando..." : "Guardar"}
         </SubmitButton>
       </div>

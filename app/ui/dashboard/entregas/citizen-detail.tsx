@@ -1,7 +1,8 @@
-import { formatDate, formatNumber } from "@/app/lib/utils/format";
+import { formatDate, formatNumber, formatRUT } from "@/app/lib/utils/format";
 import DetailRow from "../campañas/[id]/detail-card";
 import { redirect } from "next/navigation";
 import { fetchRSHByRUT } from "@/app/lib/data/rsh";
+import { getAge } from "@/app/lib/utils/get-values";
 
 type Props = {
   rut: string;
@@ -19,7 +20,7 @@ export default async function CitizenDetail({ rut }: Props) {
     // sector,
     tramo,
     telefono,
-    dv,
+    // dv,
     fecha_nacimiento,
     genero,
     correo,
@@ -32,21 +33,10 @@ export default async function CitizenDetail({ rut }: Props) {
     ultima_entrega,
   } = data[0];
 
-  const formattedRut = formatNumber(rut) + (dv ? "-" + dv : "");
+  const formattedRut = formatRUT(rut);
   const descripcion = nombres_rsh[0] + apellidos_rsh[0];
 
-  const calculateAge = (birthdate: string) => {
-    const today = new Date();
-    const birthDate = new Date(birthdate);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age;
-  };
-
-  const age = calculateAge(fecha_nacimiento.toString());
+  const age = getAge(fecha_nacimiento.toString());
 
   return (
     <div className="items-centers relative flex flex-col justify-center">

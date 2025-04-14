@@ -59,7 +59,9 @@ export default function ModalEntregasDetail({
                 <p className="text-sm">{estado_documentos}</p>
               </div>
             </div>
-            <span className="text-xs">Beneficiario: {formattedRUT}</span>
+            <span className="flex gap-1 text-xs text-slate-500">
+              Beneficiario: <p className="text-blue-700">{formattedRUT}</p>
+            </span>
           </div>
           <CloseModalButton name="detailsModal" folio={folio} />
         </section>

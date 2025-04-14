@@ -1,8 +1,6 @@
 "use client";
 import { formatDate } from "@/app/lib/utils/format";
-// import Link from "next/link";
 import { useRouter } from "next/navigation";
-// import { CiViewList } from "react-icons/ci";
 import { FiBox } from "react-icons/fi";
 import { TbCopy } from "react-icons/tb";
 import { toast } from "sonner";

@@ -18,7 +18,7 @@ export default function RSHTableRow({
 }) {
   const {
     rut,
-    dv,
+    // dv,
     nombres_rsh,
     apellidos_rsh,
     direccion,

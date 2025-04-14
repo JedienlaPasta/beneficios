@@ -2,15 +2,15 @@ import { formatDate } from "@/app/lib/utils/format";
 import CampaignOptionsMenu from "./options-menu";
 import DetailRow from "./detail-card";
 import StaticRequirementsCard from "./static-card-requirements";
-import SocialAidsGivenResume from "./social-aids-stock-resume";
 import { fetchCampaignById } from "@/app/lib/data/campañas";
-import { redirect } from "next/navigation"; // Changed import from next/dist/server/api-utils to next/navigation
+import { redirect } from "next/navigation";
 import RoleGuard from "@/app/ui/auth/role-guard";
+import EntregasStockSummary from "./entregas-stock-summary";
 
 export default async function CampaignDetail({ id }: { id: string }) {
   const { data } = await fetchCampaignById(id);
   if (data.length === 0) {
-    redirect("/dashboard/campanas"); // Fixed path and using the correct redirect function
+    redirect("/dashboard/campanas");
   }
   const {
     nombre_campaña,
@@ -110,12 +110,12 @@ export default async function CampaignDetail({ id }: { id: string }) {
               Resumen
             </h2>
             <div className="flex flex-col gap-2 rounded-xl px-6">
-              <SocialAidsGivenResume entregas={stock} period="Stock Inicial" />
-              <SocialAidsGivenResume
+              <EntregasStockSummary entregas={stock} period="Stock Inicial" />
+              <EntregasStockSummary
                 entregas={stock - entregas}
                 period="Disponibles"
               />
-              <SocialAidsGivenResume entregas={entregas} period="Entregado" />
+              <EntregasStockSummary entregas={entregas} period="Entregado" />
             </div>
           </div>
         </div>
@@ -207,7 +207,7 @@ export function CampaignDetailSkeleton() {
               Resumen
             </h2>
             <div className="flex flex-col gap-2 rounded-xl px-6 py-2">
-              {/* Skeleton resume cards */}
+              {/* Skeleton summary cards */}
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}

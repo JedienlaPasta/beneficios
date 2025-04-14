@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 
 const loginSchema = z.object({
   correo: z.string().email({ message: "Credenciales inválidas" }).trim(),
-  contraseña: z.string().min(6, { message: "Credenciales inválidas" }).trim(),
+  contraseña: z.string({ message: "Credenciales inválidas" }).trim(),
 });
 
 export async function loginAction(formData: FormData) {
@@ -42,7 +42,6 @@ export async function loginAction(formData: FormData) {
     authResult.user.rol,
   );
   return { success: true, message: "Bienvenido!" };
-  // redirect("/dashboard");
 }
 
 export async function logoutAction() {

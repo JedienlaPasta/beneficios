@@ -2,10 +2,10 @@
 import { useEffect, useRef, useState } from "react";
 
 const rolesList = [
-  {
-    id: 1,
-    name: "Administrador",
-  },
+  // {
+  //   id: 1,
+  //   name: "Administrador",
+  // },
   {
     id: 2,
     name: "Supervisor",

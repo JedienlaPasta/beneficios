@@ -5,6 +5,7 @@ import sql from "mssql";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcrypt";
 import { logAction } from "./auditoria";
+import { z } from "zod";
 
 // Add a function to hash passwords
 async function hashPassword(password: string): Promise<string> {
@@ -13,7 +14,37 @@ async function hashPassword(password: string): Promise<string> {
   return await bcrypt.hash(password, saltRounds);
 }
 
+const userSchema = z.object({
+  nombre: z.string().min(3, { message: "Nombre es requerido" }),
+  correo: z.string().email({ message: "Correo no válido" }),
+  cargo: z.string().min(3, { message: "Cargo es requerido" }),
+  rol: z.string().min(3, { message: "Rol es requerido" }),
+  password: z
+    .string()
+    .min(8, { message: "Contraseña debe tener al menos 8 caracteres" })
+    .max(20, { message: "Contraseña debe tener como máximo 20 caracteres" })
+    .regex(/[A-Z]/, {
+      message: "Contraseña debe tener al menos una letra mayúscula",
+    })
+    .regex(/[a-z]/, {
+      message: "Contraseña debe tener al menos una letra minúscula",
+    })
+    .regex(/[0-9]/, {
+      message: "Contraseña debe tener al menos un número",
+    })
+    .regex(/[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/, {
+      message: "Contraseña debe tener al menos un carácter especial",
+    }),
+});
+
 export async function createUser(formData: FormData) {
+  const result = userSchema.safeParse(Object.fromEntries(formData));
+  if (!result.success) {
+    return {
+      success: false,
+      message: result.error.issues[0].message,
+    };
+  }
   const nombre = formData.get("nombre") as string;
   const correo = formData.get("correo") as string;
   const cargo = formData.get("cargo") as string;
@@ -138,14 +169,15 @@ export async function updateUser(userId: string, formData: FormData) {
     `;
 
     // Only update password if provided
-    if (password) {
-      // Hash the password before updating
+    if (password && password.trim() !== "") {
       const hashedPassword = await hashPassword(password);
       request.input("contraseña", sql.VarChar, hashedPassword);
       query += ", contraseña = @contraseña";
+      console.log(hashedPassword);
     }
 
     query += " WHERE id = @id";
+    console.log(query);
 
     await request.query(query);
 

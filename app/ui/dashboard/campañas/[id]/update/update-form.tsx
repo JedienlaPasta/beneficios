@@ -39,6 +39,15 @@ export default function UpdateForm({ data }: { data: Campaign[] }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
+  //Form validation
+  const isFormValid = () => {
+    return (
+      updateFormData.nombre_campaña.trim() !== "" &&
+      updateFormData.fecha_inicio !== null &&
+      updateFormData.fecha_termino !== null
+    );
+  };
+
   const formAction = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
@@ -144,7 +153,7 @@ export default function UpdateForm({ data }: { data: Campaign[] }) {
           isDisabled={isDisabled}
           setIsDisabled={setIsDisabled}
         ></CancelButton>
-        <SubmitButton isDisabled={isDisabled} setIsDisabled={setIsDisabled}>
+        <SubmitButton isDisabled={isDisabled || !isFormValid()}>
           {isLoading ? "Guardando..." : "Guardar"}
         </SubmitButton>
       </div>

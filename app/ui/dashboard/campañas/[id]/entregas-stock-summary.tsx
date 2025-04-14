@@ -1,6 +1,6 @@
 import { FiBox } from "react-icons/fi";
 
-export default function SocialAidsStockResume({
+export default function EntregasStockSummary({
   entregas,
   period,
 }: {

@@ -15,9 +15,13 @@ type EditUserModalProps = {
 
 export function EditUserModal({ user, onClose }: EditUserModalProps) {
   const [isDisabled, setIsDisabled] = useState(false);
-  const [rol, setRol] = useState<string>("");
+  const [rol, setRol] = useState<string>(user.rol || "");
 
   const formAction = async (formData: FormData) => {
+    if (user.rol === "Administrador" && user.rol !== rol) {
+      toast.error("No puedes cambiar el rol de un administrador");
+      return;
+    }
     setIsDisabled(true);
 
     const toastId = toast.loading("Actualizando usuario...");
@@ -126,9 +130,7 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
         </div>
 
         <div className="flex justify-end gap-2 pt-4">
-          <SubmitButton isDisabled={isDisabled} setIsDisabled={setIsDisabled}>
-            Guardar Cambios
-          </SubmitButton>
+          <SubmitButton isDisabled={isDisabled}>Guardar Cambios</SubmitButton>
         </div>
       </form>
     </UserManagementModal>
