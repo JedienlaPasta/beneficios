@@ -5,8 +5,9 @@ import { FiLogOut, FiUser } from "react-icons/fi";
 import Link from "next/link";
 import { toast } from "sonner";
 import { logoutAction } from "@/app/lib/actions/auth";
+import { UserData } from "@/app/lib/definitions";
 
-export default function PerfilUsuario({ userData }: { userData: any }) {
+export default function PerfilUsuario({ userData }: { userData: UserData }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 

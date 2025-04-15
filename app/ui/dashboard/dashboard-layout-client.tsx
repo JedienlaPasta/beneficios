@@ -3,13 +3,14 @@ import React, { useState } from "react";
 import Sidenav from "./sidenav";
 import { HiMenuAlt2 } from "react-icons/hi";
 import { Toaster } from "sonner";
+import { UserData } from "@/app/lib/definitions";
 
 export default function DashboardLayoutClient({
   children,
   userData,
 }: {
   children: React.ReactNode;
-  userData: any;
+  userData: UserData;
 }) {
   const [sidenavOpen, setSidenavOpen] = useState(false);
 

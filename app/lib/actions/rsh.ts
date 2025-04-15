@@ -194,16 +194,6 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
           WHERE t.name = 'RSHTableType'
         `);
 
-        let useTemporaryTable = false;
-        let schemaName = "dbo"; // Default schema
-
-        if (typeCheckResult.recordset.length === 0) {
-          useTemporaryTable = true;
-        } else {
-          const typeInfo = typeCheckResult.recordset[0];
-          schemaName = typeInfo.schema_name;
-        }
-
         // Check if stored procedure exists
         const procCheckResult = await checkRequest.query(`
           SELECT 

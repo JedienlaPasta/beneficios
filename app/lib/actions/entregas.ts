@@ -178,7 +178,7 @@ export const createEntrega = async (id: string, formData: FormData) => {
 export const deleteEntregaByFolio = async (folio: string) => {
   try {
     const pool = await connectToDB();
-    let transaction = new sql.Transaction(pool);
+    const transaction = new sql.Transaction(pool);
 
     try {
       await transaction.begin();

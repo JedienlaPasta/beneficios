@@ -73,7 +73,10 @@ export async function deleteSession() {
 // =========================================================00
 
 export async function encrypt(payload: SessionPayload) {
-  return new SignJWT(payload as any)
+  return new SignJWT({
+    userId: payload.userId,
+    expiresAt: payload.expiresAt.toISOString(),
+  })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("24h")

@@ -1,3 +1,4 @@
+import sql from "mssql";
 import dayjs from "dayjs";
 import { connectToDB } from "../utils/db-connection";
 import utc from "dayjs/plugin/utc";
@@ -47,22 +48,27 @@ export async function fetchGeneralInfo() {
 
 export async function fetchDailyEntregasCountByYear(year: string) {
   try {
+    // Extend dayjs with UTC plugin once
+    dayjs.extend(utc);
+
     const pool = await connectToDB();
     const request = pool.request();
 
-    const result = await request.query(`
-      SELECT
-        CAST(fecha_entrega AS DATE) as fecha,
-        COUNT(*) as cantidad_entregas
-      FROM entregas
-      WHERE fecha_entrega BETWEEN '2025-01-01' AND '2025-12-31'
-      GROUP BY CAST(fecha_entrega AS DATE)
-      ORDER BY fecha;
-    `);
+    // Use parameterized query to prevent SQL injection
+    const result = await request
+      .input("startDate", sql.Date, `${year}-01-01`)
+      .input("endDate", sql.Date, `${year}-12-31`).query(`
+        SELECT
+          CAST(fecha_entrega AS DATE) as fecha,
+          COUNT(*) as cantidad_entregas
+        FROM entregas
+        WHERE fecha_entrega BETWEEN @startDate AND @endDate
+        GROUP BY CAST(fecha_entrega AS DATE)
+        ORDER BY fecha;
+      `);
 
     const entregasPorDia = result.recordset.reduce(
       (acc, entrega) => {
-        dayjs.extend(utc);
         const dateStr = dayjs.utc(entrega.fecha).format("YYYY-MM-DD");
         acc[dateStr] = entrega.cantidad_entregas;
         return acc;
@@ -73,6 +79,7 @@ export async function fetchDailyEntregasCountByYear(year: string) {
     return entregasPorDia;
   } catch (error) {
     console.error("Error al obtener el conteo diario de entregas:", error);
-    return [];
+    // Return empty object instead of empty array to match return type
+    return {} as Record<string, number>;
   }
 }

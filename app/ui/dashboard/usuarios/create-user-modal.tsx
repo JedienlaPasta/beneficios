@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { SubmitButton } from "../submit-button";
 import { createUser } from "@/app/lib/actions/usuarios";

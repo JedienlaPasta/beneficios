@@ -35,9 +35,9 @@ export default function EntregasTableRow({
   const formattedRut = formatRUT(rut);
   const fecha = formatDate(fecha_entrega);
 
-  const handleClick = () => {
-    router.push(`/dashboard/entregas/${rut}`);
-  };
+  // const handleClick = () => {
+  //   router.push(`/dashboard/entregas/${rut}`);
+  // };
 
   return (
     <tr className="grid grid-cols-26 gap-8 text-nowrap px-6 text-sm tabular-nums transition-colors hover:bg-slate-200/50">

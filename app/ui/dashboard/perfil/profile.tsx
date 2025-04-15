@@ -7,7 +7,7 @@ import {
   FiUser,
   FiCamera,
   FiLock,
-  FiEdit,
+  // FiEdit,
 } from "react-icons/fi";
 import Image from "next/image";
 import ChangePasswordModal from "./change-password-modal";
@@ -186,7 +186,7 @@ export default function UserProfile({ userData }: UserProfileProps) {
       {isPasswordModalOpen && (
         <ChangePasswordModal
           onClose={() => setIsPasswordModalOpen(false)}
-          userId={userData.correo}
+          // userId={userData.correo}
         />
       )}
     </div>

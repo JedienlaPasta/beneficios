@@ -257,7 +257,7 @@ export async function updateCampaign(id: string, formData: FormData) {
 export async function deleteCampaign(id: string) {
   try {
     const pool = await connectToDB();
-    let transaction = new sql.Transaction(pool);
+    const transaction = new sql.Transaction(pool);
     try {
       await transaction.begin();
       const campaignRequest = new sql.Request(transaction);
@@ -310,7 +310,7 @@ export async function deleteCampaign(id: string) {
 export async function endCampaignById(id: string) {
   try {
     const pool = await connectToDB();
-    let transaction = new sql.Transaction(pool);
+    const transaction = new sql.Transaction(pool);
     try {
       await transaction.begin();
       const campaignRequest = new sql.Request(transaction);

@@ -115,3 +115,11 @@ export type RSH = {
 
   discapacidad: string;
 };
+
+export type UserData = {
+  id: string;
+  nombre_usuario: string;
+  correo: string;
+  cargo: string;
+  rol: string;
+};

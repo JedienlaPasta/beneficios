@@ -5,10 +5,13 @@ import { FiX, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 
 type ChangePasswordModalProps = {
   onClose: () => void;
-  userId: string;
+  // userId: string;
 };
 
-export default function ChangePasswordModal({ onClose, userId }: ChangePasswordModalProps) {
+export default function ChangePasswordModal({
+  onClose,
+  //  userId
+}: ChangePasswordModalProps) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -22,25 +25,25 @@ export default function ChangePasswordModal({ onClose, userId }: ChangePasswordM
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    
+
     // Validate passwords
     if (!currentPassword || !newPassword || !confirmPassword) {
       setError("Todos los campos son obligatorios");
       return;
     }
-    
+
     if (newPassword !== confirmPassword) {
       setError("Las contraseñas nuevas no coinciden");
       return;
     }
-    
+
     if (newPassword.length < 8) {
       setError("La contraseña debe tener al menos 8 caracteres");
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       // Here you would call your API to change the password
       // For example:
@@ -49,21 +52,23 @@ export default function ChangePasswordModal({ onClose, userId }: ChangePasswordM
       //   headers: { 'Content-Type': 'application/json' },
       //   body: JSON.stringify({ userId, currentPassword, newPassword })
       // });
-      
+
       // if (!response.ok) {
       //   const data = await response.json();
       //   throw new Error(data.message || 'Error al cambiar la contraseña');
       // }
-      
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       setSuccess(true);
       setTimeout(() => {
         onClose();
       }, 2000);
-    } catch (err: any) {
-      setError(err.message || "Error al cambiar la contraseña");
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : "Error al cambiar la contraseña",
+      );
     } finally {
       setLoading(false);
     }
@@ -73,15 +78,17 @@ export default function ChangePasswordModal({ onClose, userId }: ChangePasswordM
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
       <div className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-xl">
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
-          <h3 className="text-lg font-medium text-slate-800">Cambiar contraseña</h3>
-          <button 
+          <h3 className="text-lg font-medium text-slate-800">
+            Cambiar contraseña
+          </h3>
+          <button
             onClick={onClose}
             className="rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-500"
           >
             <FiX size={20} />
           </button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="p-6">
           {success ? (
             <div className="mb-6 rounded-lg bg-green-50 p-4 text-green-700">
@@ -94,9 +101,12 @@ export default function ChangePasswordModal({ onClose, userId }: ChangePasswordM
                   {error}
                 </div>
               )}
-              
+
               <div className="mb-4">
-                <label htmlFor="current-password" className="mb-2 block text-sm font-medium text-slate-700">
+                <label
+                  htmlFor="current-password"
+                  className="mb-2 block text-sm font-medium text-slate-700"
+                >
                   Contraseña actual
                 </label>
                 <div className="relative">
@@ -117,13 +127,20 @@ export default function ChangePasswordModal({ onClose, userId }: ChangePasswordM
                     className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-500"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                   >
-                    {showCurrentPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                    {showCurrentPassword ? (
+                      <FiEyeOff size={16} />
+                    ) : (
+                      <FiEye size={16} />
+                    )}
                   </button>
                 </div>
               </div>
-              
+
               <div className="mb-4">
-                <label htmlFor="new-password" className="mb-2 block text-sm font-medium text-slate-700">
+                <label
+                  htmlFor="new-password"
+                  className="mb-2 block text-sm font-medium text-slate-700"
+                >
                   Nueva contraseña
                 </label>
                 <div className="relative">
@@ -144,13 +161,20 @@ export default function ChangePasswordModal({ onClose, userId }: ChangePasswordM
                     className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-500"
                     onClick={() => setShowNewPassword(!showNewPassword)}
                   >
-                    {showNewPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                    {showNewPassword ? (
+                      <FiEyeOff size={16} />
+                    ) : (
+                      <FiEye size={16} />
+                    )}
                   </button>
                 </div>
               </div>
-              
+
               <div className="mb-6">
-                <label htmlFor="confirm-password" className="mb-2 block text-sm font-medium text-slate-700">
+                <label
+                  htmlFor="confirm-password"
+                  className="mb-2 block text-sm font-medium text-slate-700"
+                >
                   Confirmar nueva contraseña
                 </label>
                 <div className="relative">
@@ -171,13 +195,17 @@ export default function ChangePasswordModal({ onClose, userId }: ChangePasswordM
                     className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-500"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
-                    {showConfirmPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                    {showConfirmPassword ? (
+                      <FiEyeOff size={16} />
+                    ) : (
+                      <FiEye size={16} />
+                    )}
                   </button>
                 </div>
               </div>
             </>
           )}
-          
+
           <div className="flex justify-end gap-3">
             <button
               type="button"

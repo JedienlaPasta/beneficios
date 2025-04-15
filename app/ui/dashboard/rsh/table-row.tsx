@@ -1,10 +1,5 @@
 "use client";
-import {
-  capitalizeAll,
-  formatDate,
-  formatNumber,
-} from "@/app/lib/utils/format";
-import { JSX } from "react";
+import { formatDate, formatNumber } from "@/app/lib/utils/format";
 
 export default function TableRow({
   item,

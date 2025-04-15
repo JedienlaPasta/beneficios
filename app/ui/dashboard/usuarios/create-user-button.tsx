@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { FiPlus } from "react-icons/fi";
 import { CreateUserModal } from "./create-user-modal";
 
 export function CreateUserButton() {

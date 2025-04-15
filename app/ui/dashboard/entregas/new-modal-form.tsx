@@ -81,7 +81,12 @@ export default function NewModalForm({
 
     // Convert selectedCampaigns to formFields format
     const campaignsToSubmit = Object.entries(selectedCampaigns)
-      .filter(([_, value]) => value.selected)
+      .filter(
+        ([_campaignId, value]: [
+          string,
+          { selected: boolean; detail: string },
+        ]) => value.selected,
+      )
       .map(([id, value]) => {
         const campaign = activeCampaigns?.find(
           (campaign) => campaign.id === id,
@@ -154,8 +159,14 @@ export default function NewModalForm({
 
     // Check if all selected campaigns have details
     const hasEmptyDetails = Object.entries(selectedCampaigns)
-      .filter(([_, value]) => value.selected)
-      .some(([_, value]) => value.detail.trim() === "");
+      .filter(
+        ([_id, value]: [string, { selected: boolean; detail: string }]) =>
+          value.selected,
+      )
+      .some(
+        ([_id, value]: [string, { selected: boolean; detail: string }]) =>
+          value.detail.trim() === "",
+      );
 
     return !hasEmptyDetails;
   };

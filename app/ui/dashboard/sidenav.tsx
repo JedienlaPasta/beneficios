@@ -4,10 +4,11 @@ import NavLinks from "./nav-links";
 import PerfilUsuario from "./perfil-usuario";
 // import sibasImg from "@/public/logo_S.svg";
 import elquiscoImg from "@/public/elquisco.svg";
+import { UserData } from "@/app/lib/definitions";
 
 type SidenavProps = {
   setSidenavOpen: (prev: boolean) => void;
-  userData: any;
+  userData: UserData;
 };
 
 export default function Sidenav({ setSidenavOpen, userData }: SidenavProps) {
