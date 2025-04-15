@@ -185,14 +185,14 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
         console.log("Iniciando importación RSH...");
 
         // Check if table type exists and is accessible - search across all schemas
-        const typeCheckResult = await checkRequest.query(`
-          SELECT 
-            t.name AS type_name,
-            s.name AS schema_name
-          FROM sys.types t
-          JOIN sys.schemas s ON t.schema_id = s.schema_id
-          WHERE t.name = 'RSHTableType'
-        `);
+        // const typeCheckResult = await checkRequest.query(`
+        //   SELECT
+        //     t.name AS type_name,
+        //     s.name AS schema_name
+        //   FROM sys.types t
+        //   JOIN sys.schemas s ON t.schema_id = s.schema_id
+        //   WHERE t.name = 'RSHTableType'
+        // `);
 
         // Check if stored procedure exists
         const procCheckResult = await checkRequest.query(`

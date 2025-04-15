@@ -1,6 +1,6 @@
 "use client";
 import { formatDate, formatRUT } from "@/app/lib/utils/format";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 
 export default function EntregasTableRow({
   item,
@@ -31,7 +31,7 @@ export default function EntregasTableRow({
     nombres_rsh,
     apellidos_rsh,
   } = item;
-  const router = useRouter();
+  // const router = useRouter();
   const formattedRut = formatRUT(rut);
   const fecha = formatDate(fecha_entrega);
 
