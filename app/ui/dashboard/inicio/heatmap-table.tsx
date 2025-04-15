@@ -1,13 +1,15 @@
-import clsx from "clsx";
 import { JSX } from "react";
-import outputData from "@/app/lib/data/output.json";
+import { fetchDailyEntregasCountByYear } from "@/app/lib/data/inicio";
+import { getDaysBetween } from "@/app/lib/utils/get-values";
+import BoardCube from "./heatmap-board-cube";
 
-export default function HeatMapTable() {
-  const board: Array<JSX.Element> = [];
-  outputData.forEach((item) => {
-    board.push(<BoardCube key={item.index} state={item.state} />);
-  });
+type HeatMapTableProps = {
+  year: string;
+};
 
+export default async function HeatMapTable({ year }: HeatMapTableProps) {
+  const entregas = await fetchDailyEntregasCountByYear(year);
+  console.log(year);
   const weekDays = ["Lun", "Mar", "Mie", "Jue", "Vie"];
   const boardDays = weekDays.map((day) => <p key={day}>{day}</p>);
 
@@ -25,44 +27,96 @@ export default function HeatMapTable() {
     "Nov",
     "Dic",
   ];
-  const mesesTablero = months.map((month) => (
-    <p className="w-8" key={month}>
-      {month}
-    </p>
-  ));
+
+  function calculateThresholds(data: number[]): number[] {
+    const sorted = [...data].sort((a, b) => a - b);
+    const percentiles = [0.2, 0.4, 0.6, 0.8];
+    return percentiles.map((p) => {
+      const idx = Math.floor(p * sorted.length);
+      return sorted[idx];
+    });
+  }
+
+  const counts = Object.values(entregas).filter(
+    (value) => typeof value === "number",
+  ) as number[];
+
+  const thresholds =
+    counts.length > 0 ? calculateThresholds(counts) : [0, 1, 2, 3];
+
+  // days now includes 2025-12-31 thanks to our fix.
+  const days = getDaysBetween("2025-01-01", "2025-12-31");
+  const filteredDays = days.filter((day) => day.year() === 2025);
+
+  // Build weeks array (each week has exactly 5 elements)
+  const weeks: Array<JSX.Element[]> = [];
+  let currentWeek: JSX.Element[] = [];
+
+  // Determine the offset for the first workday (Mon-Fri)
+  const firstWorkdayIndex = filteredDays.findIndex((day) => {
+    const dayOfWeek = day.day();
+    return dayOfWeek >= 1 && dayOfWeek <= 5;
+  });
+  const firstWorkDay = filteredDays[firstWorkdayIndex];
+  const dayOfWeek = firstWorkDay.day();
+  const offset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+
+  // Pre-pad the first week with disabled cubes.
+  for (let i = 0; i < offset; i++) {
+    currentWeek.push(<BoardCube key={`offset-${i}`} count={0} disabled />);
+  }
+
+  filteredDays.forEach((day) => {
+    const dOW = day.day();
+    if (dOW >= 1 && dOW <= 5) {
+      const dateStr = day.format("YYYY-MM-DD");
+      const count = entregas[dateStr] || 0;
+      currentWeek.push(
+        <BoardCube
+          key={dateStr}
+          count={count}
+          dateStr={dateStr}
+          thresholds={thresholds}
+        />,
+      );
+
+      if (currentWeek.length === 5) {
+        weeks.push(currentWeek);
+        currentWeek = [];
+      }
+    }
+  });
+
+  // Pad final week if needed once only.
+  if (currentWeek.length > 0) {
+    const pad = 5 - currentWeek.length;
+    for (let i = 0; i < pad; i++) {
+      currentWeek.push(<BoardCube key={`final-pad-${i}`} count={0} disabled />);
+    }
+    weeks.push(currentWeek);
+  }
+
+  console.log(
+    "Last day in filteredDays:",
+    filteredDays.at(-1)?.format("YYYY-MM-DD"),
+  );
 
   return (
-    <div className="items-centers flex w-fit flex-col justify-center rounded-xl border border-slate-200 bg-slate-50 p-4">
-      <div className="bg-slate-300s ml-7 flex gap-12 pb-1 text-xs text-gray-600">
-        {mesesTablero}
+    <div className="flex w-fit flex-col rounded-xl border border-slate-200 bg-slate-50 p-4">
+      <div className="ml-7 grid grid-cols-12 pb-1 text-xs text-gray-600">
+        {months.map((month) => (
+          <div key={month} className="whitespace-nowrap text-center">
+            {month}
+          </div>
+        ))}
       </div>
       <div className="flex items-center justify-center gap-2">
         <div className="flex flex-col gap-1 text-center text-xs text-gray-600">
           {boardDays}
         </div>
-        <div className="bg-slate-800s grid w-fit grid-flow-col grid-rows-5 gap-1">
-          {board}
+        <div className="grid grid-flow-col grid-rows-5 gap-1">
+          {weeks.flat()}
         </div>
-      </div>
-    </div>
-  );
-}
-
-function BoardCube({ state }: { state: number }) {
-  const stateColor = [
-    "bg-slate-100 border-slate-200",
-    "bg-green-100 border-green-300",
-    "bg-green-200 border-green-400",
-    "bg-green-300 border-green-500",
-    "bg-green-400 border-green-600",
-  ];
-
-  return (
-    <div
-      className={`group relative flex h-4 w-4 items-center justify-center rounded border ${clsx(stateColor[state - 1])}`}
-    >
-      <div className="absolute bottom-5 z-10 hidden text-nowrap rounded-md bg-gray-800 px-2 py-1 text-xs text-white group-hover:flex">
-        Entregas: +{(state - 1) * 2}
       </div>
     </div>
   );
