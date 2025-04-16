@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { FormField } from "../entregas/new-modal-form";
-// import { campaignsList } from "@/app/data/data";
+
+type FormField = {
+  id: string;
+  campaignName: string;
+  detail: string;
+  code: string;
+};
 
 type CampaignList = {
   id: string;
@@ -29,7 +34,6 @@ export default function CampaignDropdown({
   setCampaignName,
 }: CampañaDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
-  // const [campaignName, setCampaignName] = useState("");
 
   const toggleDropdown = () => {
     setIsOpen((prev) => !prev);
@@ -95,20 +99,26 @@ export default function CampaignDropdown({
       {/* Dropdown List */}
       {isOpen && (
         <ul className="absolute left-[-1px] top-16 z-10 max-h-[146px] w-[101%] divide-y overflow-y-auto rounded-lg border border-gray-200 bg-white text-slate-700 shadow-lg">
-          {campaignsList?.map((campaign, index) => (
-            <li
-              key={index}
-              onClick={() =>
-                setCampaign
-                  ? setCampaign(campaign.name)
-                  : handleCampaignSelection(campaign)
-              }
-              className="flex h-12 w-full cursor-pointer flex-col justify-center px-4 text-sm hover:bg-sky-100"
-            >
-              <span>{campaign.name}</span>
-              <span className="text-xs text-slate-500">{campaign.type}</span>
+          {campaignsList && campaignsList.length > 0 ? (
+            campaignsList.map((campaign, index) => (
+              <li
+                key={index}
+                onClick={() =>
+                  setCampaign
+                    ? setCampaign(campaign.name)
+                    : handleCampaignSelection(campaign)
+                }
+                className="flex h-12 w-full cursor-pointer flex-col justify-center px-4 text-sm hover:bg-sky-100"
+              >
+                <span>{campaign.name}</span>
+                <span className="text-xs text-slate-500">{campaign.type}</span>
+              </li>
+            ))
+          ) : (
+            <li className="flex h-12 w-full flex-col justify-center px-4 text-sm text-slate-500">
+              No hay campañas disponibles
             </li>
-          ))}
+          )}
         </ul>
       )}
     </div>

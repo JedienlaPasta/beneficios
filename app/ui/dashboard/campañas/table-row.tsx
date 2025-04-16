@@ -1,8 +1,6 @@
 "use client";
 import { formatDate } from "@/app/lib/utils/format";
-// import Link from "next/link";
 import { useRouter } from "next/navigation";
-// import { CiViewList } from "react-icons/ci";
 import { FiBox } from "react-icons/fi";
 import { TbCopy } from "react-icons/tb";
 import { toast } from "sonner";
@@ -12,14 +10,14 @@ export default function TableRow({
 }: {
   item: {
     id: string;
-    nombre: string;
+    nombre_campaña: string;
     entregas: number;
     estado: "En curso" | "Finalizado";
     fecha_inicio: Date;
     fecha_termino: Date;
   };
 }) {
-  const { id, nombre, entregas, fecha_inicio, fecha_termino } = item;
+  const { id, nombre_campaña, entregas, fecha_inicio, fecha_termino } = item;
   const router = useRouter();
 
   const inicio = formatDate(fecha_inicio);
@@ -45,21 +43,26 @@ export default function TableRow({
   return (
     <tr
       onClick={handleClick}
-      className="cursor-pointer text-nowrap text-sm tabular-nums transition-colors hover:bg-slate-200/50"
+      className="grid cursor-pointer grid-cols-26 gap-9 text-nowrap px-6 text-sm tabular-nums transition-colors hover:bg-slate-50"
     >
-      <td className="group w-[20%] max-w-56 px-10 py-3 font-medium text-slate-700">
+      <td className="group col-span-5 flex min-h-12 items-center py-4 text-slate-600">
         <div className="flex items-center gap-2">
-          <div className="overflow-hidden text-ellipsis">{id}</div>
+          <div className="max-w-[160px] truncate">{id}</div>
           <div className="hidden rounded p-[3px] hover:bg-slate-200 group-hover:block">
             <TbCopy
-              onClick={() => copyToClipboard(id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                copyToClipboard(id);
+              }}
               className="h-5 w-5 shrink-0 cursor-pointer text-slate-500"
             />
           </div>
         </div>
       </td>
-      <td className="w-[30%] py-3 font-medium text-slate-700">{nombre}</td>
-      <td className="w-[10%] items-center py-3 text-slate-700">
+      <td className="col-span-7 flex items-center py-4 text-slate-600">
+        {nombre_campaña}
+      </td>
+      <td className="col-span-3 py-4 text-left text-slate-600">
         <div className="flex items-center gap-3 font-medium text-slate-700/90">
           <div className="col-span-1 flex w-fit justify-start">
             <FiBox />
@@ -67,17 +70,15 @@ export default function TableRow({
           {entregas}
         </div>
       </td>
-      <td className="w-[5%] py-3">
+      <td className="col-span-3 flex justify-center py-4 text-slate-600">
         <span
           className={`inline-block rounded-full border px-3 py-1 text-xs font-medium ${colorEstado}`}
         >
           {estado}
         </span>
       </td>
-      <td className="w-[15%] py-3 text-right text-slate-600">{inicio}</td>
-      <td className="w-[15%] px-10 py-3 text-right text-slate-600">
-        {termino}
-      </td>
+      <td className="col-span-4 py-4 text-right text-slate-600">{inicio}</td>
+      <td className="col-span-4 py-4 text-right text-slate-600">{termino}</td>
     </tr>
   );
 }

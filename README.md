@@ -148,6 +148,16 @@ Actualizar cantidad de entregas?
 
 ===========================================================
 
+DNS Publico
+
+DB Windows (Credenciales / Instalar Microsoft SQL Server Management Studio?)
+
+Pedir a R que pida que cambien los puertos? x
+
+Certificados SSL x
+
+===========================================================
+
 # Campos Formulario Beneficios
 
 Entregas:

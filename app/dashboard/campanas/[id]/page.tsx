@@ -1,11 +1,12 @@
-import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/campaigns-table-skeleton";
-import Modal from "@/app/ui/dashboard/modal";
 import { Suspense } from "react";
 import UpdateCampaignModal from "@/app/ui/dashboard/campañas/[id]/update/update-campaign-modal";
-import CampaignDetail from "@/app/ui/dashboard/campañas/[id]/campaign-detail";
-import { fetchCampaignById } from "@/app/lib/data/campañas";
+import CampaignDetail, {
+  CampaignDetailSkeleton,
+} from "@/app/ui/dashboard/campañas/[id]/campaign-detail";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import CampaignSocialAidsTable from "@/app/ui/dashboard/campañas/[id]/campaign-social-aid-table";
+import CampaignSocialAidsTableSkeleton from "@/app/ui/dashboard/campañas/[id]/table-skeleton";
+import { Modal } from "@/app/ui/dashboard/modal";
 
 type CampaignProps = {
   searchParams?: Promise<{
@@ -25,13 +26,14 @@ export default async function Campaign(props: CampaignProps) {
   // Params (id)
   const params = await props.params;
   const id = params.id;
-  const { data } = await fetchCampaignById(id);
 
   return (
     <div>
       {showUpdateModal === "open" && (
         <Modal name="update">
-          <UpdateCampaignModal id={id} data={data} />
+          <Suspense fallback={<div>Loading...</div>}>
+            <UpdateCampaignModal id={id} />
+          </Suspense>
         </Modal>
       )}
       <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
@@ -44,7 +46,9 @@ export default async function Campaign(props: CampaignProps) {
       </div>
 
       <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
-        <CampaignDetail id={id} />
+        <Suspense fallback={<CampaignDetailSkeleton />}>
+          <CampaignDetail id={id} />
+        </Suspense>
         <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50">
           <div className="flex flex-wrap items-center justify-between gap-4 px-10 pt-4 3xl:w-[96rem] 3xl:self-center">
             <span className="flex flex-wrap items-center gap-2 text-nowrap text-lg font-semibold text-slate-800">
@@ -55,7 +59,7 @@ export default async function Campaign(props: CampaignProps) {
             </span>
             <SearchBar placeholder="Buscar..." />
           </div>
-          <Suspense fallback={<TablaCampañasSkeleton />}>
+          <Suspense fallback={<CampaignSocialAidsTableSkeleton />}>
             <CampaignSocialAidsTable
               id={id}
               query={query}

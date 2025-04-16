@@ -1,65 +1,80 @@
-import { HiOutlineGift } from "react-icons/hi2";
-import { HiOutlineUsers } from "react-icons/hi2";
-// import { HiOutlineClock } from "react-icons/hi2";
+import { FaBoxesStacked } from "react-icons/fa6";
+import { FaPersonCane } from "react-icons/fa6";
+import { FaBoxOpen } from "react-icons/fa6";
+import Link from "next/link";
+import { fetchGeneralInfo } from "@/app/lib/data/inicio";
+import { formatNumber } from "@/app/lib/utils/format";
+import { JSX } from "react";
 
-export default function GeneralInfoCards() {
+export default async function GeneralInfoCards() {
+  const response = await fetchGeneralInfo();
   const stats = [
     {
       title: "Campañas Activas",
-      value: "4",
-      icon: <HiOutlineGift className="h-5 w-5" />,
-      change: "+2 este mes",
+      value: formatNumber(response[0]?.active_campaigns) || "4",
+      icon: <FaBoxesStacked className="h-5 w-5" />,
+      to: "/dashboard/campanas",
       changeType: "positive",
     },
     {
       title: "Entregas",
-      value: "98",
-      icon: <HiOutlineUsers className="h-5 w-5" />,
-      change: "+31 última semana",
+      value: formatNumber(response[0]?.total_entregas) || "98",
+      icon: <FaBoxOpen className="h-5 w-5" />,
+      to: "/dashboard/entregas",
       changeType: "positive",
     },
     {
       title: "Beneficiarios",
-      value: "1.429",
-      icon: <HiOutlineUsers className="h-5 w-5" />,
-      change: "+0 última semana",
+      value: formatNumber(response[0]?.total_beneficiarios) || "1.429",
+      icon: <FaPersonCane className="h-5 w-5" />,
+      to: "/dashboard/rsh",
       changeType: "positive",
     },
   ];
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 2xl:grid-cols-3">
       {stats.map((stat) => (
-        <div
-          key={stat.title}
-          className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-md shadow-slate-300 transition-all hover:shadow-md"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="rounded-lg bg-blue-500/10 p-2 text-blue-600">
-                {stat.icon}
-              </div>
-              <p className="text-sm font-medium text-slate-600">{stat.title}</p>
-            </div>
-          </div>
-
-          <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-slate-900">
-              {stat.value}
-            </span>
-            <span
-              className={`inline-flex items-center gap-1 text-xs font-medium ${
-                stat.changeType === "positive"
-                  ? "text-green-600"
-                  : "text-red-600"
-              }`}
-            >
-              {stat.change}
-            </span>
-          </div>
-          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600 opacity-0 transition-opacity group-hover:opacity-100" />
-        </div>
+        <InfoCard key={stat.title} stat={stat} />
       ))}
     </div>
+  );
+}
+
+type InfoCardProps = {
+  stat: {
+    title: string;
+    value: string;
+    icon: JSX.Element;
+    changeType: string;
+    to: string;
+  };
+};
+
+function InfoCard({ stat }: InfoCardProps) {
+  return (
+    <Link
+      key={stat.title}
+      href={stat.to}
+      className="group cursor-pointer overflow-hidden rounded-xl bg-white p-6 shadow-md shadow-slate-300/70 transition-all duration-300 hover:shadow-lg hover:shadow-slate-300/80 last:lg:col-span-2 last:2xl:col-span-1"
+    >
+      {/* Card header with icon and title */}
+      <div className="relative flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="size-10 place-content-center place-items-center rounded-lg bg-blue-500/20 text-blue-600 shadow-sm transition-all group-hover:bg-blue-500/25">
+            {stat.icon}
+          </div>
+          <p className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            {stat.title}
+          </p>
+        </div>
+        <div className="">
+          <span className="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">
+            {stat.value}
+          </span>
+        </div>
+        <div className="absolute right-0 top-1/2 h-16 w-24 -translate-y-1/2 translate-x-[7rem] rounded-lg bg-blue-500 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+      </div>
+    </Link>
   );
 }

@@ -1,14 +1,14 @@
 export function Spinner() {
   return (
-    <div className="animate-cspin h-5 w-5 rounded-full border-4 border-blue-200 border-t-blue-400 bg-white"></div>
+    <div className="animate-cspin h-5 w-5 rounded-full border-4 border-blue-200 border-t-blue-400 bg-transparent"></div>
   );
 }
 
 export function SquaresLoader() {
   return (
     <div className="relative mx-auto my-2 flex h-16 w-16 items-center justify-center">
-      <div className="animate-square absolute h-full w-full rounded-md bg-gradient-to-br from-blue-500 to-blue-600 opacity-70 shadow-md"></div>
-      <div className="animate-innerSquare absolute inset-2 rounded-sm bg-gradient-to-tr from-blue-200 to-blue-300 shadow-inner"></div>
+      <div className="absolute h-full w-full animate-square rounded-md bg-gradient-to-br from-blue-500 to-blue-600 opacity-70 shadow-md"></div>
+      <div className="absolute inset-2 animate-innerSquare rounded-sm bg-gradient-to-tr from-blue-200 to-blue-300 shadow-inner"></div>
     </div>
   );
 }

@@ -11,24 +11,34 @@ export default async function CampaignsTable({
   query,
   currentPage,
 }: CampaignsTableProps) {
-  const { data, pages } = await fetchCampaigns(query, currentPage);
+  const resultsPerPage = 10;
+  const { data, pages } = await fetchCampaigns(
+    query,
+    currentPage,
+    resultsPerPage,
+  );
 
   return (
-    <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300">
+    <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300/70">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[44rem]">
-          <thead className="border-y border-slate-200/70 bg-slate-50 text-xs font-medium uppercase tracking-wider text-slate-600/70">
-            <tr>
-              <th className="py-4 pl-10 text-left font-normal">Id</th>
-              <th className="py-4 text-left font-normal">Campaña</th>
-              <th className="py-4 text-left font-normal">Entregas</th>
-              <th className="py-4 text-left font-normal">Estado</th>
-              <th className="py-4 text-right font-normal">Inicio</th>
-              <th className="py-4 pr-10 text-right font-normal">Término</th>
-              {/* <th className="py-4 pr-10 text-right font-normal">Detalle</th> */}
+        <table className="w-full min-w-[44rem] border-collapse">
+          <thead className="border-y border-slate-200/80 bg-slate-50 text-xs uppercase tracking-wider text-slate-600/70">
+            <tr className="grid grid-cols-26 items-center gap-9 px-6 text-left">
+              <th className="col-span-5 py-4 text-left font-normal">Id</th>
+              <th className="col-span-7 py-4 text-left font-normal">Campaña</th>
+              <th className="col-span-3 py-4 text-left font-normal">
+                Entregas
+              </th>
+              <th className="col-span-3 py-4 text-center font-normal">
+                Estado
+              </th>
+              <th className="col-span-4 py-4 text-right font-normal">Inicio</th>
+              <th className="col-span-4 py-4 text-right font-normal">
+                Término
+              </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200/30">
+          <tbody className="divide-y divide-slate-200/80">
             {data?.map((item: Campaign, index: number) => (
               <TableRow key={index} item={item} />
             ))}

@@ -1,9 +1,12 @@
 "use server";
-import postgres from "postgres";
+import sql from "mssql";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import * as ExcelJS from "exceljs";
 import { FormState } from "@/app/ui/dashboard/campañas/new-campaign-modal";
+import { connectToDB } from "../utils/db-connection";
+import { capitalizeAll } from "../utils/format";
+import { logAction } from "./auditoria";
 
 // Crear RSH
 
@@ -16,10 +19,10 @@ import { FormState } from "@/app/ui/dashboard/campañas/new-campaign-modal";
 interface CitizenData {
   telefono: string | null;
   correo: string | null;
-  nombres: string;
+  nombres_rsh: string;
   apellidopaterno: string;
   apellidomaterno: string | null;
-  apellidos: string;
+  apellidos_rsh: string;
   rut: string;
   dv: string;
   indigena: string | null;
@@ -36,8 +39,6 @@ interface CitizenData {
   fecha_modificacion: Date | null;
   fecha_calificacion: Date | null;
 }
-
-const sql = postgres(process.env.DATABASE_URL!, { ssl: "require" });
 
 // Helpers
 const capitalizeWords = (text: string): string =>
@@ -92,10 +93,7 @@ const FileSchema = z.object({
     ),
 });
 
-export async function importXLSXFile(
-  // prevState: FormState,
-  formData: FormData,
-): Promise<FormState> {
+export async function importXLSXFile(formData: FormData): Promise<FormState> {
   try {
     const { file } = FileSchema.parse({
       file: formData.get("file"),
@@ -121,45 +119,43 @@ export async function importXLSXFile(
         return;
       }
 
-      // Procesar campos
-      const [apellidopaterno, apellidomaterno] = [
-        values[14] ? capitalizeWords(String(values[14])) : "",
-        values[15] ? capitalizeWords(String(values[15])) : null,
-      ];
+      // Procesar campos (optimizado)
+      const apellidopaterno = values[14]
+        ? capitalizeWords(String(values[14]))
+        : "";
+      const apellidomaterno = values[15]
+        ? capitalizeWords(String(values[15]))
+        : null;
       const citizen: CitizenData = {
         rut: rawRut,
-        dv: values[13] as string,
-        nombres: values[16] ? capitalizeWords(String(values[16])) : "",
+        dv: String(values[13]),
+        nombres_rsh: values[16] ? capitalizeWords(String(values[16])) : "",
         apellidopaterno,
         apellidomaterno,
-        apellidos: `${apellidopaterno} ${apellidomaterno || ""}`.trim(),
+        apellidos_rsh: `${apellidopaterno} ${apellidomaterno || ""}`.trim(),
         telefono: values[1] ? String(values[1]).replace(/\D/g, "") : null,
         correo: values[2] ? String(values[2]) : null,
-        indigena: (() => {
-          const value = values[20];
-          if (
-            value === null ||
-            value === undefined ||
-            value === "" ||
-            isNaN(Number(value))
-          ) {
-            return null;
-          }
-
-          const numericValue = parseInt(String(value), 10);
-
-          return numericValue === 0 ? "No" : "Sí";
-        })(),
+        indigena:
+          values[20] === null ||
+          values[20] === undefined ||
+          values[20] === "" ||
+          isNaN(Number(values[20]))
+            ? null
+            : parseInt(String(values[20]), 10) === 0
+              ? "No"
+              : "Sí",
         genero: values[67] == 1 ? "Masculino" : "Femenino",
-        nacionalidad: values[69]
-          ? Number(values[69]) == 1
+        nacionalidad:
+          values[69] && Number(values[69]) == 1
             ? "Chilena"
-            : "Extranjera"
-          : null,
-        sector: values[78] ? String(values[78]) : null,
-        calle: values[75] ? String(values[75]) : "",
+            : values[69]
+              ? "Extranjera"
+              : null,
+        sector: values[78] ? capitalizeAll(values[78]?.toString()) : null,
+        calle: values[75] ? capitalizeAll(values[75]?.toString()) : "",
         numcalle: values[3] ? String(values[3]) : null,
-        direccion: `${values[75] || ""} ${values[3] || ""}`.trim(),
+        direccion:
+          `${capitalizeAll(values[75]?.toString()) || ""} ${capitalizeAll(values[3]?.toString()) || ""}`.trim(),
         tramo: values[70] ? String(values[70]) : "",
         folio: values[64] ? String(values[64]) : "",
         fecha_nacimiento: convertDate(String(values[68])),
@@ -168,72 +164,308 @@ export async function importXLSXFile(
         fecha_calificacion: convertDate(String(values[71])),
       };
 
-      // Validación adicional
-      if (!citizen.rut || !citizen.nombres || !citizen.apellidopaterno) {
+      if (!citizen.rut || !citizen.nombres_rsh || !citizen.apellidopaterno) {
         skippedRows++;
         return;
       }
-
       citizens.push(citizen);
       validRows++;
     });
 
-    // Bulk insert
+    const pool = await connectToDB();
+
     if (citizens.length > 0) {
-      await sql.begin(async (sql) => {
-        const MAX_PARAMS = 65534;
-        const COLUMNS_COUNT = 18;
-        const CHUNK_SIZE = Math.floor(MAX_PARAMS / COLUMNS_COUNT);
+      const transaction = new sql.Transaction(pool);
+      await transaction.begin();
+      const start = new Date();
 
-        const chunks = chunkArray(citizens, CHUNK_SIZE);
+      try {
+        // Check database context and permissions
+        const checkRequest = new sql.Request(transaction);
+        console.log("Iniciando importación RSH...");
 
-        for (const chunk of chunks) {
-          await sql`
-            INSERT INTO rsh ${sql(chunk, [
-              "telefono",
-              "correo",
-              "nombres",
-              "apellidos",
-              "rut",
-              "dv",
-              "indigena",
-              "genero",
-              "nacionalidad",
-              "sector",
-              "direccion",
-              "tramo",
-              "folio",
-              "fecha_nacimiento",
-              "fecha_encuesta",
-              "fecha_modificacion",
-              "fecha_calificacion",
-            ])}
-            ON CONFLICT (rut) DO UPDATE SET
-              telefono = EXCLUDED.telefono,
-              correo = EXCLUDED.correo,
-              nombres = EXCLUDED.nombres,
-              apellidos = EXCLUDED.apellidos,
-              dv = EXCLUDED.dv,
-              indigena = EXCLUDED.indigena,
-              genero = EXCLUDED.genero,
-              nacionalidad = EXCLUDED.nacionalidad,
-              sector = EXCLUDED.sector,
-              direccion = EXCLUDED.direccion,
-              tramo = EXCLUDED.tramo,
-              folio = EXCLUDED.folio,
-              fecha_nacimiento = EXCLUDED.fecha_nacimiento,
-              fecha_encuesta = EXCLUDED.fecha_encuesta,
-              fecha_modificacion = EXCLUDED.fecha_modificacion,
-              fecha_calificacion = EXCLUDED.fecha_calificacion
-          `;
+        // Check if table type exists and is accessible - search across all schemas
+        // const typeCheckResult = await checkRequest.query(`
+        //   SELECT
+        //     t.name AS type_name,
+        //     s.name AS schema_name
+        //   FROM sys.types t
+        //   JOIN sys.schemas s ON t.schema_id = s.schema_id
+        //   WHERE t.name = 'RSHTableType'
+        // `);
+
+        // Check if stored procedure exists
+        const procCheckResult = await checkRequest.query(`
+          SELECT 
+            p.name AS proc_name,
+            s.name AS schema_name
+          FROM sys.procedures p
+          JOIN sys.schemas s ON p.schema_id = s.schema_id
+          WHERE p.name = 'sp_MergeRSHBatch'
+        `);
+
+        let procSchemaName = "dbo"; // Default schema
+
+        if (procCheckResult.recordset.length > 0) {
+          const procInfo = procCheckResult.recordset[0];
+          procSchemaName = procInfo.schema_name;
         }
-      });
+
+        // Define CHUNK_SIZE once and create chunks array once
+        const CHUNK_SIZE = 2000;
+        const chunks = chunkArray(citizens, CHUNK_SIZE);
+        console.log(`Procesando ${chunks.length} lotes de datos...`);
+
+        for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
+          const currentChunk = chunks[chunkIndex];
+          console.log(
+            `Lote ${chunkIndex + 1}/${chunks.length}: ${currentChunk.length} registros`,
+          );
+
+          // For the first chunk, try with a smaller batch size to test
+          if (chunkIndex === 0) {
+            const testChunk = currentChunk.slice(0, 10);
+
+            try {
+              const testRequest = new sql.Request(transaction);
+
+              // Create a TVP (Table-Valued Parameter)
+              const tvp = new sql.Table();
+
+              // Define the TVP structure to match RSHTableType
+              tvp.columns.add("rut", sql.Int, { nullable: false });
+              tvp.columns.add("dv", sql.Char(1), { nullable: false });
+              tvp.columns.add("nombres_rsh", sql.VarChar(50), {
+                nullable: false,
+              });
+              tvp.columns.add("apellidos_rsh", sql.VarChar(50), {
+                nullable: false,
+              });
+              tvp.columns.add("direccion", sql.VarChar(200), {
+                nullable: false,
+              });
+              tvp.columns.add("sector", sql.VarChar(50), { nullable: true });
+              tvp.columns.add("telefono", sql.VarChar(20), { nullable: true });
+              tvp.columns.add("correo", sql.VarChar(50), { nullable: true });
+              tvp.columns.add("tramo", sql.VarChar(10), { nullable: false });
+              tvp.columns.add("genero", sql.VarChar(20), { nullable: true });
+              tvp.columns.add("indigena", sql.VarChar(20), { nullable: true });
+              tvp.columns.add("nacionalidad", sql.VarChar(30), {
+                nullable: true,
+              });
+              tvp.columns.add("folio", sql.VarChar(20), { nullable: false });
+              tvp.columns.add("fecha_nacimiento", sql.DateTime2(7), {
+                nullable: true,
+              });
+              tvp.columns.add("fecha_calificacion", sql.DateTime2(7), {
+                nullable: true,
+              });
+              tvp.columns.add("fecha_encuesta", sql.DateTime2(7), {
+                nullable: true,
+              });
+              tvp.columns.add("fecha_modificacion", sql.DateTime2(7), {
+                nullable: true,
+              });
+
+              // Insert test data into TVP
+              for (const citizen of testChunk) {
+                const rutInt = parseInt(citizen.rut, 10);
+                if (isNaN(rutInt)) continue;
+
+                // Ensure required fields have values
+                if (
+                  !citizen.dv ||
+                  !citizen.nombres_rsh ||
+                  !citizen.apellidos_rsh ||
+                  !citizen.direccion ||
+                  !citizen.tramo ||
+                  !citizen.folio
+                )
+                  continue;
+
+                try {
+                  // Add row to TVP
+                  tvp.rows.add(
+                    rutInt,
+                    citizen.dv,
+                    citizen.nombres_rsh,
+                    citizen.apellidos_rsh,
+                    citizen.direccion,
+                    citizen.sector || null,
+                    citizen.telefono || null,
+                    citizen.correo || null,
+                    citizen.tramo,
+                    citizen.genero || null,
+                    citizen.indigena || null,
+                    citizen.nacionalidad || null,
+                    citizen.folio,
+                    citizen.fecha_nacimiento || null,
+                    citizen.fecha_calificacion || null,
+                    citizen.fecha_encuesta || null,
+                    citizen.fecha_modificacion || null,
+                  );
+                } catch (rowError) {
+                  console.error(`Error en RUT ${citizen.rut}:`, rowError);
+                  throw rowError;
+                }
+              }
+
+              // Execute the stored procedure with the TVP
+              testRequest.input("RSHData", tvp);
+              await testRequest.execute(`${procSchemaName}.sp_MergeRSHBatch`);
+            } catch (testErr) {
+              console.error("Error en prueba inicial:", testErr);
+              throw testErr;
+            }
+          }
+
+          // Continue with the regular processing for all chunks
+          try {
+            const batchRequest = new sql.Request(transaction);
+
+            // Create a TVP (Table-Valued Parameter)
+            const tvp = new sql.Table();
+
+            // Define the TVP structure to match RSHTableType
+            tvp.columns.add("rut", sql.Int, { nullable: false });
+            tvp.columns.add("dv", sql.Char(1), { nullable: false });
+            tvp.columns.add("nombres_rsh", sql.VarChar(50), {
+              nullable: false,
+            });
+            tvp.columns.add("apellidos_rsh", sql.VarChar(50), {
+              nullable: false,
+            });
+            tvp.columns.add("direccion", sql.VarChar(200), { nullable: false });
+            tvp.columns.add("sector", sql.VarChar(50), { nullable: true });
+            tvp.columns.add("telefono", sql.VarChar(20), { nullable: true });
+            tvp.columns.add("correo", sql.VarChar(50), { nullable: true });
+            tvp.columns.add("tramo", sql.VarChar(10), { nullable: false });
+            tvp.columns.add("genero", sql.VarChar(20), { nullable: true });
+            tvp.columns.add("indigena", sql.VarChar(20), { nullable: true });
+            tvp.columns.add("nacionalidad", sql.VarChar(30), {
+              nullable: true,
+            });
+            tvp.columns.add("folio", sql.VarChar(20), { nullable: false });
+            tvp.columns.add("fecha_nacimiento", sql.DateTime2(7), {
+              nullable: true,
+            });
+            tvp.columns.add("fecha_calificacion", sql.DateTime2(7), {
+              nullable: true,
+            });
+            tvp.columns.add("fecha_encuesta", sql.DateTime2(7), {
+              nullable: true,
+            });
+            tvp.columns.add("fecha_modificacion", sql.DateTime2(7), {
+              nullable: true,
+            });
+
+            // Build batch insert for all records in the chunk
+            let insertCount = 0;
+            for (const citizen of currentChunk) {
+              const rutInt = parseInt(citizen.rut, 10);
+              if (isNaN(rutInt)) continue;
+
+              // Ensure required fields have values
+              if (
+                !citizen.dv ||
+                !citizen.nombres_rsh ||
+                !citizen.apellidos_rsh ||
+                !citizen.direccion ||
+                !citizen.tramo ||
+                !citizen.folio
+              )
+                continue;
+
+              try {
+                // Add row to TVP
+                tvp.rows.add(
+                  rutInt,
+                  citizen.dv,
+                  citizen.nombres_rsh,
+                  citizen.apellidos_rsh,
+                  citizen.direccion,
+                  citizen.sector || null,
+                  citizen.telefono || null,
+                  citizen.correo || null,
+                  citizen.tramo,
+                  citizen.genero || null,
+                  citizen.indigena || null,
+                  citizen.nacionalidad || null,
+                  citizen.folio,
+                  citizen.fecha_nacimiento || null,
+                  citizen.fecha_calificacion || null,
+                  citizen.fecha_encuesta || null,
+                  citizen.fecha_modificacion || null,
+                );
+                insertCount++;
+              } catch (rowError) {
+                console.error(`Error en RUT ${citizen.rut}:`, rowError);
+                throw rowError;
+              }
+            }
+
+            // If we have valid records, execute the stored procedure
+            if (insertCount > 0) {
+              batchRequest.input("RSHData", tvp);
+              await batchRequest.execute(`${procSchemaName}.sp_MergeRSHBatch`);
+              console.log(
+                `Lote ${chunkIndex + 1} completado: ${insertCount} registros`,
+              );
+            }
+          } catch (spError) {
+            console.error("Error en procesamiento de lote:", spError);
+            throw spError;
+          }
+        }
+
+        // Update rsh_info table
+        console.log("Actualizando tabla rsh_info...");
+        await transaction.request().query("DELETE FROM rsh_info");
+        await transaction
+          .request()
+          .query("INSERT INTO rsh_info DEFAULT VALUES");
+
+        // Commit the transaction
+        await transaction.commit();
+        const end = new Date();
+        const elapsedTime = end.getTime() - start.getTime();
+        const seconds = Math.floor(elapsedTime / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        console.log(
+          `Importación completada en ${minutes > 0 ? `${minutes}m ` : ""}${remainingSeconds}s (${elapsedTime}ms)`,
+        );
+      } catch (error) {
+        console.error("Error en transacción:", error);
+
+        // Check for permission-related errors
+        const errorMessage =
+          error instanceof Error ? error.message : "Error desconocido";
+        const isPermissionError =
+          errorMessage.includes("permission") ||
+          errorMessage.includes("privilege") ||
+          errorMessage.includes("access");
+
+        if (isPermissionError) {
+          console.error("Error de permisos en la base de datos");
+          return {
+            success: false,
+            message:
+              "Error de permisos en la base de datos. Contacte al administrador.",
+          };
+        }
+
+        try {
+          await transaction.rollback();
+          console.log("Transacción revertida");
+        } catch (rollbackError) {
+          console.error("Error al revertir transacción:", rollbackError);
+        }
+        throw error;
+      }
     }
 
-    // Actualizar metadatos
-
-    await sql`DELETE FROM rsh_info`;
-    await sql` INSERT INTO rsh_info DEFAULT VALUES `;
+    await logAction("importar", "actualizó", "RSH");
 
     revalidatePath("/dashboard/rsh");
 

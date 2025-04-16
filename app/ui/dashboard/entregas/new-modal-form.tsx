@@ -1,51 +1,44 @@
 "use client";
 import { toast } from "sonner";
-import CampaignDropdown from "../campañas/campaign-dropdown";
 import Input from "../campañas/new-campaign-input";
 import { SubmitButton } from "../submit-button";
-import { useState, useEffect } from "react";
-import { Campaign, RSH } from "@/app/lib/definitions";
+import { useState } from "react";
+import { Campaign } from "@/app/lib/definitions";
 import { createEntrega } from "@/app/lib/actions/entregas";
 import { useSearchParams, useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 
+// Update the props type to include userId
 type NewModalFormProps = {
   activeCampaigns?: Campaign[];
-  data: RSH[];
-};
-
-export type FormField = {
-  id: string;
-  campaignName: string;
-  detail: string;
-  code: string;
+  rut: string;
+  userId: string; // Add this new prop
 };
 
 export default function NewModalForm({
   activeCampaigns,
-  data,
+  rut,
+  userId, // Receive userId as a prop
 }: NewModalFormProps) {
-  const rut = data[0].rut;
   const router = useRouter();
-  const [id_usuario, setIdUsuario] = useState("");
+  // Remove the state for idUsuario since we're getting it from props
   const [observaciones, setObservaciones] = useState("");
-  const [formFields, setFormFields] = useState<FormField[]>([
-    { id: "", campaignName: "", detail: "", code: "" },
-  ]);
 
-  useEffect(() => {
-    try {
-      const userSession = localStorage.getItem("userSession");
-      if (userSession) {
-        const userData = JSON.parse(userSession);
-        setIdUsuario(userData.id_usuario);
-      } else {
-        toast.error("No se encontró sesión de usuario");
-      }
-    } catch (error) {
-      console.error("Error getting user session:", error);
-      toast.error("Error al obtener la sesión de usuario");
+  // Initialize selectedCampaigns with a lazy initializer function
+  const [selectedCampaigns, setSelectedCampaigns] = useState<{
+    [campaignId: string]: { selected: boolean; detail: string };
+  }>(() => {
+    if (activeCampaigns && activeCampaigns.length > 0) {
+      return activeCampaigns.reduce(
+        (acc, campaign) => {
+          acc[campaign.id] = { selected: false, detail: "" };
+          return acc;
+        },
+        {} as { [key: string]: { selected: boolean; detail: string } },
+      );
     }
-  }, []);
+    return {};
+  });
 
   const searchParams = useSearchParams();
 
@@ -55,40 +48,78 @@ export default function NewModalForm({
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
-  const dropdownCampaigns = activeCampaigns?.map((campaign) => ({
-    id: campaign.id,
-    name: campaign.nombre,
-    type: campaign.tipo_dato,
-    code: campaign.descripcion,
-  }));
-
   // Button handlers
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
-  const createEntregaWithId = createEntrega.bind(null, id_usuario);
+  // Update this line to use the userId prop directly
+  const createEntregaWithId = createEntrega.bind(null, userId);
+
+  const handleCheckboxChange = (campaignId: string) => {
+    setSelectedCampaigns((prev) => ({
+      ...prev,
+      [campaignId]: {
+        ...prev[campaignId],
+        selected: !prev[campaignId].selected,
+      },
+    }));
+  };
+
+  const handleDetailChange = (campaignId: string, value: string) => {
+    setSelectedCampaigns((prev) => ({
+      ...prev,
+      [campaignId]: {
+        ...prev[campaignId],
+        detail: value,
+      },
+    }));
+  };
 
   const formAction = async (formData: FormData) => {
-    // e.preventDefault();
     setIsLoading(true);
     setIsDisabled(true);
 
-    if (formFields[0].campaignName === "") {
+    // Convert selectedCampaigns to formFields format
+    const campaignsToSubmit = Object.entries(selectedCampaigns)
+      .filter(
+        ([, value]: [string, { selected: boolean; detail: string }]) =>
+          value.selected,
+      )
+      .map(([id, value]) => {
+        const campaign = activeCampaigns?.find(
+          (campaign) => campaign.id === id,
+        );
+        return {
+          id,
+          campaignName: campaign?.nombre_campaña || "",
+          detail: value.detail,
+          code: campaign?.code || "",
+        };
+      });
+
+    if (campaignsToSubmit.length === 0) {
       toast.error("Debe seleccionar al menos una campaña");
+      setIsLoading(false);
+      setIsDisabled(false);
       return;
     }
-    formFields.forEach((item) => {
-      if (item.campaignName === "" || item.detail === "") {
-        toast.error("Los campos 'Campaña' y 'Detalle' son obligatorios");
+
+    for (const campaign of campaignsToSubmit) {
+      if (campaign.detail.toString().trim() === "") {
+        toast.error(
+          `Debe ingresar un detalle para la campaña "${campaign.campaignName}"`,
+        );
+        setIsLoading(false);
+        setIsDisabled(false);
         return;
       }
-    });
+    }
 
-    formData.append("campaigns", JSON.stringify(formFields));
+    formData.append("campaigns", JSON.stringify(campaignsToSubmit));
     formData.append("rut", rut.toString());
-    // formData.append("id_usuario", id_usuario);
     formData.append("observaciones", observaciones);
 
+    // Rest of the formAction remains the same
     toast.promise(
       createEntregaWithId(formData).then((response) => {
         if (!response.success) {
@@ -115,52 +146,138 @@ export default function NewModalForm({
     );
   };
 
-  const handleFieldChange = (
-    index: number,
-    field: keyof FormField,
-    value: string,
-  ) => {
-    const newFormFields = [...formFields];
-    newFormFields[index][field] = value;
-    setFormFields(newFormFields);
-  };
+  // Add this function to check if form is valid
+  const isFormValid = () => {
+    // Check if any campaigns are selected
+    const selectedCount = Object.values(selectedCampaigns).filter(
+      (v) => v.selected,
+    ).length;
 
-  const addFormField = () => {
-    setFormFields([
-      ...formFields,
-      { id: "", campaignName: "", detail: "", code: "" },
-    ]);
-  };
-  const removeFormField = () => {
-    setFormFields(formFields.filter((_, i) => i !== formFields.length - 1));
+    if (selectedCount === 0) return false;
+
+    // Check if all selected campaigns have details
+    const hasEmptyDetails = Object.entries(selectedCampaigns)
+      .filter(
+        ([, value]: [string, { selected: boolean; detail: string }]) =>
+          value.selected,
+      )
+      .some(
+        ([, value]: [string, { selected: boolean; detail: string }]) =>
+          value.detail.trim() === "",
+      );
+
+    return !hasEmptyDetails;
   };
 
   return (
-    <form action={formAction} className="flex flex-col gap-5 pt-2">
-      {formFields.map((field, index) => (
-        <div key={index} className="flex gap-3">
-          <CampaignDropdown
-            label="Campaña"
-            name="campaignName"
-            campaignsList={dropdownCampaigns}
-            campaignName={field.campaignName}
-            readOnly
-            setCampaignName={(field, value) =>
-              handleFieldChange(index, field, value)
-            }
-          />
-          <div className="grow">
-            <Input
-              placeHolder="Código, Talla, Monto..."
-              label="Detalle"
-              type="text"
-              nombre={`descripcion-${index}`}
-              value={field.detail}
-              setData={(value) => handleFieldChange(index, "detail", value)}
-            />
+    <form action={formAction} className="flex select-none flex-col gap-5 pt-2">
+      <div className="scrollbar-gutter-stable max-h-[400px] overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-4 pr-1">
+        <div className="justify- mb-4 flex items-baseline justify-between">
+          <h3 className="text-sm font-medium text-slate-700">
+            Beneficios seleccionados:
+          </h3>
+          <div className="text-xs text-slate-500">
+            {Object.values(selectedCampaigns).filter((v) => v.selected).length}{" "}
+            seleccionadas
           </div>
         </div>
-      ))}
+
+        <div className="space-y-3">
+          {activeCampaigns?.map((campaign) => (
+            <div
+              key={campaign.id}
+              className={`overflow-hidden rounded-lg border shadow-sm transition-all ${
+                selectedCampaigns[campaign.id]?.selected
+                  ? "border-blue-300 bg-white ring-blue-300"
+                  : "border-slate-200 bg-white hover:border-slate-300"
+              }`}
+            >
+              <div
+                className="flex cursor-pointer items-start gap-3 p-3"
+                onClick={() => handleCheckboxChange(campaign.id)}
+              >
+                <div
+                  className={`flex h-5 w-5 items-center justify-center rounded-md border ${
+                    selectedCampaigns[campaign.id]?.selected
+                      ? "border-blue-500 bg-blue-500"
+                      : "border-slate-300 bg-white"
+                  }`}
+                >
+                  {selectedCampaigns[campaign.id]?.selected && (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-3.5 w-3.5 text-white"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <label
+                      htmlFor={`campaign-${campaign.id}`}
+                      className="cursor-pointer text-sm font-medium text-slate-700"
+                    >
+                      {campaign.nombre_campaña}
+                    </label>
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+                      {campaign.tipo_dato}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <AnimatePresence>
+                {selectedCampaigns[campaign.id]?.selected && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{
+                      duration: 0.3,
+                      ease: "easeInOut",
+                      opacity: { duration: 0.2 },
+                    }}
+                    className="overflow-hidden"
+                    onAnimationStart={() => {
+                      // Force scrollbar recalculation during animation
+                      const container = document.querySelector(
+                        ".scrollbar-gutter-stable",
+                      );
+                      if (container) container.scrollTop = container.scrollTop;
+                    }}
+                  >
+                    <div className="border-t border-slate-100 bg-slate-50 p-3">
+                      <Input
+                        placeHolder={`Ingrese ${campaign.tipo_dato.toLowerCase()}...`}
+                        type="text"
+                        nombre={`detail-${campaign.id}`}
+                        value={selectedCampaigns[campaign.id]?.detail || ""}
+                        setData={(value) =>
+                          handleDetailChange(campaign.id, value)
+                        }
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
+
+          {(!activeCampaigns || activeCampaigns.length === 0) && (
+            <div className="flex h-24 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500">
+              No hay campañas activas disponibles
+            </div>
+          )}
+        </div>
+      </div>
+
       <Input
         placeHolder="Observaciones..."
         label="Observaciones"
@@ -169,33 +286,12 @@ export default function NewModalForm({
         value={observaciones}
         setData={setObservaciones}
       />
-      <div className="mt-4 flex gap-4">
-        <FormFieldButton action={addFormField}>Agregar Campaña</FormFieldButton>
-        <FormFieldButton action={removeFormField}>
-          Eliminar Campaña
-        </FormFieldButton>
-      </div>
-      <SubmitButton isDisabled={isDisabled} setIsDisabled={setIsDisabled}>
-        {isLoading ? "Guardando..." : "Guardar"}
-      </SubmitButton>
-    </form>
-  );
-}
 
-function FormFieldButton({
-  action,
-  children,
-}: {
-  action: () => void;
-  children: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={action}
-      className="h-10 flex-1 grow rounded-lg border border-slate-300 bg-blue-500 px-4 text-sm text-white transition-colors hover:bg-blue-600"
-    >
-      {children}
-    </button>
+      <div className="mt-2 flex">
+        <SubmitButton isDisabled={isDisabled || !isFormValid()}>
+          {isLoading ? "Guardando..." : "Guardar"}
+        </SubmitButton>
+      </div>
+    </form>
   );
 }

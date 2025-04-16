@@ -1,36 +1,38 @@
+export type Activity = {
+  // id: string;
+  accion: string;
+  comentario_accion: string;
+  comentario_nombre?: string;
+  fecha: string;
+  id_usuario: string;
+  nombre_usuario: string;
+  id_registro_mod?: string;
+  pages?: number; // total de paginas
+  total?: number; // total de registros
+};
+
 export type Campaign = {
   id: string;
-  nombre: string;
+  nombre_campaña: string;
   fecha_inicio: Date;
   fecha_termino: Date;
-  descripcion: string;
-  stock: number;
-  estado: "En curso" | "Finalizado";
   entregas: number;
+  code: string;
+  stock: number;
   tipo_dato: string;
   tramo: string;
+  estado: "En curso" | "Finalizado";
   discapacidad: string;
   adulto_mayor: string;
   pages?: number; // total de paginas
   total?: number; // total de registros
 };
 
-export type Activity = {
-  id: string;
-  id_mod?: string;
-  nombre: string;
-  accion: string;
-  dato: string;
-  fecha: Date;
-  pages?: number; // total de paginas
-  total?: number; // total de registros
-};
-
-//Social
+// Social (Entregas + RSH)
 export type SocialAid = {
   folio: string;
-  nombres: string;
-  apellidos: string;
+  nombres_rsh: string;
+  apellidos_rsh: string;
   rut: string;
   beneficio?: string;
   fecha_entrega: Date;
@@ -40,7 +42,7 @@ export type SocialAid = {
 
 export type SocialAidTableRow = {
   folio: string;
-  nombre_campaña: string;
+  nombre_campaña?: string;
   detalle: string;
   estado_documentos: string;
   nombre_usuario: string;
@@ -75,8 +77,8 @@ export type SocialFiles = {
 export type RSHTableData = {
   rut: number;
   dv: string;
-  nombres: string;
-  apellidos: string;
+  nombres_rsh: string;
+  apellidos_rsh: string;
   direccion: string;
   tramo: number;
   ultima_entrega: Date;
@@ -85,13 +87,13 @@ export type RSHTableData = {
 };
 
 export type RSHInfo = {
-  ultima_actualizacion: Date;
+  ultima_actualizacion: Date | null;
   total_registros: number;
 };
 
 export type RSH = {
-  nombres: string;
-  apellidos: string;
+  nombres_rsh: string;
+  apellidos_rsh: string;
   rut: number;
   direccion: string;
   sector: string;
@@ -112,4 +114,12 @@ export type RSH = {
   total?: number; // total de registros
 
   discapacidad: string;
+};
+
+export type UserData = {
+  id: string;
+  nombre_usuario: string;
+  correo: string;
+  cargo: string;
+  rol: string;
 };

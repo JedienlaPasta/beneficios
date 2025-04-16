@@ -15,7 +15,9 @@ export default function Breadcrumbs() {
       if (path === "campanas") return [path, "Campañas"];
       if (path === "entregas") return [path, "Entregas"];
       if (path === "rsh") return [path, "RSH"];
-      if (path === "registros") return [path, "Registros"];
+      if (path === "auditoria") return [path, "Auditoría"];
+      if (path === "usuarios") return [path, "Usuarios"];
+      if (path === "perfil") return [path, "Perfil"];
       else return [path, path];
     });
     return breadCrumbs;
@@ -34,7 +36,7 @@ export default function Breadcrumbs() {
   return (
     <nav
       aria-label="breadcrumb"
-      className="flex h-full items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center"
+      className="flex h-full items-center justify-between"
     >
       <ol className="flex text-sm text-gray-400">
         {breadCrumbs.map((item, index) => (

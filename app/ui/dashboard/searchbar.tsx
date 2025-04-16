@@ -20,8 +20,8 @@ export default function SearchBar({ placeholder }: SearchBarProps) {
     } else {
       params.delete("query");
     }
-    replace(`${pathname}?${params.toString()}`);
-  }, 500);
+    replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }, 300);
 
   return (
     <div className="relative">

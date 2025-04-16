@@ -3,11 +3,13 @@ import { RiDashboardFill } from "react-icons/ri";
 import { FaBoxesStacked } from "react-icons/fa6";
 import { FaBoxOpen } from "react-icons/fa6";
 import { FaHouseChimney } from "react-icons/fa6";
-import { FaFileExcel } from "react-icons/fa6";
+import { FaFileLines } from "react-icons/fa6";
+import { FaUserGear } from "react-icons/fa6";
 
 import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import RoleGuard from "../auth/role-guard";
 
 const links = [
   {
@@ -32,9 +34,19 @@ const links = [
     description: "Registro Social de Hogares",
   },
   {
-    nombre: "Registros",
-    href: "/dashboard/registros",
-    icon: <FaFileExcel className="h-5 w-5" />,
+    nombre: "Auditoría",
+    href: "/dashboard/auditoria",
+    icon: <FaFileLines className="h-5 w-5" />,
+  },
+  {
+    nombre: "Usuarios",
+    href: "/dashboard/usuarios",
+    icon: <FaUserGear className="h-5 w-5" />,
+  },
+  {
+    nombre: "Prueba",
+    href: "/dashboard/prueba",
+    icon: <FaUserGear className="h-5 w-5" />,
   },
 ];
 
@@ -53,11 +65,52 @@ export default function NavLinks({ setSidenavOpen }: NavLinksProps) {
       {links.map((link) => {
         const isActive = parentPathname === link.href;
 
+        // For admin-only links
+        if (link.nombre === "Auditoría" || link.nombre === "Usuarios") {
+          return (
+            <RoleGuard key={link.nombre} allowedRoles={["Administrador"]}>
+              <Link
+                onClick={() => setSidenavOpen(false)}
+                href={link.href}
+                prefetch={true}
+                className={clsx(
+                  "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                  {
+                    "bg-gradient-to-r from-blue-500 to-blue-600 text-white":
+                      isActive,
+                    "text-slate-400 hover:bg-slate-800/70 hover:text-white hover:shadow-sm":
+                      !isActive,
+                  },
+                )}
+              >
+                <span
+                  className={clsx("transition-all duration-200", {
+                    "scale-110 transform text-white": isActive,
+                    "text-slate-400 group-hover:text-white": !isActive,
+                  })}
+                >
+                  {link.icon}
+                </span>
+                <span
+                  className={clsx({
+                    "text-white": isActive,
+                    "text-slate-400 group-hover:text-white": !isActive,
+                  })}
+                >
+                  {link.nombre}
+                </span>
+              </Link>
+            </RoleGuard>
+          );
+        }
+
+        // For regular links visible to all users
         return (
           <Link
             onClick={() => setSidenavOpen(false)}
             key={link.nombre}
             href={link.href}
+            prefetch={true}
             className={clsx(
               "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
               {
@@ -84,13 +137,6 @@ export default function NavLinks({ setSidenavOpen }: NavLinksProps) {
             >
               {link.nombre}
             </span>
-
-            {link.description && (
-              <div className="absolute left-full z-50 ml-3 hidden text-nowrap rounded-lg bg-slate-700 px-3 py-2 text-xs font-medium text-white opacity-0 shadow-lg transition-all duration-200 group-hover:opacity-100 lg:group-hover:block">
-                {link.description}
-                <div className="absolute -left-1 top-1/2 z-10 h-2 w-2 -translate-y-1/2 rotate-45 bg-slate-700" />
-              </div>
-            )}
           </Link>
         );
       })}

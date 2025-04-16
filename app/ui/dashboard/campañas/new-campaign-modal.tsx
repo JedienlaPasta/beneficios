@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { createCampaign } from "@/app/lib/actions/campaña";
@@ -12,7 +12,7 @@ import DataTypeCards from "./[id]/update/data-type-cards";
 import RequirementsCard from "./[id]/update/requirements-cards";
 import dayjs from "dayjs";
 import CustomAntdDatePicker from "@/app/ui/dashboard/datepicker";
-import { campaignsList } from "@/app/data/data";
+import { campaignsList } from "@/app/lib/data/static-data";
 
 export type FormState = {
   success?: boolean;
@@ -67,10 +67,15 @@ export default function NewCampaignModal() {
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
-  useEffect(() => {
-    console.log("isLoading: " + isLoading);
-    console.log("isDisabled: " + isDisabled);
-  }, [isLoading, isDisabled]);
+  // Form validation
+  const isFormValid = () => {
+    return (
+      campaignName.trim() !== "" &&
+      stock.trim() !== "" &&
+      code.trim() !== "" &&
+      date !== null
+    );
+  };
 
   const formAction = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -80,36 +85,30 @@ export default function NewCampaignModal() {
     const myFormData = new FormData();
     myFormData.append("nombre", campaignName);
     myFormData.append("fechaTermino", date?.toString() || "");
-    myFormData.append("descripcion", code.toString() || ""); // Cambiar "descripcion x code  aqui, en actions y en db"
+    myFormData.append("code", code.toString() || "");
     myFormData.append("stock", stock.toString() || (0).toString());
     myFormData.append("tipoDato", fieldType);
     myFormData.append("tramo", criteria.tramo.toString());
     myFormData.append("discapacidad", criteria.discapacidad.toString());
     myFormData.append("adultoMayor", criteria.adultoMayor.toString());
 
-    toast.promise(
-      createCampaign(myFormData).then((response) => {
-        if (!response.success) {
-          throw new Error(response.message);
-        }
-        return response;
-      }),
-      {
-        loading: "Guardando...",
-        success: (response) => {
-          setIsLoading(false);
-          setTimeout(() => {
-            closeModal();
-          }, 500);
-          return response.message;
-        },
-        error: (err) => {
-          setIsDisabled(false);
-          setIsLoading(false);
-          return err.message;
-        },
-      },
-    );
+    const toastId = toast.loading("Guardando...");
+    try {
+      const response = await createCampaign(myFormData);
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+
+      toast.success(response.message, { id: toastId });
+      setIsLoading(false);
+      setTimeout(closeModal, 300);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Error desconocido";
+      toast.error(message, { id: toastId });
+      setIsLoading(false);
+      setIsDisabled(false);
+    }
   };
 
   return (
@@ -207,7 +206,7 @@ export default function NewCampaignModal() {
             </RequirementsCard>
           </div>
         </div>
-        <SubmitButton isDisabled={isDisabled}>
+        <SubmitButton isDisabled={isDisabled || !isFormValid()}>
           {isLoading ? "Guardando..." : "Guardar"}
         </SubmitButton>
       </form>

@@ -1,6 +1,8 @@
 "use client";
-import { useState } from "react";
+import { loginAction } from "@/app/lib/actions/auth";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 import { SubmitButton } from "./dashboard/submit-button";
 
 export default function LoginForm() {
@@ -10,88 +12,78 @@ export default function LoginForm() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const formAction = async (formData: FormData) => {
     setIsDisabled(true);
-    setError("");
 
+    const toastId = toast.loading("Iniciando sesión...");
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        // Store user session in localStorage for client-side access
-        localStorage.setItem("userSession", JSON.stringify(data.user));
-
-        // Set a cookie for server-side session validation
-        document.cookie = `userSession=${encodeURIComponent(JSON.stringify(data.user))};path=/;max-age=86400`;
-
-        router.push("/dashboard");
-      } else {
-        setError(data.error || "Error al iniciar sesión");
-        setIsDisabled(false);
+      const response = await loginAction(formData);
+      if (!response.success) {
+        throw new Error(response.error);
       }
+
+      toast.success(response.message, { id: toastId });
+      router.push("/dashboard");
     } catch (error) {
-      console.error("Error durante el login:", error);
-      setError("Error de conexión");
+      const message =
+        error instanceof Error ? error.message : "Error al iniciar sesión";
+      toast.error(message, { id: toastId });
       setIsDisabled(false);
+      setError(message);
     }
   };
 
   return (
-    <form className="flex flex-col gap-10" onSubmit={handleSubmit}>
-      {error && (
-        <div className="rounded-md bg-red-50 p-3 text-sm text-red-500">
-          {error}
-        </div>
-      )}
-      <div className="relative top-5 flex h-10 items-center gap-3 rounded-md border border-slate-300 bg-white px-4 shadow-sm transition-all focus-within:border-blue-500">
+    <form action={formAction} className="flex flex-col gap-4">
+      {/* Tus campos de formulario */}
+      <div>
         <label
           htmlFor="email"
-          className="absolute left-0 top-[-1.25rem] text-xs text-slate-400"
+          className={`block text-xs ${error ? "text-red-500" : "text-slate-400"}`}
         >
-          Correo
+          Correo electrónico
         </label>
         <input
-          id="email"
-          name="email"
           type="email"
+          id="email"
+          name="correo"
           autoComplete="email"
           required
+          placeholder="tu@empresa.com"
+          className={`mt-1 block h-11 w-full rounded-md border px-3 py-2 text-sm outline-none ${error ? "border-red-500" : "border-gray-300 focus:border-blue-400"}`}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="tu@empresa.com"
-          className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
         />
       </div>
-      <div className="relative top-5 flex h-10 items-center gap-3 rounded-md border border-slate-300 bg-white px-4 shadow-sm transition-all focus-within:border-blue-500">
+
+      <div>
         <label
           htmlFor="password"
-          className="absolute left-0 top-[-1.25rem] text-xs text-slate-400"
+          className={`block text-xs ${error ? "text-red-500" : "text-slate-400"}`}
         >
           Contraseña
         </label>
         <input
-          id="password"
-          name="password"
           type="password"
+          id="password"
+          name="contraseña"
           autoComplete="current-password"
           required
+          placeholder="Contraseña"
+          className={`mt-1 block h-11 w-full rounded-md border px-3 py-2 text-sm outline-none ${error ? "border-red-500" : "border-gray-300 focus:border-blue-400"}`}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Contraseña"
-          className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
         />
       </div>
-      <div className="mt-3 flex">
-        <SubmitButton isDisabled={isDisabled} setIsDisabled={setIsDisabled}>
+      {error && (
+        <div className="relative">
+          <div className="absolute left-0 top-0 text-sm text-red-500">
+            {error}
+          </div>
+        </div>
+      )}
+      <div className="mt-2 flex">
+        <SubmitButton isDisabled={isDisabled || !email || !password}>
           {isDisabled ? "Verificando..." : "Iniciar sesión"}
         </SubmitButton>
       </div>
