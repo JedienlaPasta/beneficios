@@ -62,7 +62,6 @@ export default function CampaignDropdown({
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!setCampaign) return;
     setCampaign(e.target.value);
-    console.log("first");
   };
 
   const handleCampaignSelection = (campaign: CampaignList) => {
@@ -70,9 +69,9 @@ export default function CampaignDropdown({
     setCampaignName("campaignName", campaign.name);
     setCampaignName("id", campaign.id);
     setCampaignName("code", campaign.code);
-    console.log(
-      `Selected campaign: ${campaign.name}, ID: ${campaign.id}, CODE: ${campaign.code}`,
-    );
+    // console.log(
+    //   `Selected campaign: ${campaign.name}, ID: ${campaign.id}, CODE: ${campaign.code}`,
+    // );
   };
 
   return (

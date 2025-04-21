@@ -80,7 +80,6 @@ export async function changePassword(userId: string, formData: FormData) {
     );
 
     if (!comparePassword) {
-      console.log("first");
       return { success: false, message: "Contraseña actual incorrecta" };
     }
 

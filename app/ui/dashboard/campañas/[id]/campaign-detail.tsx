@@ -61,7 +61,7 @@ export default async function CampaignDetail({ id }: { id: string }) {
               <p className="text-sm font-medium text-slate-500">{tipo_dato}</p>
             </div>
           </div>
-          <RoleGuard allowedRoles={["Administrador"]}>
+          <RoleGuard allowedRoles={["Administrador", "Supervisor"]}>
             <CampaignOptionsMenu id={id} />
           </RoleGuard>
         </div>

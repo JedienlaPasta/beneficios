@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { RiCloseLine } from "react-icons/ri";
@@ -66,11 +66,6 @@ export default function ImportXLSXModal({ name }: { name: string }) {
       },
     );
   };
-
-  useEffect(() => {
-    console.log("isLoading: " + isLoading);
-    console.log("isDisabled: " + isDisabled);
-  }, [isLoading, isDisabled]);
 
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();

@@ -7,26 +7,26 @@ type HeatMapTableProps = {
   year: string;
 };
 
+const months = [
+  "Ene",
+  "Feb",
+  "Mar",
+  "Abr",
+  "May",
+  "Jun",
+  "Jul",
+  "Ago",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dic",
+];
+
+const weekDays = ["Lun", "Mar", "Mie", "Jue", "Vie"];
+const boardDays = weekDays.map((day) => <p key={day}>{day}</p>);
+
 export default async function HeatMapTable({ year }: HeatMapTableProps) {
   const entregas = await fetchDailyEntregasCountByYear(year);
-  console.log(year);
-  const weekDays = ["Lun", "Mar", "Mie", "Jue", "Vie"];
-  const boardDays = weekDays.map((day) => <p key={day}>{day}</p>);
-
-  const months = [
-    "Ene",
-    "Feb",
-    "Mar",
-    "Abr",
-    "May",
-    "Jun",
-    "Jul",
-    "Ago",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dic",
-  ];
 
   function calculateThresholds(data: number[]): number[] {
     const sorted = [...data].sort((a, b) => a - b);
@@ -45,8 +45,9 @@ export default async function HeatMapTable({ year }: HeatMapTableProps) {
     counts.length > 0 ? calculateThresholds(counts) : [0, 1, 2, 3];
 
   // days now includes 2025-12-31 thanks to our fix.
-  const days = getDaysBetween("2025-01-01", "2025-12-31");
-  const filteredDays = days.filter((day) => day.year() === 2025);
+  const days = getDaysBetween(`${year}-01-01`, `${year}-12-31`);
+
+  const filteredDays = days.filter((day) => day.year() === Number(year));
 
   // Build weeks array (each week has exactly 5 elements)
   const weeks: Array<JSX.Element[]> = [];
@@ -96,10 +97,32 @@ export default async function HeatMapTable({ year }: HeatMapTableProps) {
     weeks.push(currentWeek);
   }
 
-  console.log(
-    "Last day in filteredDays:",
-    filteredDays.at(-1)?.format("YYYY-MM-DD"),
+  return (
+    <div className="flex w-fit flex-col rounded-xl border border-slate-200 bg-slate-50 p-4">
+      <div className="ml-7 grid grid-cols-12 pb-1 text-xs text-gray-600">
+        {months.map((month) => (
+          <div key={month} className="whitespace-nowrap text-center">
+            {month}
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center justify-center gap-2">
+        <div className="flex flex-col gap-1 text-center text-xs text-gray-600">
+          {boardDays}
+        </div>
+        <div className="grid grid-flow-col grid-rows-5 gap-1">
+          {weeks.flat()}
+        </div>
+      </div>
+    </div>
   );
+}
+
+export function HeatmapTableSkeleton() {
+  const weeks: Array<JSX.Element> = [];
+  for (let i = 0; i < 265; i++) {
+    weeks.push(<BoardCube key={`final-pad-${i}`} count={0} disabled />);
+  }
 
   return (
     <div className="flex w-fit flex-col rounded-xl border border-slate-200 bg-slate-50 p-4">

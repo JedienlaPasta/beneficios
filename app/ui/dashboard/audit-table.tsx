@@ -45,7 +45,7 @@ export default function AuditTable({
 }) {
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
 
-  if (!logs || logs.length === 0) {
+  if (!logs) {
     return (
       <div className="flex flex-col justify-center rounded-b-xl border-t border-gray-200/80 bg-white p-6 text-center">
         <div className="mx-auto mb-2 flex items-center justify-center gap-2 rounded-full bg-amber-100/80 p-2 text-lg text-amber-500">
@@ -77,28 +77,26 @@ export default function AuditTable({
   return (
     <div className="overflow-hidden rounded-b-xl bg-white">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[44rem]">
+        <table className="w-full min-w-[44rem] border-collapse">
           <thead className="border-y border-slate-200/70 bg-slate-50 text-xs font-medium tracking-wider text-slate-600/70">
-            <tr className="grid grid-cols-26">
-              <th className="col-span-8 py-4 pl-10 pr-6 text-left font-normal">
+            <tr className="grid grid-cols-26 items-center gap-8 px-6">
+              <th className="col-span-8 py-4 text-left font-normal">
                 ACTIVIDAD
               </th>
-              <th className="col-span-12 py-4 pr-14 text-right font-normal">
+              <th className="col-span-12 py-4 text-right font-normal">
                 ID REGISTRO MODIFICADO
               </th>
-              <th className="col-span-6 py-4 pr-14 text-right font-normal">
-                FECHA
-              </th>
+              <th className="col-span-6 py-4 text-right font-normal">FECHA</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/30">
             {logs.map((log, index) => (
               <tr
                 key={String(log.id_registro_mod) + index}
-                className="grid cursor-pointer grid-cols-26 items-center text-nowrap text-sm tabular-nums transition-colors hover:bg-slate-200/50"
+                className="grid cursor-pointer grid-cols-26 items-center gap-8 text-nowrap px-6 text-sm tabular-nums transition-colors hover:bg-slate-200/50"
                 onClick={() => setSelectedLog(log)}
               >
-                <td className="col-span-8 flex items-center gap-3 py-4 pl-10 pr-6">
+                <td className="col-span-12 flex items-center gap-3 py-4">
                   <span
                     className={`rounded-xl p-1 text-lg ${getActivityStyle(log.accion).color}`}
                   >
@@ -116,12 +114,12 @@ export default function AuditTable({
                     </span>
                   </div>
                 </td>
-                <td className="col-span-12 py-4 pr-14 text-right text-slate-500">
+                <td className="col-span-8 overflow-hidden text-ellipsis py-4 text-right text-slate-500">
                   <span className="">
                     {log.id_registro_mod || "No disponible"}
                   </span>
                 </td>
-                <td className="col-span-6 py-4 pr-14 text-right text-slate-600">
+                <td className="col-span-6 py-4 text-right text-slate-600">
                   <div className="text-slate-600">
                     {formatDate(new Date(log.fecha))}
                   </div>
@@ -135,7 +133,7 @@ export default function AuditTable({
         </table>
       </div>
 
-      {totalPages > 1 && <Pagination pages={totalPages} />}
+      <Pagination pages={totalPages} />
 
       {/* Details Modal */}
       {selectedLog && (

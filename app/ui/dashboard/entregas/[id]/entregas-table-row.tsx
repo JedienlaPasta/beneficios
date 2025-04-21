@@ -26,15 +26,15 @@ export default function TableRow({ item }: { item: SocialAidTableRow }) {
   return (
     <tr
       onClick={handleClick}
-      className="grid cursor-pointer grid-cols-26 text-nowrap text-sm tabular-nums transition-colors hover:bg-slate-200/50"
+      className="grid cursor-pointer grid-cols-26 gap-8 text-nowrap text-sm tabular-nums transition-colors hover:bg-slate-200/50"
     >
-      <td className="col-span-5 flex min-h-12 items-center px-10 text-slate-600">
+      <td className="col-span-7 flex min-h-12 items-center px-10 text-slate-600">
         {folio}
       </td>
-      <td className="col-span-13 flex items-center py-3 text-slate-600">
+      <td className="col-span-10 flex items-center py-3 text-slate-600">
         {nombre_usuario}
       </td>
-      <td className="col-span-4 flex h-11 min-h-11 items-center self-center text-slate-600">
+      <td className="col-span-5 flex h-11 min-h-11 items-center self-center text-slate-600">
         <div
           className={`flex w-fit items-center gap-2 rounded-md px-2 py-1 ${estadoTextColor}`}
         >
