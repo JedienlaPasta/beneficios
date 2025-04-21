@@ -59,16 +59,10 @@ const CreateEntrega = CreateEntregaFormSchema;
 
 export const createEntrega = async (id: string, formData: FormData) => {
   try {
-    console.log("Starting createEntrega function");
     const { rut, observaciones, campaigns } = CreateEntrega.parse({
       rut: formData.get("rut"),
       observaciones: formData.get("observaciones"),
       campaigns: JSON.parse(formData.get("campaigns") as string),
-    });
-    console.log("Parsed form data:", {
-      rut,
-      observaciones,
-      campaignsCount: campaigns.length,
     });
 
     let code;
@@ -126,7 +120,6 @@ export const createEntrega = async (id: string, formData: FormData) => {
       }
 
       folio = folioResult.recordset[0].folio;
-      console.log("Generated folio:", folio);
 
       // Insert campaign details and update campaign counts
       if (campaigns.length > 0) {

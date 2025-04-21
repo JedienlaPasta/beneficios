@@ -6,15 +6,6 @@ export default function EntregasTableRow({
   item,
 }: {
   item: {
-    // rut: number;
-    // dv: string;
-    // nombres_rsh: string;
-    // apellidos_rsh: string;
-    // direccion: string;
-    // sector: string;
-    // tramo: number;
-    // ultima_entrega: Date;
-
     rut: string;
     folio: string;
     estado_documentos: string;

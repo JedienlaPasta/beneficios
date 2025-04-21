@@ -1,16 +1,18 @@
 "use client";
 
+import { changePassword } from "@/app/lib/actions/perfil";
 import { useState } from "react";
 import { FiX, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
+import { toast } from "sonner";
 
 type ChangePasswordModalProps = {
   onClose: () => void;
-  // userId: string;
+  userId: string;
 };
 
 export default function ChangePasswordModal({
   onClose,
-  //  userId
+  userId,
 }: ChangePasswordModalProps) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -24,51 +26,32 @@ export default function ChangePasswordModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-
-    // Validate passwords
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      setError("Todos los campos son obligatorios");
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      setError("Las contraseñas nuevas no coinciden");
-      return;
-    }
-
-    if (newPassword.length < 8) {
-      setError("La contraseña debe tener al menos 8 caracteres");
-      return;
-    }
+    // setError("");
 
     setLoading(true);
 
+    const myFormData = new FormData();
+    myFormData.append("currentPassword", currentPassword);
+    myFormData.append("newPassword", newPassword);
+    myFormData.append("confirmPassword", confirmPassword);
+
+    const toastId = toast.loading("Guardando...");
     try {
-      // Here you would call your API to change the password
-      // For example:
-      // const response = await fetch('/api/change-password', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ userId, currentPassword, newPassword })
-      // });
+      const response = await changePassword(userId, myFormData);
+      if (!response.success) {
+        throw new Error(response.message);
+      }
 
-      // if (!response.ok) {
-      //   const data = await response.json();
-      //   throw new Error(data.message || 'Error al cambiar la contraseña');
-      // }
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
+      toast.success(response.message, { id: toastId });
       setSuccess(true);
       setTimeout(() => {
         onClose();
       }, 2000);
-    } catch (err: unknown) {
-      setError(
-        err instanceof Error ? err.message : "Error al cambiar la contraseña",
-      );
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Error desconocido";
+      toast.error(message, { id: toastId });
+      setError(message);
     } finally {
       setLoading(false);
     }

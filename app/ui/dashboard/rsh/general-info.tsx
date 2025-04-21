@@ -46,7 +46,7 @@ export default async function RSHGeneralInfo() {
         {/* Action label */}
         <div className="mt-auto border-t border-slate-100 px-7 py-3">
           <p className="text-sm font-medium text-slate-700 transition-colors duration-300 group-hover:text-blue-600">
-            Nuevo Registro
+            Nuevo Registro - (No disponible)
           </p>
         </div>
       </InfoCardWrapper>

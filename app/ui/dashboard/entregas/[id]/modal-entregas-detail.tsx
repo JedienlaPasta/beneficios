@@ -142,7 +142,7 @@ export default function ModalEntregasDetail({
                       Beneficios Recibidos{" "}
                       {entrega.length > 3 && "(" + entrega.length + ")"}
                     </h3>
-                    <RoleGuard allowedRoles={["Administrador"]}>
+                    <RoleGuard allowedRoles={["Administrador", "Supervisor"]}>
                       <DeleteEntregasButton folio={folio} />
                     </RoleGuard>
                   </div>

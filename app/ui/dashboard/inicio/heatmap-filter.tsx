@@ -1,6 +1,6 @@
 "use client";
 import { getYearsBetween } from "@/app/lib/utils/get-values";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function HeatMapFilter({
   currentYear,
@@ -9,21 +9,20 @@ export default function HeatMapFilter({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pathname = usePathname();
   const selectedYear = searchParams.get("year") || currentYear;
 
   const handleClick = (year: string) => {
     const params = new URLSearchParams(searchParams);
     params.set("year", year);
-    router.replace(`${pathname}?${params.toString()}`);
+    router.replace(`?${params.toString()}`, { scroll: false });
   };
 
   const start = "2025";
-  const end = "2030";
+  const end = currentYear;
   const years = getYearsBetween(start, end);
 
   return (
-    <div className="-mt-1 flex max-h-[11.5rem] min-w-32 max-w-96 shrink-0 flex-col flex-nowrap gap-2 overflow-y-auto px-2 py-1">
+    <div className="-mt-1 flex max-h-[11.5rem] min-w-36 max-w-96 shrink-0 flex-col flex-nowrap gap-2 overflow-y-auto px-2 py-1">
       {years.map((year) => (
         <button
           key={year}

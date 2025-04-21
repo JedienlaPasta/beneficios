@@ -27,7 +27,6 @@ export async function logAction(
     // If userId is not provided, try to get it from the session
     if (!userId) {
       const session = await getSession();
-      console.log("session: " + session?.userId);
       sessionId = String(session?.userId);
 
       // If still no userId, use a default value

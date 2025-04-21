@@ -47,7 +47,6 @@ export default function NewCitizenModal({ name }: { name: string }) {
 
     formData.append("fechaTermino", date?.toString() || "");
     formData.append("descripcion", codigo?.toString() || "");
-    // formAction(formData);
   };
 
   return (

@@ -1,19 +1,11 @@
 "use client";
 import { useState } from "react";
-import {
-  FiBriefcase,
-  FiMail,
-  FiShield,
-  FiUser,
-  FiCamera,
-  FiLock,
-  // FiEdit,
-} from "react-icons/fi";
-import Image from "next/image";
+import { FiBriefcase, FiMail, FiShield, FiUser, FiLock } from "react-icons/fi";
 import ChangePasswordModal from "./change-password-modal";
 
 type UserProfileProps = {
   userData: {
+    id: string;
     nombre_usuario: string;
     correo: string;
     cargo: string;
@@ -24,20 +16,6 @@ type UserProfileProps = {
 
 export default function UserProfile({ userData }: UserProfileProps) {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [profileImage, setProfileImage] = useState<string | null>(
-    userData.profilePicture || null,
-  );
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setProfileImage(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   return (
     <div className="overflow-hidden rounded-xl bg-white shadow-lg">
@@ -45,56 +23,9 @@ export default function UserProfile({ userData }: UserProfileProps) {
       <div className="relative h-40 bg-gradient-to-r from-blue-500 to-indigo-600">
         <div className="absolute -bottom-16 left-8 flex items-end">
           <div className="group relative h-32 w-32 overflow-hidden rounded-full border-4 border-white bg-white shadow-md">
-            {profileImage ? (
-              <div className="relative h-full w-full">
-                <Image
-                  src={profileImage}
-                  alt={userData.nombre_usuario}
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 transition-all duration-200 group-hover:bg-opacity-40">
-                  <label
-                    htmlFor="profile-upload"
-                    className="scale-0 cursor-pointer rounded-lg bg-white px-3 py-2 text-sm font-medium text-slate-800 opacity-0 shadow-md transition-all duration-200 group-hover:scale-100 group-hover:opacity-100"
-                  >
-                    <div className="flex items-center gap-2">
-                      <FiCamera size={16} />
-                      <span>Cambiar</span>
-                    </div>
-                    <input
-                      id="profile-upload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageUpload}
-                    />
-                  </label>
-                </div>
-              </div>
-            ) : (
-              <div className="relative flex h-full w-full items-center justify-center bg-blue-100 text-4xl font-bold text-blue-600">
-                {userData.nombre_usuario.charAt(0)}
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 transition-all duration-200 group-hover:bg-opacity-40">
-                  <label
-                    htmlFor="profile-upload"
-                    className="scale-0 cursor-pointer rounded-lg bg-white px-3 py-2 text-sm font-medium text-slate-800 opacity-0 shadow-md transition-all duration-200 group-hover:scale-100 group-hover:opacity-100"
-                  >
-                    <div className="flex items-center gap-2">
-                      <FiCamera size={16} />
-                      <span>Cambiar</span>
-                    </div>
-                    <input
-                      id="profile-upload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageUpload}
-                    />
-                  </label>
-                </div>
-              </div>
-            )}
+            <div className="relative flex h-full w-full items-center justify-center bg-blue-100 text-4xl font-bold text-blue-600">
+              {userData.nombre_usuario.charAt(0)}
+            </div>
           </div>
         </div>
       </div>
@@ -186,7 +117,7 @@ export default function UserProfile({ userData }: UserProfileProps) {
       {isPasswordModalOpen && (
         <ChangePasswordModal
           onClose={() => setIsPasswordModalOpen(false)}
-          // userId={userData.correo}
+          userId={userData.id}
         />
       )}
     </div>

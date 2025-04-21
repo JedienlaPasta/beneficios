@@ -34,7 +34,8 @@ const userSchema = z.object({
     })
     .regex(/[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/, {
       message: "Contraseña debe tener al menos un carácter especial",
-    }),
+    })
+    .optional(),
 });
 
 export async function createUser(formData: FormData) {
@@ -131,6 +132,29 @@ export async function updateUser(userId: string, formData: FormData) {
     };
   }
 
+  // Create a base object with the required fields
+  const userData = {
+    nombre,
+    correo,
+    cargo,
+    rol,
+  };
+
+  // Only include password if it's provided
+  const dataToValidate = password && password.trim() !== "" 
+    ? { ...userData, password }
+    : userData;
+
+  // Validate with Zod
+  const result = userSchema.safeParse(dataToValidate);
+
+  if (!result.success) {
+    return {
+      success: false,
+      message: result.error.issues[0].message,
+    };
+  }
+
   try {
     const pool = await connectToDB();
 
@@ -173,11 +197,9 @@ export async function updateUser(userId: string, formData: FormData) {
       const hashedPassword = await hashPassword(password);
       request.input("contraseña", sql.VarChar, hashedPassword);
       query += ", contraseña = @contraseña";
-      console.log(hashedPassword);
     }
 
     query += " WHERE id = @id";
-    console.log(query);
 
     await request.query(query);
 

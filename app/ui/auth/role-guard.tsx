@@ -24,7 +24,6 @@ export default function RoleGuard({
       );
 
       if (!userRoleCookie) {
-        // console.log("No userRole cookie found");
         setHasAccess(false);
         return;
       }
@@ -38,13 +37,11 @@ export default function RoleGuard({
       const userData = JSON.parse(decodeURIComponent(cookieValue));
 
       if (!userData || !userData.rol) {
-        // console.log("Invalid user role data in cookie");
         setHasAccess(false);
         return;
       }
 
       const hasRole = allowedRoles.includes(userData.rol);
-      // console.log(`User role: ${userData.rol}, Access granted: ${hasRole}`);
       setHasAccess(hasRole);
     } catch (error) {
       console.error("Error checking user role:", error);
