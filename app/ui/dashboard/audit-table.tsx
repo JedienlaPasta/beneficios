@@ -89,7 +89,7 @@ export default function AuditTable({
               <th className="col-span-6 py-4 text-right font-normal">FECHA</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200/30">
+          <tbody className="divide-y divide-slate-200/70">
             {logs.map((log, index) => (
               <tr
                 key={String(log.id_registro_mod) + index}

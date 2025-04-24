@@ -264,7 +264,7 @@ export async function updateRSH(formData: FormData) {
 
     // fecha_modificacion = GETDATE() -- Update modification date automatically
 
-    await logAction("Editar", "actualizó el RSH", formatedRut);
+    await logAction("Editar", "editó el RSH", formatedRut);
     revalidatePath("/dashboard/rsh");
     return {
       success: true,

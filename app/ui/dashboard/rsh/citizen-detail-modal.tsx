@@ -179,7 +179,7 @@ function ToggleUpdateFormButton({ handleClick }: { handleClick: () => void }) {
   return (
     <button
       onClick={handleClick}
-      className="flex items-center gap-1 rounded-md bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-600 transition-all hover:bg-blue-100 active:scale-95"
+      className="flex items-center gap-1 rounded-md border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600 transition-all duration-300 hover:border-blue-200 hover:bg-blue-100/70 active:scale-95"
     >
       Editar
     </button>
