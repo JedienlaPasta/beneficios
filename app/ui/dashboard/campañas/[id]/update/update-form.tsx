@@ -18,6 +18,7 @@ export type Requirements = {
 };
 
 export default function UpdateForm({ data }: { data: Campaign[] }) {
+  const [addStock, setAddStock] = useState("");
   const [fieldType, setFieldType] = useState(data[0].tipo_dato);
   const [updateFormData, setUpdateFormData] = useState<Campaign>(data[0]);
   const [criteria, setCriteria] = useState<Requirements>({
@@ -59,6 +60,7 @@ export default function UpdateForm({ data }: { data: Campaign[] }) {
     myFormData.append("fechaInicio", updateFormData.fecha_inicio.toString());
     myFormData.append("fechaTermino", updateFormData.fecha_termino.toString());
     myFormData.append("tipoDato", fieldType);
+    myFormData.append("addStock", addStock.toString());
     myFormData.append("tramo", criteria.tramo.toString());
     myFormData.append("discapacidad", criteria.discapacidad.toString());
     myFormData.append("adultoMayor", criteria.adultoMayor.toString());
@@ -106,6 +108,15 @@ export default function UpdateForm({ data }: { data: Campaign[] }) {
           </DataTypeCards>
         </div>
       </div>
+      <Input
+        label="Agregar Stock"
+        nombre="stock"
+        value={addStock}
+        setData={setAddStock}
+        type="text"
+        pattern="[0-9]*"
+        placeHolder="0"
+      />
       <CustomAntdDatePicker
         label="Inicio"
         placeholder="Ingrese fecha de inicio"

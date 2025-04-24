@@ -3,7 +3,10 @@ type Props = {
   content: string;
   isDisabled: boolean;
   setShowConfirmModal: (show: boolean) => void;
-  action: (id: string, e: React.MouseEvent<HTMLButtonElement>) => Promise<void | { error?: string; success?: string }>;
+  action: (
+    id: string,
+    e: React.MouseEvent<HTMLButtonElement>,
+  ) => Promise<void | { error?: string; success?: string }>;
 };
 
 export default function ConfirmModal({

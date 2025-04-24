@@ -8,20 +8,18 @@ import { createEntrega } from "@/app/lib/actions/entregas";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Update the props type to include userId
 type NewModalFormProps = {
   activeCampaigns?: Campaign[];
   rut: string;
-  userId: string; // Add this new prop
+  userId: string;
 };
 
 export default function NewModalForm({
   activeCampaigns,
   rut,
-  userId, // Receive userId as a prop
+  userId,
 }: NewModalFormProps) {
   const router = useRouter();
-  // Remove the state for idUsuario since we're getting it from props
   const [observaciones, setObservaciones] = useState("");
 
   // Initialize selectedCampaigns with a lazy initializer function
@@ -219,7 +217,7 @@ export default function NewModalForm({
                   )}
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between gap-2">
                     <label
                       htmlFor={`campaign-${campaign.id}`}
                       className="cursor-pointer text-sm font-medium text-slate-700"
@@ -227,7 +225,7 @@ export default function NewModalForm({
                       {campaign.nombre_campaña}
                     </label>
                     <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
-                      {campaign.tipo_dato}
+                      Stock: {campaign.stock - campaign.entregas}
                     </span>
                   </div>
                 </div>

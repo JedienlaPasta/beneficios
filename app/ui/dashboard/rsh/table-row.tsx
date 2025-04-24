@@ -1,5 +1,6 @@
 "use client";
 import { formatDate, formatNumber } from "@/app/lib/utils/format";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function TableRow({
   item,
@@ -26,9 +27,20 @@ export default function TableRow({
     ultima_entrega,
   } = item;
   const formattedRut = formatNumber(rut) + (dv ? "-" + dv : "");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handleClick = () => {
+    const params = new URLSearchParams(searchParams);
+    params.set("citizen", rut.toString());
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
 
   return (
-    <tr className="grid grid-cols-26 gap-9 text-nowrap px-6 text-sm tabular-nums transition-colors hover:bg-slate-50">
+    <tr
+      onClick={handleClick}
+      className="grid cursor-pointer grid-cols-26 gap-9 text-nowrap px-6 text-sm tabular-nums transition-colors hover:bg-slate-50"
+    >
       <td className="group col-span-4 flex items-center py-4 text-slate-600">
         {formattedRut}
       </td>

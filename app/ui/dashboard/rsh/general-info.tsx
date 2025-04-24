@@ -7,7 +7,7 @@ import { RSHGeneralInfoSkeleton } from "./rsh-info-skeleton";
 export default async function RSHGeneralInfo() {
   return (
     <div className="flex flex-wrap gap-6">
-      <InfoCardWrapper disabled modal="newcitizen">
+      <InfoCardWrapper disabled={false} modal="newcitizen">
         {/* Decorative gradient element */}
         <div className="absolute left-[calc(100%-1rem)] top-0 h-60 w-[20rem] bg-gradient-to-b from-blue-500 to-blue-700 transition-all duration-500 group-hover:left-[calc(100%-8rem)] group-hover:-rotate-[-25deg]"></div>
 
@@ -46,7 +46,7 @@ export default async function RSHGeneralInfo() {
         {/* Action label */}
         <div className="mt-auto border-t border-slate-100 px-7 py-3">
           <p className="text-sm font-medium text-slate-700 transition-colors duration-300 group-hover:text-blue-600">
-            Nuevo Registro - (No disponible)
+            Nuevo Registro
           </p>
         </div>
       </InfoCardWrapper>

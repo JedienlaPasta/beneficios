@@ -24,7 +24,7 @@ export function Modal({
   return (
     <div className="fixed inset-0 z-50 flex justify-center">
       <div className="fixed inset-0 bg-gray-900/50" onClick={handleClick} />
-      <div className="items-centers fixed flex h-dvh grow items-center">
+      <div className="items-centers fixed top-[5%] flex h-svh grow items-start">
         {children}
       </div>
     </div>

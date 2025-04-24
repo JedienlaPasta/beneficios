@@ -47,6 +47,11 @@ export const formatRUT = (rut: string | number) => {
   return formatNumber(rut) + "-" + getDV(String(rut));
 };
 
+export const formatPhone = (phone?: string | number) => {
+  if (!phone) return "";
+  return phone.toString().replace(/\B(?=(\d{4})+(?!\d))/g, " ");
+};
+
 export const capitalize = (str: string) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };

@@ -71,7 +71,7 @@ export default function NewCampaignModal() {
   const isFormValid = () => {
     return (
       campaignName.trim() !== "" &&
-      stock.trim() !== "" &&
+      // stock.trim() !== "" &&
       code.trim() !== "" &&
       date !== null
     );
@@ -135,7 +135,6 @@ export default function NewCampaignModal() {
         <div className="flex items-end gap-3">
           <div className="grow">
             <Input
-              required={true}
               placeHolder="Stock..."
               label="Stock Inicial"
               type="text"

@@ -63,7 +63,7 @@ export default function ModalEntregasDetail({
               Beneficiario: <p className="text-blue-700">{formattedRUT}</p>
             </span>
           </div>
-          <CloseModalButton name="detailsModal" folio={folio} />
+          <CloseModalButton name="detailsModal" />
         </section>
 
         {/* Tab Navigation */}

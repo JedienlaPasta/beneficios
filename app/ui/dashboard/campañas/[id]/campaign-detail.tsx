@@ -110,10 +110,10 @@ export default async function CampaignDetail({ id }: { id: string }) {
               Resumen
             </h2>
             <div className="flex flex-col gap-2 rounded-xl px-6">
-              <EntregasStockSummary entregas={stock} period="Stock Inicial" />
+              <EntregasStockSummary entregas={stock} period="Stock Total" />
               <EntregasStockSummary
                 entregas={stock - entregas}
-                period="Disponibles"
+                period="Stock Disponible"
               />
               <EntregasStockSummary entregas={entregas} period="Entregado" />
             </div>
