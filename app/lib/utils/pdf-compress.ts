@@ -2,9 +2,7 @@ import { spawn } from "child_process";
 
 export async function compressPdfBuffer(inputBuffer: Buffer): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    const gsCommand =
-      process.env.GHOSTSCRIPT_COMMAND ||
-      (process.platform === "win32" ? "gswin64c" : "gs");
+    const gsCommand = process.env.GHOSTSCRIPT_COMMAND || "gs";
     const gs = spawn(gsCommand, [
       "-sDEVICE=pdfwrite",
       "-dCompatibilityLevel=1.4",
