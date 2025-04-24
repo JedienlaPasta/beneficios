@@ -135,6 +135,7 @@ export async function importEntregas() {
           console.log(
             `Error parsing date for folio ${entrega.folio}: ${entrega.fecha_entrega}`,
           );
+          console.log(error);
           skippedRows++;
           continue;
         }
