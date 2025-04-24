@@ -6,11 +6,13 @@ import ImportXLSXModal from "@/app/ui/dashboard/rsh/import-xlsx-modal";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import NewCitizenModal from "@/app/ui/dashboard/rsh/new-citizen-modal";
 import { Modal } from "@/app/ui/dashboard/modal";
+import ModalCitizenDetailContext from "@/app/ui/dashboard/rsh/citizen-context-modal";
 
 type RSHProps = {
   searchParams?: Promise<{
     query?: string;
     page?: string;
+    citizen?: string;
     newcitizen?: string;
     importxlsx?: string;
   }>;
@@ -18,6 +20,7 @@ type RSHProps = {
 
 export default async function RSH(props: RSHProps) {
   const searchParams = await props.searchParams;
+  const citizen = searchParams?.citizen || "";
   const newcitizen = searchParams?.newcitizen || "";
   const importxlsx = searchParams?.importxlsx || "";
   const query = searchParams?.query || "";
@@ -28,6 +31,11 @@ export default async function RSH(props: RSHProps) {
       {newcitizen === "open" && (
         <Modal name="newcitizen">
           <NewCitizenModal name="newcitizen" />
+        </Modal>
+      )}
+      {citizen !== "" && (
+        <Modal name="citizen">
+          <ModalCitizenDetailContext name="citizen" rut={citizen} />
         </Modal>
       )}
       {importxlsx === "open" && (

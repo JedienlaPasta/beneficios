@@ -18,10 +18,8 @@ export default function TableRow({ item }: { item: SocialAidTableRow }) {
 
   const estadoTextColor =
     estado_documentos === "Finalizado"
-      ? "bg-slate-100 text-slate-500"
-      : "bg-yellow-100 text-yellow-500";
-  const estadoDotColor =
-    estado_documentos === "Finalizado" ? "bg-slate-300" : "bg-yellow-400";
+      ? "bg-slate-100/80 border-slate-200/80 text-slate-500"
+      : "bg-yellow-50 border-yellow-200/80 text-yellow-500";
 
   return (
     <tr
@@ -35,12 +33,7 @@ export default function TableRow({ item }: { item: SocialAidTableRow }) {
         {nombre_usuario}
       </td>
       <td className="col-span-5 flex h-11 min-h-11 items-center self-center text-slate-600">
-        <div
-          className={`flex w-fit items-center gap-2 rounded-md px-2 py-1 ${estadoTextColor}`}
-        >
-          <span
-            className={`z-10 h-1.5 w-1.5 shrink-0 rounded-full ${estadoDotColor} animate-pulse`}
-          ></span>
+        <div className={`rounded-md border px-3 py-1 ${estadoTextColor}`}>
           <p className="z-10">{estado_documentos}</p>
         </div>
       </td>

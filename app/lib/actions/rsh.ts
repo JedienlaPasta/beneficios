@@ -5,14 +5,327 @@ import { revalidatePath } from "next/cache";
 import * as ExcelJS from "exceljs";
 import { FormState } from "@/app/ui/dashboard/campañas/new-campaign-modal";
 import { connectToDB } from "../utils/db-connection";
-import { capitalizeAll } from "../utils/format";
+import { capitalize, capitalizeAll, formatRUT } from "../utils/format";
 import { logAction } from "./auditoria";
+import { getDV } from "../utils/get-values";
+
+const RSHFormSchema = z.object({
+  // Required fields
+  rut: z
+    .string()
+    .min(7, { message: "RUT debe tener al menos 7 dígitos" })
+    .regex(/^\d+$/, { message: "RUT debe contener solo números" }),
+  dv: z.string().length(1, { message: "DV es obligatorio" }),
+  nombres_rsh: z
+    .string()
+    .min(3, { message: "Nombres deben tener al menos 3 caracteres" }),
+  apellidos_rsh: z
+    .string()
+    .min(3, { message: "Apellidos deben tener al menos 3 caracteres" }),
+  direccion: z
+    .string()
+    .min(3, { message: "Dirección debe tener al menos 3 caracteres" }),
+  tramo: z.enum(["40", "50", "60", "70", "80", "90", "100"], {
+    message:
+      "Tramo debe ser uno de los valores permitidos: 40, 50, 60, 70, 80, 90 o 100",
+  }),
+  folio: z.string().length(8, { message: "Folio debe tener 8 dígitos" }),
+
+  // Optional fields
+  sector: z.string().optional(),
+  telefono: z
+    .string()
+    .optional()
+    .refine((val) => !val || val.length === 9, {
+      message: "Teléfono debe tener 9 dígitos",
+    }),
+  correo: z
+    .string()
+    .optional()
+    .refine((val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+      message: "Formato de correo electrónico inválido",
+    }),
+  genero: z
+    .union([z.enum(["Femenino", "Masculino"]), z.literal("")])
+    .optional(),
+  indigena: z.union([z.enum(["Si", "No", "Sí"]), z.literal("")]).optional(),
+  nacionalidad: z.string().optional(),
+  fecha_nacimiento: z.string().optional(),
+});
 
 // Crear RSH
+export async function createRSH(formData: FormData) {
+  const rut = formData.get("rut") as string;
+  const dv = formData.get("dv") as string;
+  const nombresRSH = formData.get("nombres_rsh") as string;
+  const apellidosRSH = formData.get("apellidos_rsh") as string;
+  const direccion = formData.get("direccion") as string;
+  const sector = formData.get("sector") as string;
+  const telefono = formData.get("telefono") as string;
+  const correo = formData.get("correo") as string;
+  const tramo = formData.get("tramo") as string;
+  const genero = formData.get("genero") as string;
+  const indigena = formData.get("indigena") as string;
+  const nacionalidad = formData.get("nacionalidad") as string;
+  const folio = formData.get("folio") as string;
+  const fecha_nacimiento = formData.get("fecha_nacimiento") as string;
+
+  const checkDV = getDV(rut);
+  if (checkDV !== dv) {
+    return {
+      success: false,
+      message: "El DV no coincide con el RUT",
+    };
+  }
+
+  const validationResult = RSHFormSchema.safeParse({
+    rut,
+    dv,
+    nombres_rsh: capitalizeAll(nombresRSH),
+    apellidos_rsh: capitalizeAll(apellidosRSH),
+    direccion: capitalizeAll(direccion),
+    sector: capitalizeAll(sector),
+    telefono,
+    correo,
+    tramo,
+    genero: capitalize(genero),
+    indigena: capitalize(indigena),
+    nacionalidad: capitalize(nacionalidad),
+    folio,
+    fecha_nacimiento: fecha_nacimiento
+      ? new Date(fecha_nacimiento).toISOString()
+      : undefined,
+  });
+
+  if (!validationResult.success) {
+    return {
+      success: false,
+      message: validationResult.error.errors[0].message,
+    };
+  }
+
+  try {
+    const pool = await connectToDB();
+    const request = pool.request();
+
+    // Check if rut already exists
+    const rshResult = await request
+      .input("userRut", sql.Int, rut)
+      .query("SELECT 1 FROM rsh WHERE rut = @userRut");
+
+    if (rshResult.recordset.length > 0) {
+      return { success: false, message: "Ya existe un registro con este RUT" };
+    }
+
+    await request
+      .input("rut", sql.Int, validationResult.data.rut)
+      .input("dv", sql.VarChar, validationResult.data.dv)
+      .input("nombres_rsh", sql.VarChar, validationResult.data.nombres_rsh)
+      .input("apellidos_rsh", sql.VarChar, validationResult.data.apellidos_rsh)
+      .input("direccion", sql.VarChar, validationResult.data.direccion)
+      .input("sector", sql.VarChar, validationResult.data.sector)
+      .input("telefono", sql.VarChar, validationResult.data.telefono)
+      .input("correo", sql.VarChar, validationResult.data.correo)
+      .input("tramo", sql.VarChar, validationResult.data.tramo)
+      .input("genero", sql.VarChar, validationResult.data.genero)
+      .input("indigena", sql.VarChar, validationResult.data.indigena)
+      .input("nacionalidad", sql.VarChar, validationResult.data.nacionalidad)
+      .input("folio", sql.VarChar, validationResult.data.folio)
+      .input(
+        "fecha_nacimiento",
+        sql.VarChar,
+        validationResult.data.fecha_nacimiento,
+      ).query(`
+        INSERT INTO rsh (rut, dv, nombres_rsh, apellidos_rsh, direccion, sector, telefono, correo, tramo, genero, indigena, nacionalidad, folio, fecha_nacimiento)
+        VALUES (@rut, @dv, @nombres_rsh, @apellidos_rsh, @direccion, @sector, @telefono, @correo, @tramo, @genero, @indigena, @nacionalidad, @folio, @fecha_nacimiento)
+        `);
+
+    const formatedRut = formatRUT(rut);
+    await logAction("Crear", "creó el RSH", formatedRut);
+    revalidatePath("/dashboard/rsh");
+    return {
+      success: true,
+      message: `Registro ${formatedRut} creado exitosamente`,
+    };
+  } catch (error) {
+    console.error(error || "Error al crear el registro.");
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
 
 // Editar RSH
+export async function updateRSH(formData: FormData) {
+  const rut = formData.get("rut") as string;
+  const dv = formData.get("dv") as string;
+  const nombresRSH = formData.get("nombres_rsh") as string;
+  const apellidosRSH = formData.get("apellidos_rsh") as string;
+  const direccion = formData.get("direccion") as string;
+  const sector = formData.get("sector") as string;
+  const telefono = formData.get("telefono") as string;
+  const correo = formData.get("correo") as string;
+  const tramo = formData.get("tramo") as string;
+  const genero = formData.get("genero") as string;
+  const indigena = formData.get("indigena") as string;
+  const nacionalidad = formData.get("nacionalidad") as string;
+  const folio = formData.get("folio") as string;
+  const fecha_nacimiento = formData.get("fecha_nacimiento") as string;
+
+  const checkDV = getDV(rut);
+  if (checkDV !== dv) {
+    return {
+      success: false,
+      message: "El DV no coincide con el RUT",
+    };
+  }
+
+  const validationResult = RSHFormSchema.safeParse({
+    rut,
+    dv,
+    nombres_rsh: capitalizeAll(nombresRSH),
+    apellidos_rsh: capitalizeAll(apellidosRSH),
+    direccion: capitalizeAll(direccion),
+    sector: capitalizeAll(sector),
+    telefono,
+    correo,
+    tramo,
+    genero: capitalize(genero),
+    indigena: capitalize(indigena),
+    nacionalidad: capitalize(nacionalidad),
+    folio,
+    fecha_nacimiento: fecha_nacimiento
+      ? new Date(fecha_nacimiento).toISOString()
+      : undefined,
+  });
+
+  if (!validationResult.success) {
+    return {
+      success: false,
+      message: validationResult.error.errors[0].message,
+    };
+  }
+
+  const formatedRut = formatRUT(rut);
+
+  try {
+    const pool = await connectToDB();
+    const checkRequest = pool.request();
+
+    const rshResult = await checkRequest
+      .input("rut", sql.Int, rut)
+      .query("SELECT 1 FROM rsh WHERE rut = @rut");
+
+    if (rshResult.recordset.length === 0) {
+      return {
+        success: false,
+        message: `No se encontraron coincidencias para ${formatedRut}`,
+      };
+    }
+
+    const updateRequest = pool.request();
+    await updateRequest
+      .input("rut", sql.Int, validationResult.data.rut)
+      .input("dv", sql.VarChar, validationResult.data.dv)
+      .input("nombres_rsh", sql.VarChar, validationResult.data.nombres_rsh)
+      .input("apellidos_rsh", sql.VarChar, validationResult.data.apellidos_rsh)
+      .input("direccion", sql.VarChar, validationResult.data.direccion)
+      .input("sector", sql.VarChar, validationResult.data.sector)
+      .input("telefono", sql.VarChar, validationResult.data.telefono)
+      .input("correo", sql.VarChar, validationResult.data.correo)
+      .input("tramo", sql.VarChar, validationResult.data.tramo)
+      .input("genero", sql.VarChar, validationResult.data.genero)
+      .input("indigena", sql.VarChar, validationResult.data.indigena)
+      .input("nacionalidad", sql.VarChar, validationResult.data.nacionalidad)
+      .input("folio", sql.VarChar, validationResult.data.folio)
+      .input(
+        "fecha_nacimiento",
+        sql.VarChar,
+        validationResult.data.fecha_nacimiento,
+      ).query(`
+        UPDATE rsh
+        SET
+          dv = @dv,
+          nombres_rsh = @nombres_rsh,
+          apellidos_rsh = @apellidos_rsh,
+          direccion = @direccion,
+          sector = @sector,
+          telefono = @telefono,
+          correo = @correo,
+          tramo = @tramo,
+          genero = @genero,
+          indigena = @indigena,
+          nacionalidad = @nacionalidad,
+          folio = @folio,
+          fecha_nacimiento = @fecha_nacimiento
+        WHERE rut = @rut
+      `);
+
+    // fecha_modificacion = GETDATE() -- Update modification date automatically
+
+    await logAction("Editar", "editó el RSH", formatedRut);
+    revalidatePath("/dashboard/rsh");
+    return {
+      success: true,
+      message: `Registro ${formatedRut} actualizado exitosamente`,
+    };
+  } catch (error) {
+    console.error(error || "Error actualizar el registro.");
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
 
 // Eliminar RSH
+export async function deleteRSH(rut: string) {
+  try {
+    const pool = await connectToDB();
+    const transaction = new sql.Transaction(pool);
+
+    try {
+      await transaction.begin();
+      const rshRequest = new sql.Request(transaction);
+      const rshResult = await rshRequest
+        .input("rut", sql.Int, rut)
+        .query(`SELECT 1 FROM rsh WHERE rut = @rut`);
+
+      if (rshResult.recordset.length === 0) {
+        await transaction.rollback();
+        return {
+          success: false,
+          message: `No se encontró el registro ${formatRUT(rut)}`,
+        };
+      }
+
+      const deleteRshRequest = new sql.Request(transaction);
+      await deleteRshRequest
+        .input("rut", sql.Int, rut)
+        .query(`DELETE FROM rsh WHERE rut = @rut`);
+
+      // ON DELETE CASCADE de entregas?
+      await transaction.commit();
+
+      await logAction("Eliminar", "eliminó el RSH", formatRUT(rut));
+      revalidatePath("/dashboard/rsh");
+      return {
+        success: true,
+        message: `Registro ${formatRUT(rut)} eliminado exitosamente`,
+      };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  } catch (error) {
+    console.log("Error al eliminar el registro:", error);
+    return {
+      success: false,
+      message: `Error al eliminar el registro ${formatRUT(rut)}`,
+    };
+  }
+}
 
 // ---------------- Cargar RSH desde Excel ------------
 // Interfaces
@@ -29,8 +342,6 @@ interface CitizenData {
   genero: string;
   nacionalidad: string | null;
   sector: string | null;
-  calle: string;
-  numcalle: string | null;
   direccion: string;
   tramo: string;
   folio: string;
@@ -61,23 +372,6 @@ const convertDate = (dateString: string): Date | null => {
     : new Date(year, month, day);
 };
 
-// const formatCurrentDate = (): Date => {
-//   const now = new Date();
-//   const year = now.getFullYear();
-//   const month = now.getMonth();
-//   const day = now.getDate();
-
-//   return new Date(year, month, day);
-// };
-
-const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
-  const chunks = [];
-  for (let i = 0; i < array.length; i += chunkSize) {
-    chunks.push(array.slice(i, i + chunkSize));
-  }
-  return chunks;
-};
-
 // Validación Zod
 const FileSchema = z.object({
   file: z
@@ -93,7 +387,16 @@ const FileSchema = z.object({
     ),
 });
 
+// Importar XLSX
 export async function importXLSXFile(formData: FormData): Promise<FormState> {
+  const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+      chunks.push(array.slice(i, i + chunkSize));
+    }
+    return chunks;
+  };
+
   try {
     const { file } = FileSchema.parse({
       file: formData.get("file"),
@@ -126,6 +429,11 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
       const apellidomaterno = values[15]
         ? capitalizeWords(String(values[15]))
         : null;
+      const calle = values[75] ? capitalizeAll(values[75]?.toString()) : "";
+      const numcalle = values[3] ? String(values[3]) : null;
+      const sector = values[78]
+        ? capitalizeAll(values[78]?.toString()).trim()
+        : null;
       const citizen: CitizenData = {
         rut: rawRut,
         dv: String(values[13]),
@@ -143,7 +451,7 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
             ? null
             : parseInt(String(values[20]), 10) === 0
               ? "No"
-              : "Sí",
+              : "Si",
         genero: values[67] == 1 ? "Masculino" : "Femenino",
         nacionalidad:
           values[69] && Number(values[69]) == 1
@@ -151,11 +459,12 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
             : values[69]
               ? "Extranjera"
               : null,
-        sector: values[78] ? capitalizeAll(values[78]?.toString()) : null,
-        calle: values[75] ? capitalizeAll(values[75]?.toString()) : "",
-        numcalle: values[3] ? String(values[3]) : null,
-        direccion:
-          `${capitalizeAll(values[75]?.toString()) || ""} ${capitalizeAll(values[3]?.toString()) || ""}`.trim(),
+        sector: sector
+          ? sector.length > 3
+            ? sector.substring(0, sector.length - 3)
+            : sector
+          : null,
+        direccion: `${calle} ${numcalle}`.trim(),
         tramo: values[70] ? String(values[70]) : "",
         folio: values[64] ? String(values[64]) : "",
         fecha_nacimiento: convertDate(String(values[68])),
@@ -183,16 +492,6 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
         // Check database context and permissions
         const checkRequest = new sql.Request(transaction);
         console.log("Iniciando importación RSH...");
-
-        // Check if table type exists and is accessible - search across all schemas
-        // const typeCheckResult = await checkRequest.query(`
-        //   SELECT
-        //     t.name AS type_name,
-        //     s.name AS schema_name
-        //   FROM sys.types t
-        //   JOIN sys.schemas s ON t.schema_id = s.schema_id
-        //   WHERE t.name = 'RSHTableType'
-        // `);
 
         // Check if stored procedure exists
         const procCheckResult = await checkRequest.query(`

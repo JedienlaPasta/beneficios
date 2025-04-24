@@ -6,7 +6,7 @@ export const getDV = (rut: string) => {
   for (let i = rut.length - 1; i >= 0; i--) {
     const digit = parseInt(rut.charAt(i), 10);
     sum += digit * multiplier;
-    multiplier = (multiplier % 7) + 2;
+    multiplier = multiplier === 7 ? 2 : multiplier + 1;
   }
   const dv = 11 - (sum % 11);
   if (dv === 11) {

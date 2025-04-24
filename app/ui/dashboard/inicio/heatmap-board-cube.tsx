@@ -58,7 +58,7 @@ export default function BoardCube({
     >
       {isToday && (
         <span
-          className={`group relative flex size-2 items-center justify-center rounded-[2px] border !bg-green-50 ${clsx(cubeClass)}`}
+          className={`group relative flex size-2 items-center justify-center rounded-[2px] border !bg-green-100 ${clsx(cubeClass)}`}
         ></span>
       )}
       {!disabled && (

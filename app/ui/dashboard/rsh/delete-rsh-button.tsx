@@ -1,10 +1,10 @@
 "use client";
-import { deleteEntregaByFolio } from "@/app/lib/actions/entregas";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useState } from "react";
+import { deleteRSH } from "@/app/lib/actions/rsh";
 
-export default function DeleteEntregasButton({ folio }: { folio: string }) {
+export default function DeleteRSHButton({ rut }: { rut: number }) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const searchParams = useSearchParams();
@@ -12,34 +12,34 @@ export default function DeleteEntregasButton({ folio }: { folio: string }) {
 
   const closeModal = () => {
     const params = new URLSearchParams(searchParams);
-    params.delete("detailsModal");
+    params.delete("citizen");
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
-  const deleteCampaignWithId = deleteEntregaByFolio.bind(null, folio);
-
-  // Mostrar modal de confirmación en lugar de eliminar directamente
   const handleDeleteButton = async () => {
     setShowConfirmModal(true);
   };
 
   const confirmDelete = async () => {
     setIsDisabled(true);
-    toast.promise(deleteCampaignWithId(), {
-      loading: "Eliminando entrega...",
-      success: async (response) => {
-        setShowConfirmModal(false);
-        setIsDisabled(false);
-        closeModal();
-        return {
-          message: response.message,
-        };
-      },
-      error: () => ({
-        message: "Error al eliminar la entrega",
-        description: "No se pudo eliminar la entrega. Intente nuevamente.",
-      }),
-    });
+
+    const toastId = toast.loading("Eliminando entrega...");
+    try {
+      const response = await deleteRSH(String(rut));
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+      toast.success(response.message, { id: toastId });
+      setShowConfirmModal(false);
+      setIsDisabled(false);
+      closeModal();
+      router.refresh();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Error al crear el registro";
+      toast.error(message, { id: toastId });
+      setIsDisabled(false);
+    }
   };
 
   return (
