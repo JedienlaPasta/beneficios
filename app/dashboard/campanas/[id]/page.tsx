@@ -4,9 +4,10 @@ import CampaignDetail, {
   CampaignDetailSkeleton,
 } from "@/app/ui/dashboard/campañas/[id]/campaign-detail";
 import SearchBar from "@/app/ui/dashboard/searchbar";
-import CampaignSocialAidsTable from "@/app/ui/dashboard/campañas/[id]/campaign-social-aid-table";
+import CampaignSocialAidsTable from "@/app/ui/dashboard/campañas/[id]/campaign-entregas-table";
 import CampaignSocialAidsTableSkeleton from "@/app/ui/dashboard/campañas/[id]/table-skeleton";
 import { Modal } from "@/app/ui/dashboard/modal";
+import ModalSkeleton from "@/app/ui/modal-skeleton";
 
 type CampaignProps = {
   searchParams?: Promise<{
@@ -31,7 +32,7 @@ export default async function Campaign(props: CampaignProps) {
     <div>
       {showUpdateModal === "open" && (
         <Modal name="update">
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<ModalSkeleton name="update" />}>
             <UpdateCampaignModal id={id} />
           </Suspense>
         </Modal>

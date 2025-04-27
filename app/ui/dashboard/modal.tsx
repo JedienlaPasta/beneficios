@@ -4,16 +4,23 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { FiX } from "react-icons/fi";
 
-export function Modal({
-  name,
-  children,
-}: {
+type ModalProps = {
   name: string;
   children: React.ReactNode;
-  position?: string;
-}) {
+  top?: string;
+};
+
+export function Modal({ name, children }: ModalProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
 
   const handleClick = () => {
     const params = new URLSearchParams(searchParams);
@@ -22,24 +29,30 @@ export function Modal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-gray-900/50" onClick={handleClick} />
-      <div className="items-centers fixed top-[5%] flex h-svh grow items-start">
+      <div className={`relative z-10 h-[90%]`}>
+        <span onClick={handleClick} className="absolute inset-0 -z-10" />
         {children}
       </div>
     </div>
   );
 }
 
+// ====================================================================================================================
 // Modal para la gestion de usuarios
 
-type ModalProps = {
+type UserModalProps = {
   title: string;
   children: React.ReactNode;
   onClose: () => void;
 };
 
-export function UserManagementModal({ title, children, onClose }: ModalProps) {
+export function UserManagementModal({
+  title,
+  children,
+  onClose,
+}: UserModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Close modal when clicking outside

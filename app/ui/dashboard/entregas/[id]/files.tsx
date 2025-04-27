@@ -14,68 +14,6 @@ export function Files({ item }: { item: SocialFiles }) {
 
   const deleteFileWithId = deletePDFById.bind(null, item.id);
 
-  // const handleDelete = async (e: React.MouseEvent) => {
-  //   e.stopPropagation();
-
-  //   toast.custom((t) => (
-  //     <div
-  //       className={`pointer-events-auto flex w-full max-w-md flex-col rounded-lg bg-white shadow-lg`}
-  //     >
-  //       <div className="p-4">
-  //         <div className="flex items-start">
-  //           <div className="ml-3 flex-1">
-  //             <p className="text-sm font-medium text-gray-900">
-  //               ¿Eliminar documento?
-  //             </p>
-  //             <p className="mt-1 text-sm text-gray-500">
-  //               Esta acción no se puede deshacer.
-  //             </p>
-  //           </div>
-  //         </div>
-  //       </div>
-  //       <div className="flex border-t border-gray-200">
-  //         <button
-  //           onClick={() => {
-  //             // First dismiss the confirmation toast
-  //             toast.dismiss(t);
-
-  //             // Then after a small delay, show the promise toast
-  //             setTimeout(() => {
-  //               toast.promise(
-  //                 deletePDFById(item.id).then((response) => {
-  //                   if (!response.success) {
-  //                     throw new Error(response.message);
-  //                   }
-  //                   return response;
-  //                 }),
-  //                 {
-  //                   loading: "Eliminando...",
-  //                   success: (response) => {
-  //                     router.refresh();
-  //                     return response.message;
-  //                   },
-  //                   error: (err) => {
-  //                     return err.message;
-  //                   },
-  //                 },
-  //               );
-  //             }, 50); // Small delay to ensure first toast is gone
-  //           }}
-  //           className="flex w-full items-center justify-center rounded-none rounded-bl-lg border border-transparent p-3 text-sm font-medium text-red-600 hover:text-red-500 focus:outline-none"
-  //         >
-  //           Eliminar
-  //         </button>
-  //         <button
-  //           onClick={() => toast.dismiss(t)}
-  //           className="flex w-full items-center justify-center rounded-none rounded-br-lg border border-transparent p-3 text-sm font-medium text-gray-700 hover:text-gray-500 focus:outline-none"
-  //         >
-  //           Cancelar
-  //         </button>
-  //       </div>
-  //     </div>
-  //   ));
-  // };
-
   const handleDeleteButton = async () => {
     setShowConfirmModal(true);
   };

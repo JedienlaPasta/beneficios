@@ -4,7 +4,7 @@ import { formatDate, formatNumber } from "@/app/lib/utils/format";
 import { fetchEntregasForCampaignDetail } from "@/app/lib/data/entregas";
 import { getDV } from "@/app/lib/utils/get-values";
 
-export default async function CampaignSocialAidsTable({
+export default async function CampaignEntregasTable({
   id,
   query,
   paginaActual,

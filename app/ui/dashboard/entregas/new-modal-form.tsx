@@ -169,7 +169,7 @@ export default function NewModalForm({
 
   return (
     <form action={formAction} className="flex select-none flex-col gap-5 pt-2">
-      <div className="scrollbar-gutter-stable max-h-[400px] overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-4 pr-1">
+      <div className="max-h-[400px] rounded-lg border border-slate-200 bg-slate-50 p-4">
         <div className="justify- mb-4 flex items-baseline justify-between">
           <h3 className="text-sm font-medium text-slate-700">
             Beneficios seleccionados:

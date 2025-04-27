@@ -19,7 +19,7 @@ export function InfoCardWrapper({
     if (disabled) return;
     const params = new URLSearchParams(searchParams);
     params.set(modal, "open");
-    router.push("?" + params.toString());
+    router.replace("?" + params.toString());
   };
 
   return (

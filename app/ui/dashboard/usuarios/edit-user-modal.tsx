@@ -15,6 +15,9 @@ type EditUserModalProps = {
 
 export function EditUserModal({ user, onClose }: EditUserModalProps) {
   const [isDisabled, setIsDisabled] = useState(false);
+  const [nombre, setNombre] = useState<string>(user.nombre_usuario || "");
+  const [correo, setCorreo] = useState<string>(user.correo || "");
+  const [cargo, setCargo] = useState<string>(user.cargo || "");
   const [rol, setRol] = useState<string>(user.rol || "");
 
   const formAction = async (formData: FormData) => {
@@ -41,6 +44,18 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
     }
   };
 
+  const isFormValid = () => {
+    if (
+      nombre.trim() === "" ||
+      correo.trim() === "" ||
+      cargo.trim() === "" ||
+      rol.trim() === ""
+    ) {
+      return false;
+    }
+    return true;
+  };
+
   const inputStyle =
     "mt-1 h-10 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm text-slate-700 shadow-sm outline-none transition-all placeholder:text-gray-400 focus:border-blue-500 focus:outline-none";
 
@@ -58,7 +73,8 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
             type="text"
             id="nombre"
             name="nombre"
-            defaultValue={user.nombre_usuario}
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
             autoComplete="off"
             required
             placeholder="Nombre y apellido"
@@ -77,7 +93,8 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
             type="email"
             id="correo"
             name="correo"
-            defaultValue={user.correo}
+            value={correo}
+            onChange={(e) => setCorreo(e.target.value)}
             autoComplete="off"
             required
             placeholder="usuario@correo.com"
@@ -96,7 +113,8 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
             type="text"
             id="cargo"
             name="cargo"
-            defaultValue={user.cargo}
+            value={cargo}
+            onChange={(e) => setCargo(e.target.value)}
             autoComplete="off"
             placeholder="Cargo funcionario"
             required
@@ -130,7 +148,9 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
         </div>
 
         <div className="flex justify-end gap-2 pt-4">
-          <SubmitButton isDisabled={isDisabled}>Guardar Cambios</SubmitButton>
+          <SubmitButton isDisabled={isDisabled || !isFormValid()}>
+            Guardar Cambios
+          </SubmitButton>
         </div>
       </form>
     </UserManagementModal>

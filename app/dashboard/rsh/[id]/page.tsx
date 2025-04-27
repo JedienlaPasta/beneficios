@@ -1,5 +1,5 @@
 import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/campaigns-table-skeleton";
-import TablaEntregasDetalleCampaña from "@/app/ui/dashboard/campañas/[id]/campaign-social-aid-table";
+import TablaEntregasDetalleCampaña from "@/app/ui/dashboard/campañas/[id]/campaign-entregas-table";
 import { Suspense } from "react";
 import CampaignDetail from "@/app/ui/dashboard/campañas/[id]/campaign-detail";
 import SearchBar from "@/app/ui/dashboard/searchbar";

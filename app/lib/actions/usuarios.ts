@@ -141,9 +141,8 @@ export async function updateUser(userId: string, formData: FormData) {
   };
 
   // Only include password if it's provided
-  const dataToValidate = password && password.trim() !== "" 
-    ? { ...userData, password }
-    : userData;
+  const dataToValidate =
+    password && password.trim() !== "" ? { ...userData, password } : userData;
 
   // Validate with Zod
   const result = userSchema.safeParse(dataToValidate);
