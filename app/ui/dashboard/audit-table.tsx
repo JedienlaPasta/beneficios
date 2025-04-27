@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { capitalize, formatDate, formatTime } from "@/app/lib/utils/format";
+import { formatDate, formatTime } from "@/app/lib/utils/format";
 import { MdAutorenew } from "react-icons/md";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { BiFolderPlus } from "react-icons/bi";
