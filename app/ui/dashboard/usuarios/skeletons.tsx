@@ -3,39 +3,57 @@
 // Update the UserTableSkeleton to include the estado column
 
 export function UserTableSkeleton() {
+  const thStyle =
+    "whitespace-nowrap  py-4 text-left text-xs font-medium uppercase tracking-wide text-slate-500";
+
   return (
-    <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[60rem] border-collapse divide-y divide-slate-200 text-sm">
           <thead>
-            <tr className="border-b bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-              <th className="px-4 py-3">Nombre</th>
-              <th className="px-4 py-3">Correo</th>
-              <th className="px-4 py-3">Cargo</th>
-              <th className="px-4 py-3">Rol</th>
-              <th className="px-4 py-3">Estado</th>
-              <th className="px-4 py-3 text-right">Acciones</th>
+            <tr className="grid grid-cols-26 bg-slate-50 px-6 pt-2">
+              <th scope="col" className={`${thStyle} col-span-5`}>
+                Nombre
+              </th>
+              <th scope="col" className={`${thStyle} col-span-6`}>
+                Correo
+              </th>
+              <th scope="col" className={`${thStyle} col-span-5`}>
+                Cargo
+              </th>
+              <th scope="col" className={`${thStyle} col-span-3`}>
+                Rol
+              </th>
+              <th scope="col" className={`${thStyle} col-span-3`}>
+                Estado
+              </th>
+              <th scope="col" className={`${thStyle} col-span-4 text-right`}>
+                Acciones
+              </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200">
+          <tbody className="divide-y divide-slate-200/70 bg-white">
             {[...Array(5)].map((_, i) => (
-              <tr key={i}>
-                <td className="px-4 py-3">
+              <tr
+                key={i}
+                className="group grid grid-cols-26 items-center gap-8 text-nowrap px-6 text-sm transition-colors hover:bg-slate-200/50"
+              >
+                <td className="col-span-5 whitespace-nowrap py-4 font-medium text-slate-700">
                   <div className="h-5 w-32 animate-pulse rounded bg-slate-200"></div>
                 </td>
-                <td className="px-4 py-3">
+                <td className="col-span-6 whitespace-nowrap py-4 text-slate-600">
                   <div className="h-5 w-40 animate-pulse rounded bg-slate-200"></div>
                 </td>
-                <td className="px-4 py-3">
+                <td className="col-span-5 whitespace-nowrap py-4 text-slate-600">
                   <div className="h-5 w-24 animate-pulse rounded bg-slate-200"></div>
                 </td>
-                <td className="px-4 py-3">
+                <td className="col-span-3 whitespace-nowrap py-4">
                   <div className="h-5 w-20 animate-pulse rounded bg-slate-200"></div>
                 </td>
-                <td className="px-4 py-3">
+                <td className="col-span-3 whitespace-nowrap py-4">
                   <div className="h-5 w-24 animate-pulse rounded bg-slate-200"></div>
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="col-span-4 whitespace-nowrap py-4 text-right">
                   <div className="flex justify-end gap-2">
                     <div className="h-8 w-8 animate-pulse rounded bg-slate-200"></div>
                     <div className="h-8 w-8 animate-pulse rounded bg-slate-200"></div>

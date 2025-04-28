@@ -36,7 +36,7 @@ export default async function CitizenDetail({ rut }: Props) {
   const formattedRut = formatRUT(rut);
   const descripcion = nombres_rsh[0] + apellidos_rsh[0];
 
-  const age = getAge(fecha_nacimiento.toString());
+  const age = getAge(fecha_nacimiento?.toString());
 
   return (
     <div className="items-centers relative flex flex-col justify-center">

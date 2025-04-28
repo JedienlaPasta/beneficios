@@ -104,10 +104,6 @@ export async function fetchEntregasByRUT(
     const pool = await connectToDB();
     const request = pool.request();
 
-    // Optimize the query by:
-    // 1. Using a more efficient COUNT method
-    // 2. Adding an index hint if you have an index on rut and folio
-    // 3. Only calculating COUNT when needed (first page)
     const countQuery =
       currentPage === 1
         ? `COUNT(*) OVER() AS total`

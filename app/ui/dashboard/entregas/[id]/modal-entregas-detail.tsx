@@ -112,7 +112,7 @@ export default function ModalEntregasDetail({
               className="flex flex-col gap-4"
             >
               {/* General Info */}
-              <section className="mt-1 rounded-xl border border-gray-200/80 bg-gray-50/70 p-5 shadow-sm">
+              <section className="mt-1 rounded-xl border border-gray-200/80 bg-gray-50/70 p-5">
                 <div className="grid grid-cols-2 gap-5">
                   <ModalGeneralInfoField
                     name="Encargado"
@@ -134,7 +134,7 @@ export default function ModalEntregasDetail({
               </section>
 
               {/* Entregas List */}
-              <section className="flex flex-col gap-3">
+              <section className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                   <h3 className="flex items-center gap-2 text-sm font-medium text-slate-600">
                     <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
@@ -243,7 +243,7 @@ function EntregasListItem({ item }: { item: SocialAidByFolio }) {
 
 function FilesList({ folio, files }: { folio: string; files: SocialFiles[] }) {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-sm font-medium text-slate-600">
           <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
