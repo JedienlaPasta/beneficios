@@ -25,7 +25,7 @@ export default function AuditDetailsModal({
             </h3>
             <button
               onClick={() => setSelectedLog(null)}
-              className="rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600"
+              className="rounded-full p-1 text-slate-400 transition-colors hover:text-slate-600"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

@@ -4,13 +4,13 @@
 
 export function UserTableSkeleton() {
   const thStyle =
-    "whitespace-nowrap  py-4 text-left text-xs font-medium uppercase tracking-wide text-slate-500";
+    "whitespace-nowrap  py-4 text-left text-xs font-normal uppercase tracking-wide";
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-md shadow-slate-300/70">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[60rem] border-collapse divide-y divide-slate-200 text-sm">
-          <thead>
+          <thead className="text-slate-600/70">
             <tr className="grid grid-cols-26 bg-slate-50 px-6 pt-2">
               <th scope="col" className={`${thStyle} col-span-5`}>
                 Nombre
