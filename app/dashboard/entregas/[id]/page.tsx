@@ -3,13 +3,14 @@ import { Suspense } from "react";
 import CitizenDetail, {
   CitizenDetailSkeleton,
 } from "@/app/ui/dashboard/entregas/citizen-detail";
-import NewSocialAidModal from "@/app/ui/dashboard/entregas/new-social-aid-modal";
+import NewEntregaModal from "@/app/ui/dashboard/entregas/new-entrega-modal";
 import NewButton from "@/app/ui/dashboard/new-button";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import EntregasTable from "@/app/ui/dashboard/entregas/[id]/entregas-table";
 import { Modal } from "@/app/ui/dashboard/modal";
 import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/modal-context";
-import { Spinner } from "@/app/ui/dashboard/loaders";
+import ModalSkeleton from "@/app/ui/modal-skeleton";
+// import { Spinner } from "@/app/ui/dashboard/loaders";
 
 type CitizenRecordProps = {
   searchParams?: Promise<{
@@ -36,12 +37,14 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
     <div>
       {newSocialAid === "open" && (
         <Modal name="newsocialaid">
-          <NewSocialAidModal rut={rut} />
+          <Suspense fallback={<ModalSkeleton name="newsocialaid" />}>
+            <NewEntregaModal rut={rut} />
+          </Suspense>
         </Modal>
       )}
       {detailsModal && (
         <Modal name="detailsModal">
-          <Suspense fallback={<Spinner />}>
+          <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
             <ModalEntregasDetailContext folio={detailsModal} rut={rut} />
           </Suspense>
         </Modal>

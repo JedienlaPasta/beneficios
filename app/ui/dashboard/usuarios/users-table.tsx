@@ -39,14 +39,14 @@ export function UsersTable({ users }: { users: User[] }) {
   };
 
   const thStyle =
-    "whitespace-nowrap px-4 py-4 text-left text-xs font-medium uppercase tracking-wide text-slate-500";
+    "whitespace-nowrap  py-4 text-left text-xs font-normal uppercase tracking-wide";
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-md shadow-slate-300/70">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[60rem] border-collapse divide-y divide-slate-200 text-sm">
-          <thead>
-            <tr className="grid grid-cols-26 bg-slate-50 px-4 pt-2">
+          <thead className="text-slate-600/70">
+            <tr className="grid grid-cols-26 bg-slate-50 px-6 pt-2">
               <th scope="col" className={`${thStyle} col-span-5`}>
                 Nombre
               </th>
@@ -67,22 +67,22 @@ export function UsersTable({ users }: { users: User[] }) {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200 bg-white">
+          <tbody className="divide-y divide-slate-200/70 bg-white">
             {users.map((user) => (
               <tr
                 key={user.id}
-                className="group grid grid-cols-26 items-center px-4 hover:bg-slate-50"
+                className="group grid grid-cols-26 items-center gap-8 text-nowrap px-6 text-sm transition-colors hover:bg-slate-200/50"
               >
-                <td className="col-span-5 whitespace-nowrap px-4 py-3 font-medium text-slate-900">
+                <td className="col-span-5 whitespace-nowrap py-4 font-medium text-slate-700">
                   {user.nombre_usuario}
                 </td>
-                <td className="col-span-6 whitespace-nowrap px-4 py-3 text-slate-600">
+                <td className="col-span-6 whitespace-nowrap py-4 text-slate-500">
                   {user.correo}
                 </td>
-                <td className="col-span-5 whitespace-nowrap px-4 py-3 text-slate-600">
+                <td className="col-span-5 whitespace-nowrap py-4 text-slate-500">
                   {user.cargo}
                 </td>
-                <td className="col-span-3 whitespace-nowrap px-4 py-3">
+                <td className="col-span-3 whitespace-nowrap py-4">
                   <span
                     className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
                       user.rol === "Administrador"
@@ -95,7 +95,7 @@ export function UsersTable({ users }: { users: User[] }) {
                     {user.rol}
                   </span>
                 </td>
-                <td className="col-span-3 whitespace-nowrap px-4 py-3">
+                <td className="col-span-3 whitespace-nowrap py-4">
                   <span
                     className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
                       user.estado === "Habilitado"
@@ -106,7 +106,7 @@ export function UsersTable({ users }: { users: User[] }) {
                     {user.estado}
                   </span>
                 </td>
-                <td className="col-span-4 whitespace-nowrap px-4 py-3 text-right">
+                <td className="col-span-4 whitespace-nowrap py-4 text-right">
                   <div className="flex justify-end space-x-2">
                     <button
                       onClick={() => setEditingUser(user)}
@@ -150,7 +150,7 @@ export function UsersTable({ users }: { users: User[] }) {
               <tr>
                 <td
                   colSpan={6}
-                  className="px-4 py-10 text-center text-sm text-slate-500"
+                  className="py-10 text-center text-sm text-slate-500"
                 >
                   No hay usuarios registrados
                 </td>

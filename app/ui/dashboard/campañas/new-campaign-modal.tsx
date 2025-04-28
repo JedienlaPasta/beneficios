@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { createCampaign } from "@/app/lib/actions/campaña";
 import Input from "@/app/ui/dashboard/campañas/new-campaign-input";
 import CampaignDropdown from "@/app/ui/dashboard/campañas/campaign-dropdown";
-import { RiCloseLine } from "react-icons/ri";
 import { SubmitButton } from "../submit-button";
 import { Requirements } from "./[id]/update/update-form";
 import DataTypeCards from "./[id]/update/data-type-cards";
@@ -13,6 +12,7 @@ import RequirementsCard from "./[id]/update/requirements-cards";
 import dayjs from "dayjs";
 import CustomAntdDatePicker from "@/app/ui/dashboard/datepicker";
 import { campaignsList } from "@/app/lib/data/static-data";
+import CloseModalButton from "../close-modal-button";
 
 export type FormState = {
   success?: boolean;
@@ -112,103 +112,105 @@ export default function NewCampaignModal() {
   };
 
   return (
-    <div className="grid max-h-dvh w-full max-w-[30rem] shrink-0 flex-col gap-3 overflow-y-auto rounded-xl bg-white p-8 shadow-xl">
+    <div className="flex max-h-full w-[32rem] max-w-full shrink-0 flex-col overflow-hidden rounded-xl bg-white p-8 shadow-xl">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold">Crear Campaña</h2>
-        <RiCloseLine
-          className="cursor-pointer text-xl text-slate-400 hover:text-slate-600"
-          onClick={closeModal}
-        />
+        <CloseModalButton name="modal" />
       </div>
       <p className="text-xs text-gray-500">
         Elige el tipo de campaña que quieres ingresar y sus datos
         correspondientes.
       </p>
-      <form onSubmit={formAction} className="flex flex-col gap-5 pt-2">
-        <CampaignDropdown
-          label="Campaña"
-          name={"nombre"}
-          campaignsList={campaignsList}
-          campaignName={campaignName}
-          setCampaign={handleCampaignNameSelection}
-        />
-        <div className="flex items-end gap-3">
-          <div className="grow">
-            <Input
-              placeHolder="Stock..."
-              label="Stock Inicial"
-              type="text"
-              nombre="stock"
-              value={stock}
-              setData={setStock}
-            />
+      <div className="overflow-y-auto scrollbar-hide">
+        <form
+          onSubmit={formAction}
+          className="mt-2 flex flex-col gap-5 bg-white"
+        >
+          <CampaignDropdown
+            label="Campaña"
+            name={"nombre"}
+            campaignsList={campaignsList}
+            campaignName={campaignName}
+            setCampaign={handleCampaignNameSelection}
+          />
+          <div className="flex items-end gap-3">
+            <div className="grow">
+              <Input
+                placeHolder="Stock..."
+                label="Stock Inicial"
+                type="text"
+                nombre="stock"
+                value={stock}
+                setData={setStock}
+              />
+            </div>
+            <div className="grow">
+              <Input
+                required={true}
+                placeHolder="Código..."
+                label="Código Campaña"
+                type="text"
+                nombre="descripcion"
+                value={code}
+                setData={setCode}
+              />
+            </div>
+            <CampaignCode descripcion={code ? code.toUpperCase() : "##"} />
           </div>
-          <div className="grow">
-            <Input
-              required={true}
-              placeHolder="Código..."
-              label="Código Campaña"
-              type="text"
-              nombre="descripcion"
-              value={code}
-              setData={setCode}
-            />
+          <div className="flex flex-col gap-1">
+            <p className="text-xs text-slate-500">Dato Asociado</p>
+            <div className="grid grid-cols-3 gap-3">
+              <DataTypeCards value={fieldType} setValue={setFieldType}>
+                Código
+              </DataTypeCards>
+              <DataTypeCards value={fieldType} setValue={setFieldType}>
+                Monto
+              </DataTypeCards>
+              <DataTypeCards value={fieldType} setValue={setFieldType}>
+                Talla
+              </DataTypeCards>
+            </div>
           </div>
-          <CampaignCode descripcion={code ? code.toUpperCase() : "##"} />
-        </div>
-        <div className="flex flex-col gap-1">
-          <p className="text-xs text-slate-500">Dato Asociado</p>
-          <div className="grid grid-cols-3 gap-3">
-            <DataTypeCards value={fieldType} setValue={setFieldType}>
-              Código
-            </DataTypeCards>
-            <DataTypeCards value={fieldType} setValue={setFieldType}>
-              Monto
-            </DataTypeCards>
-            <DataTypeCards value={fieldType} setValue={setFieldType}>
-              Talla
-            </DataTypeCards>
-          </div>
-        </div>
-        <CustomAntdDatePicker
-          label="Término"
-          placeholder="Seleccione una fecha"
-          setDate={datePickerHandler}
-        />
+          <CustomAntdDatePicker
+            label="Término"
+            placeholder="Seleccione una fecha"
+            setDate={datePickerHandler}
+          />
 
-        <div className="flex flex-col gap-1">
-          <p className="text-xs text-slate-500">Criterios de Aceptación</p>
-          <div className="grid grid-cols-1 gap-3">
-            <RequirementsCard
-              isMarked={criteria.tramo}
-              name={"tramo"}
-              setIsMarked={setCriteria}
-              description="Hasta 40%"
-            >
-              Tramo
-            </RequirementsCard>
-            <RequirementsCard
-              isMarked={criteria.discapacidad}
-              name={"discapacidad"}
-              setIsMarked={setCriteria}
-              description="Discapacidad o dependencia"
-            >
-              Discapacidad
-            </RequirementsCard>
-            <RequirementsCard
-              isMarked={criteria.adultoMayor}
-              name={"adultoMayor"}
-              setIsMarked={setCriteria}
-              description="60 Años o Más"
-            >
-              Adulto Mayor
-            </RequirementsCard>
+          <div className="flex flex-col gap-1">
+            <p className="text-xs text-slate-500">Criterios de Aceptación</p>
+            <div className="grid grid-cols-1 gap-3">
+              <RequirementsCard
+                isMarked={criteria.tramo}
+                name={"tramo"}
+                setIsMarked={setCriteria}
+                description="Hasta 40%"
+              >
+                Tramo
+              </RequirementsCard>
+              <RequirementsCard
+                isMarked={criteria.discapacidad}
+                name={"discapacidad"}
+                setIsMarked={setCriteria}
+                description="Discapacidad o dependencia"
+              >
+                Discapacidad
+              </RequirementsCard>
+              <RequirementsCard
+                isMarked={criteria.adultoMayor}
+                name={"adultoMayor"}
+                setIsMarked={setCriteria}
+                description="60 Años o Más"
+              >
+                Adulto Mayor
+              </RequirementsCard>
+            </div>
           </div>
-        </div>
-        <SubmitButton isDisabled={isDisabled || !isFormValid()}>
-          {isLoading ? "Guardando..." : "Guardar"}
-        </SubmitButton>
-      </form>
+          <SubmitButton isDisabled={isDisabled || !isFormValid()}>
+            {isLoading ? "Guardando..." : "Guardar"}
+          </SubmitButton>
+        </form>
+      </div>
     </div>
   );
 }

@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { capitalize, formatDate, formatTime } from "@/app/lib/utils/format";
+import { formatDate, formatTime } from "@/app/lib/utils/format";
 import { MdAutorenew } from "react-icons/md";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { BiFolderPlus } from "react-icons/bi";
 import Pagination from "./pagination";
+import AuditDetailsModal from "./auditoria/details-modal";
 
 const ACTIVITY = [
   {
@@ -25,7 +26,7 @@ const ACTIVITY = [
   },
 ];
 
-type AuditLog = {
+export type AuditLog = {
   // id?: string;
   accion: string;
   comentario_accion: string;
@@ -77,7 +78,7 @@ export default function AuditTable({
   return (
     <div className="overflow-hidden rounded-b-xl bg-white">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[44rem] border-collapse">
+        <table className="w-full min-w-[44rem] border-collapse select-none">
           <thead className="border-y border-slate-200/70 bg-slate-50 text-xs font-medium tracking-wider text-slate-600/70">
             <tr className="grid grid-cols-26 items-center gap-8 px-6">
               <th className="col-span-8 py-4 text-left font-normal">
@@ -137,59 +138,10 @@ export default function AuditTable({
 
       {/* Details Modal */}
       {selectedLog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl">
-            <h3 className="mb-4 text-lg font-medium text-slate-900">
-              Detalles de la acción
-            </h3>
-            <div className="mb-4 grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs font-medium text-slate-500">Usuario</p>
-                <p className="text-sm text-slate-900">
-                  {selectedLog.nombre_usuario || "No disponible"}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-slate-500">Acción</p>
-                <p className="text-sm text-slate-900">
-                  {capitalize(selectedLog.accion)}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-slate-500">Fecha</p>
-                <p className="text-sm text-slate-900">
-                  {formatDate(new Date(selectedLog.fecha))}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-slate-500">
-                  Id Registro Alterado
-                </p>
-                <p className="text-sm text-slate-900">
-                  {selectedLog.id_registro_mod || "No disponible"}
-                </p>
-              </div>
-            </div>
-            {selectedLog.comentario_accion && (
-              <div className="mb-4">
-                <p className="text-xs font-medium text-slate-500">Dato</p>
-                <p className="text-sm text-slate-900">
-                  {capitalize(selectedLog.comentario_accion) +
-                    " " +
-                    (selectedLog.comentario_nombre || "")}
-                </p>
-              </div>
-            )}
-            <div className="flex justify-end">
-              <button
-                onClick={() => setSelectedLog(null)}
-                className="rounded-md bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
+        <AuditDetailsModal
+          selectedLog={selectedLog}
+          setSelectedLog={setSelectedLog}
+        />
       )}
     </div>
   );

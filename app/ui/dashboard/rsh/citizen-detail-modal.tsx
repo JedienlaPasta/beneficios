@@ -39,7 +39,7 @@ export default function CitizenDetailModal({ citizen }: ModalProps) {
       layout
       layoutRoot
       transition={{ layout: { duration: 0.25 } }}
-      className="flex max-h-[90%] w-[32rem] max-w-full shrink-0 flex-col gap-2 overflow-hidden rounded-xl bg-white p-8 shadow-xl" // Removed scrollbar-hide from here
+      className="flex max-h-full w-[32rem] max-w-full shrink-0 flex-col gap-2 overflow-hidden rounded-xl bg-white p-8 shadow-xl" // Removed scrollbar-hide from here
     >
       {/* Header */}
       <section className="flex flex-shrink-0 items-center justify-between">
@@ -270,6 +270,19 @@ function UpdateForm({ citizen, updateTab }: UpdateFormProps) {
       setIsLoading(false);
     }
   };
+
+  const isFormValid = () => {
+    return (
+      rut.trim() !== "" &&
+      dv.trim() !== "" &&
+      nombres.trim() !== "" &&
+      apellidos.trim() !== "" &&
+      direccion.trim() !== "" &&
+      tramo.trim() !== "" &&
+      folio.trim() !== ""
+    );
+  };
+
   return (
     <form onSubmit={handleSubmit} className="overflow-y-auto scrollbar-hide">
       <motion.div className="relative grid min-h-[6rem] gap-6">
@@ -450,7 +463,7 @@ function UpdateForm({ citizen, updateTab }: UpdateFormProps) {
           )}
         </AnimatePresence>
         <div className="z-10 flex">
-          <SubmitButton isDisabled={isDisabled}>
+          <SubmitButton isDisabled={isDisabled || !isFormValid()}>
             {isLoading ? "Guardando..." : "Guardar"}
           </SubmitButton>
         </div>

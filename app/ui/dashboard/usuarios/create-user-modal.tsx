@@ -43,8 +43,6 @@ export function CreateUserModal({ onClose }: { onClose: () => void }) {
     setIsFormValid(isValid);
   };
 
-  // We can remove the useEffect since validation happens in handleInputChange
-  // But we need to handle rol changes separately
   const handleRolChange = (newRol: string) => {
     setRol(newRol);
 
