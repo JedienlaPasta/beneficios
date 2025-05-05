@@ -7,7 +7,7 @@ type RSHTableProps = {
   currentPage: number;
 };
 export default async function RSHTable({ query, currentPage }: RSHTableProps) {
-  const itemsPerPage = 8;
+  const itemsPerPage = 7;
   const { data, pages } = await fetchRSH(query, currentPage, itemsPerPage);
 
   return (

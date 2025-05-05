@@ -11,7 +11,9 @@ export default function RSHTableRow({
     nombres_rsh: string;
     apellidos_rsh: string;
     direccion: string;
+    direccion_mod?: string;
     sector: string;
+    sector_mod?: string;
     tramo: number;
     ultima_entrega: Date;
   };
@@ -22,7 +24,9 @@ export default function RSHTableRow({
     nombres_rsh,
     apellidos_rsh,
     direccion,
+    direccion_mod,
     sector,
+    sector_mod,
     tramo,
     ultima_entrega,
   } = item;
@@ -38,18 +42,20 @@ export default function RSHTableRow({
       onClick={handleClick}
       className="grid cursor-pointer grid-cols-26 gap-9 text-nowrap px-6 text-sm tabular-nums transition-colors hover:bg-slate-50"
     >
-      <td className="group col-span-4 flex items-center py-4 text-slate-600">
+      <td className="group col-span-4 flex items-center py-3.5 text-slate-600">
         {formattedRut}
       </td>
-      <td className="col-span-6 py-4 text-slate-600">
+      <td className="col-span-6 py-3.5 text-slate-600">
         {apellidos_rsh}
         <div className="mt-1 text-xs text-slate-500/90">{nombres_rsh}</div>
       </td>
-      <td className="col-span-8 py-4 text-left text-slate-600">
-        {direccion}
-        <p className="mt-1 text-xs text-slate-500/90">{sector}</p>
+      <td className="col-span-8 py-3.5 text-left text-slate-600">
+        {direccion_mod ? direccion_mod : direccion}
+        <p className="mt-1 text-xs text-slate-500/90">
+          {sector_mod ? sector_mod : sector}
+        </p>
       </td>
-      <td className="col-span-4 flex flex-col justify-center py-4">
+      <td className="col-span-4 flex flex-col justify-center py-3.5">
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-blue-500">{tramo}%</span>
@@ -77,7 +83,7 @@ export default function RSHTableRow({
           </div>
         </div>
       </td>
-      <td className="col-span-4 flex flex-col items-end justify-center py-4 text-right">
+      <td className="col-span-4 flex flex-col items-end justify-center py-3.5 text-right">
         {ultima_entrega ? (
           <div className="text-slate-600">
             {formatDate(ultima_entrega)}

@@ -22,15 +22,9 @@ export default async function RSHById(props: RSHByIdProps) {
   // Params (id)
   const params = await props.params;
   const id = params.id;
-  // const { data } = await fetchRSHById(id);
 
   return (
     <div>
-      {/* {showUpdateModal === "open" && (
-        <Modal>
-          <UpdateCampaignModal id={id} data={data} />
-        </Modal>
-      )} */}
       <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
         <div>
           <h2 className="text-3xl font-bold text-slate-800">

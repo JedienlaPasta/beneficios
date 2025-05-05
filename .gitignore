@@ -41,3 +41,5 @@ yarn-error.log*
 next-env.d.ts
 
 input.xlsx
+output.xlsx
+output_checked.xlsx

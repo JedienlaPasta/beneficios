@@ -2,14 +2,19 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { RiCloseLine } from "react-icons/ri";
 
-export default function CloseModalButton({ name }: { name: string }) {
+type Props = {
+  name: string;
+  secondName?: string;
+};
+
+export default function CloseModalButton({ name, secondName }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const closeModal = () => {
     const params = new URLSearchParams(searchParams);
-    console.log(name);
     params.delete(name);
+    params.delete(secondName || "");
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 

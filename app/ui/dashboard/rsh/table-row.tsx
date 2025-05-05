@@ -11,7 +11,9 @@ export default function TableRow({
     nombres_rsh: string;
     apellidos_rsh: string;
     direccion: string;
+    direccion_mod?: string;
     sector: string;
+    sector_mod?: string;
     tramo: number;
     ultima_entrega: Date;
   };
@@ -22,7 +24,9 @@ export default function TableRow({
     nombres_rsh,
     apellidos_rsh,
     direccion,
+    direccion_mod,
     sector,
+    sector_mod,
     tramo,
     ultima_entrega,
   } = item;
@@ -49,8 +53,10 @@ export default function TableRow({
         <div className="mt-1 text-xs text-slate-500/90">{nombres_rsh}</div>
       </td>
       <td className="col-span-8 py-4 text-left text-slate-600">
-        {direccion}
-        <p className="mt-1 text-xs text-slate-500/90">{sector}</p>
+        {direccion_mod !== null ? direccion_mod : direccion}
+        <p className="mt-1 text-xs text-slate-500/90">
+          {sector_mod ? sector_mod : sector}
+        </p>
       </td>
       <td className="col-span-4 flex flex-col justify-center py-4">
         <div className="flex flex-col gap-2">

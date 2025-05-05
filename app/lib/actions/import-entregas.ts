@@ -18,11 +18,16 @@ interface Entregas {
   beneficios_entregados: Entrega[];
   observacion: string;
   nombre_usuario: string;
+  nombre_beneficiario: string;
+  // folio_rsh: string;
 }
 
 export async function importEntregas() {
+  // const file = "output.xlsx";
+  const file = "output_checked.xlsx";
   try {
-    const filePath = path.join(process.cwd(), "public", "input.xlsx");
+    // const filePath = path.join(process.cwd(), "public", "input.xlsx");
+    const filePath = path.join(process.cwd(), "public", file);
 
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePath);
@@ -40,16 +45,16 @@ export async function importEntregas() {
       const dv = rawRut?.split("-")[1];
 
       const beneficios_entregados: Entrega[] = [];
-      if (values[11]?.toString() && values[10]?.toString()) {
+      if (values[9]?.toString() && values[10]?.toString()) {
         beneficios_entregados.push({
-          detalle: values[11]?.toString() || "",
-          id_campaña: values[10]?.toString() || "",
+          id_campaña: values[9]?.toString() || "",
+          detalle: values[10]?.toString() || "",
         });
       }
-      if (values[15]?.toString() && values[14]?.toString()) {
+      if (values[11]?.toString() && values[12]?.toString()) {
         beneficios_entregados.push({
-          detalle: values[15]?.toString() || "",
-          id_campaña: values[14]?.toString() || "",
+          id_campaña: values[11]?.toString() || "",
+          detalle: values[12]?.toString() || "",
         });
       }
 
@@ -57,10 +62,12 @@ export async function importEntregas() {
         folio: values[1]?.toString() || "",
         rut,
         dv,
-        fecha_entrega: values[9]?.toString() || "",
+        fecha_entrega: values[8]?.toString() || "",
         beneficios_entregados: beneficios_entregados,
-        nombre_usuario: capitalizeAll(values[19]?.toString()) || "",
+        nombre_usuario: capitalizeAll(values[16]?.toString()) || "",
         observacion: values[17]?.toString() || "",
+        nombre_beneficiario: capitalizeAll(values[3]?.toString()) || "",
+        // folio_rsh: values[5]?.toString() || "",
       };
 
       if (
@@ -84,6 +91,8 @@ export async function importEntregas() {
     try {
       let skippedRows = 0;
       const notFound = [];
+      const duplicated = [];
+      let index = 1;
       for (const entrega of entregas) {
         const nombre = entrega.nombre_usuario;
         const userRequest = new sql.Request(transaction);
@@ -99,7 +108,7 @@ export async function importEntregas() {
           await transaction.rollback();
           return {
             success: false,
-            message: `User not found for nombre_usuario: ${entrega.nombre_usuario}`,
+            message: `User not found for nombre_usuario: ${entrega}`,
           };
         }
 
@@ -114,7 +123,27 @@ export async function importEntregas() {
           skippedRows++;
           notFound.push({
             rut: entrega.rut + " " + entrega.dv,
-            nombre: entrega.nombre_usuario,
+            nombre: entrega.nombre_beneficiario,
+            folio: entrega.folio,
+          });
+          continue;
+        }
+
+        // Check if the folio already exists in the entregas table
+        const folioCheckRequest = new sql.Request(transaction);
+        const folioExists = await folioCheckRequest
+          .input("folio", sql.VarChar, entrega.folio)
+          .query(`SELECT 1 FROM entregas WHERE folio = @folio`);
+
+        if (folioExists.recordset.length > 0) {
+          console.log(
+            `Folio ${entrega.folio} already exists in entregas table`,
+          );
+          skippedRows++;
+          duplicated.push({
+            rut: entrega.rut + " " + entrega.dv,
+            nombre: entrega.nombre_beneficiario,
+            folio: entrega.folio,
           });
           continue;
         }
@@ -157,7 +186,7 @@ export async function importEntregas() {
         const folio = entregaResult.recordset[0].folio;
 
         for (const beneficio of entrega.beneficios_entregados) {
-          console.log(beneficio.id_campaña);
+          console.log(index + ": " + beneficio.id_campaña + " - " + folio);
           const beneficioRequest = new sql.Request(transaction);
           await beneficioRequest
             .input("detalle", sql.NVarChar, beneficio.detalle)
@@ -178,6 +207,7 @@ export async function importEntregas() {
               WHERE id = @id_campaña
             `);
         }
+        index++;
       }
 
       await transaction.commit();
@@ -185,10 +215,11 @@ export async function importEntregas() {
       return {
         success: true,
         message: `Successfully imported ${entregas.length} records, skipped ${skippedRows} rows`,
-        count: entregas.length,
+        inserted: entregas.length,
         skipped: skippedRows,
-        data: entregas,
+        // data: entregas,
         notFound: notFound,
+        duplicated: duplicated,
       };
     } catch (error) {
       console.log("Rollback");

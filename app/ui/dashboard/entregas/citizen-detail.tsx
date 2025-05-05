@@ -1,4 +1,4 @@
-import { formatDate, formatRUT } from "@/app/lib/utils/format";
+import { formatPhone, formatRUT } from "@/app/lib/utils/format";
 import DetailRow from "../campañas/[id]/detail-card";
 import { redirect } from "next/navigation";
 import { fetchRSHByRUT } from "@/app/lib/data/rsh";
@@ -17,20 +17,16 @@ export default async function CitizenDetail({ rut }: Props) {
     nombres_rsh,
     apellidos_rsh,
     direccion,
-    // sector,
+    direccion_mod,
     tramo,
     telefono,
-    // dv,
+    telefono_mod,
     fecha_nacimiento,
     genero,
     correo,
-    // indigena,
-    fecha_calificacion,
+    correo_mod,
     folio,
-    // fecha_encuesta,
     nacionalidad,
-    fecha_modificacion,
-    ultima_entrega,
   } = data[0];
 
   const formattedRut = formatRUT(rut);
@@ -63,7 +59,6 @@ export default async function CitizenDetail({ rut }: Props) {
               </p>
             </div>
           </div>
-          {/* <CampaignOptionsMenu id={id} /> */}
           <span className="flex flex-col text-slate-500">
             <p className="text-xs uppercase tracking-wider">Tramo</p>
             <p className="text-2xl font-bold text-slate-600">{tramo}%</p>
@@ -77,7 +72,6 @@ export default async function CitizenDetail({ rut }: Props) {
               Información General
             </h2>
             <div className="rounded-xl bg-white px-10 py-2">
-              {/* <DetailRow name="ID" value={id} border={true} /> */}
               <DetailRow
                 name="Nacionalidad"
                 value={nacionalidad}
@@ -90,7 +84,7 @@ export default async function CitizenDetail({ rut }: Props) {
           {/* 2nd segment */}
           <div className="rounded-xl border border-slate-200 bg-gray-100">
             <h2 className="px-10 py-4 text-sm font-medium text-slate-400">
-              Información Contacto
+              Información Contacto RSH
             </h2>
             <div className="rounded-xl bg-white px-10 py-2">
               <DetailRow
@@ -109,23 +103,20 @@ export default async function CitizenDetail({ rut }: Props) {
           {/* 3rd segment */}
           <div className="rounded-xl border border-slate-200 bg-gray-100 xl:col-span-2 2xl:col-span-1">
             <h2 className="px-10 py-4 text-sm font-medium text-slate-400">
-              Fechas
+              Información Contacto Modificado
             </h2>
             <div className="rounded-xl bg-white px-10 py-2">
               <DetailRow
-                name="Fecha Modificación"
-                value={formatDate(fecha_modificacion) || "Sin teléfono"}
+                name="Teléfono"
+                value={formatPhone(telefono_mod) || "Sin teléfono"}
                 border={true}
               />
               <DetailRow
-                name="Fecha Calificación"
-                value={formatDate(fecha_calificacion) || "Sin dirección"}
+                name="Dirección"
+                value={direccion_mod || "Sin dirección"}
                 border={true}
               />
-              <DetailRow
-                name="Última Entrega"
-                value={formatDate(ultima_entrega) || "Sin entregas"}
-              />
+              <DetailRow name="Correo" value={correo_mod || "Sin correo"} />
             </div>
           </div>
         </div>

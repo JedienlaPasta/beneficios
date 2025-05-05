@@ -1,4 +1,4 @@
-export default function CampaignSocialAidsTableSkeleton() {
+export default function CampaignEntregasTableSkeleton() {
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[44rem]">

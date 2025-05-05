@@ -96,13 +96,17 @@ export type RSH = {
   apellidos_rsh: string;
   rut: number;
   direccion: string;
+  direccion_mod?: string;
   sector: string;
+  sector_mod?: string;
   tramo: number;
-  telefono: number;
+  telefono: string;
+  telefono_mod?: string;
   dv: string;
   fecha_nacimiento: Date;
   genero: string;
   correo: string;
+  correo_mod?: string;
   indigena: string;
   fecha_calificacion: Date;
   folio: string;

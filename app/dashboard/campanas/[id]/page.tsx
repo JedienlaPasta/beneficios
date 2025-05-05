@@ -4,8 +4,8 @@ import CampaignDetail, {
   CampaignDetailSkeleton,
 } from "@/app/ui/dashboard/campañas/[id]/campaign-detail";
 import SearchBar from "@/app/ui/dashboard/searchbar";
-import CampaignSocialAidsTable from "@/app/ui/dashboard/campañas/[id]/campaign-entregas-table";
-import CampaignSocialAidsTableSkeleton from "@/app/ui/dashboard/campañas/[id]/table-skeleton";
+import CampaignEntregasTable from "@/app/ui/dashboard/campañas/[id]/campaign-entregas-table";
+import CampaignEntregasTableSkeleton from "@/app/ui/dashboard/campañas/[id]/table-skeleton";
 import { Modal } from "@/app/ui/dashboard/modal";
 import ModalSkeleton from "@/app/ui/modal-skeleton";
 
@@ -60,8 +60,8 @@ export default async function Campaign(props: CampaignProps) {
             </span>
             <SearchBar placeholder="Buscar..." />
           </div>
-          <Suspense fallback={<CampaignSocialAidsTableSkeleton />}>
-            <CampaignSocialAidsTable
+          <Suspense fallback={<CampaignEntregasTableSkeleton />}>
+            <CampaignEntregasTable
               id={id}
               query={query}
               paginaActual={paginaActual}

@@ -524,7 +524,9 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
     form.getTextField("Rut").setText(`${ciudadano.rut}-${ciudadano.dv}`);
     form.getTextField("Domicilio").setText(String(ciudadano.direccion));
     form.getTextField("Tramo").setText(`${ciudadano.tramo}%`);
-    form.getTextField("Telefono").setText(ciudadano.telefono || "No aplica");
+    form
+      .getTextField("Telefono")
+      .setText(String(ciudadano.telefono || "No aplica"));
     form
       .getTextField("FechaSolicitud")
       .setText(new Date().toLocaleDateString());

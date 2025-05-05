@@ -8,8 +8,10 @@ export async function fetchRSHByRUT(rut: string) {
     const request = pool.request();
     const result = await request.input("rut", sql.Int, rut).query(`
         SELECT rsh.*,
+        mods.direccion_mod, mods.sector_mod, mods.telefono_mod, mods.correo_mod,
         (SELECT MAX(fecha_entrega) FROM entregas WHERE rut = @rut) AS ultima_entrega
         FROM rsh
+        LEFT JOIN rsh_mods mods ON rsh.rut = mods.rut
         WHERE rsh.rut = @rut
       `);
 
@@ -40,8 +42,10 @@ export async function fetchRSH(
       .input("pageSize", sql.Int, resultsPerPage).query(`
         SELECT rsh.rut, rsh.dv, rsh.nombres_rsh, rsh.apellidos_rsh, rsh.direccion, rsh.sector, rsh.tramo,
         (SELECT MAX(entregas.fecha_entrega) FROM entregas WHERE entregas.rut = rsh.rut) AS ultima_entrega,
+        mods.direccion_mod, mods.sector_mod, mods.telefono_mod, mods.correo_mod,
         COUNT (*) OVER() AS total
         FROM rsh
+        LEFT JOIN rsh_mods mods ON rsh.rut = mods.rut
         WHERE concat(rsh.rut,' ', rsh.nombres_rsh,' ', rsh.apellidos_rsh,' ', rsh.direccion) LIKE @query
         ORDER BY rsh.apellidos_rsh ASC
         OFFSET @offset ROWS

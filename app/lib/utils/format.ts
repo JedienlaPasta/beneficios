@@ -44,6 +44,7 @@ export const formatNumber = (num: number | string) => {
 };
 
 export const formatRUT = (rut: string | number) => {
+  if (!rut) return "";
   return formatNumber(rut) + "-" + getDV(String(rut));
 };
 
