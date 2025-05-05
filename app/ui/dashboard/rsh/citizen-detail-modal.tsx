@@ -8,9 +8,7 @@ import { getAge } from "@/app/lib/utils/get-values";
 import RoleGuard from "../../auth/role-guard";
 import DeleteRSHButton from "./delete-rsh-button";
 import { SubmitButton } from "../submit-button";
-import CustomAntdDatePicker from "../datepicker";
 import Input from "../campañas/new-campaign-input";
-import dayjs from "dayjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { updateRSH } from "@/app/lib/actions/rsh";
 import { toast } from "sonner";
@@ -21,17 +19,14 @@ type ModalProps = {
 };
 
 export default function CitizenDetailModal({ citizen }: ModalProps) {
-  const [updateTab, setUpdateTab] = useState("Obligatorio");
   const [tab, setTab] = useState("Personal");
   const tabs = ["Personal", "Adicional"];
-  const updateTabs = ["Obligatorio", "Opcional"];
   const { rut, folio } = citizen;
 
   const [isEditing, setIsEditing] = useState(false);
   const toggleEditForm = () => {
     setIsEditing((prev) => !prev);
     setTab("Personal");
-    setUpdateTab("Obligatorio");
   };
 
   return (
@@ -101,26 +96,16 @@ export default function CitizenDetailModal({ citizen }: ModalProps) {
                 duration: 0.3,
               }}
             >
-              {updateTabs.map((currentTab, index) => (
-                <button
-                  key={index}
-                  onClick={() => setUpdateTab(currentTab)}
-                  className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors ${
-                    currentTab === updateTab
-                      ? "text-blue-600"
-                      : "text-slate-500 hover:text-slate-700"
-                  }`}
-                >
-                  {currentTab}
-                  {currentTab === updateTab && (
-                    <motion.span
-                      layoutId="tab-underline"
-                      className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600"
-                      transition={{ duration: 0.2 }}
-                    />
-                  )}
-                </button>
-              ))}
+              <button
+                className={`relative px-4 py-2 text-sm font-medium text-blue-600 outline-none transition-colors`}
+              >
+                {"Contacto"}
+                <motion.span
+                  layoutId="tab-underline"
+                  className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600"
+                  transition={{ duration: 0.2 }}
+                />
+              </button>
             </motion.span>
           )}
         </AnimatePresence>
@@ -130,9 +115,7 @@ export default function CitizenDetailModal({ citizen }: ModalProps) {
         <h3 className="flex items-center gap-3 py-2 text-sm font-medium text-slate-600">
           <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
           {isEditing
-            ? updateTab === "Obligatorio"
-              ? "Información Obligatoria"
-              : "Información Opcional"
+            ? "Información de Contacto"
             : tab === "Personal"
               ? "Información Personal"
               : "Información Adicional"}
@@ -151,19 +134,19 @@ export default function CitizenDetailModal({ citizen }: ModalProps) {
           {isEditing ? (
             <motion.div
               key="update-form"
-              initial={{ opacity: 0, y: 10, height: 390 }}
+              initial={{ opacity: 0, y: 10, height: 340 }}
               animate={{ opacity: 1, y: 0, height: "auto" }}
               exit={{ opacity: 0, y: -10, height: 220 }}
               transition={{ duration: 0.4 }}
             >
-              <UpdateForm citizen={citizen} updateTab={updateTab} />
+              <UpdateForm citizen={citizen} />
             </motion.div>
           ) : (
             <motion.div
               key="rsh-content"
               initial={{ opacity: 0, y: 10, height: 220 }}
               animate={{ opacity: 1, y: 0, height: "auto" }}
-              exit={{ opacity: 0, y: -10, height: 390 }}
+              exit={{ opacity: 0, y: -10, height: 340 }}
               transition={{ duration: 0.4 }}
             >
               <RSHContent citizen={citizen} tab={tab} />
@@ -188,25 +171,20 @@ function ToggleUpdateFormButton({ handleClick }: { handleClick: () => void }) {
 
 type UpdateFormProps = {
   citizen: RSH;
-  updateTab: string;
 };
 
-function UpdateForm({ citizen, updateTab }: UpdateFormProps) {
-  const [rut, setRut] = useState(String(citizen?.rut) || "");
-  const [dv, setDv] = useState(citizen?.dv || "");
-  const [nombres, setNombres] = useState(citizen?.nombres_rsh || "");
-  const [apellidos, setApellidos] = useState(citizen?.apellidos_rsh || "");
-  const [direccion, setDireccion] = useState(citizen?.direccion || "");
-  const [sector, setSector] = useState(citizen?.sector || "");
-  const [telefono, setTelefono] = useState(String(citizen?.telefono || ""));
-  const [correo, setCorreo] = useState(citizen?.correo || "");
-  const [tramo, setTramo] = useState(String(citizen?.tramo || ""));
-  const [genero, setGenero] = useState(citizen?.genero || "");
-  const [indigena, setIndigena] = useState(citizen?.indigena || "");
-  const [nacionalidad, setNacionalidad] = useState(citizen?.nacionalidad || "");
-  const [folio, setFolio] = useState(String(citizen?.folio || ""));
-  const [fechaNacimiento, setFechaNacimiento] = useState<Date | null>(
-    citizen?.fecha_nacimiento || "",
+function UpdateForm({ citizen }: UpdateFormProps) {
+  const [direccion, setDireccion] = useState(
+    citizen?.direccion_mod || citizen?.direccion || "",
+  );
+  const [sector, setSector] = useState(
+    citizen?.sector_mod || citizen?.sector || "",
+  );
+  const [telefono, setTelefono] = useState(
+    String(citizen?.telefono_mod || citizen?.telefono || ""),
+  );
+  const [correo, setCorreo] = useState(
+    citizen?.correo_mod || citizen?.correo || "",
   );
 
   const router = useRouter();
@@ -222,14 +200,6 @@ function UpdateForm({ citizen, updateTab }: UpdateFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
-  const fechaNacimientoHandler = (pickerDate: dayjs.Dayjs | null) => {
-    if (pickerDate) {
-      setFechaNacimiento(pickerDate.toDate());
-    } else {
-      setFechaNacimiento(null);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
@@ -237,20 +207,11 @@ function UpdateForm({ citizen, updateTab }: UpdateFormProps) {
 
     const myFormData = new FormData();
 
-    myFormData.append("rut", rut);
-    myFormData.append("dv", dv);
-    myFormData.append("nombres_rsh", nombres);
-    myFormData.append("apellidos_rsh", apellidos);
+    myFormData.append("rut", String(citizen.rut));
     myFormData.append("direccion", direccion);
     myFormData.append("sector", sector);
     myFormData.append("telefono", telefono);
     myFormData.append("correo", correo);
-    myFormData.append("tramo", tramo);
-    myFormData.append("genero", genero);
-    myFormData.append("indigena", indigena);
-    myFormData.append("nacionalidad", nacionalidad);
-    myFormData.append("folio", folio);
-    myFormData.append("fechaNacimiento", fechaNacimiento?.toString() || "");
 
     const toastId = toast.loading("Guardando...");
     try {
@@ -272,195 +233,67 @@ function UpdateForm({ citizen, updateTab }: UpdateFormProps) {
   };
 
   const isFormValid = () => {
-    return (
-      rut.trim() !== "" &&
-      dv.trim() !== "" &&
-      nombres.trim() !== "" &&
-      apellidos.trim() !== "" &&
-      direccion.trim() !== "" &&
-      tramo.trim() !== "" &&
-      folio.trim() !== ""
-    );
+    return direccion.trim() !== "";
   };
 
   return (
     <form onSubmit={handleSubmit} className="overflow-y-auto scrollbar-hide">
       <motion.div className="relative grid min-h-[6rem] gap-6">
         <AnimatePresence mode="wait">
-          {updateTab === "Obligatorio" && (
-            <motion.section
-              key="obligatorio"
-              initial={{ opacity: 0, y: 10, height: 270 }}
-              animate={{ opacity: 1, y: 0, height: "auto" }}
-              exit={{ opacity: 0, y: -10, height: 290 }}
-              transition={{
-                duration: 0.4,
-                height: { duration: 0.4 },
-                ease: "easeInOut",
-              }}
-              className="flex flex-col gap-5"
-              layout
-            >
-              <div className="flex flex-col gap-5 pt-2">
-                <div className="flex grow gap-3">
-                  <Input
-                    placeHolder="12345678"
-                    label="RUT (sin dígito ni puntos) *"
-                    type="text"
-                    pattern="[0-9]*"
-                    nombre="rut"
-                    value={rut}
-                    setData={setRut}
-                    required
-                  />
-                  <Input
-                    placeHolder="K o 0-9"
-                    label="Dígito Verificador *"
-                    type="text"
-                    nombre="dv"
-                    value={dv}
-                    setData={setDv}
-                    maxLength={1}
-                    required
-                  />
-                </div>
+          <motion.section
+            key="opcional"
+            initial={{ opacity: 0, y: 10, height: 290 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, y: -10, height: 270 }}
+            transition={{
+              duration: 0.4,
+              height: { duration: 0.4 },
+              ease: "easeInOut",
+            }}
+            layout
+          >
+            <div className="flex flex-col gap-5 pt-2">
+              <Input
+                placeHolder="Dirección completa"
+                label="Dirección *"
+                type="text"
+                nombre="direccion"
+                value={direccion}
+                setData={setDireccion}
+                required
+              />
 
-                <div className="flex grow gap-3">
-                  <Input
-                    placeHolder="Nombres"
-                    label="Nombres *"
-                    type="text"
-                    nombre="nombres"
-                    value={nombres}
-                    setData={setNombres}
-                    required
-                  />
-                  <Input
-                    placeHolder="Apellidos"
-                    label="Apellidos *"
-                    type="text"
-                    nombre="apellidos"
-                    value={apellidos}
-                    setData={setApellidos}
-                    required
-                  />
-                </div>
-
+              <div className="flex grow gap-3">
                 <Input
-                  placeHolder="Dirección completa"
-                  label="Dirección *"
+                  placeHolder="Sector"
+                  label="Sector"
                   type="text"
-                  nombre="direccion"
-                  value={direccion}
-                  setData={setDireccion}
-                  required
+                  nombre="sector"
+                  value={sector}
+                  setData={setSector}
                 />
-
-                <div className="flex grow gap-3">
-                  <Input
-                    placeHolder="40-100"
-                    label="Tramo RSH *"
-                    type="text"
-                    pattern="[0-9]*"
-                    nombre="tramo"
-                    value={tramo}
-                    setData={setTramo}
-                    required
-                  />
-                  <Input
-                    placeHolder="Número de folio"
-                    label="Folio *"
-                    type="text"
-                    pattern="[0-9]*"
-                    nombre="folio"
-                    value={folio}
-                    setData={setFolio}
-                    required
-                  />
-                </div>
-              </div>
-            </motion.section>
-          )}
-          {updateTab === "Opcional" && (
-            <motion.section
-              key="opcional"
-              initial={{ opacity: 0, y: 10, height: 290 }}
-              animate={{ opacity: 1, y: 0, height: "auto" }}
-              exit={{ opacity: 0, y: -10, height: 270 }}
-              transition={{
-                duration: 0.4,
-                height: { duration: 0.4 },
-                ease: "easeInOut",
-              }}
-              layout
-            >
-              <div className="flex flex-col gap-5 pt-2">
                 <Input
-                  placeHolder="correo@ejemplo.com"
-                  label="Correo Electrónico"
-                  type="email"
-                  nombre="correo"
-                  value={correo}
-                  setData={setCorreo}
-                />
-
-                <div className="flex grow gap-3">
-                  <Input
-                    placeHolder="Sector"
-                    label="Sector"
-                    type="text"
-                    nombre="sector"
-                    value={sector}
-                    setData={setSector}
-                  />
-                  <Input
-                    placeHolder="912345678"
-                    label="Teléfono"
-                    type="text"
-                    pattern="[0-9]*"
-                    maxLength={9}
-                    nombre="telefono"
-                    value={telefono}
-                    setData={setTelefono}
-                  />
-                </div>
-
-                <div className="flex grow gap-3">
-                  <Input
-                    placeHolder="Masculino/Femenino/Otro"
-                    label="Género"
-                    type="text"
-                    nombre="genero"
-                    value={genero}
-                    setData={setGenero}
-                  />
-                  <Input
-                    placeHolder="Sí/No"
-                    label="Pertenece a pueblo indígena"
-                    type="text"
-                    nombre="indigena"
-                    value={indigena}
-                    setData={setIndigena}
-                  />
-                </div>
-
-                <Input
-                  placeHolder="Chilena/Otra"
-                  label="Nacionalidad"
+                  placeHolder="912345678"
+                  label="Teléfono"
                   type="text"
-                  nombre="nacionalidad"
-                  value={nacionalidad}
-                  setData={setNacionalidad}
-                />
-
-                <CustomAntdDatePicker
-                  label="Fecha de Nacimiento"
-                  placeholder="Seleccione una fecha"
-                  setDate={fechaNacimientoHandler}
+                  pattern="[0-9]*"
+                  maxLength={9}
+                  nombre="telefono"
+                  value={telefono}
+                  setData={setTelefono}
                 />
               </div>
-            </motion.section>
-          )}
+
+              <Input
+                placeHolder="correo@ejemplo.com"
+                label="Correo Electrónico"
+                type="email"
+                nombre="correo"
+                value={correo}
+                setData={setCorreo}
+              />
+            </div>
+          </motion.section>
         </AnimatePresence>
         <div className="z-10 flex">
           <SubmitButton isDisabled={isDisabled || !isFormValid()}>
@@ -561,7 +394,9 @@ function RSHContent({ citizen, tab }: { citizen: RSH; tab: string }) {
             <div className="mt-2 grid grid-cols-6 gap-4 rounded-xl border border-gray-200/80 bg-gray-50/70 p-6 shadow-sm">
               <div className="col-span-4 flex flex-col gap-1">
                 <p className="text-xs font-medium text-slate-500">Dirección</p>
-                <p className="text-sm text-slate-800">{citizen.direccion}</p>
+                <p className="text-sm text-slate-800">
+                  {citizen?.direccion_mod || citizen?.direccion || ""}
+                </p>
               </div>
 
               <div className="col-span-2 flex flex-col gap-1">
@@ -580,7 +415,7 @@ function RSHContent({ citizen, tab }: { citizen: RSH; tab: string }) {
               <div className="col-span-4 flex flex-col gap-1">
                 <p className="text-xs font-medium text-slate-500">Sector</p>
                 <p className="text-sm text-slate-800">
-                  {citizen.sector || "No especificado"}
+                  {citizen?.sector_mod || citizen?.sector || "No especificado"}
                 </p>
               </div>
 
@@ -602,14 +437,15 @@ function RSHContent({ citizen, tab }: { citizen: RSH; tab: string }) {
                   Correo Electrónico
                 </p>
                 <p className="text-sm text-slate-800">
-                  {citizen.correo || "No registrado"}
+                  {citizen?.correo_mod || citizen?.correo || "No registrado"}
                 </p>
               </div>
 
               <div className="col-span-2 flex flex-col gap-1">
                 <p className="text-xs font-medium text-slate-500">Teléfono</p>
                 <p className="text-sm text-slate-800">
-                  {formatPhone(citizen.telefono) || "No registrado"}
+                  {formatPhone(citizen?.telefono_mod || citizen?.telefono) ||
+                    "No registrado"}
                 </p>
               </div>
             </div>

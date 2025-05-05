@@ -19,7 +19,11 @@ const CreateCampaignFormSchema = z.object({
   fechaTermino: z.string(),
   estado: z.enum(["En curso", "Finalizado"]),
   code: z.string(),
-  stock: z.string().transform((str) => Number(str)),
+  stock: z.string()
+    .refine((val) => !isNaN(Number(val)) && val.trim() !== '', {
+      message: "El stock debe ser un número válido"
+    })
+    .transform((str) => Number(str)),
   entregas: z.number(),
   tipoDato: z.string(),
   tramo: z.string().transform((str) => str === "true"),

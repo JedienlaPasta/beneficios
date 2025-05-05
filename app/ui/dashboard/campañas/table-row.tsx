@@ -28,8 +28,8 @@ export default function TableRow({
 
   const colorEstado =
     estado === "En curso"
-      ? "bg-green-100/80 text-green-500 border-green-200/80"
-      : "bg-slate-100/80 text-slate-500 border-slate-200/60";
+      ? "bg-green-100 text-green-600"
+      : "bg-slate-100/80 text-slate-500";
 
   const copyToClipboard = async (text: string) => {
     await navigator.clipboard.writeText(text);
@@ -72,7 +72,7 @@ export default function TableRow({
       </td>
       <td className="col-span-3 flex justify-center py-4 text-slate-600">
         <span
-          className={`rounded-md border px-3 py-1 text-xs font-medium ${colorEstado}`}
+          className={`rounded-md px-3 py-1 text-xs font-medium ${colorEstado}`}
         >
           {estado}
         </span>

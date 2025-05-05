@@ -6,11 +6,12 @@ import { useEffect, useRef } from "react";
 
 type ModalProps = {
   name: string;
+  secondName?: string;
   children: React.ReactNode;
   top?: string;
 };
 
-export function Modal({ name, children }: ModalProps) {
+export function Modal({ name, secondName, children }: ModalProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -25,6 +26,7 @@ export function Modal({ name, children }: ModalProps) {
   const handleClick = () => {
     const params = new URLSearchParams(searchParams);
     params.delete(name);
+    params.delete(secondName || "");
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 

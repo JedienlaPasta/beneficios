@@ -156,48 +156,44 @@ export async function createRSH(formData: FormData) {
   }
 }
 
+const RSHUpdateFormSchema = z.object({
+  rut: z
+    .string()
+    .min(7, { message: "RUT debe tener al menos 7 dígitos" })
+    .regex(/^\d+$/, { message: "RUT debe contener solo números" }),
+  direccion: z
+    .string()
+    .min(3, { message: "Dirección debe tener al menos 3 caracteres" }),
+  sector: z.string().optional(),
+  telefono: z
+    .string()
+    .optional()
+    .refine((val) => !val || val.length === 9, {
+      message: "Teléfono debe tener 9 dígitos",
+    }),
+  correo: z
+    .string()
+    .optional()
+    .refine((val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+      message: "Formato de correo electrónico inválido",
+    }),
+});
+
 // Editar RSH
 export async function updateRSH(formData: FormData) {
+  console.log(formData);
   const rut = formData.get("rut") as string;
-  const dv = formData.get("dv") as string;
-  const nombresRSH = formData.get("nombres_rsh") as string;
-  const apellidosRSH = formData.get("apellidos_rsh") as string;
   const direccion = formData.get("direccion") as string;
   const sector = formData.get("sector") as string;
   const telefono = formData.get("telefono") as string;
   const correo = formData.get("correo") as string;
-  const tramo = formData.get("tramo") as string;
-  const genero = formData.get("genero") as string;
-  const indigena = formData.get("indigena") as string;
-  const nacionalidad = formData.get("nacionalidad") as string;
-  const folio = formData.get("folio") as string;
-  const fecha_nacimiento = formData.get("fecha_nacimiento") as string;
 
-  const checkDV = getDV(rut);
-  if (checkDV !== dv) {
-    return {
-      success: false,
-      message: "El DV no coincide con el RUT",
-    };
-  }
-
-  const validationResult = RSHFormSchema.safeParse({
+  const validationResult = RSHUpdateFormSchema.safeParse({
     rut,
-    dv,
-    nombres_rsh: capitalizeAll(nombresRSH),
-    apellidos_rsh: capitalizeAll(apellidosRSH),
     direccion: capitalizeAll(direccion),
     sector: capitalizeAll(sector),
     telefono,
     correo,
-    tramo,
-    genero: capitalize(genero),
-    indigena: capitalize(indigena),
-    nacionalidad: capitalize(nacionalidad),
-    folio,
-    fecha_nacimiento: fecha_nacimiento
-      ? new Date(fecha_nacimiento).toISOString()
-      : undefined,
   });
 
   if (!validationResult.success) {
@@ -211,65 +207,68 @@ export async function updateRSH(formData: FormData) {
 
   try {
     const pool = await connectToDB();
-    const checkRequest = pool.request();
+    const transaction = new sql.Transaction(pool);
 
-    const rshResult = await checkRequest
-      .input("rut", sql.Int, rut)
-      .query("SELECT 1 FROM rsh WHERE rut = @rut");
+    try {
+      await transaction.begin();
+      const rshRequest = new sql.Request(transaction);
+      const rshResult = await rshRequest
+        .input("rut", sql.Int, rut)
+        .query("SELECT 1 FROM rsh WHERE rut = @rut");
 
-    if (rshResult.recordset.length === 0) {
+      if (rshResult.recordset.length === 0) {
+        return {
+          success: false,
+          message: `No se encontraron coincidencias para ${formatedRut}`,
+        };
+      }
+
+      const rshModsRequest = new sql.Request(transaction);
+      const rshModsResult = await rshModsRequest
+        .input("rut", sql.Int, rut)
+        .query("SELECT 1 FROM rsh_mods WHERE rut = @rut");
+
+      if (rshModsResult.recordset.length === 0) {
+        const updateRshModsRequest = new sql.Request(transaction);
+        await updateRshModsRequest
+          .input("rut", sql.Int, validationResult.data.rut)
+          .input("direccion", sql.VarChar, validationResult.data.direccion)
+          .input("sector", sql.VarChar, validationResult.data.sector)
+          .input("telefono", sql.VarChar, validationResult.data.telefono)
+          .input("correo", sql.VarChar, validationResult.data.correo).query(`
+            INSERT INTO rsh_mods (direccion_mod, sector_mod, telefono_mod, correo_mod, rut)
+            VALUES (@direccion, @sector, @telefono, @correo, @rut)
+          `);
+      } else {
+        const updateRshModsRequest = new sql.Request(transaction);
+        await updateRshModsRequest
+          .input("rut", sql.Int, validationResult.data.rut)
+          .input("direccion_mod", sql.VarChar, validationResult.data.direccion)
+          .input("sector_mod", sql.VarChar, validationResult.data.sector)
+          .input("telefono_mod", sql.VarChar, validationResult.data.telefono)
+          .input("correo_mod", sql.VarChar, validationResult.data.correo)
+          .query(`
+            UPDATE rsh_mods
+            SET
+              direccion_mod = @direccion_mod,
+              sector_mod = @sector_mod,
+              telefono_mod = @telefono_mod,
+              correo_mod = @correo_mod
+            WHERE rut = @rut
+          `);
+      }
+
+      await transaction.commit();
+      await logAction("Editar", "editó el RSH", formatedRut);
+      revalidatePath("/dashboard/rsh");
       return {
-        success: false,
-        message: `No se encontraron coincidencias para ${formatedRut}`,
+        success: true,
+        message: `Registro ${formatedRut} actualizado exitosamente`,
       };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
     }
-
-    const updateRequest = pool.request();
-    await updateRequest
-      .input("rut", sql.Int, validationResult.data.rut)
-      .input("dv", sql.VarChar, validationResult.data.dv)
-      .input("nombres_rsh", sql.VarChar, validationResult.data.nombres_rsh)
-      .input("apellidos_rsh", sql.VarChar, validationResult.data.apellidos_rsh)
-      .input("direccion", sql.VarChar, validationResult.data.direccion)
-      .input("sector", sql.VarChar, validationResult.data.sector)
-      .input("telefono", sql.VarChar, validationResult.data.telefono)
-      .input("correo", sql.VarChar, validationResult.data.correo)
-      .input("tramo", sql.VarChar, validationResult.data.tramo)
-      .input("genero", sql.VarChar, validationResult.data.genero)
-      .input("indigena", sql.VarChar, validationResult.data.indigena)
-      .input("nacionalidad", sql.VarChar, validationResult.data.nacionalidad)
-      .input("folio", sql.VarChar, validationResult.data.folio)
-      .input(
-        "fecha_nacimiento",
-        sql.VarChar,
-        validationResult.data.fecha_nacimiento,
-      ).query(`
-        UPDATE rsh
-        SET
-          dv = @dv,
-          nombres_rsh = @nombres_rsh,
-          apellidos_rsh = @apellidos_rsh,
-          direccion = @direccion,
-          sector = @sector,
-          telefono = @telefono,
-          correo = @correo,
-          tramo = @tramo,
-          genero = @genero,
-          indigena = @indigena,
-          nacionalidad = @nacionalidad,
-          folio = @folio,
-          fecha_nacimiento = @fecha_nacimiento
-        WHERE rut = @rut
-      `);
-
-    // fecha_modificacion = GETDATE() -- Update modification date automatically
-
-    await logAction("Editar", "editó el RSH", formatedRut);
-    revalidatePath("/dashboard/rsh");
-    return {
-      success: true,
-      message: `Registro ${formatedRut} actualizado exitosamente`,
-    };
   } catch (error) {
     console.error(error || "Error actualizar el registro.");
     return {

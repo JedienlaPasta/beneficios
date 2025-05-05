@@ -47,7 +47,6 @@ export default async function Campaigns(props: CampaignsProps) {
             <span className="flex flex-wrap items-center gap-2 text-nowrap text-lg font-semibold text-slate-800">
               <p>Historial de Campañas</p>
             </span>
-            {/* Search bar should be outside Suspense since it doesn't depend on async data */}
             <SearchBar placeholder="Buscar..." />
           </div>
           <Suspense fallback={<CampaignsTableSkeleton />}>

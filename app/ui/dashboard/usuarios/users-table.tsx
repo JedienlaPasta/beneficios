@@ -46,7 +46,7 @@ export function UsersTable({ users }: { users: User[] }) {
       <div className="overflow-x-auto">
         <table className="w-full min-w-[60rem] border-collapse divide-y divide-slate-200 text-sm">
           <thead className="text-slate-600/70">
-            <tr className="grid grid-cols-26 bg-slate-50 px-6 pt-2">
+            <tr className="grid grid-cols-26 gap-8 bg-slate-50 px-6 pt-2">
               <th scope="col" className={`${thStyle} col-span-5`}>
                 Nombre
               </th>
@@ -84,7 +84,7 @@ export function UsersTable({ users }: { users: User[] }) {
                 </td>
                 <td className="col-span-3 whitespace-nowrap py-4">
                   <span
-                    className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                    className={`inline-flex rounded-md px-3 py-1 text-xs font-medium ${
                       user.rol === "Administrador"
                         ? "bg-purple-100 text-purple-600"
                         : user.rol === "Supervisor"
@@ -97,7 +97,7 @@ export function UsersTable({ users }: { users: User[] }) {
                 </td>
                 <td className="col-span-3 whitespace-nowrap py-4">
                   <span
-                    className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                    className={`inline-flex rounded-md px-3 py-1 text-xs font-medium ${
                       user.estado === "Habilitado"
                         ? "bg-green-100 text-green-600"
                         : "bg-red-100 text-red-600"

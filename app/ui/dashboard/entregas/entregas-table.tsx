@@ -11,7 +11,7 @@ export default async function EntregasTable({
   query,
   currentPage,
 }: EntregasProps) {
-  const { data, pages } = await fetchEntregas(query, currentPage, 4);
+  const { data, pages } = await fetchEntregas(query, currentPage, 9);
 
   return (
     <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300/70">

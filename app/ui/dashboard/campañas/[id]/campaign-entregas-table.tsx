@@ -31,7 +31,6 @@ export default async function CampaignEntregasTable({
                 Folio
               </th>
               <th className="col-span-13 py-4 font-normal">Beneficiario</th>
-              {/* <th className="py-4 col-span-5 pl-10 pr-6 font-normal"></th> */}
               <th className="col-span-4 py-4 text-right font-normal">RUT</th>
               <th className="col-span-4 py-4 pr-10 text-right font-normal">
                 Entrega
