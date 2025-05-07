@@ -46,7 +46,13 @@ export async function fetchRSH(
         COUNT (*) OVER() AS total
         FROM rsh
         LEFT JOIN rsh_mods mods ON rsh.rut = mods.rut
-        WHERE concat(rsh.rut,' ', rsh.nombres_rsh,' ', rsh.apellidos_rsh,' ', rsh.direccion) LIKE @query
+        WHERE 
+          rsh.rut LIKE @query OR
+          rsh.direccion COLLATE Modern_Spanish_CI_AI LIKE @query OR
+          rsh.sector COLLATE Modern_Spanish_CI_AI LIKE @query OR
+          rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR
+          rsh.apellidos_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR
+          concat(rsh.nombres_rsh,' ', rsh.apellidos_rsh) COLLATE Modern_Spanish_CI_AI LIKE @query
         ORDER BY rsh.apellidos_rsh ASC
         OFFSET @offset ROWS
         FETCH NEXT @pageSize ROWS ONLY

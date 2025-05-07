@@ -13,10 +13,10 @@ export default function SelectSearch() {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid gap-4 lg:grid-cols-2">
       <div
         onClick={() => handleClick("ciudadanos")}
-        className={`group relative flex min-w-64 cursor-pointer flex-col justify-center overflow-hidden rounded-lg border bg-white shadow-md shadow-slate-300/70 transition-all duration-500 hover:shadow-lg ${
+        className={`group relative flex min-w-64 grow cursor-pointer flex-col justify-center overflow-hidden rounded-lg border bg-white shadow-md shadow-slate-300/70 transition-all duration-500 hover:shadow-lg ${
           currentTable === "ciudadanos" ? "border-blue-400" : "border-white"
         }`}
       >
@@ -38,7 +38,7 @@ export default function SelectSearch() {
 
       <div
         onClick={() => handleClick("entregas")}
-        className={`group relative flex min-w-64 cursor-pointer flex-col justify-center overflow-hidden rounded-lg border bg-white shadow-md shadow-slate-300/70 transition-all duration-500 hover:shadow-lg ${
+        className={`group relative flex min-w-64 grow cursor-pointer flex-col justify-center overflow-hidden rounded-lg border bg-white shadow-md shadow-slate-300/70 transition-all duration-500 hover:shadow-lg ${
           currentTable === "entregas" ? "border-blue-400" : "border-white"
         }`}
       >
