@@ -58,6 +58,9 @@ export async function fetchCampaigns(
         FETCH NEXT @pageSize ROWS ONLY
       `);
 
+    // WHERE nombre_campaña LIKE @query OR CAST(id AS NVARCHAR(50)) LIKE @query
+    // WHERE c.nombre_campaña LIKE @query OR CAST(c.id AS NVARCHAR(50)) LIKE @query
+
     // Handle the case where no records are found
     if (result.recordset.length === 0) {
       return { data: [], pages: 0 };

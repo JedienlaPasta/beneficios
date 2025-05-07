@@ -8,33 +8,6 @@ import {
 } from "../definitions";
 import { connectToDB } from "../utils/db-connection";
 
-//
-//
-//
-//
-//
-// rsh.nombres??
-// rsh.nombres??
-// rsh.nombres??
-// rsh.nombres??
-// rsh.nombres??
-//
-
-// export async function fetchSocialAidById(id: string) {
-//   try {
-//     const pool = await connectToDB();
-//     const request = pool.request();
-//     const result = await request
-//       .input("id", sql.NVarChar, id)
-//       .query(`SELECT * FROM rsh WHERE rut = @id`);
-
-//     return { data: result.recordset[0] as SocialAid };
-//   } catch (error) {
-//     console.error("Error al obtener datos de la tabla de entregas:", error);
-//     return { data: {} };
-//   }
-// }
-
 export async function fetchEntrega(folio: string) {
   try {
     const pool = await connectToDB();
@@ -76,7 +49,9 @@ export async function fetchEntregas(
         WHERE
           entregas.rut LIKE @query OR
           entregas.folio LIKE @query OR
-          concat(rsh.nombres_rsh,' ', rsh.apellidos_rsh) LIKE @query
+          rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR 
+          rsh.apellidos_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR 
+          concat(rsh.nombres_rsh,' ', rsh.apellidos_rsh) COLLATE Modern_Spanish_CI_AI LIKE @query
         ORDER BY entregas.fecha_entrega DESC
         OFFSET @offset ROWS
         FETCH NEXT @pageSize ROWS ONLY
@@ -229,10 +204,11 @@ export async function fetchEntregasForCampaignDetail(
         WHERE
           entrega.id_campaña = @id 
           AND (
-            rsh.nombres_rsh LIKE @query OR
-            rsh.apellidos_rsh LIKE @query OR
             rsh.rut LIKE @query OR
-            entregas.folio LIKE @query
+            entregas.folio LIKE @query OR
+            rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR
+            rsh.apellidos_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR
+            concat(rsh.nombres_rsh,' ', rsh.apellidos_rsh) COLLATE Modern_Spanish_CI_AI LIKE @query
           )
         ORDER BY entregas.fecha_entrega DESC
         OFFSET @offset ROWS
