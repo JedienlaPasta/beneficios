@@ -1,12 +1,12 @@
 "use client";
+import { createEntrega } from "@/app/lib/actions/entregas";
+import { Campaign } from "@/app/lib/definitions";
+import { AnimatePresence, motion } from "framer-motion";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
 import Input from "../campañas/new-campaign-input";
 import { SubmitButton } from "../submit-button";
-import { useState } from "react";
-import { Campaign } from "@/app/lib/definitions";
-import { createEntrega } from "@/app/lib/actions/entregas";
-import { useSearchParams, useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 
 type NewModalFormProps = {
   activeCampaigns?: Campaign[];
@@ -14,7 +14,7 @@ type NewModalFormProps = {
   userId: string;
 };
 
-export default function NewModalForm({
+export default function NewModalFormManual({
   activeCampaigns,
   rut,
   userId,

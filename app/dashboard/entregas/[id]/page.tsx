@@ -3,13 +3,14 @@ import { Suspense } from "react";
 import CitizenDetail, {
   CitizenDetailSkeleton,
 } from "@/app/ui/dashboard/entregas/citizen-detail";
-import NewEntregaModal from "@/app/ui/dashboard/entregas/new-entrega-modal";
+// import NewEntregaModal from "@/app/ui/dashboard/entregas/new-modal";
 import NewButton from "@/app/ui/dashboard/new-button";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import EntregasTable from "@/app/ui/dashboard/entregas/[id]/entregas-table";
 import { Modal } from "@/app/ui/dashboard/modal";
 import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/modal-context";
 import ModalSkeleton from "@/app/ui/modal-skeleton";
+import NewEntregaModalContext from "@/app/ui/dashboard/entregas/modal-context";
 // import { Spinner } from "@/app/ui/dashboard/loaders";
 
 type CitizenRecordProps = {
@@ -38,7 +39,7 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
       {newSocialAid === "open" && (
         <Modal name="newsocialaid">
           <Suspense fallback={<ModalSkeleton name="newsocialaid" />}>
-            <NewEntregaModal rut={rut} />
+            <NewEntregaModalContext rut={rut} />
           </Suspense>
         </Modal>
       )}
