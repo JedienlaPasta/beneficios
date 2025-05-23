@@ -8,6 +8,7 @@ type CustomAntdDatePickerProps = {
   label: string;
   placeholder?: string;
   defaultValue?: dayjs.Dayjs | null;
+  required?: boolean;
   setDate?: (
     pickerDate: dayjs.Dayjs | null,
     dateString: string | string[],
@@ -19,6 +20,7 @@ export default function CustomAntdDatePicker({
   label,
   placeholder,
   defaultValue,
+  required,
   setDate,
   setFormData,
 }: CustomAntdDatePickerProps) {
@@ -54,6 +56,7 @@ export default function CustomAntdDatePicker({
           defaultValue={defaultValue}
           placeholder={placeholder}
           onChange={datePickerHandler}
+          required={required}
           className={`h-10 rounded-lg border border-slate-300 px-4 text-sm text-slate-700 placeholder:text-slate-400 focus-within:!border-blue-500 hover:border-slate-400/70 focus:!border-blue-500 focus:outline-none ${inter.className}`}
         />
       </div>

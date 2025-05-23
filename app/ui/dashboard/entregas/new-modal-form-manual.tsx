@@ -7,6 +7,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import Input from "../campañas/new-campaign-input";
 import { SubmitButton } from "../submit-button";
+import CustomAntdDatePicker from "../datepicker";
+import dayjs from "dayjs";
 
 type NewModalFormProps = {
   activeCampaigns?: Campaign[];
@@ -20,7 +22,10 @@ export default function NewModalFormManual({
   userId,
 }: NewModalFormProps) {
   const router = useRouter();
+  const [folio, setFolio] = useState("");
   const [observaciones, setObservaciones] = useState("");
+  const [fechaEntrega, setFechaEntrega] = useState<Date | null>(null);
+  const [correo, setCorreo] = useState("");
 
   // Initialize selectedCampaigns with a lazy initializer function
   const [selectedCampaigns, setSelectedCampaigns] = useState<{
@@ -116,32 +121,60 @@ export default function NewModalFormManual({
     formData.append("campaigns", JSON.stringify(campaignsToSubmit));
     formData.append("rut", rut.toString());
     formData.append("observaciones", observaciones);
+    formData.append("fecha_entrega", fechaEntrega?.toISOString() || "");
+    formData.append("folio", folio.toString().toUpperCase());
+    formData.append("correo", correo);
 
-    // Rest of the formAction remains the same
-    toast.promise(
-      createEntregaWithId(formData).then((response) => {
-        if (!response.success) {
-          throw new Error(response.message);
-        }
-        setIsLoading(false);
-        setIsDisabled(false);
-        return response;
-      }),
-      {
-        loading: "Guardando...",
-        success: (response) => {
-          setIsLoading(false);
-          setTimeout(() => {
-            closeModal();
-          }, 500);
-          return response.message;
-        },
-        error: (err) => {
-          setIsDisabled(false);
-          return err.message;
-        },
-      },
-    );
+    // toast.promise(
+    //   createEntregaWithId(formData).then((response) => {
+    //     if (!response.success) {
+    //       throw new Error(response.message);
+    //     }
+    //     setIsLoading(false);
+    //     setIsDisabled(false);
+    //     return response;
+    //   }),
+    //   {
+    //     loading: "Guardando...",
+    //     success: (response) => {
+    //       setIsLoading(false);
+    //       setTimeout(() => {
+    //         closeModal();
+    //       }, 500);
+    //       return response.message;
+    //     },
+    //     error: (err) => {
+    //       setIsDisabled(false);
+    //       return err.message;
+    //     },
+    //   },
+    // );
+
+    const toastId = toast.loading("Guardando...");
+    try {
+      const response = await createEntregaWithId(formData);
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+      toast.success(response.message, { id: toastId });
+      closeModal();
+      router.refresh();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Error al crear la entrega";
+      toast.error(message, { id: toastId });
+      setIsDisabled(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fechaEntregaHandler = (pickerDate: dayjs.Dayjs | null) => {
+    if (pickerDate) {
+      setFechaEntrega(pickerDate.toDate());
+    } else {
+      setFechaEntrega(null);
+    }
   };
 
   // Add this function to check if form is valid
@@ -152,6 +185,12 @@ export default function NewModalFormManual({
     ).length;
 
     if (selectedCount === 0) return false;
+
+    if (!fechaEntrega) return false;
+
+    if (folio.trim() === "" || folio.trim().length < 7) return false;
+
+    if (correo.trim() === "") return false;
 
     // Check if all selected campaigns have details
     const hasEmptyDetails = Object.entries(selectedCampaigns)
@@ -169,6 +208,35 @@ export default function NewModalFormManual({
 
   return (
     <form action={formAction} className="flex select-none flex-col gap-5 pt-2">
+      <div className="grid grid-cols-2 gap-2">
+        <Input
+          placeHolder="Folio..."
+          label="Folio"
+          type="text"
+          nombre="folio"
+          value={folio}
+          setData={setFolio}
+          required
+        />
+
+        <CustomAntdDatePicker
+          label="Fecha de Entrega"
+          placeholder="Seleccione una fecha"
+          setDate={fechaEntregaHandler}
+          required
+        />
+      </div>
+
+      <Input
+        placeHolder="tu@correo.com..."
+        label="Correo"
+        type="email"
+        nombre="correo"
+        value={correo}
+        setData={setCorreo}
+        required
+      />
+
       <div className="max-h-[400px] overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-4 scrollbar-hide">
         <div className="justify- mb-4 flex items-baseline justify-between">
           <h3 className="text-sm font-medium text-slate-700">

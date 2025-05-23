@@ -45,7 +45,7 @@ interface UserData {
 const CreateEntregaFormSchema = z.object({
   rut: z.string(),
   observaciones: z.string(),
-  campaigns: z.array(
+  campaigns: z.string(
     z.object({
       id: z.string(),
       campaignName: z.string(),
@@ -53,25 +53,45 @@ const CreateEntregaFormSchema = z.object({
       code: z.string(),
     }),
   ),
+  folio: z
+    .string()
+    .min(7, { message: "Folio debe tener al menos 7 caracteres" }),
+  fecha_entrega: z.string(),
+  correo: z.string().email({ message: "Correo no válido" }),
 });
 
 const CreateEntrega = CreateEntregaFormSchema;
 
 export const createEntrega = async (id: string, formData: FormData) => {
-  try {
-    const { rut, observaciones, campaigns } = CreateEntrega.parse({
-      rut: formData.get("rut"),
-      observaciones: formData.get("observaciones"),
-      campaigns: JSON.parse(formData.get("campaigns") as string),
-    });
+  const result = CreateEntrega.safeParse(Object.fromEntries(formData));
+  if (!result.success) {
+    return {
+      success: false,
+      message: result.error.issues[0].message,
+    };
+  }
+  const rut = formData.get("rut");
+  const folio = formData.get("folio");
+  const correo = formData.get("correo");
+  const observaciones = formData.get("observaciones");
+  const fecha_entrega = formData.get("fecha_entrega");
+  const campaigns = JSON.parse(formData.get("campaigns") as string);
 
+  if (!rut || !campaigns) {
+    return {
+      success: false,
+      message: "Campos incompletos",
+    };
+  }
+
+  try {
     let code;
     if (campaigns.length === 0)
       throw new Error("No se seleccionó ninguna campaña");
     if (campaigns.length > 1) code = "DO";
     else code = campaigns[0].code;
 
-    let folio: string = "";
+    let newFolio: string = "";
 
     const pool = await connectToDB();
     let transaction: sql.Transaction | undefined;
@@ -79,47 +99,84 @@ export const createEntrega = async (id: string, formData: FormData) => {
       transaction = new sql.Transaction(pool);
       await transaction.begin(sql.ISOLATION_LEVEL.READ_COMMITTED);
 
-      // Generate a folio using MSSQL functions
-      const folioRequest = new sql.Request(transaction);
-      folioRequest
+      const correoRequest = new sql.Request(transaction);
+      const correoResult = await correoRequest.input(
+        "correo",
+        sql.VarChar,
+        correo,
+      ).query(`
+          SELECT id FROM usuarios WHERE correo = @correo
+        `);
+      if (correoResult.recordset.length === 0) {
+        return {
+          success: false,
+          message: "Correo no registrado",
+        };
+      }
+
+      const userId = folio ? correoResult.recordset[0].id : id;
+
+      // Use provided folio or generate a new one
+      if (folio) {
+        const checkFolioRequest = new sql.Request(transaction);
+        const checkFolioResult = await checkFolioRequest.input(
+          "folio",
+          sql.NVarChar,
+          folio,
+        ).query(`
+          SELECT folio FROM entregas WHERE folio = @folio
+        `);
+        if (checkFolioResult.recordset.length > 0) {
+          return {
+            success: false,
+            message: "Este Folio ya se encuentra registrado",
+          };
+        }
+        newFolio = folio as string;
+      } else {
+        // Generate a folio using MSSQL functions
+        const folioRequest = new sql.Request(transaction);
+        folioRequest
+          .input("observaciones", sql.NVarChar, observaciones)
+          .input("rut", sql.Int, rut)
+          .input("id", sql.UniqueIdentifier, userId)
+          .input("code", sql.NVarChar, code);
+
+        const folioResult = await folioRequest.query(`
+            DECLARE @UUID UNIQUEIDENTIFIER = NEWID();
+            DECLARE @UUIDString NVARCHAR(50) = REPLACE(CAST(@UUID AS NVARCHAR(50)), '-', '');
+            DECLARE @ShortUUID NVARCHAR(8) = SUBSTRING(@UUIDString, 1, 8);
+            DECLARE @YearCode NVARCHAR(2) = RIGHT(CAST(YEAR(GETUTCDATE()) AS NVARCHAR(4)), 2);
+            DECLARE @NewFolio NVARCHAR(50) = CONCAT(@ShortUUID, '-', @YearCode, '-', @code);
+            
+            SELECT @NewFolio as folio;
+        `);
+
+        if (!folioResult.recordset || folioResult.recordset.length === 0) {
+          throw new Error("No se pudo generar el folio");
+        }
+
+        newFolio = folioResult.recordset[0].folio;
+      }
+
+      const entregaRequest = new sql.Request(transaction);
+      entregaRequest
+        .input("folio", sql.NVarChar, newFolio)
         .input("observaciones", sql.NVarChar, observaciones)
+        .input("fecha_entrega", sql.DateTime, fecha_entrega)
         .input("rut", sql.Int, rut)
-        .input("id", sql.UniqueIdentifier, id)
-        .input("code", sql.NVarChar, code);
+        .input("id", sql.UniqueIdentifier, id);
 
-      const folioResult = await folioRequest.query(`
-          DECLARE @UUID UNIQUEIDENTIFIER = NEWID();
-          DECLARE @UUIDString NVARCHAR(50) = REPLACE(CAST(@UUID AS NVARCHAR(50)), '-', '');
-          DECLARE @ShortUUID NVARCHAR(8) = SUBSTRING(@UUIDString, 1, 8);
-          DECLARE @YearCode NVARCHAR(2) = RIGHT(CAST(YEAR(GETUTCDATE()) AS NVARCHAR(4)), 2);
-          DECLARE @NewFolio NVARCHAR(50) = CONCAT(@ShortUUID, '-', @YearCode, '-', @code);
-          
-          INSERT INTO entregas (folio, observacion, fecha_entrega, rut, id_usuario)
-          OUTPUT INSERTED.folio
-          VALUES (
-            @NewFolio,
-            @observaciones,
-            GETUTCDATE(),
-            @rut,
-            @id
-          )
+      await entregaRequest.query(`
+        INSERT INTO entregas (folio, observacion, fecha_entrega, rut, id_usuario)
+        VALUES (
+          @folio,
+          @observaciones,
+          @fecha_entrega,
+          @rut,
+          @id
+        )
       `);
-
-      // Check if there was an error message returned
-      if (
-        folioResult.recordset &&
-        folioResult.recordset[0] &&
-        folioResult.recordset[0].error_message
-      ) {
-        throw new Error(folioResult.recordset[0].error_message);
-      }
-
-      // Check if we got a folio back
-      if (!folioResult.recordset || folioResult.recordset.length === 0) {
-        throw new Error("No se pudo generar el folio");
-      }
-
-      folio = folioResult.recordset[0].folio;
 
       // Insert campaign details and update campaign counts
       if (campaigns.length > 0) {
@@ -127,7 +184,7 @@ export const createEntrega = async (id: string, formData: FormData) => {
           const campaignRequest = new sql.Request(transaction);
           await campaignRequest
             .input("detail", sql.NVarChar, campaign.detail)
-            .input("folio", sql.NVarChar, folio)
+            .input("folio", sql.NVarChar, newFolio)
             .input("campaignId", sql.UniqueIdentifier, campaign.id).query(`
               INSERT INTO entrega (detalle, folio, id_campaña)
               VALUES (@detail, @folio, @campaignId)
@@ -155,7 +212,7 @@ export const createEntrega = async (id: string, formData: FormData) => {
       throw error;
     }
 
-    await logAction("Crear", "registró una nueva entrega", "", folio);
+    await logAction("Crear", "registró una nueva entrega", "", newFolio);
 
     return { success: true, message: "Entrega recibida" };
   } catch (error) {

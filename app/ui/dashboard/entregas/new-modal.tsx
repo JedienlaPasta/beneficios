@@ -21,11 +21,11 @@ export default function NewEntregaModal({
   const [tab, setTab] = useState(tabs[0]);
 
   return (
-    <div className="flex max-h-full w-[32rem] max-w-full shrink-0 flex-col gap-3 overflow-hidden rounded-xl bg-white p-8 shadow-xl">
+    <div className="flex max-h-full w-[32rem] max-w-full shrink-0 flex-col gap-2 overflow-hidden rounded-xl bg-white p-8 shadow-xl">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-slate-800">
+          <h2 className="text-lg font-semibold tracking-tight text-slate-700">
             Asignar Beneficios
           </h2>
         </div>
@@ -76,9 +76,9 @@ export default function NewEntregaModal({
           {tab === "Rápido" && (
             <motion.div
               key="tab-rapido"
-              initial={{ opacity: 0, y: 10, height: 290 }}
+              initial={{ opacity: 0, y: 10, height: 340 }}
               animate={{ opacity: 1, y: 0, height: "auto" }}
-              exit={{ opacity: 0, y: -10, height: 270 }}
+              exit={{ opacity: 0, y: -10, height: 360 }}
               transition={{
                 duration: 0.4,
                 height: { duration: 0.4 },
@@ -92,9 +92,9 @@ export default function NewEntregaModal({
           {tab === "Manual" && (
             <motion.div
               key="tab-manual"
-              initial={{ opacity: 0, y: 10, height: 290 }}
+              initial={{ opacity: 0, y: 10, height: 360 }}
               animate={{ opacity: 1, y: 0, height: "auto" }}
-              exit={{ opacity: 0, y: -10, height: 270 }}
+              exit={{ opacity: 0, y: -10, height: 340 }}
               transition={{
                 duration: 0.4,
                 height: { duration: 0.4 },
