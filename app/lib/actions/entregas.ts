@@ -181,9 +181,14 @@ export const createEntrega = async (id: string, formData: FormData) => {
       // Insert campaign details and update campaign counts
       if (campaigns.length > 0) {
         for (const campaign of campaigns) {
+          const detail = Number(campaign.detail)
+            ? campaign.detail
+            : campaign.detail.toUpperCase();
+          console.log(detail);
+
           const campaignRequest = new sql.Request(transaction);
           await campaignRequest
-            .input("detail", sql.NVarChar, campaign.detail)
+            .input("detail", sql.NVarChar, detail)
             .input("folio", sql.NVarChar, newFolio)
             .input("campaignId", sql.UniqueIdentifier, campaign.id).query(`
               INSERT INTO entrega (detalle, folio, id_campaña)
