@@ -61,6 +61,7 @@ export default function ImportXLSXModal({ name }: { name: string }) {
         },
         error: (err) => {
           setIsDisabled(false);
+          setIsLoading(false);
           return err.message;
         },
       },
