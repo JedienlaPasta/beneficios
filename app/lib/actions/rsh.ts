@@ -371,19 +371,15 @@ const convertDate = (dateString: string): Date | null => {
     : new Date(year, month, day);
 };
 
-// Validación Zod
+// Validación Zod - Modified to work with Blob instead of File
 const FileSchema = z.object({
-  file: z
-    .instanceof(File)
-    .refine(
-      (file) =>
-        file.size > 0 &&
-        [
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-          "application/vnd.ms-excel",
-        ].includes(file.type),
-      { message: "Archivo Excel requerido (.xls, .xlsx)" },
-    ),
+  file: z.any().refine(
+    (file) => {
+      // Check if it's a Blob (which includes File in browser environments)
+      return file instanceof Blob && file.size > 0;
+    },
+    { message: "Archivo Excel requerido (.xls, .xlsx)" },
+  ),
 });
 
 // Importar XLSX
@@ -397,12 +393,23 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
   };
 
   try {
-    const { file } = FileSchema.parse({
-      file: formData.get("file"),
-    });
+    const fileData = formData.get("file");
+
+    if (!fileData) {
+      return {
+        success: false,
+        message: "No se ha seleccionado ningún archivo.",
+      };
+    }
+
+    // Validate the file data
+    FileSchema.parse({ file: fileData });
+
+    // Convert the file data to a buffer that ExcelJS can work with
+    const arrayBuffer = await (fileData as Blob).arrayBuffer();
 
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(await file.arrayBuffer());
+    await workbook.xlsx.load(arrayBuffer);
     const worksheet = workbook.worksheets[0];
 
     const citizens: CitizenData[] = [];
