@@ -21,7 +21,7 @@ export default function NewModalForm({
 }: NewModalFormProps) {
   const router = useRouter();
   const [observaciones, setObservaciones] = useState("");
-
+  const [lastSelection, setLastSelection] = useState("");
   // Initialize selectedCampaigns with a lazy initializer function
   const [selectedCampaigns, setSelectedCampaigns] = useState<{
     [campaignId: string]: { selected: boolean; detail: string };
@@ -53,14 +53,20 @@ export default function NewModalForm({
   // Update this line to use the userId prop directly
   const createEntregaWithId = createEntrega.bind(null, userId);
 
-  const handleCheckboxChange = (campaignId: string) => {
-    setSelectedCampaigns((prev) => ({
-      ...prev,
-      [campaignId]: {
-        ...prev[campaignId],
-        selected: !prev[campaignId].selected,
-      },
-    }));
+  const handleCheckboxChange = (campaign: Campaign) => {
+    const campaignId = campaign.id;
+    const availableStock = campaign.stock - campaign.entregas;
+    setLastSelection(campaignId);
+
+    if (availableStock) {
+      setSelectedCampaigns((prev) => ({
+        ...prev,
+        [campaignId]: {
+          ...prev[campaignId],
+          selected: !prev[campaignId].selected,
+        },
+      }));
+    }
   };
 
   const handleDetailChange = (campaignId: string, value: string) => {
@@ -184,21 +190,27 @@ export default function NewModalForm({
           {activeCampaigns?.map((campaign) => (
             <div
               key={campaign.id}
-              className={`overflow-hidden rounded-lg border shadow-sm transition-all ${
+              className={`overflow-hidden rounded-lg border bg-white shadow-sm transition-all hover:border-slate-300 ${
                 selectedCampaigns[campaign.id]?.selected
-                  ? "border-blue-300 bg-white ring-blue-300"
-                  : "border-slate-200 bg-white hover:border-slate-300"
+                  ? "!border-blue-300 ring-blue-300"
+                  : lastSelection === campaign.id &&
+                      campaign.stock - campaign.entregas < 1
+                    ? "!border-rose-300"
+                    : "!border-slate-200"
               }`}
             >
               <div
                 className="flex cursor-pointer items-start gap-3 p-3"
-                onClick={() => handleCheckboxChange(campaign.id)}
+                onClick={() => handleCheckboxChange(campaign)}
               >
                 <div
                   className={`flex h-5 w-5 items-center justify-center rounded-md border ${
                     selectedCampaigns[campaign.id]?.selected
                       ? "border-blue-500 bg-blue-500"
-                      : "border-slate-300 bg-white"
+                      : lastSelection === campaign.id &&
+                          campaign.stock - campaign.entregas < 1
+                        ? "border-rose-300 bg-white"
+                        : "border-slate-300 bg-white"
                   }`}
                 >
                   {selectedCampaigns[campaign.id]?.selected && (
@@ -220,11 +232,23 @@ export default function NewModalForm({
                   <div className="flex items-center justify-between gap-2">
                     <label
                       htmlFor={`campaign-${campaign.id}`}
-                      className="cursor-pointer text-sm font-medium text-slate-700"
+                      className={`cursor-pointer text-sm font-medium ${
+                        lastSelection === campaign.id &&
+                        campaign.stock - campaign.entregas < 1
+                          ? "text-rose-500"
+                          : "text-slate-700"
+                      }`}
                     >
                       {campaign.nombre_campaña}
                     </label>
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+                    <span
+                      className={`rounded-full bg-slate-100 px-2 py-0.5 text-xs ${
+                        lastSelection === campaign.id &&
+                        campaign.stock - campaign.entregas < 1
+                          ? "text-rose-500"
+                          : "text-slate-600"
+                      }`}
+                    >
                       Stock: {campaign.stock - campaign.entregas}
                     </span>
                   </div>

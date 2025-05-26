@@ -44,7 +44,7 @@ interface UserData {
 // Crear Entrega
 const CreateEntregaFormSchema = z.object({
   rut: z.string(),
-  observaciones: z.string(),
+  observaciones: z.string().optional(),
   campaigns: z.string(
     z.object({
       id: z.string(),
@@ -55,9 +55,10 @@ const CreateEntregaFormSchema = z.object({
   ),
   folio: z
     .string()
-    .min(7, { message: "Folio debe tener al menos 7 caracteres" }),
-  fecha_entrega: z.string(),
-  correo: z.string().email({ message: "Correo no válido" }),
+    .min(7, { message: "Folio debe tener al menos 7 caracteres" })
+    .optional(),
+  fecha_entrega: z.string().optional(),
+  correo: z.string().email({ message: "Correo no válido" }).optional(),
 });
 
 const CreateEntrega = CreateEntregaFormSchema;
@@ -99,29 +100,30 @@ export const createEntrega = async (id: string, formData: FormData) => {
       transaction = new sql.Transaction(pool);
       await transaction.begin(sql.ISOLATION_LEVEL.READ_COMMITTED);
 
-      const correoRequest = new sql.Request(transaction);
-      const correoResult = await correoRequest.input(
-        "correo",
-        sql.VarChar,
-        correo,
-      ).query(`
-          SELECT id FROM usuarios WHERE correo = @correo
-        `);
-      if (correoResult.recordset.length === 0) {
-        return {
-          success: false,
-          message: "Correo no registrado",
-        };
-      }
-
-      const userId = folio ? correoResult.recordset[0].id : id;
-
       // Use provided folio or generate a new one
       if (folio) {
+        console.log(folio);
+        // Manual insert path
+        const correoRequest = new sql.Request(transaction);
+        const correoResult = await correoRequest.input(
+          "correo",
+          sql.VarChar,
+          correo,
+        ).query(`
+          SELECT id FROM usuarios WHERE correo = @correo
+        `);
+        if (correoResult.recordset.length === 0) {
+          return {
+            success: false,
+            message: "Correo no registrado",
+          };
+        }
+        const userId = correoResult.recordset[0].id;
+
         const checkFolioRequest = new sql.Request(transaction);
         const checkFolioResult = await checkFolioRequest.input(
           "folio",
-          sql.NVarChar,
+          sql.VarChar,
           folio,
         ).query(`
           SELECT folio FROM entregas WHERE folio = @folio
@@ -132,15 +134,33 @@ export const createEntrega = async (id: string, formData: FormData) => {
             message: "Este Folio ya se encuentra registrado",
           };
         }
-        newFolio = folio as string;
+
+        const entregaRequest = new sql.Request(transaction);
+        await entregaRequest
+          .input("folio", sql.VarChar, folio)
+          .input("observaciones", sql.VarChar, observaciones)
+          .input("fecha_entrega", sql.DateTime, fecha_entrega)
+          .input("rut", sql.Int, rut)
+          .input("id", sql.UniqueIdentifier, userId).query(`
+            INSERT INTO entregas (folio, observacion, fecha_entrega, rut, id_usuario)
+            VALUES (
+              @folio,
+              @observaciones,
+              @fecha_entrega,
+              @rut,
+              @id
+            )
+          `);
+
+        newFolio = folio ? folio.toString() : "";
       } else {
         // Generate a folio using MSSQL functions
         const folioRequest = new sql.Request(transaction);
         folioRequest
-          .input("observaciones", sql.NVarChar, observaciones)
+          .input("observaciones", sql.VarChar, observaciones)
           .input("rut", sql.Int, rut)
-          .input("id", sql.UniqueIdentifier, userId)
-          .input("code", sql.NVarChar, code);
+          .input("id", sql.UniqueIdentifier, id)
+          .input("code", sql.VarChar, code);
 
         const folioResult = await folioRequest.query(`
             DECLARE @UUID UNIQUEIDENTIFIER = NEWID();
@@ -149,34 +169,24 @@ export const createEntrega = async (id: string, formData: FormData) => {
             DECLARE @YearCode NVARCHAR(2) = RIGHT(CAST(YEAR(GETUTCDATE()) AS NVARCHAR(4)), 2);
             DECLARE @NewFolio NVARCHAR(50) = CONCAT(@ShortUUID, '-', @YearCode, '-', @code);
             
-            SELECT @NewFolio as folio;
+            INSERT INTO entregas (folio, observacion, fecha_entrega, rut, id_usuario)
+            OUTPUT INSERTED.folio
+            VALUES (
+              @NewFolio,
+              @observaciones,
+              GETUTCDATE(),
+              @rut,
+              @id
+            )
         `);
 
         if (!folioResult.recordset || folioResult.recordset.length === 0) {
           throw new Error("No se pudo generar el folio");
         }
 
+        // Store the generated folio
         newFolio = folioResult.recordset[0].folio;
       }
-
-      const entregaRequest = new sql.Request(transaction);
-      entregaRequest
-        .input("folio", sql.NVarChar, newFolio)
-        .input("observaciones", sql.NVarChar, observaciones)
-        .input("fecha_entrega", sql.DateTime, fecha_entrega)
-        .input("rut", sql.Int, rut)
-        .input("id", sql.UniqueIdentifier, id);
-
-      await entregaRequest.query(`
-        INSERT INTO entregas (folio, observacion, fecha_entrega, rut, id_usuario)
-        VALUES (
-          @folio,
-          @observaciones,
-          @fecha_entrega,
-          @rut,
-          @id
-        )
-      `);
 
       // Insert campaign details and update campaign counts
       if (campaigns.length > 0) {
@@ -184,12 +194,11 @@ export const createEntrega = async (id: string, formData: FormData) => {
           const detail = Number(campaign.detail)
             ? campaign.detail
             : campaign.detail.toUpperCase();
-          console.log(detail);
 
           const campaignRequest = new sql.Request(transaction);
           await campaignRequest
-            .input("detail", sql.NVarChar, detail)
-            .input("folio", sql.NVarChar, newFolio)
+            .input("detail", sql.VarChar, detail)
+            .input("folio", sql.VarChar, newFolio)
             .input("campaignId", sql.UniqueIdentifier, campaign.id).query(`
               INSERT INTO entrega (detalle, folio, id_campaña)
               VALUES (@detail, @folio, @campaignId)
