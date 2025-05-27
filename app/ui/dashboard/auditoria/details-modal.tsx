@@ -80,7 +80,7 @@ export default function AuditDetailsModal({
           </div>
 
           {selectedLog.comentario_accion && (
-            <div className="mb-6 rounded-lg border border-slate-200 bg-slate-100 p-4">
+            <div className="rounded-lg border border-slate-200 bg-slate-100 p-4">
               <p className="mb-1 text-xs font-medium uppercase tracking-wider text-slate-500">
                 Dato
               </p>
@@ -93,14 +93,14 @@ export default function AuditDetailsModal({
             </div>
           )}
 
-          <div className="flex justify-end">
+          {/* <div className="flex justify-end">
             <button
               onClick={() => setSelectedLog(null)}
               className="rounded-lg bg-slate-800 px-5 py-2.5 text-sm font-medium text-white outline-none transition-colors hover:bg-slate-700"
             >
               Cerrar
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
