@@ -593,16 +593,16 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
     form.getTextField("Folio").setText(String(folio));
     form
       .getTextField("NombreCiudadano")
-      .setText(`${ciudadano.nombres_rsh} ${ciudadano.apellidos_rsh}`);
-    form.getTextField("Rut").setText(`${ciudadano.rut}-${ciudadano.dv}`);
-    form.getTextField("Domicilio").setText(String(ciudadano.direccion));
-    form.getTextField("Tramo").setText(`${ciudadano.tramo}%`);
+      .setText(` ${ciudadano.nombres_rsh} ${ciudadano.apellidos_rsh}`);
+    form.getTextField("Rut").setText(` ${ciudadano.rut}-${ciudadano.dv}`);
+    form.getTextField("Domicilio").setText(" " + String(ciudadano.direccion));
+    form.getTextField("Tramo").setText(` ${ciudadano.tramo}%`);
     form
       .getTextField("Telefono")
-      .setText(String(ciudadano.telefono || "No aplica"));
+      .setText(" " + String(ciudadano.telefono || "No aplica"));
     form
       .getTextField("FechaSolicitud")
-      .setText(new Date().toLocaleDateString());
+      .setText(" " + formatDate(fecha_entrega));
 
     campaigns.forEach(({ campaign_name, detail }) => {
       if (campaign_name.includes("Vale de Gas")) {
@@ -619,9 +619,11 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
     });
 
     form.getTextField("Justificacion").setText(observacion);
-    form.getTextField("NombreProfesional").setText(encargado.nombre_usuario);
-    form.getTextField("Cargo").setText(encargado.cargo);
-    form.getTextField("FechaEntrega").setText(formatDate(fecha_entrega));
+    form
+      .getTextField("NombreProfesional")
+      .setText(" " + encargado.nombre_usuario);
+    form.getTextField("Cargo").setText(" " + encargado.cargo);
+    form.getTextField("FechaEntrega").setText(" " + formatDate(fecha_entrega));
 
     // Guardar el PDF en un Buffer
     const pdfBuffer = await pdfDoc.save();
