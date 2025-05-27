@@ -7,6 +7,7 @@ import path from "path";
 import { compressPdfBuffer } from "../utils/pdf-compress";
 import { connectToDB } from "../utils/db-connection";
 import { logAction } from "./auditoria";
+import { formatDate } from "../utils/format";
 
 interface CitizenData {
   telefono: string | null;
@@ -533,7 +534,7 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
     // Get delivery info
     const entregaRequest = pool.request().input("folio", sql.NVarChar, folio);
     const entregaResult = await entregaRequest.query(`
-    SELECT observacion, rut, id_usuario
+    SELECT observacion, rut, id_usuario, fecha_entrega
     FROM entregas 
     WHERE folio = @folio
   `);
@@ -555,7 +556,8 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
       return { success: false, error: "Campañas no encontradas", status: 404 };
     }
 
-    const { observacion, rut, id_usuario } = entregaResult.recordset[0];
+    const { observacion, rut, id_usuario, fecha_entrega } =
+      entregaResult.recordset[0];
     const campaigns = campaignsResult.recordset;
 
     const pdfBytes = fs.readFileSync(
@@ -619,7 +621,7 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
     form.getTextField("Justificacion").setText(observacion);
     form.getTextField("NombreProfesional").setText(encargado.nombre_usuario);
     form.getTextField("Cargo").setText(encargado.cargo);
-    form.getTextField("FechaEntrega").setText(new Date().toLocaleDateString());
+    form.getTextField("FechaEntrega").setText(formatDate(fecha_entrega));
 
     // Guardar el PDF en un Buffer
     const pdfBuffer = await pdfDoc.save();
