@@ -132,31 +132,6 @@ export default function NewModalFormManual({
     formData.append("folio", folio.toString().toUpperCase());
     formData.append("correo", correo);
 
-    // toast.promise(
-    //   createEntregaWithId(formData).then((response) => {
-    //     if (!response.success) {
-    //       throw new Error(response.message);
-    //     }
-    //     setIsLoading(false);
-    //     setIsDisabled(false);
-    //     return response;
-    //   }),
-    //   {
-    //     loading: "Guardando...",
-    //     success: (response) => {
-    //       setIsLoading(false);
-    //       setTimeout(() => {
-    //         closeModal();
-    //       }, 500);
-    //       return response.message;
-    //     },
-    //     error: (err) => {
-    //       setIsDisabled(false);
-    //       return err.message;
-    //     },
-    //   },
-    // );
-
     const toastId = toast.loading("Guardando...");
     try {
       const response = await createEntregaWithId(formData);

@@ -43,29 +43,25 @@ export default function ImportXLSXModal({ name }: { name: string }) {
     const myFormData = new FormData();
     myFormData.append("file", selectedFile);
 
-    toast.promise(
-      importXLSXFile(myFormData).then((response) => {
-        if (!response.success) {
-          throw new Error(response.message);
-        }
-        return response;
-      }),
-      {
-        loading: "Procesando archivo Excel...",
-        success: (response) => {
-          setIsLoading(false);
-          setTimeout(() => {
-            closeModal();
-          }, 500);
-          return response.message;
-        },
-        error: (err) => {
-          setIsDisabled(false);
-          setIsLoading(false);
-          return err.message;
-        },
-      },
-    );
+    const toastId = toast.loading("Procesando archivo Excel...");
+    try {
+      const response = await importXLSXFile(myFormData);
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+      toast.success(response.message, { id: toastId });
+      setTimeout(() => {
+        closeModal();
+      }, 500);
+      // return response.message;
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Error al cargar los datos";
+      toast.error(message, { id: toastId });
+      setIsDisabled(false);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
