@@ -4,9 +4,7 @@ import { cookies } from "next/headers";
 import { ResponseCookies } from "next/dist/server/web/spec-extension/cookies";
 
 // Secret key for signing JWTs
-const secretKey = new TextEncoder().encode(
-  process.env.JWT_SECRET || "your-secret-key-at-least-32-characters-long",
-);
+const secretKey = new TextEncoder().encode(process.env.JWT_SECRET);
 
 type SessionPayload = {
   userId: string;
@@ -18,9 +16,8 @@ export async function createSession(
   nombre_usuario: string,
   rol: string,
 ) {
-  const expiresAt = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000);
+  const expiresAt = new Date(Date.now() + 1 * 12 * 60 * 60 * 1000);
   const session = await encrypt({ userId, expiresAt });
-
   // Use the correct type for cookies
   const cookieStore = (await cookies()) as unknown as ResponseCookies;
   cookieStore.set("session", session, {
