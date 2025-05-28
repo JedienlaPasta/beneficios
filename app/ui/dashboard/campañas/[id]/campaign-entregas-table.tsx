@@ -25,7 +25,7 @@ export default async function CampaignEntregasTable({
     <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300/70">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[44rem]">
-          <thead className="border-y border-slate-200/70 bg-slate-50 text-left text-xs font-medium uppercase tracking-wider text-slate-600/70">
+          <thead className="border-y border-gray-200/80 bg-slate-50 text-left text-xs font-medium uppercase tracking-wider text-slate-600/70">
             <tr className="grid grid-cols-26">
               <th className="col-span-5 py-4 pl-10 text-left font-normal">
                 Folio
@@ -37,7 +37,7 @@ export default async function CampaignEntregasTable({
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200/30">
+          <tbody className="divide-y divide-slate-200/80">
             {data?.map((item: SocialAid, index: number) => (
               <TableRow key={index} item={item} />
             ))}

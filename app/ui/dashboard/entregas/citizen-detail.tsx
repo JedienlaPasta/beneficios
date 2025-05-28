@@ -74,11 +74,18 @@ export default async function CitizenDetail({ rut }: Props) {
             <div className="rounded-xl bg-white px-10 py-2">
               <DetailRow
                 name="Nacionalidad"
-                value={nacionalidad}
+                value={nacionalidad || "No especificada"}
                 border={true}
               />
-              <DetailRow name="Género" value={genero} border={true} />
-              <DetailRow name="Edad" value={age.toString()} />
+              <DetailRow
+                name="Género"
+                value={genero || "No especificado"}
+                border={true}
+              />
+              <DetailRow
+                name="Edad"
+                value={age ? age.toString() : "No registrado"}
+              />
             </div>
           </div>
           {/* 2nd segment */}
@@ -89,15 +96,15 @@ export default async function CitizenDetail({ rut }: Props) {
             <div className="rounded-xl bg-white px-10 py-2">
               <DetailRow
                 name="Teléfono"
-                value={telefono?.toString() || "Sin teléfono"}
+                value={telefono ? telefono.toString() : "No registrado"}
                 border={true}
               />
               <DetailRow
                 name="Dirección"
-                value={direccion?.toString() || "Sin dirección"}
+                value={direccion || "No especificada"}
                 border={true}
               />
-              <DetailRow name="Correo" value={correo || "Sin correo"} />
+              <DetailRow name="Correo" value={correo || "No registrado"} />
             </div>
           </div>
           {/* 3rd segment */}
@@ -108,15 +115,15 @@ export default async function CitizenDetail({ rut }: Props) {
             <div className="rounded-xl bg-white px-10 py-2">
               <DetailRow
                 name="Teléfono"
-                value={formatPhone(telefono_mod) || "Sin teléfono"}
+                value={formatPhone(telefono_mod) || "No registrado"}
                 border={true}
               />
               <DetailRow
                 name="Dirección"
-                value={direccion_mod || "Sin dirección"}
+                value={direccion_mod || "No especificada"}
                 border={true}
               />
-              <DetailRow name="Correo" value={correo_mod || "Sin correo"} />
+              <DetailRow name="Correo" value={correo_mod || "No registrado"} />
             </div>
           </div>
         </div>

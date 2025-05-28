@@ -299,6 +299,36 @@ export async function deleteRSH(rut: string) {
         };
       }
 
+      // Obtener todas las entregas asociadas al usuario
+      const entregasRequest = new sql.Request(transaction);
+      const entregasResult = await entregasRequest
+        .input("rut", sql.Int, rut)
+        .query(`
+          SELECT folio FROM entregas WHERE rut = @rut
+        `);
+
+      // Para cada entrega, obtener las campañas asociadas y actualizar el contador
+      for (const entrega of entregasResult.recordset) {
+        const campaignRequest = new sql.Request(transaction);
+        const campaignResult = await campaignRequest
+          .input("folio", sql.NVarChar, entrega.folio)
+          .query(`
+            SELECT id_campaña FROM entrega WHERE folio = @folio
+          `);
+
+        // Actualizar el contador de entregas en cada campaña
+        for (const campaign of campaignResult.recordset) {
+          const updateRequest = new sql.Request(transaction);
+          await updateRequest
+            .input("campaignId", sql.UniqueIdentifier, campaign.id_campaña)
+            .query(`
+              UPDATE campañas
+              SET entregas = entregas - 1
+              WHERE id = @campaignId AND entregas > 0
+            `);
+        }
+      }
+
       const deleteRshRequest = new sql.Request(transaction);
       await deleteRshRequest
         .input("rut", sql.Int, rut)
@@ -318,10 +348,10 @@ export async function deleteRSH(rut: string) {
       throw error;
     }
   } catch (error) {
-    console.log("Error al eliminar el registro:", error);
+    console.error("Error al eliminar RSH:", error);
     return {
       success: false,
-      message: `Error al eliminar el registro ${formatRUT(rut)}`,
+      message: error instanceof Error ? error.message : String(error),
     };
   }
 }

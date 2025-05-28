@@ -39,7 +39,7 @@ export function UsersTable({ users }: { users: User[] }) {
   };
 
   const thStyle =
-    "whitespace-nowrap  py-4 text-left text-xs font-normal uppercase tracking-wide";
+    "whitespace-nowrap  py-5 text-left text-xs font-normal uppercase tracking-wide";
 
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-md shadow-slate-300/70">
@@ -106,7 +106,7 @@ export function UsersTable({ users }: { users: User[] }) {
                     {user.estado}
                   </span>
                 </td>
-                <td className="col-span-4 whitespace-nowrap py-4 text-right">
+                <td className="col-span-4 whitespace-nowrap text-right">
                   <div className="flex justify-end space-x-2">
                     <button
                       onClick={() => setEditingUser(user)}

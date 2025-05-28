@@ -97,7 +97,7 @@ export default function AuditTable({
                 className="grid cursor-pointer grid-cols-26 items-center gap-8 text-nowrap px-6 text-sm tabular-nums transition-colors hover:bg-slate-200/50"
                 onClick={() => setSelectedLog(log)}
               >
-                <td className="col-span-12 flex items-center gap-3 py-4">
+                <td className="col-span-12 flex items-center gap-3 py-5">
                   <span
                     className={`rounded-xl p-1 text-lg ${getActivityStyle(log.accion).color}`}
                   >
@@ -120,7 +120,7 @@ export default function AuditTable({
                     {log.id_registro_mod || "No disponible"}
                   </span>
                 </td>
-                <td className="col-span-6 py-4 text-right text-slate-600">
+                <td className="col-span-6 text-right text-slate-600">
                   <div className="text-slate-600">
                     {formatDate(new Date(log.fecha))}
                   </div>

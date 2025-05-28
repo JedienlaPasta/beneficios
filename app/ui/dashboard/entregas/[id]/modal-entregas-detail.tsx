@@ -128,7 +128,7 @@ export default function ModalEntregasDetail({
                     name="Justificación"
                     className="mt-3 border-t border-gray-200/80 pt-4"
                   >
-                    {observacion || "No especifica."}
+                    {observacion || "No especificada"}
                   </ModalGeneralInfoField>
                 </div>
               </section>

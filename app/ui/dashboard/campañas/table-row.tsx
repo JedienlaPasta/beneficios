@@ -45,10 +45,10 @@ export default function TableRow({
       onClick={handleClick}
       className="grid cursor-pointer grid-cols-26 gap-9 text-nowrap px-6 text-sm tabular-nums transition-colors hover:bg-slate-50"
     >
-      <td className="group col-span-5 flex min-h-12 items-center py-4 text-slate-600">
-        <div className="flex items-center gap-2">
+      <td className="group col-span-5 flex min-h-12 items-center py-5 text-slate-600">
+        <div className="relative flex items-center gap-2">
           <div className="max-w-[160px] truncate">{id}</div>
-          <div className="hidden rounded p-[3px] hover:bg-slate-200 group-hover:block">
+          <div className="absolute left-[110%] hidden rounded p-[3px] hover:bg-slate-200 group-hover:block">
             <TbCopy
               onClick={(e) => {
                 e.stopPropagation();
@@ -62,23 +62,23 @@ export default function TableRow({
       <td className="col-span-7 flex items-center py-4 text-slate-600">
         {nombre_campaña}
       </td>
-      <td className="col-span-3 py-4 text-left text-slate-600">
-        <div className="flex items-center gap-3 font-medium text-slate-700/90">
-          <div className="col-span-1 flex w-fit justify-start">
-            <FiBox />
-          </div>
-          {entregas}
-        </div>
+      <td className="col-span-3 flex items-center gap-3 py-4 text-left text-slate-700/90">
+        <FiBox className="col-span-1 flex w-fit justify-start" />
+        {entregas}
       </td>
-      <td className="col-span-3 flex justify-center py-4 text-slate-600">
+      <td className="col-span-3 flex items-center justify-center py-4 text-slate-600">
         <span
           className={`rounded-md px-3 py-1 text-xs font-medium ${colorEstado}`}
         >
           {estado}
         </span>
       </td>
-      <td className="col-span-4 py-4 text-right text-slate-600">{inicio}</td>
-      <td className="col-span-4 py-4 text-right text-slate-600">{termino}</td>
+      <td className="col-span-4 flex items-center justify-end py-4 text-right text-slate-600">
+        {inicio}
+      </td>
+      <td className="col-span-4 flex items-center justify-end py-4 text-right text-slate-600">
+        {termino}
+      </td>
     </tr>
   );
 }
