@@ -2,7 +2,14 @@
 
 import { User } from "@/app/lib/data/users";
 import { useState } from "react";
-import { FiEdit2, FiTrash2, FiEye, FiEyeOff } from "react-icons/fi";
+import {
+  FiEdit2,
+  FiTrash2,
+  FiEye,
+  FiEyeOff,
+  FiUserCheck,
+  FiUserX,
+} from "react-icons/fi";
 import { EditUserModal } from "./edit-user-modal";
 import { DeleteUserModal } from "./delete-user-modal";
 import { toggleUserStatus } from "@/app/lib/actions/usuarios";
@@ -27,13 +34,13 @@ export function UsersTable({ users }: { users: User[] }) {
       if (!response.success) {
         throw new Error("Error al cambiar el estado del usuario");
       }
-
       toast.success(response.message, { id: toastId });
       router.refresh();
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Error desconocido";
       toast.error(message, { id: toastId });
+    } finally {
       setIsProcessing(null);
     }
   };
@@ -130,9 +137,9 @@ export function UsersTable({ users }: { users: User[] }) {
                       }
                     >
                       {user.estado === "Habilitado" ? (
-                        <FiEyeOff className="h-4 w-4" />
+                        <FiUserX className="h-4 w-4" />
                       ) : (
-                        <FiEye className="h-4 w-4" />
+                        <FiUserCheck className="h-4 w-4" />
                       )}
                     </button>
                     <button
