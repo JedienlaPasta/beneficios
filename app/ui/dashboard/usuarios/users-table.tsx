@@ -2,14 +2,7 @@
 
 import { User } from "@/app/lib/data/users";
 import { useState } from "react";
-import {
-  FiEdit2,
-  FiTrash2,
-  FiEye,
-  FiEyeOff,
-  FiUserCheck,
-  FiUserX,
-} from "react-icons/fi";
+import { FiEdit2, FiTrash2, FiUserCheck, FiUserX } from "react-icons/fi";
 import { EditUserModal } from "./edit-user-modal";
 import { DeleteUserModal } from "./delete-user-modal";
 import { toggleUserStatus } from "@/app/lib/actions/usuarios";
