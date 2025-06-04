@@ -109,7 +109,7 @@ export default function LoginPage() {
           className="h-full w-full object-cover"
           quality={90} // Reduce quality slightly for smaller file size
           placeholder="blur" // Add blur placeholder while loading
-          sizes="(max-width: 768px) 100vw, 50vw" // Responsive sizing
+          // sizes="(max-width: 768px) 100vw, 50vw" // Responsive sizing
         />
 
         {/* Improved content overlay */}
