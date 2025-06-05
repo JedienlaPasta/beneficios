@@ -18,6 +18,23 @@ const secretKey = new TextEncoder().encode(
 export default async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
+  // Log the path to see what's being intercepted
+  console.log("Middleware path:", path);
+
+  // --- IMPORTANT: Ensure static files and internal Next.js paths are NOT processed by middleware logic ---
+  // This is generally handled by the matcher, but a defensive check here can be useful if the matcher is complex.
+  // However, for this specific issue, the matcher improvement is the main focus.
+  // If you were to add a defensive check, it would look something like:
+  if (
+    path.startsWith("/_next/static/") ||
+    path.startsWith("/_next/image/") ||
+    path.startsWith("/favicon.ico") ||
+    path.startsWith("/elquisco.svg") // Example for a specific public asset
+  ) {
+    return NextResponse.next();
+  }
+  // --- IMPORTANT: Ensure static files and internal Next.js paths are NOT processed by middleware logic ---
+
   const isProtectedRoute = protectedRoutes.some(
     (route) => path === route || path.startsWith(`${route}/`),
   );
@@ -91,10 +108,14 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
+     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - any files in the /public directory (explicitly exclude based on common patterns)
+     * Note: Next.js generally handles /public itself, but explicit exclusion in matcher
+     * can prevent unexpected middleware interception.
      */
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|css|js)$).*)",
   ],
 };
