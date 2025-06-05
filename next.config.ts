@@ -17,11 +17,6 @@ const nextConfig = {
   },
 
   poweredByHeader: false,
-
-  // Añadir configuración crítica para Docker
-  // images: {
-  //   unoptimized: true,
-  // },
 };
 
 module.exports = nextConfig;
