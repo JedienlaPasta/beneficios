@@ -3,10 +3,10 @@ import { Suspense, useEffect, useState } from "react";
 import LoginForm from "@/app/ui/login-form";
 // import { SquaresLoader } from "./ui/dashboard/loaders";
 import Image from "next/image";
-import { loginImages } from "@/public/login-images/quisco/index";
-import defaultImage from "@/public/login-images/quisco/8.webp";
-import sibasImg from "@/public/logo_S.svg";
-import quiscoImg from "@/public/elquisco.svg";
+import { loginImages } from "@/app/lib/login-images";
+import defaultImage from "../public/login-images/8.webp";
+import sibasImg from "../public/logo_S.svg";
+import quiscoImg from "../public/elquisco.svg";
 import { anton_sc } from "./ui/fonts";
 import { Toaster } from "sonner";
 
