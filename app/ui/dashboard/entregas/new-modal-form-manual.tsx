@@ -59,15 +59,24 @@ export default function NewModalFormManual({
   // Update this line to use the userId prop directly
   const createEntregaWithId = createEntrega.bind(null, userId);
 
+  const checkValues = (campaign: Campaign) => {
+    if (campaign.stock === null) return;
+    if (campaign.entregas === null) return;
+    if (campaign.stock - campaign.entregas < 1) return true;
+    return false;
+  };
+
+  const getStock = (campaign: Campaign) => {
+    if (campaign.stock === null) return 0;
+    if (campaign.entregas === null) return 0;
+    return campaign.stock - campaign.entregas;
+  };
+
   const handleCheckboxChange = (campaign: Campaign) => {
     const campaignId = campaign.id;
-    const availableStock =
-      campaign.stock && campaign.entregas
-        ? campaign.stock - campaign.entregas
-        : 0;
     setLastSelection(campaignId);
 
-    if (availableStock) {
+    if (!checkValues(campaign)) {
       setSelectedCampaigns((prev) => ({
         ...prev,
         [campaignId]: {
@@ -240,13 +249,9 @@ export default function NewModalFormManual({
               className={`overflow-hidden rounded-lg border bg-white shadow-sm transition-all hover:border-slate-300 ${
                 selectedCampaigns[campaign.id]?.selected
                   ? "!border-blue-300 ring-blue-300"
-                  : lastSelection === campaign.id &&
-                      campaign.stock &&
-                      campaign.entregas
-                    ? campaign.stock - campaign.entregas < 1
-                    : true
-                      ? "!border-rose-300"
-                      : "!border-slate-200"
+                  : lastSelection === campaign.id && checkValues(campaign)
+                    ? "!border-rose-300"
+                    : "!border-slate-200"
               }`}
             >
               <div
@@ -257,13 +262,9 @@ export default function NewModalFormManual({
                   className={`flex h-5 w-5 items-center justify-center rounded-md border ${
                     selectedCampaigns[campaign.id]?.selected
                       ? "border-blue-500 bg-blue-500"
-                      : lastSelection === campaign.id &&
-                          campaign.stock &&
-                          campaign.entregas
-                        ? campaign.stock - campaign.entregas < 1
-                        : true
-                          ? "!border-rose-300"
-                          : "!border-slate-200"
+                      : lastSelection === campaign.id && checkValues(campaign)
+                        ? "!border-rose-300"
+                        : "!border-slate-200"
                   }`}
                 >
                   {selectedCampaigns[campaign.id]?.selected && (
@@ -286,32 +287,21 @@ export default function NewModalFormManual({
                     <label
                       htmlFor={`campaign-${campaign.id}`}
                       className={`cursor-pointer text-sm font-medium ${
-                        lastSelection === campaign.id &&
-                        campaign.stock &&
-                        campaign.entregas
-                          ? campaign.stock - campaign.entregas < 1
-                          : true
-                            ? "text-rose-500"
-                            : "text-slate-700"
+                        lastSelection === campaign.id && checkValues(campaign)
+                          ? "text-rose-500"
+                          : "text-slate-700"
                       }`}
                     >
                       {campaign.nombre_campaña}
                     </label>
                     <span
                       className={`rounded-full bg-slate-100 px-2 py-0.5 text-xs ${
-                        lastSelection === campaign.id &&
-                        campaign.stock &&
-                        campaign.entregas
-                          ? campaign.stock - campaign.entregas < 1
-                          : true
-                            ? "text-rose-500"
-                            : "text-slate-600"
+                        lastSelection === campaign.id && checkValues(campaign)
+                          ? "text-rose-500"
+                          : "text-slate-600"
                       }`}
                     >
-                      Stock:{" "}
-                      {campaign.stock && campaign.entregas
-                        ? campaign.stock - campaign.entregas
-                        : 0}
+                      Stock: {getStock(campaign)}
                     </span>
                   </div>
                 </div>

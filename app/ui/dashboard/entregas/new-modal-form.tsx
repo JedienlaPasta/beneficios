@@ -53,12 +53,24 @@ export default function NewModalForm({
   // Update this line to use the userId prop directly
   const createEntregaWithId = createEntrega.bind(null, userId);
 
+  const checkValues = (campaign: Campaign) => {
+    if (campaign.stock === null) return;
+    if (campaign.entregas === null) return;
+    if (campaign.stock - campaign.entregas < 1) return true;
+    return false;
+  };
+
+  const getStock = (campaign: Campaign) => {
+    if (campaign.stock === null) return 0;
+    if (campaign.entregas === null) return 0;
+    return campaign.stock - campaign.entregas;
+  };
+
   const handleCheckboxChange = (campaign: Campaign) => {
     const campaignId = campaign.id;
-    const availableStock = campaign.stock - campaign.entregas;
     setLastSelection(campaignId);
 
-    if (availableStock) {
+    if (!checkValues(campaign)) {
       setSelectedCampaigns((prev) => ({
         ...prev,
         [campaignId]: {
@@ -123,31 +135,23 @@ export default function NewModalForm({
     formData.append("rut", rut.toString());
     formData.append("observaciones", observaciones);
 
-    // Rest of the formAction remains the same
-    toast.promise(
-      createEntregaWithId(formData).then((response) => {
-        if (!response.success) {
-          throw new Error(response.message);
-        }
-        setIsLoading(false);
-        setIsDisabled(false);
-        return response;
-      }),
-      {
-        loading: "Guardando...",
-        success: (response) => {
-          setIsLoading(false);
-          setTimeout(() => {
-            closeModal();
-          }, 500);
-          return response.message;
-        },
-        error: (err) => {
-          setIsDisabled(false);
-          return err.message;
-        },
-      },
-    );
+    const toastId = toast.loading("Guardando...");
+    try {
+      const response = await createEntregaWithId(formData);
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+      toast.success(response.message, { id: toastId });
+      closeModal();
+      router.refresh();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Error al crear la entrega";
+      toast.error(message, { id: toastId });
+      setIsDisabled(false);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Add this function to check if form is valid
@@ -193,8 +197,7 @@ export default function NewModalForm({
               className={`overflow-hidden rounded-lg border bg-white shadow-sm transition-all hover:border-slate-300 ${
                 selectedCampaigns[campaign.id]?.selected
                   ? "!border-blue-300 ring-blue-300"
-                  : lastSelection === campaign.id &&
-                      campaign.stock - campaign.entregas < 1
+                  : lastSelection === campaign.id && checkValues(campaign)
                     ? "!border-rose-300"
                     : "!border-slate-200"
               }`}
@@ -207,8 +210,7 @@ export default function NewModalForm({
                   className={`flex h-5 w-5 items-center justify-center rounded-md border ${
                     selectedCampaigns[campaign.id]?.selected
                       ? "border-blue-500 bg-blue-500"
-                      : lastSelection === campaign.id &&
-                          campaign.stock - campaign.entregas < 1
+                      : lastSelection === campaign.id && checkValues(campaign)
                         ? "border-rose-300 bg-white"
                         : "border-slate-300 bg-white"
                   }`}
@@ -233,8 +235,7 @@ export default function NewModalForm({
                     <label
                       htmlFor={`campaign-${campaign.id}`}
                       className={`cursor-pointer text-sm font-medium ${
-                        lastSelection === campaign.id &&
-                        campaign.stock - campaign.entregas < 1
+                        lastSelection === campaign.id && checkValues(campaign)
                           ? "text-rose-500"
                           : "text-slate-700"
                       }`}
@@ -243,13 +244,12 @@ export default function NewModalForm({
                     </label>
                     <span
                       className={`rounded-full bg-slate-100 px-2 py-0.5 text-xs ${
-                        lastSelection === campaign.id &&
-                        campaign.stock - campaign.entregas < 1
+                        lastSelection === campaign.id && checkValues(campaign)
                           ? "text-rose-500"
                           : "text-slate-600"
                       }`}
                     >
-                      Stock: {campaign.stock - campaign.entregas}
+                      Stock: {getStock(campaign)}
                     </span>
                   </div>
                 </div>
