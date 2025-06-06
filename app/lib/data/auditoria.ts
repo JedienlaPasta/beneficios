@@ -79,7 +79,6 @@ export async function fetchActivity(
         FETCH NEXT @pageSize ROWS ONLY
       `);
 
-    const data = result.recordset;
     const pages = Math.ceil(
       Number(result.recordset[0]?.total) / resultsPerPage,
     );
