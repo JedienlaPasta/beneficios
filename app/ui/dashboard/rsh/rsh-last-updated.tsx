@@ -2,10 +2,10 @@ import { fetchRSHLastUpdate } from "@/app/lib/data/rsh";
 import { formatDate } from "@/app/lib/utils/format";
 
 export async function RSHLastUpdated() {
-  const { data } = await fetchRSHLastUpdate();
+  const { ultima_actualizacion } = await fetchRSHLastUpdate();
 
-  const lastUpdated = data[0]?.ultima_actualizacion
-    ? formatDate(data[0].ultima_actualizacion)
+  const lastUpdated = ultima_actualizacion
+    ? formatDate(ultima_actualizacion)
     : "No hay datos asociados";
 
   return (

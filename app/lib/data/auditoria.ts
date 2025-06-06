@@ -1,15 +1,20 @@
 import sql from "mssql";
 import { connectToDB } from "../utils/db-connection";
+import { Activity } from "../definitions";
 
 export async function fetchUserActivityById(
   userId: string,
   query: string,
   currentPage: number,
   resultsPerPage: number,
-) {
+): Promise<{ data: Activity[]; pages: number }> {
   const offset = (currentPage - 1) * resultsPerPage;
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return { data: [], pages: 0 };
+    }
     const request = pool.request();
 
     const result = await request
@@ -33,18 +38,14 @@ export async function fetchUserActivityById(
         FETCH NEXT @pageSize ROWS ONLY
       `);
 
-    const data = result.recordset;
     const pages = Math.ceil(
       Number(result.recordset[0]?.total) / resultsPerPage,
     );
 
-    return {
-      data,
-      total: pages,
-    };
+    return { data: result.recordset as Activity[], pages };
   } catch (error) {
     console.error("Database Error:", error);
-    throw new Error("Error al obtener actividades");
+    return { data: [], pages: 0 };
   }
 }
 
@@ -52,10 +53,14 @@ export async function fetchActivity(
   query: string,
   currentPage: number,
   resultsPerPage: number,
-) {
+): Promise<{ data: Activity[]; pages: number }> {
   const offset = (currentPage - 1) * resultsPerPage;
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return { data: [], pages: 0 };
+    }
     const request = pool.request();
 
     const result = await request
@@ -79,12 +84,9 @@ export async function fetchActivity(
       Number(result.recordset[0]?.total) / resultsPerPage,
     );
 
-    return {
-      data,
-      total: pages,
-    };
+    return { data: result.recordset as Activity[], pages };
   } catch (error) {
     console.error("Database Error:", error);
-    throw new Error("Error al obtener actividades");
+    return { data: [], pages: 0 };
   }
 }

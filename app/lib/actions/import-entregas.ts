@@ -82,6 +82,11 @@ export async function importEntregas() {
     });
 
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return { success: false, message: "No connection to database" };
+    }
+
     if (entregas.length === 0)
       return { success: false, message: "No data to import" };
 

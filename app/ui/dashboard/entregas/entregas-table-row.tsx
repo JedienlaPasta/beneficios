@@ -1,16 +1,10 @@
 "use client";
+import { Entregas } from "@/app/lib/definitions";
 import { formatDate, formatRUT } from "@/app/lib/utils/format";
 import { useRouter, useSearchParams } from "next/navigation";
 
 type EntregasProps = {
-  item: {
-    rut: string;
-    folio: string;
-    estado_documentos: string;
-    fecha_entrega: Date;
-    nombres_rsh: string;
-    apellidos_rsh: string;
-  };
+  item: Entregas;
 };
 
 export default function EntregasTableRow({ item }: EntregasProps) {
@@ -27,9 +21,10 @@ export default function EntregasTableRow({ item }: EntregasProps) {
   const searchParams = useSearchParams();
 
   const handleClick = () => {
+    if (!rut || !folio) return;
     const params = new URLSearchParams(searchParams);
     params.set("detailsModal", folio);
-    params.set("rut", rut);
+    params.set("rut", String(rut));
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
@@ -44,7 +39,9 @@ export default function EntregasTableRow({ item }: EntregasProps) {
       className="grid cursor-pointer grid-cols-26 gap-8 text-nowrap px-6 text-sm tabular-nums transition-colors hover:bg-slate-200/50"
     >
       <td className="col-span-5 py-4 text-slate-700">{folio}</td>
-      <td className="col-span-4 py-4 text-slate-600">{formatRUT(rut)}</td>
+      <td className="col-span-4 py-4 text-slate-600">
+        {formatRUT(String(rut))}
+      </td>
       <td className="col-span-9 py-4 text-slate-600">
         {nombres_rsh + " " + apellidos_rsh}
       </td>

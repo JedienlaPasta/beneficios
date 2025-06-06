@@ -8,10 +8,6 @@ import RoleGuard from "@/app/ui/auth/role-guard";
 import EntregasStockSummary from "./entregas-stock-summary";
 
 export default async function CampaignDetail({ id }: { id: string }) {
-  const { data } = await fetchCampaignById(id);
-  if (data.length === 0) {
-    redirect("/dashboard/campanas");
-  }
   const {
     nombre_campaña,
     fecha_inicio,
@@ -23,10 +19,17 @@ export default async function CampaignDetail({ id }: { id: string }) {
     tramo,
     discapacidad,
     adulto_mayor,
-  } = data[0];
+  } = await fetchCampaignById(id);
+  if (nombre_campaña === "") {
+    redirect("/dashboard/campanas");
+  }
   const inicio = formatDate(fecha_inicio);
   const termino = formatDate(fecha_termino);
-  const estado = fecha_termino > new Date() ? "En curso" : "Finalizado";
+  const estado = fecha_termino
+    ? fecha_termino > new Date()
+      ? "En curso"
+      : "Finalizado"
+    : "";
   const colorEstado =
     estado === "En curso"
       ? ["bg-green-100", "bg-green-500", "text-green-500", "border-green-200"]
@@ -110,12 +113,18 @@ export default async function CampaignDetail({ id }: { id: string }) {
               Resumen
             </h2>
             <div className="flex flex-col gap-2 rounded-xl px-6">
-              <EntregasStockSummary entregas={stock} period="Stock Total" />
               <EntregasStockSummary
-                entregas={stock - entregas}
+                entregas={stock ? stock : 0}
+                period="Stock Total"
+              />
+              <EntregasStockSummary
+                entregas={stock && entregas ? stock - entregas : 0}
                 period="Stock Disponible"
               />
-              <EntregasStockSummary entregas={entregas} period="Entregado" />
+              <EntregasStockSummary
+                entregas={entregas || 0}
+                period="Entregado"
+              />
             </div>
           </div>
         </div>

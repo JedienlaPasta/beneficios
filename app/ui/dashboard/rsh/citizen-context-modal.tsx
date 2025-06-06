@@ -11,9 +11,5 @@ export default async function ModalCitizenDetailContext({
   rut,
 }: ModalContextProps) {
   const response = await fetchRSHByRUT(rut);
-  return (
-    // <div className="flex h-svh items-start justify-center">
-    <CitizenDetailModal name={name} citizen={response.data[0]} />
-    // </div>
-  );
+  return <CitizenDetailModal name={name} citizen={response} />;
 }

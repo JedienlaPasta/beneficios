@@ -11,6 +11,7 @@ import { Modal } from "@/app/ui/dashboard/modal";
 import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/modal-context";
 import ModalSkeleton from "@/app/ui/modal-skeleton";
 import NewEntregaModalContext from "@/app/ui/dashboard/entregas/modal-context";
+import { formatRUT } from "@/app/lib/utils/format";
 // import { Spinner } from "@/app/ui/dashboard/loaders";
 
 type CitizenRecordProps = {
@@ -71,7 +72,7 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
             <span className="flex flex-wrap items-center gap-2 text-nowrap text-lg font-semibold text-slate-800">
               <p>Beneficios Recibidos</p>
               <p className="rounded-md bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-500">
-                #{rut}
+                #{formatRUT(rut)}
               </p>
             </span>
             <SearchBar placeholder="Buscar..." />

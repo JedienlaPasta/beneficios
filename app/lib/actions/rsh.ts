@@ -106,6 +106,14 @@ export async function createRSH(formData: FormData) {
 
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
+
     const request = pool.request();
 
     // Check if rut already exists
@@ -207,6 +215,14 @@ export async function updateRSH(formData: FormData) {
 
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
+
     const transaction = new sql.Transaction(pool);
 
     try {
@@ -282,6 +298,14 @@ export async function updateRSH(formData: FormData) {
 export async function deleteRSH(rut: string) {
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
+
     const transaction = new sql.Transaction(pool);
 
     try {
@@ -301,8 +325,7 @@ export async function deleteRSH(rut: string) {
 
       // Obtener todas las entregas asociadas al usuario
       const entregasRequest = new sql.Request(transaction);
-      const entregasResult = await entregasRequest
-        .input("rut", sql.Int, rut)
+      const entregasResult = await entregasRequest.input("rut", sql.Int, rut)
         .query(`
           SELECT folio FROM entregas WHERE rut = @rut
         `);
@@ -310,18 +333,22 @@ export async function deleteRSH(rut: string) {
       // Para cada entrega, obtener las campañas asociadas y actualizar el contador
       for (const entrega of entregasResult.recordset) {
         const campaignRequest = new sql.Request(transaction);
-        const campaignResult = await campaignRequest
-          .input("folio", sql.NVarChar, entrega.folio)
-          .query(`
+        const campaignResult = await campaignRequest.input(
+          "folio",
+          sql.NVarChar,
+          entrega.folio,
+        ).query(`
             SELECT id_campaña FROM entrega WHERE folio = @folio
           `);
 
         // Actualizar el contador de entregas en cada campaña
         for (const campaign of campaignResult.recordset) {
           const updateRequest = new sql.Request(transaction);
-          await updateRequest
-            .input("campaignId", sql.UniqueIdentifier, campaign.id_campaña)
-            .query(`
+          await updateRequest.input(
+            "campaignId",
+            sql.UniqueIdentifier,
+            campaign.id_campaña,
+          ).query(`
               UPDATE campañas
               SET entregas = entregas - 1
               WHERE id = @campaignId AND entregas > 0
@@ -518,6 +545,13 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
     });
 
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
 
     if (citizens.length > 0) {
       const transaction = new sql.Transaction(pool);

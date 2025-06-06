@@ -3,9 +3,9 @@ import ModalImportForm from "./modal-import-form";
 import CloseModalButton from "../../close-modal-button";
 import { FaBoxOpen } from "react-icons/fa6";
 import {
-  SocialAidByFolio,
-  SocialAidTableRowByFolio,
-  SocialFiles,
+  EntregaByFolio,
+  EntregasTableByFolio,
+  EntregasFiles,
 } from "@/app/lib/definitions";
 import Link from "next/link";
 import { Files } from "./files";
@@ -19,9 +19,9 @@ import { AnimatePresence, motion } from "framer-motion"; // Add this import
 type Props = {
   rut: string;
   folio: string;
-  entregas: SocialAidTableRowByFolio;
-  entrega: SocialAidByFolio[];
-  files: SocialFiles[];
+  entregas: EntregasTableByFolio;
+  entrega: EntregaByFolio[];
+  files: EntregasFiles[];
 };
 
 export default function ModalEntregasDetail({
@@ -211,7 +211,7 @@ function ModalGeneralInfoField({
   );
 }
 
-function EntregasListItem({ item }: { item: SocialAidByFolio }) {
+function EntregasListItem({ item }: { item: EntregaByFolio }) {
   return (
     <div className="flex items-center justify-between gap-4 rounded-lg border border-gray-200/80 bg-gray-50 px-3 py-2.5 transition-colors hover:bg-gray-100/80">
       <div className="flex items-center gap-3">
@@ -241,7 +241,13 @@ function EntregasListItem({ item }: { item: SocialAidByFolio }) {
   );
 }
 
-function FilesList({ folio, files }: { folio: string; files: SocialFiles[] }) {
+function FilesList({
+  folio,
+  files,
+}: {
+  folio: string;
+  files: EntregasFiles[];
+}) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -255,7 +261,7 @@ function FilesList({ folio, files }: { folio: string; files: SocialFiles[] }) {
 
       {files.length > 0 ? (
         <div className="grid grid-cols-3 gap-3 rounded-xl border border-gray-200/80 bg-gray-50/70 p-4 shadow-sm">
-          {files.map((item: SocialFiles, index) => (
+          {files.map((item: EntregasFiles, index) => (
             <Files key={index} item={item} />
           ))}
         </div>

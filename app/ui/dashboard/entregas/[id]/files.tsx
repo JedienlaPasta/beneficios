@@ -1,5 +1,5 @@
 "use client";
-import { SocialFiles } from "@/app/lib/definitions";
+import { EntregasFiles } from "@/app/lib/definitions";
 import pdf from "@/public/pdf.svg";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -7,7 +7,7 @@ import { deletePDFById, downloadPDFById } from "@/app/lib/actions/entregas";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function Files({ item }: { item: SocialFiles }) {
+export function Files({ item }: { item: EntregasFiles }) {
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const router = useRouter();

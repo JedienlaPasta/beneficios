@@ -96,6 +96,14 @@ export const createEntrega = async (id: string, formData: FormData) => {
     let newFolio: string = "";
 
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
+
     let transaction: sql.Transaction | undefined;
     try {
       transaction = new sql.Transaction(pool);
@@ -243,6 +251,14 @@ export const createEntrega = async (id: string, formData: FormData) => {
 export const deleteEntregaByFolio = async (folio: string) => {
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
+
     const transaction = new sql.Transaction(pool);
 
     try {
@@ -318,6 +334,14 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
     }
 
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
+
     const uploadPromises = [];
 
     for (let i = 0; i < fileCount; i++) {
@@ -415,6 +439,13 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
 export const deletePDFById = async (id: string) => {
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
 
     // Check if document exists before deleting
     const documentRequest = pool.request().input("id", sql.NVarChar, id);
@@ -486,6 +517,13 @@ export const deletePDFById = async (id: string) => {
 export const downloadPDFById = async (id: string) => {
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
 
     // Fetch document from database
     const documentRequest = pool.request().input("id", sql.NVarChar, id);
@@ -530,6 +568,13 @@ export const downloadPDFById = async (id: string) => {
 export const createAndDownloadPDFByFolio = async (folio: string) => {
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
 
     // Get delivery info
     const entregaRequest = pool.request().input("folio", sql.NVarChar, folio);

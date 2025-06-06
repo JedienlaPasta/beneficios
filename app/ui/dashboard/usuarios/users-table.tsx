@@ -1,6 +1,5 @@
 "use client";
 
-import { User } from "@/app/lib/data/users";
 import { useState } from "react";
 import { FiEdit2, FiTrash2, FiUserCheck, FiUserX } from "react-icons/fi";
 import { EditUserModal } from "./edit-user-modal";
@@ -8,14 +7,15 @@ import { DeleteUserModal } from "./delete-user-modal";
 import { toggleUserStatus } from "@/app/lib/actions/usuarios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { UserData } from "@/app/lib/definitions";
 
-export function UsersTable({ users }: { users: User[] }) {
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [deletingUser, setDeletingUser] = useState<User | null>(null);
+export function UsersTable({ users }: { users: UserData[] }) {
+  const [editingUser, setEditingUser] = useState<UserData | null>(null);
+  const [deletingUser, setDeletingUser] = useState<UserData | null>(null);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleToggleStatus = async (user: User) => {
+  const handleToggleStatus = async (user: UserData) => {
     setIsProcessing(user.id);
 
     const newStatus =

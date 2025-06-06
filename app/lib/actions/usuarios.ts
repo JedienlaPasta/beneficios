@@ -58,6 +58,13 @@ export async function createUser(formData: FormData) {
 
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "Error al conectar a la base de datos",
+      };
+    }
 
     // Check if email already exists
     const checkEmail = await pool
@@ -156,6 +163,13 @@ export async function updateUser(userId: string, formData: FormData) {
 
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "Error al conectar a la base de datos",
+      };
+    }
 
     // Check if email already exists for other users
     const checkEmail = await pool
@@ -216,6 +230,14 @@ export async function updateUser(userId: string, formData: FormData) {
 export async function toggleUserStatus(userId: string, newStatus: string) {
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "Error al conectar a la base de datos",
+      };
+    }
+
     const request = pool.request();
 
     const userResult = await request
@@ -258,6 +280,14 @@ export async function toggleUserStatus(userId: string, newStatus: string) {
 export async function deleteUser(userId: string) {
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "Error al conectar a la base de datos",
+      };
+    }
+
     const request = pool.request();
 
     const userResult = await request

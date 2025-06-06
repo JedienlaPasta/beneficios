@@ -6,7 +6,7 @@ export default function RSHTableRow({
   item,
 }: {
   item: {
-    rut: number;
+    rut: number | null;
     dv: string;
     nombres_rsh: string;
     apellidos_rsh: string;
@@ -14,8 +14,8 @@ export default function RSHTableRow({
     direccion_mod?: string;
     sector: string;
     sector_mod?: string;
-    tramo: number;
-    ultima_entrega: Date;
+    tramo: number | null;
+    ultima_entrega: Date | null;
   };
 }) {
   const {
@@ -31,11 +31,14 @@ export default function RSHTableRow({
     ultima_entrega,
   } = item;
   const router = useRouter();
-  const formattedRut = formatRUT(rut);
+  const formattedRut = rut ? formatRUT(rut) : "";
 
   const handleClick = () => {
+    if (!rut) return;
     router.push(`/dashboard/entregas/${rut}`);
   };
+
+  const verifiedTramo = tramo !== null ? tramo : 0;
 
   return (
     <tr
@@ -58,13 +61,15 @@ export default function RSHTableRow({
       <td className="col-span-4 flex flex-col justify-center py-3.5">
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-blue-500">{tramo}%</span>
+            <span className="text-xs font-medium text-blue-500">
+              {verifiedTramo}%
+            </span>
             <span className="text-xs text-slate-500">
-              {tramo <= 40
+              {verifiedTramo <= 40
                 ? "Bajo"
-                : tramo <= 60
+                : verifiedTramo <= 60
                   ? "Medio bajo"
-                  : tramo <= 80
+                  : verifiedTramo <= 80
                     ? "Medio alto"
                     : "Alto"}
             </span>
@@ -74,7 +79,7 @@ export default function RSHTableRow({
             <div
               className="absolute top-0 h-full bg-gradient-to-r from-blue-500 to-blue-400"
               style={{
-                width: `${tramo}%`,
+                width: `${verifiedTramo}%`,
               }}
             >
               {/* Indicator line */}

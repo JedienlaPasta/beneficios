@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { SubmitButton } from "../submit-button";
-import { User } from "@/app/lib/data/users";
 import { updateUser } from "@/app/lib/actions/usuarios";
 import { UserManagementModal } from "../modal";
 import RolDropdown from "./roles-dropdown";
+import { UserData } from "@/app/lib/definitions";
 
 type EditUserModalProps = {
-  user: User;
+  user: UserData;
   onClose: () => void;
 };
 

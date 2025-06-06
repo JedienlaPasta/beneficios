@@ -11,10 +11,9 @@ export default function TableRow({
   item: {
     id: string;
     nombre_campaña: string;
-    entregas: number;
-    estado: "En curso" | "Finalizado";
-    fecha_inicio: Date;
-    fecha_termino: Date;
+    entregas: number | null;
+    fecha_inicio: Date | null;
+    fecha_termino: Date | null;
   };
 }) {
   const { id, nombre_campaña, entregas, fecha_inicio, fecha_termino } = item;
@@ -24,7 +23,11 @@ export default function TableRow({
   const termino = formatDate(fecha_termino);
 
   const now = new Date();
-  const estado = fecha_termino > now ? "En curso" : "Finalizado";
+  const estado = fecha_termino
+    ? fecha_termino > now
+      ? "En curso"
+      : "Finalizado"
+    : "";
 
   const colorEstado =
     estado === "En curso"
@@ -64,7 +67,7 @@ export default function TableRow({
       </td>
       <td className="col-span-3 flex items-center gap-3 py-4 text-left text-slate-700/90">
         <FiBox className="col-span-1 flex w-fit justify-start" />
-        {entregas}
+        {entregas ? entregas : 0}
       </td>
       <td className="col-span-3 flex items-center justify-center py-4 text-slate-600">
         <span

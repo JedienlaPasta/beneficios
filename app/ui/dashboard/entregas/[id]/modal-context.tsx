@@ -20,9 +20,9 @@ export default async function ModalEntregasDetailContext({
     fetchFilesByFolio(folio),
   ]);
 
-  const entregas = entregasResponse.data[0];
-  const entrega = entregaResponse.data;
-  const files = filesResponse.data;
+  const entregas = entregasResponse;
+  const entrega = entregaResponse;
+  const files = filesResponse;
 
   return (
     <ModalEntregasDetail

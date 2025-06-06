@@ -14,6 +14,15 @@ interface UserData {
 export async function authenticateUser(correo: string, contraseña: string) {
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "Error en el servidor",
+        status: 500,
+      };
+    }
+
     const userRequest = pool.request();
     userRequest.input("correo", sql.VarChar, correo);
     const user = await userRequest.query(

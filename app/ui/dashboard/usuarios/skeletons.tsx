@@ -1,7 +1,3 @@
-// Add this to your existing skeletons.tsx file
-
-// Update the UserTableSkeleton to include the estado column
-
 export function UserTableSkeleton() {
   const thStyle =
     "whitespace-nowrap  py-4 text-left text-xs font-normal uppercase tracking-wide";

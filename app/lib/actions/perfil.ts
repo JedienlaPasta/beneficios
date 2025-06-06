@@ -62,6 +62,14 @@ export async function changePassword(userId: string, formData: FormData) {
 
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "Error de conexión a la base de datos",
+      };
+    }
+
     const request = pool.request();
 
     // Check if user exists

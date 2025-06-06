@@ -15,7 +15,6 @@ const nextConfig = {
       },
     ];
   },
-
   poweredByHeader: false,
 };
 

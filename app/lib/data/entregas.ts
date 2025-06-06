@@ -1,45 +1,65 @@
 import sql from "mssql";
 import {
-  SocialAid,
-  SocialAidByFolio,
-  SocialAidTableRow,
-  SocialAidTableRowByFolio,
-  SocialFiles,
+  Entregas,
+  EntregasCampañaDetail,
+  EntregaByFolio,
+  EntregasTable,
+  EntregasTableByFolio,
+  EntregasFiles,
 } from "../definitions";
 import { connectToDB } from "../utils/db-connection";
 
-export async function fetchEntrega(folio: string) {
-  try {
-    const pool = await connectToDB();
-    const request = pool.request();
-    const result = await request.input("folio", sql.NVarChar, `%${folio}%`)
-      .query(`
-        SELECT TOP 1 entregas.folio, entregas.fecha_entrega, entregas.estado_documentos, entregas.rut, rsh.nombres_rsh, rsh.apellidos_rsh
-        FROM entregas
-        JOIN rsh ON entregas.rut = rsh.rut
-        WHERE
-          entregas.folio = @folio
-      `);
+// export async function fetchEntrega(folio: string): Promise<Entregas> {
+//   const defaultEntrega: Entregas = {
+//     folio: "",
+//     fecha_entrega: null,
+//     estado_documentos: "",
+//     rut: null,
+//     nombres_rsh: "",
+//     apellidos_rsh: "",
+//   };
 
-    return { data: result.recordset };
-  } catch (error) {
-    console.error("Error al obtener datos de la tabla de entregas:", error);
-    return { data: [], pages: 0 };
-  }
-}
+//   try {
+//     const pool = await connectToDB();
+//     if (!pool) {
+//       console.warn("No se pudo establecer una conexión a la base de datos.");
+//       return defaultEntrega;
+//     }
+
+//     const request = pool.request();
+//     const result = await request.input("folio", sql.NVarChar, `%${folio}%`)
+//       .query(`
+//         SELECT TOP 1 entregas.folio, entregas.fecha_entrega, entregas.estado_documentos, entregas.rut, rsh.nombres_rsh, rsh.apellidos_rsh
+//         FROM entregas
+//         JOIN rsh ON entregas.rut = rsh.rut
+//         WHERE
+//           entregas.folio = @folio
+//       `);
+
+//     return result.recordset[0] as Entregas;
+//   } catch (error) {
+//     console.error("Error al obtener datos de la tabla de entregas:", error);
+//     return defaultEntrega;
+//   }
+// }
 
 // No se usa?
 export async function fetchEntregas(
   query: string,
   currentPage: number,
   resultsPerPage: number,
-) {
+): Promise<{ data: Entregas[]; pages: number }> {
   const offset = (currentPage - 1) * resultsPerPage;
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return { data: [], pages: 0 };
+    }
+
     const request = pool.request();
     const result = await request
-      .input("query", sql.NVarChar, `%${query}%`)
+      .input("query", sql.VarChar, `%${query}%`)
       .input("offset", sql.Int, offset)
       .input("pageSize", sql.Int, resultsPerPage).query(`
         SELECT entregas.folio, entregas.fecha_entrega, entregas.estado_documentos, entregas.rut, rsh.nombres_rsh, rsh.apellidos_rsh,
@@ -61,7 +81,7 @@ export async function fetchEntregas(
     if (result.recordset.length > 0) {
       pages = Math.ceil(Number(result.recordset[0]?.total) / resultsPerPage);
     }
-    return { data: result.recordset, pages };
+    return { data: result.recordset as Entregas[], pages };
   } catch (error) {
     console.error("Error al obtener datos de la tabla de entregas:", error);
     return { data: [], pages: 0 };
@@ -73,10 +93,14 @@ export async function fetchEntregasByRUT(
   query: string,
   currentPage: number,
   resultsPerPage: number,
-) {
+): Promise<{ data: EntregasTable[]; pages: number }> {
   const offset = (currentPage - 1) * resultsPerPage;
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return { data: [], pages: 0 };
+    }
     const request = pool.request();
 
     const countQuery =
@@ -85,8 +109,8 @@ export async function fetchEntregasByRUT(
         : `CAST(0 AS INT) AS total`;
 
     const result = await request
-      .input("rut", sql.NVarChar, rut)
-      .input("query", sql.NVarChar, `%${query}%`)
+      .input("rut", sql.VarChar, rut)
+      .input("query", sql.VarChar, `%${query}%`)
       .input("offset", sql.Int, offset)
       .input("pageSize", sql.Int, resultsPerPage).query(`
         SELECT 
@@ -112,8 +136,8 @@ export async function fetchEntregasByRUT(
     } else if (currentPage > 1) {
       // Only execute count query when needed (not on first page)
       const countResult = await request
-        .input("rut", sql.NVarChar, rut)
-        .input("query", sql.NVarChar, `%${query}%`).query(`
+        .input("rut", sql.VarChar, rut)
+        .input("query", sql.VarChar, `%${query}%`).query(`
           SELECT COUNT(*) AS total
           FROM entregas
           WHERE 
@@ -125,48 +149,68 @@ export async function fetchEntregasByRUT(
       );
     }
 
-    return { data: result.recordset as SocialAidTableRow[], pages };
+    return { data: result.recordset as EntregasTable[], pages };
   } catch (error) {
     console.error("Error al obtener datos de la tabla de entregas:", error);
     return { data: [], pages: 0 };
   }
 }
 
-// Returns Entregas[] de length = 1
-export async function fetchEntregasGeneralInfoByFolio(folio: string) {
+export async function fetchEntregasGeneralInfoByFolio(
+  folio: string,
+): Promise<EntregasTableByFolio> {
+  const defaultEntrega: EntregasTableByFolio = {
+    folio: "",
+    fecha_entrega: null,
+    observacion: "",
+    estado_documentos: "",
+    nombre_usuario: "",
+  };
+
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return defaultEntrega;
+    }
+
     const request = pool.request();
-    const result = await request.input("folio", sql.NVarChar, folio).query(`
+    const result = await request.input("folio", sql.VarChar, folio).query(`
         SELECT entregas.folio, entregas.fecha_entrega, entregas.observacion, entregas.estado_documentos, usuarios.nombre_usuario
         FROM entregas
         LEFT JOIN usuarios ON entregas.id_usuario = usuarios.id
         WHERE entregas.folio = @folio
       `);
 
-    return { data: result.recordset as SocialAidTableRowByFolio[] };
+    return result.recordset[0] as EntregasTableByFolio;
   } catch (error) {
     console.error("Error al obtener datos de las entregas: ", error);
-    return { data: [], pages: 0 };
+    return defaultEntrega;
   }
 }
 
-// Returns Entrega[] de length = los que hayan
-export async function fetchEntregasInfoByFolio(folio: string) {
+export async function fetchEntregasInfoByFolio(
+  folio: string,
+): Promise<EntregaByFolio[]> {
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return [];
+    }
+
     const request = pool.request();
-    const result = await request.input("folio", sql.NVarChar, folio).query(`
+    const result = await request.input("folio", sql.VarChar, folio).query(`
         SELECT entrega.id_campaña, entrega.detalle, campañas.tipo_dato, campañas.nombre_campaña
         FROM entrega
         LEFT JOIN campañas ON entrega.id_campaña = campañas.id
         WHERE entrega.folio = @folio
       `);
 
-    return { data: result.recordset as SocialAidByFolio[] };
+    return result.recordset as EntregaByFolio[];
   } catch (error) {
     console.error("Error al obtener datos de las entregas: ", error);
-    return { data: [], pages: 0 };
+    return [];
   }
 }
 
@@ -176,7 +220,7 @@ export async function fetchEntregasForCampaignDetail(
   query: string,
   currentPage: number,
   resultsPerPage: number,
-) {
+): Promise<{ data: EntregasCampañaDetail[]; pages: number }> {
   const flattenQuery = query.replace(/[.]/g, "");
   // si no se agrega el dv no son necesarios estos slice
   if (flattenQuery.length === 8) query = flattenQuery.slice(0, 7);
@@ -185,10 +229,15 @@ export async function fetchEntregasForCampaignDetail(
   const offset = (currentPage - 1) * resultsPerPage;
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return { data: [], pages: 0 };
+    }
+
     const request = pool.request();
     const result = await request
       .input("id", sql.UniqueIdentifier, id) // Changed to UniqueIdentifier if id is a UUID
-      .input("query", sql.NVarChar, `%${query}%`)
+      .input("query", sql.VarChar, `%${query}%`)
       .input("offset", sql.Int, offset)
       .input("pageSize", sql.Int, resultsPerPage).query(`
         SELECT 
@@ -223,25 +272,32 @@ export async function fetchEntregasForCampaignDetail(
     const pages = Math.ceil(
       Number(result.recordset[0]?.total) / resultsPerPage,
     );
-    return { data: result.recordset as SocialAid[], pages };
+    return { data: result.recordset as EntregasCampañaDetail[], pages };
   } catch (error) {
     console.error("Error al obtener entregas:", error);
     return { data: [], pages: 0 };
   }
 }
 
-export async function fetchFilesByFolio(folio: string) {
+export async function fetchFilesByFolio(
+  folio: string,
+): Promise<EntregasFiles[]> {
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return [];
+    }
+
     const request = pool.request();
-    const result = request.input("folio", sql.NVarChar, folio).query(`
+    const result = await request.input("folio", sql.VarChar, folio).query(`
         SELECT documentos.fecha_guardado, documentos.nombre_documento, documentos.tipo, documentos.id
         FROM documentos
         WHERE documentos.folio = @folio`);
 
-    return { data: (await result).recordset as SocialFiles[] };
+    return result.recordset as EntregasFiles[];
   } catch (error) {
     console.error("Error al obtener archivos:", error);
-    return { data: [] };
+    return [];
   }
 }

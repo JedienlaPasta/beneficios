@@ -39,10 +39,10 @@ export type AuditLog = {
 
 export default function AuditTable({
   logs,
-  totalPages,
+  pages,
 }: {
   logs: AuditLog[];
-  totalPages: number;
+  pages: number;
 }) {
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
 
@@ -134,7 +134,7 @@ export default function AuditTable({
         </table>
       </div>
 
-      <Pagination pages={totalPages} />
+      <Pagination pages={pages} />
 
       {/* Details Modal */}
       {selectedLog && (

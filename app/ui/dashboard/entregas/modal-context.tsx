@@ -19,7 +19,7 @@ export default async function NewEntregaModalContext({
 
   return (
     <>
-      <NewEntregaModal rut={rut} userId={userId} data={response.data} />
+      <NewEntregaModal rut={rut} userId={userId} data={response} />
     </>
   );
 }

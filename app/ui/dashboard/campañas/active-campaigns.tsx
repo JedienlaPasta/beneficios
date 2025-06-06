@@ -5,16 +5,16 @@ import Link from "next/link";
 
 type ActiveCampaignsProps = {
   nombre_campaña: string;
-  termina: Date;
-  entregas: number;
+  termina: Date | null;
+  entregas: number | null;
 };
 
 export default async function ActiveCampaigns() {
-  const { data } = await fetchActiveCampaigns();
+  const response = await fetchActiveCampaigns();
   return (
     <>
       <div className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-3">
-        {data.map((campaign) => (
+        {response.map((campaign) => (
           <Link href={`/dashboard/campanas/${campaign.id}`} key={campaign.id}>
             <ActiveCampaign
               nombre_campaña={campaign.nombre_campaña}
@@ -70,7 +70,7 @@ function ActiveCampaign({
         </div>
         <div className="flex flex-col items-end">
           <span className="relative right-0 text-2xl font-bold text-slate-600 transition-all duration-500 group-hover:right-3 group-hover:text-blue-50">
-            {entregas}
+            {entregas ? entregas : 0}
           </span>
           <span className="text-xs font-medium uppercase tracking-wider text-slate-400 transition-all duration-500 group-hover:text-blue-300">
             Entregas

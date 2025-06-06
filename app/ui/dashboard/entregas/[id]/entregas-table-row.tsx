@@ -1,9 +1,9 @@
 "use client";
-import { SocialAidTableRow } from "@/app/lib/definitions";
+import { EntregasTable } from "@/app/lib/definitions";
 import { useRouter, useSearchParams } from "next/navigation";
 import { formatDate, formatTime } from "@/app/lib/utils/format";
 
-export default function TableRow({ item }: { item: SocialAidTableRow }) {
+export default function TableRow({ item }: { item: EntregasTable }) {
   const { folio, fecha_entrega, nombre_usuario, estado_documentos } = item;
   const fecha = formatDate(fecha_entrega);
   const hora = formatTime(fecha_entrega);

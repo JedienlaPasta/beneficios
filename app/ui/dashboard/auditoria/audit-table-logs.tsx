@@ -8,7 +8,7 @@ export async function AuditLogsTable({
   currentPage: number;
   query: string;
 }) {
-  const { data, total } = await fetchActivity(query, currentPage, 8);
+  const { data, pages } = await fetchActivity(query, currentPage, 8);
 
-  return <AuditTable logs={data} totalPages={total} />;
+  return <AuditTable logs={data} pages={pages} />;
 }

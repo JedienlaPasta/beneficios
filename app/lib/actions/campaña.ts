@@ -5,7 +5,6 @@ import { revalidatePath } from "next/cache";
 import { FormState } from "../../ui/dashboard/campañas/new-campaign-modal";
 import { connectToDB } from "../utils/db-connection";
 import sql from "mssql";
-import { Campaign } from "../definitions";
 import { logAction } from "./auditoria";
 import { capitalizeAll } from "../utils/format";
 
@@ -19,9 +18,10 @@ const CreateCampaignFormSchema = z.object({
   fechaTermino: z.string(),
   estado: z.enum(["En curso", "Finalizado"]),
   code: z.string(),
-  stock: z.string()
-    .refine((val) => !isNaN(Number(val)) && val.trim() !== '', {
-      message: "El stock debe ser un número válido"
+  stock: z
+    .string()
+    .refine((val) => !isNaN(Number(val)) && val.trim() !== "", {
+      message: "El stock debe ser un número válido",
     })
     .transform((str) => Number(str)),
   entregas: z.number(),
@@ -85,8 +85,16 @@ export async function createCampaign(formData: FormData): Promise<FormState> {
 
     // Buscar coincidencias en la base de datos
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
+
     const request = pool.request();
-    const result = await request.input("nombre", sql.NVarChar, nombre).query(`
+    const result = await request.input("nombre", sql.VarChar, nombre).query(`
         SELECT *,
           CASE 
             WHEN campañas.fecha_inicio > GETUTCDATE() THEN 'Pendiente'
@@ -98,7 +106,7 @@ export async function createCampaign(formData: FormData): Promise<FormState> {
       `);
 
     // Verificar que no hayan campañas activas con el mismo nombre
-    const campañas = result.recordset as Campaign[];
+    const campañas = result.recordset;
     for (const campaña of campañas) {
       if (campaña.estado !== "Finalizado")
         throw new Error("Ya existe una campaña activa con este nombre.");
@@ -108,15 +116,15 @@ export async function createCampaign(formData: FormData): Promise<FormState> {
 
     // Modified query to return the inserted ID
     const insertResult = await request
-      .input("nombre_campaña", sql.NVarChar, nombre)
+      .input("nombre_campaña", sql.VarChar, nombre)
       .input(
         "fechaTermino",
         sql.DateTime,
         new Date(new Date(fechaTermino).toISOString()),
       )
-      .input("code", sql.NVarChar, code.toUpperCase())
+      .input("code", sql.VarChar, code.toUpperCase())
       .input("stock", sql.Int, stock)
-      .input("tipoDato", sql.NVarChar, tipoDato)
+      .input("tipoDato", sql.VarChar, tipoDato)
       .input("entregas", sql.Int, entregas)
       .input("tramo", sql.Bit, tramo)
       .input("discapacidad", sql.Bit, discapacidad)
@@ -205,6 +213,13 @@ export async function updateCampaign(id: string, formData: FormData) {
     }
 
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
     const checkRequest = pool.request();
     const checkResult = await checkRequest.input("id", sql.UniqueIdentifier, id)
       .query(`
@@ -274,6 +289,13 @@ export async function updateCampaign(id: string, formData: FormData) {
 export async function deleteCampaign(id: string) {
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
     const transaction = new sql.Transaction(pool);
     try {
       await transaction.begin();
@@ -327,6 +349,13 @@ export async function deleteCampaign(id: string) {
 export async function endCampaignById(id: string) {
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
     const transaction = new sql.Transaction(pool);
     try {
       await transaction.begin();

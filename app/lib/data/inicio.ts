@@ -2,10 +2,19 @@ import sql from "mssql";
 import dayjs from "dayjs";
 import { connectToDB } from "../utils/db-connection";
 import utc from "dayjs/plugin/utc";
+import { GeneralInfo } from "../definitions";
 
-export async function fetchGeneralInfo() {
+export async function fetchGeneralInfo(): Promise<GeneralInfo> {
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        active_campaigns: 0,
+        total_entregas: 0,
+        total_beneficiarios: 0,
+      };
+    }
     const request = pool.request();
 
     const activeCampaignsResult = await request.query(`
@@ -24,25 +33,19 @@ export async function fetchGeneralInfo() {
       FROM rsh
     `);
 
-    const data = [
-      {
-        active_campaigns: activeCampaignsResult.recordset[0].active_campaigns,
-        total_entregas: totalEntregasResult.recordset[0].total_entregas,
-        total_beneficiarios:
-          totalBeneficiariosResult.recordset[0].total_beneficiarios,
-      },
-    ];
-
-    return data;
+    return {
+      active_campaigns: activeCampaignsResult.recordset[0].active_campaigns,
+      total_entregas: totalEntregasResult.recordset[0].total_entregas,
+      total_beneficiarios:
+        totalBeneficiariosResult.recordset[0].total_beneficiarios,
+    };
   } catch (error) {
     console.error("Error al obtener informacion general:", error);
-    return [
-      {
-        active_campaigns: 0,
-        total_entregas: 0,
-        total_beneficiarios: 0,
-      },
-    ];
+    return {
+      active_campaigns: 0,
+      total_entregas: 0,
+      total_beneficiarios: 0,
+    };
   }
 }
 
@@ -52,6 +55,10 @@ export async function fetchDailyEntregasCountByYear(year: string) {
     dayjs.extend(utc);
 
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {} as Record<string, number>;
+    }
     const request = pool.request();
 
     // Use parameterized query to prevent SQL injection

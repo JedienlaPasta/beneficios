@@ -14,7 +14,7 @@ export async function AuditLogsTable({
     return null;
   }
   const userId = String(userSession.userId);
-  const { data, total } = await fetchUserActivityById(
+  const { data, pages } = await fetchUserActivityById(
     userId,
     query,
     currentPage,
@@ -23,7 +23,7 @@ export async function AuditLogsTable({
 
   return (
     <>
-      <AuditTable logs={data} totalPages={total} />
+      <AuditTable logs={data} pages={pages} />
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { SocialAid } from "@/app/lib/definitions";
+import { EntregasCampañaDetail } from "@/app/lib/definitions";
 import Pagination from "../../pagination";
 import { formatDate, formatNumber } from "@/app/lib/utils/format";
 import { fetchEntregasForCampaignDetail } from "@/app/lib/data/entregas";
@@ -38,7 +38,7 @@ export default async function CampaignEntregasTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/80">
-            {data?.map((item: SocialAid, index: number) => (
+            {data?.map((item: EntregasCampañaDetail, index: number) => (
               <TableRow key={index} item={item} />
             ))}
           </tbody>
@@ -49,7 +49,7 @@ export default async function CampaignEntregasTable({
   );
 }
 
-function TableRow({ item }: { item: SocialAid }) {
+function TableRow({ item }: { item: EntregasCampañaDetail }) {
   const { folio, nombres_rsh, apellidos_rsh, rut, fecha_entrega } = item;
   const fecha = formatDate(fecha_entrega);
   const formatted_rut = formatNumber(Number(rut)) + (rut && "-" + getDV(rut));

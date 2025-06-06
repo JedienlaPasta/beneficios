@@ -17,14 +17,14 @@ export type Requirements = {
   adultoMayor: boolean;
 };
 
-export default function UpdateForm({ data }: { data: Campaign[] }) {
+export default function UpdateForm({ data }: { data: Campaign }) {
   const [addStock, setAddStock] = useState("");
-  const [fieldType, setFieldType] = useState(data[0].tipo_dato);
-  const [updateFormData, setUpdateFormData] = useState<Campaign>(data[0]);
+  const [fieldType, setFieldType] = useState(data.tipo_dato);
+  const [updateFormData, setUpdateFormData] = useState<Campaign>(data);
   const [criteria, setCriteria] = useState<Requirements>({
-    tramo: Boolean(data[0].tramo),
-    discapacidad: Boolean(data[0].discapacidad),
-    adultoMayor: Boolean(data[0].adulto_mayor),
+    tramo: Boolean(data.tramo),
+    discapacidad: Boolean(data.discapacidad),
+    adultoMayor: Boolean(data.adulto_mayor),
   });
   const updateCampaignWithId = updateCampaign.bind(null, updateFormData.id);
 
@@ -57,8 +57,16 @@ export default function UpdateForm({ data }: { data: Campaign[] }) {
     const myFormData = new FormData();
 
     myFormData.append("nombre", updateFormData.nombre_campaña);
-    myFormData.append("fechaInicio", updateFormData.fecha_inicio.toString());
-    myFormData.append("fechaTermino", updateFormData.fecha_termino.toString());
+    myFormData.append(
+      "fechaInicio",
+      updateFormData.fecha_inicio ? updateFormData.fecha_inicio.toString() : "",
+    );
+    myFormData.append(
+      "fechaTermino",
+      updateFormData.fecha_termino
+        ? updateFormData.fecha_termino.toString()
+        : "",
+    );
     myFormData.append("tipoDato", fieldType);
     myFormData.append("addStock", addStock.toString());
     myFormData.append("tramo", criteria.tramo.toString());

@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { deleteRSH } from "@/app/lib/actions/rsh";
 
-export default function DeleteRSHButton({ rut }: { rut: number }) {
+export default function DeleteRSHButton({ rut }: { rut: number | null }) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const searchParams = useSearchParams();
@@ -17,6 +17,10 @@ export default function DeleteRSHButton({ rut }: { rut: number }) {
   };
 
   const handleDeleteButton = async () => {
+    if (!rut) {
+      toast.error("No se encontró el RUT del ciudadano");
+      return;
+    }
     setShowConfirmModal(true);
   };
 

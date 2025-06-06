@@ -36,6 +36,14 @@ export async function logAction(
     }
 
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
+
     const request = pool.request();
 
     // Get user name from userId

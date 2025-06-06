@@ -3,14 +3,14 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { UserManagementModal } from "../modal";
-import { User } from "@/app/lib/data/users";
 import { deleteUser } from "@/app/lib/actions/usuarios";
+import { UserData } from "@/app/lib/definitions";
 
 export function DeleteUserModal({
   user,
   onClose,
 }: {
-  user: User;
+  user: UserData;
   onClose: () => void;
 }) {
   const [isDeleting, setIsDeleting] = useState(false);

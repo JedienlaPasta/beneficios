@@ -45,7 +45,7 @@ export default function CitizenDetailModal({ citizen }: ModalProps) {
             <h2 className="text-xl font-bold text-slate-700">#{folio}</h2>
           </div>
           <span className="flex gap-1 text-xs text-slate-500">
-            RUT: <p className="text-blue-700">{formatRUT(rut)}</p>
+            RUT: <p className="text-blue-700">{rut ? formatRUT(rut) : ""}</p>
           </span>
         </div>
         <CloseModalButton name="citizen" />

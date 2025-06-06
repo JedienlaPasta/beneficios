@@ -2,9 +2,35 @@ import sql from "mssql";
 import { RSH, RSHInfo } from "../definitions";
 import { connectToDB } from "../utils/db-connection";
 
-export async function fetchRSHByRUT(rut: string) {
+export async function fetchRSHByRUT(rut: string): Promise<RSH> {
+  const defaultRSH: RSH = {
+    nombres_rsh: "",
+    apellidos_rsh: "",
+    rut: null,
+    dv: "",
+    direccion: "",
+    direccion_mod: "",
+    sector: "",
+    sector_mod: "",
+    tramo: null,
+    telefono: "",
+    telefono_mod: "",
+    fecha_nacimiento: null,
+    genero: "",
+    correo: "",
+    correo_mod: "",
+    indigena: "",
+    ultima_entrega: null,
+    folio: "",
+    nacionalidad: "",
+  };
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return defaultRSH;
+    }
+
     const request = pool.request();
     const result = await request.input("rut", sql.Int, rut).query(`
         SELECT rsh.*,
@@ -15,10 +41,10 @@ export async function fetchRSHByRUT(rut: string) {
         WHERE rsh.rut = @rut
       `);
 
-    return { data: result.recordset as RSH[] };
+    return result.recordset[0] as RSH;
   } catch (error) {
     console.error("Error al obtener registro social de hogares: ", error);
-    return { data: [] };
+    return defaultRSH;
   }
 }
 
@@ -26,7 +52,7 @@ export async function fetchRSH(
   query: string,
   currentPage: number,
   resultsPerPage: number,
-) {
+): Promise<{ data: RSH[]; pages: number }> {
   const flattenQuery = query.replace(/[.]/g, "");
   // si no se agrega el dv no son necesarios estos slice
   if (flattenQuery.length === 8) query = flattenQuery.slice(0, 7);
@@ -35,6 +61,11 @@ export async function fetchRSH(
   const offset = (currentPage - 1) * resultsPerPage || 0;
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return { data: [], pages: 0 };
+    }
+
     const request = pool.request();
     const result = await request
       .input("query", sql.NVarChar, `%${query}%`)
@@ -68,56 +99,50 @@ export async function fetchRSH(
   }
 }
 
-export async function fetchRSHCount() {
+export async function fetchRSHCount(): Promise<RSHInfo> {
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return { ultima_actualizacion: null, total_registros: 0 };
+    }
+
     const request = pool.request();
     const result = await request.query(`
       SELECT COUNT(*) AS total_registros FROM rsh`);
 
     // Check if result.recordset has data before returning
     if (result.recordset && result.recordset.length > 0) {
-      return {
-        data: result.recordset as RSHInfo[],
-      };
+      return result.recordset[0] as RSHInfo;
     } else {
-      return {
-        data: [{ total_registros: 0 }],
-      };
+      return { ultima_actualizacion: null, total_registros: 0 };
     }
   } catch (error) {
     console.error("Error al obtener total de registros de rsh:", error);
-    return {
-      data: [{ total_registros: 0 }],
-    };
+    return { ultima_actualizacion: null, total_registros: 0 };
   }
 }
 
 export async function fetchRSHLastUpdate() {
   try {
     const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return { ultima_actualizacion: null, total_registros: 0 };
+    }
+
     const request = pool.request();
     const result = await request.query(`
       SELECT TOP 1 rsh_info.ultima_actualizacion FROM rsh_info
     `);
 
     if (result.recordset && result.recordset.length > 0) {
-      return {
-        data: result.recordset as RSHInfo[],
-      };
+      return result.recordset[0] as RSHInfo;
     } else {
-      return {
-        data: [{ ultima_actualizacion: null }],
-      };
+      return { ultima_actualizacion: null, total_registros: 0 };
     }
   } catch (error) {
     console.error("Error al obtener ultima fecha de actualizacion:", error);
-    return {
-      data: [
-        {
-          ultima_actualizacion: null,
-        },
-      ],
-    };
+    return { ultima_actualizacion: null, total_registros: 0 };
   }
 }

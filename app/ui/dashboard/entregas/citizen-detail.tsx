@@ -9,8 +9,8 @@ type Props = {
 };
 
 export default async function CitizenDetail({ rut }: Props) {
-  const { data } = await fetchRSHByRUT(rut);
-  if (data?.length === 0) {
+  const response = await fetchRSHByRUT(rut);
+  if (!response.rut) {
     redirect("/dashboard/entregas");
   }
   const {
@@ -27,12 +27,14 @@ export default async function CitizenDetail({ rut }: Props) {
     correo_mod,
     folio,
     nacionalidad,
-  } = data[0];
+  } = response;
 
   const formattedRut = formatRUT(rut);
   const descripcion = nombres_rsh[0] + apellidos_rsh[0];
 
-  const age = getAge(fecha_nacimiento?.toString());
+  const age = fecha_nacimiento
+    ? getAge(fecha_nacimiento.toString()).toString()
+    : "No registrado";
 
   return (
     <div className="items-centers relative flex flex-col justify-center">
@@ -82,10 +84,7 @@ export default async function CitizenDetail({ rut }: Props) {
                 value={genero || "No especificado"}
                 border={true}
               />
-              <DetailRow
-                name="Edad"
-                value={age ? age.toString() : "No registrado"}
-              />
+              <DetailRow name="Edad" value={age} />
             </div>
           </div>
           {/* 2nd segment */}

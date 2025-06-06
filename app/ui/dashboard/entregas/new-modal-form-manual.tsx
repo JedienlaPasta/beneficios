@@ -61,7 +61,10 @@ export default function NewModalFormManual({
 
   const handleCheckboxChange = (campaign: Campaign) => {
     const campaignId = campaign.id;
-    const availableStock = campaign.stock - campaign.entregas;
+    const availableStock =
+      campaign.stock && campaign.entregas
+        ? campaign.stock - campaign.entregas
+        : 0;
     setLastSelection(campaignId);
 
     if (availableStock) {
@@ -238,9 +241,12 @@ export default function NewModalFormManual({
                 selectedCampaigns[campaign.id]?.selected
                   ? "!border-blue-300 ring-blue-300"
                   : lastSelection === campaign.id &&
-                      campaign.stock - campaign.entregas < 1
-                    ? "!border-rose-300"
-                    : "!border-slate-200"
+                      campaign.stock &&
+                      campaign.entregas
+                    ? campaign.stock - campaign.entregas < 1
+                    : true
+                      ? "!border-rose-300"
+                      : "!border-slate-200"
               }`}
             >
               <div
@@ -252,9 +258,12 @@ export default function NewModalFormManual({
                     selectedCampaigns[campaign.id]?.selected
                       ? "border-blue-500 bg-blue-500"
                       : lastSelection === campaign.id &&
-                          campaign.stock - campaign.entregas < 1
-                        ? "border-rose-300 bg-white"
-                        : "border-slate-300 bg-white"
+                          campaign.stock &&
+                          campaign.entregas
+                        ? campaign.stock - campaign.entregas < 1
+                        : true
+                          ? "!border-rose-300"
+                          : "!border-slate-200"
                   }`}
                 >
                   {selectedCampaigns[campaign.id]?.selected && (
@@ -278,9 +287,12 @@ export default function NewModalFormManual({
                       htmlFor={`campaign-${campaign.id}`}
                       className={`cursor-pointer text-sm font-medium ${
                         lastSelection === campaign.id &&
-                        campaign.stock - campaign.entregas < 1
-                          ? "text-rose-500"
-                          : "text-slate-700"
+                        campaign.stock &&
+                        campaign.entregas
+                          ? campaign.stock - campaign.entregas < 1
+                          : true
+                            ? "text-rose-500"
+                            : "text-slate-700"
                       }`}
                     >
                       {campaign.nombre_campaña}
@@ -288,12 +300,18 @@ export default function NewModalFormManual({
                     <span
                       className={`rounded-full bg-slate-100 px-2 py-0.5 text-xs ${
                         lastSelection === campaign.id &&
-                        campaign.stock - campaign.entregas < 1
-                          ? "text-rose-500"
-                          : "text-slate-600"
+                        campaign.stock &&
+                        campaign.entregas
+                          ? campaign.stock - campaign.entregas < 1
+                          : true
+                            ? "text-rose-500"
+                            : "text-slate-600"
                       }`}
                     >
-                      Stock: {campaign.stock - campaign.entregas}
+                      Stock:{" "}
+                      {campaign.stock && campaign.entregas
+                        ? campaign.stock - campaign.entregas
+                        : 0}
                     </span>
                   </div>
                 </div>
