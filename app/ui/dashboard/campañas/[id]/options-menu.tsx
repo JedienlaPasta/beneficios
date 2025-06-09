@@ -34,22 +34,25 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
   const confirmDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setIsDisabled(true);
-    toast.promise(deleteCampaignWithId(), {
-      loading: "Eliminando campaña...",
-      success: async (response) => {
-        setShowConfirmDeleteModal(false);
-        setIsDisabled(false);
-        router.refresh();
-        router.push("/dashboard/campanas");
-        return {
-          message: response.message,
-        };
-      },
-      error: () => ({
-        message: "Error al eliminar la campaña",
-        description: "No se pudo eliminar la campaña. Intente nuevamente.",
-      }),
-    });
+
+    const toastId = toast.loading("Eliminando campaña...");
+    try {
+      const response = await deleteCampaignWithId();
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+
+      toast.success(response.message, { id: toastId });
+      setShowConfirmDeleteModal(false);
+      router.refresh();
+      router.push("/dashboard/campanas");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Error desconocido";
+      toast.error(message, { id: toastId });
+    } finally {
+      setIsDisabled(false);
+    }
   };
 
   const handleEndCampaingButton = () => {

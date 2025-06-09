@@ -305,14 +305,24 @@ export async function deleteCampaign(id: string) {
         sql.UniqueIdentifier,
         id,
       ).query(`
-        SELECT *
+        SELECT campañas.id, entrega.id AS entrega_id
         FROM campañas
-        WHERE id = @id
+        LEFT JOIN entrega ON campañas.id = entrega.id_campaña
+        WHERE campañas.id = @id
       `);
 
       if (campaignResult.recordset.length === 0) {
         await transaction.rollback();
         return { success: false, message: "No se encontró la campaña." };
+      }
+
+      if (campaignResult.recordset[0].entrega_id) {
+        await transaction.rollback();
+        return {
+          success: false,
+          message:
+            "No se puede eliminar la campaña porque tiene entregas asociadas.",
+        };
       }
 
       const deleteCampaignRequest = new sql.Request(transaction);
