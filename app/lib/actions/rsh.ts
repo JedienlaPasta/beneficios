@@ -327,33 +327,15 @@ export async function deleteRSH(rut: string) {
       const entregasRequest = new sql.Request(transaction);
       const entregasResult = await entregasRequest.input("rut", sql.Int, rut)
         .query(`
-          SELECT folio FROM entregas WHERE rut = @rut
+          SELECT 1 FROM entregas WHERE rut = @rut
         `);
 
-      // Para cada entrega, obtener las campañas asociadas y actualizar el contador
-      for (const entrega of entregasResult.recordset) {
-        const campaignRequest = new sql.Request(transaction);
-        const campaignResult = await campaignRequest.input(
-          "folio",
-          sql.NVarChar,
-          entrega.folio,
-        ).query(`
-            SELECT id_campaña FROM entrega WHERE folio = @folio
-          `);
-
-        // Actualizar el contador de entregas en cada campaña
-        for (const campaign of campaignResult.recordset) {
-          const updateRequest = new sql.Request(transaction);
-          await updateRequest.input(
-            "campaignId",
-            sql.UniqueIdentifier,
-            campaign.id_campaña,
-          ).query(`
-              UPDATE campañas
-              SET entregas = entregas - 1
-              WHERE id = @campaignId AND entregas > 0
-            `);
-        }
+      if (entregasResult.recordset.length > 0) {
+        await transaction.rollback();
+        return {
+          success: false,
+          message: `No se puede eliminar el registro ${formatRUT(rut)} porque tiene entregas asociadas.`,
+        };
       }
 
       const deleteRshRequest = new sql.Request(transaction);
@@ -361,7 +343,6 @@ export async function deleteRSH(rut: string) {
         .input("rut", sql.Int, rut)
         .query(`DELETE FROM rsh WHERE rut = @rut`);
 
-      // ON DELETE CASCADE de entregas?
       await transaction.commit();
 
       await logAction("Eliminar", "eliminó el RSH", formatRUT(rut));
