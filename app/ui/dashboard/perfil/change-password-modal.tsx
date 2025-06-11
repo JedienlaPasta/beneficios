@@ -2,7 +2,7 @@
 
 import { changePassword } from "@/app/lib/actions/perfil";
 import { useState } from "react";
-import { FiX, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
+import { FiX, FiEye, FiEyeOff } from "react-icons/fi";
 import { toast } from "sonner";
 
 type ChangePasswordModalProps = {
