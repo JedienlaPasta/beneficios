@@ -220,16 +220,11 @@ export default function ModalEntregasDetail({
               {/* Aquí puedes agregar el componente de captura de fotos */}
               <div className="flex flex-col items-start justify-center">
                 {/* Información adicional */}
-                <div className="mb-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
-                  <p className="flex items-center gap-2 text-sm text-blue-600/80">
-                    <FaCircleInfo size={16} /> Asegúrate de permitir el acceso a
-                    la cámara cuando se solicite
-                  </p>
+                <div className="mb-3 flex shrink-0 grow items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-600/80">
+                  <FaCircleInfo size={16} /> Asegúrate de permitir el acceso a
+                  <p>la cámara cuando se solicite</p>
                 </div>
-                <h3 className="flex items-center gap-2 text-sm font-medium text-slate-600">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-                  Vista de la Cámara
-                </h3>
+
                 <Camara />
               </div>
             </motion.div>

@@ -172,21 +172,27 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <div className="overflow-hidden rounded-lg">
+      <div className="overflow-hidden">
         <div className="p-6s">
           <div className="space-y-4">
             {/* Vista de la cámara */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                {cameras.length > 1 && (
+                <h3 className="flex items-center gap-2 text-sm font-medium text-slate-600">
+                  <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+                  Vista de la Cámara
+                </h3>
+                {/* {cameras.length > 1 && ( */}
+                {true && (
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600">
-                      {cameras[currentCameraIndex]?.label || "Cámara actual"}
+                      {/* {cameras[currentCameraIndex]?.label || "Cámara actual"} */}
+                      {"Cámara " + currentCameraIndex + 1}
                     </span>
                     <button
                       onClick={switchCamera}
                       disabled={isCameraLoading}
-                      className="rounded-lg bg-gray-600 px-3 py-1 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-700 disabled:bg-gray-400"
+                      className="rounded-md bg-gray-600 px-3 py-1 text-sm text-white transition-colors duration-200 hover:bg-gray-700 disabled:bg-gray-400"
                     >
                       {isCameraLoading ? (
                         <div className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent"></div>
