@@ -28,12 +28,16 @@ const CamaraComponent: React.FC<CamaraComponentProps> = ({ onPhotoTaken }) => {
   const getCameras = async () => {
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter(device => device.kind === 'videoinput');
-      const cameraDevices: CameraDevice[] = videoDevices.map((device, index) => ({
-        deviceId: device.deviceId,
-        label: device.label || `Cámara ${index + 1}`,
-        kind: device.kind
-      }));
+      const videoDevices = devices.filter(
+        (device) => device.kind === "videoinput",
+      );
+      const cameraDevices: CameraDevice[] = videoDevices.map(
+        (device, index) => ({
+          deviceId: device.deviceId,
+          label: device.label || `Cámara ${index + 1}`,
+          kind: device.kind,
+        }),
+      );
       setCameras(cameraDevices);
       return cameraDevices;
     } catch (err) {
@@ -47,7 +51,7 @@ const CamaraComponent: React.FC<CamaraComponentProps> = ({ onPhotoTaken }) => {
   const startCamera = async (deviceId?: string) => {
     try {
       setIsCameraLoading(true);
-      
+
       // Detener el stream anterior si existe
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
@@ -57,22 +61,21 @@ const CamaraComponent: React.FC<CamaraComponentProps> = ({ onPhotoTaken }) => {
         video: {
           width: 1280,
           height: 720,
-          ...(deviceId && { deviceId: { exact: deviceId } })
+          ...(deviceId && { deviceId: { exact: deviceId } }),
         },
       };
 
-      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      const mediaStream =
+        await navigator.mediaDevices.getUserMedia(constraints);
       setStream(mediaStream);
-      
+
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
         videoRef.current.play();
       }
     } catch (err) {
       console.error("Error al acceder a la cámara:", err);
-      toast.error(
-        "No se pudo acceder a la cámara. Asegúrate de dar permisos.",
-      );
+      toast.error("No se pudo acceder a la cámara. Asegúrate de dar permisos.");
     } finally {
       setIsCameraLoading(false);
     }
@@ -95,7 +98,7 @@ const CamaraComponent: React.FC<CamaraComponentProps> = ({ onPhotoTaken }) => {
     const initializeCamera = async () => {
       // Primero obtener las cámaras disponibles
       const availableCameras = await getCameras();
-      
+
       // Luego iniciar la primera cámara
       if (availableCameras.length > 0) {
         await startCamera(availableCameras[0].deviceId);
@@ -195,7 +198,7 @@ const CamaraComponent: React.FC<CamaraComponentProps> = ({ onPhotoTaken }) => {
                 {cameras.length > 1 && (
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600">
-                      {cameras[currentCameraIndex]?.label || 'Cámara actual'}
+                      {cameras[currentCameraIndex]?.label || "Cámara actual"}
                     </span>
                     <button
                       onClick={switchCamera}
@@ -205,13 +208,13 @@ const CamaraComponent: React.FC<CamaraComponentProps> = ({ onPhotoTaken }) => {
                       {isCameraLoading ? (
                         <div className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent"></div>
                       ) : (
-                        '🔄 Cambiar'
+                        "🔄 Cambiar"
                       )}
                     </button>
                   </div>
                 )}
               </div>
-              
+
               <div className="relative overflow-hidden rounded-lg bg-gray-100">
                 {isCameraLoading && (
                   <div className="absolute inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
@@ -310,7 +313,8 @@ const CamaraComponent: React.FC<CamaraComponentProps> = ({ onPhotoTaken }) => {
               </li>
               {cameras.length > 1 && (
                 <li>
-                  • Usa el botón "Cambiar" para alternar entre las {cameras.length} cámaras disponibles
+                  • Usa el botón Cambiar para alternar entre las{" "}
+                  {cameras.length} cámaras disponibles
                 </li>
               )}
             </ul>
