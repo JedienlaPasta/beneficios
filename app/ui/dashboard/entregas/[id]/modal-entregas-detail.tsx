@@ -1,7 +1,7 @@
 "use client";
 import ModalImportForm from "./modal-import-form";
 import CloseModalButton from "../../close-modal-button";
-import { FaBoxOpen } from "react-icons/fa6";
+import { FaBoxOpen, FaCircleInfo } from "react-icons/fa6";
 import {
   EntregaByFolio,
   EntregasTableByFolio,
@@ -14,7 +14,8 @@ import GetNewFileButton from "./new-file-button";
 import DeleteEntregasButton from "./delete-button";
 import RoleGuard from "@/app/ui/auth/role-guard";
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion"; // Add this import
+import { AnimatePresence, motion } from "framer-motion";
+import Camara from "./modal-camera";
 
 type Props = {
   rut: string;
@@ -31,7 +32,7 @@ export default function ModalEntregasDetail({
   entrega,
   files,
 }: Props) {
-  const [tab, setTab] = useState("Beneficios");
+  const [tab, setTab] = useState("Resumen");
   const { nombre_usuario, fecha_entrega, observacion, estado_documentos } =
     entregas;
   const formattedRUT = formatRUT(rut);
@@ -68,15 +69,15 @@ export default function ModalEntregasDetail({
       {/* Tab Navigation */}
       <section className="flex border-b border-gray-200">
         <button
-          onClick={() => setTab("Beneficios")}
+          onClick={() => setTab("Resumen")}
           className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors ${
-            tab === "Beneficios"
+            tab === "Resumen"
               ? "text-blue-600"
               : "text-slate-500 hover:text-slate-700"
           }`}
         >
-          Beneficios
-          {tab === "Beneficios" && (
+          Resumen
+          {tab === "Resumen" && (
             <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600"></span>
           )}
         </button>
@@ -93,14 +94,28 @@ export default function ModalEntregasDetail({
             <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600"></span>
           )}
         </button>
+        <button
+          onClick={() => setTab("Capturar")}
+          className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors ${
+            tab === "Capturar"
+              ? "text-blue-600"
+              : "text-slate-500 hover:text-slate-700"
+          }`}
+        >
+          Capturar
+          {tab === "Capturar" && (
+            <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600"></span>
+          )}
+        </button>
       </section>
 
       {/* Content with Framer Motion transitions */}
       <motion.div className="relative min-h-[8rem] overflow-y-auto scrollbar-hide">
         <AnimatePresence mode="wait">
-          {tab === "Beneficios" ? (
+          {tab === "Resumen" ? (
+            // Detail ==============================================================
             <motion.div
-              key="beneficios"
+              key="resumen"
               initial={{ opacity: 0, y: 10, height: 460 }}
               animate={{ opacity: 1, y: 0, height: "auto" }}
               exit={{ opacity: 0, y: -10, height: 440 }}
@@ -155,7 +170,8 @@ export default function ModalEntregasDetail({
               {/* Files List */}
               <FilesList folio={folio} files={files} />
             </motion.div>
-          ) : (
+          ) : tab === "Importar" ? (
+            // Import ==============================================================
             <motion.div
               key="importar"
               initial={{ opacity: 0, y: 10, height: 440 }}
@@ -175,7 +191,49 @@ export default function ModalEntregasDetail({
               <div className="border-t border-gray-100"></div>
               <ModalImportForm folio={folio} savedFiles={files.length} />
             </motion.div>
-          )}
+          ) : tab === "Capturar" ? (
+            // Capture =============================================================
+            <motion.div
+              key="capturar"
+              initial={{ opacity: 0, y: 10, height: 440 }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                height: "auto",
+                transition: {
+                  duration: 0.6,
+                  height: { duration: 0.8 },
+                },
+              }}
+              exit={{
+                opacity: 0,
+                y: -10,
+                height: 460,
+                transition: {
+                  duration: 0.5,
+                  height: { duration: 0.6 },
+                },
+              }}
+              layout
+              className="flex flex-col gap-5"
+            >
+              {/* Aquí puedes agregar el componente de captura de fotos */}
+              <div className="flex flex-col items-start justify-center">
+                {/* Información adicional */}
+                <div className="mb-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
+                  <p className="flex items-center gap-2 text-sm text-blue-600/80">
+                    <FaCircleInfo size={16} /> Asegúrate de permitir el acceso a
+                    la cámara cuando se solicite
+                  </p>
+                </div>
+                <h3 className="flex items-center gap-2 text-sm font-medium text-slate-600">
+                  <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+                  Vista de la Cámara
+                </h3>
+                <Camara />
+              </div>
+            </motion.div>
+          ) : null}
         </AnimatePresence>
       </motion.div>
     </motion.div>
