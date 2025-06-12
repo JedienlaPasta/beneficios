@@ -1,5 +1,5 @@
 "use client";
-import { FaCircleInfo, FaImage } from "react-icons/fa6";
+import { FaImage } from "react-icons/fa6";
 import React, { useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
 
