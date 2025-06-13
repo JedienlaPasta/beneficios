@@ -42,6 +42,7 @@ export default async function middleware(request: NextRequest) {
       }
     }
   }
+  // asd
 
   // Verificar autenticación básica
   if (isProtectedRoute && !session?.userId) {
