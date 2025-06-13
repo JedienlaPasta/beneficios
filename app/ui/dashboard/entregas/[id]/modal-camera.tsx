@@ -56,8 +56,8 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
 
       const constraints: MediaStreamConstraints = {
         video: {
-          width: 1280,
-          height: 720,
+          // width: 1280,
+          // height: 720,
           ...(deviceId && { deviceId: { exact: deviceId } }),
         },
       };
@@ -170,6 +170,18 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
     setPhotoDataUrl(null);
   };
 
+  const rotateCamera = () => {
+    if (videoRef.current) {
+      const currentRotation = videoRef.current.style.transform;
+
+      const rotation = currentRotation
+        ? parseFloat(currentRotation.replace("rotate(", "").replace("deg)", ""))
+        : 0;
+      const newRotation = rotation ? 0 : 90;
+      videoRef.current.style.transform = `rotate(${newRotation}deg)`;
+    }
+  };
+
   return (
     <div className="mx-auto max-w-4xl">
       <div className="overflow-hidden">
@@ -187,7 +199,7 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600">
                       {/* {cameras[currentCameraIndex]?.label || "Cámara actual"} */}
-                      {"Cámara " + currentCameraIndex + 1}
+                      {"Cámara " + (currentCameraIndex + 1)}
                     </span>
                     <button
                       onClick={switchCamera}
@@ -198,6 +210,21 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
                         <div className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent"></div>
                       ) : (
                         "🔄 Cambiar"
+                      )}
+                    </button>
+                  </div>
+                )}
+                {true && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={rotateCamera}
+                      disabled={isCameraLoading}
+                      className="rounded-md bg-gray-600 px-3 py-1 text-sm text-white transition-colors duration-200 hover:bg-gray-700 disabled:bg-gray-400"
+                    >
+                      {isCameraLoading ? (
+                        <div className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent"></div>
+                      ) : (
+                        "🔄 Girar"
                       )}
                     </button>
                   </div>
@@ -278,7 +305,8 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
         </div>
       </div>
 
-      <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
+      {/* <canvas ref={canvasRef} style={{ display: "none" }}></canvas> */}
+      <canvas ref={canvasRef} className="hidden"></canvas>
     </div>
   );
 }
