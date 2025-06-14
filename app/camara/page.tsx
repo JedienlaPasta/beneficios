@@ -23,8 +23,8 @@ export default async function Test() {
 
   return (
     <div className="flex h-screen w-full flex-col gap-6">
-      <Modal name="detailsModal" secondName="rut">
-        <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
+      <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
+        <Modal name="detailsModal" secondName="rut">
           <ModalEntregasDetail
             rut={rut}
             folio={folio}
@@ -32,8 +32,8 @@ export default async function Test() {
             entrega={entrega}
             files={files}
           />
-        </Suspense>
-      </Modal>
+        </Modal>
+      </Suspense>
     </div>
   );
 }
