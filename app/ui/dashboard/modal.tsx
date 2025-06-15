@@ -33,7 +33,7 @@ export function Modal({ name, secondName, children }: ModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-gray-900/50" onClick={handleClick} />
-      <div className={`relative z-10 h-[90%]`}>
+      <div className={`relative z-10 mx-auto h-[90%] w-[95%] sm:w-fit`}>
         <span onClick={handleClick} className="absolute inset-0 -z-10" />
         {children}
       </div>
