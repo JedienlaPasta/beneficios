@@ -42,7 +42,7 @@ export default function ModalEntregasDetail({
       layout
       layoutRoot
       transition={{ layout: { duration: 0.25 } }}
-      className="md:w-[34rem]s flex w-[100%] shrink-0 flex-col gap-4 overflow-hidden rounded-xl bg-white p-8 shadow-xl transition-all duration-500 scrollbar-hide sm:w-[34rem]"
+      className="md:w-[34rem]s flex max-h-full w-[100%] shrink-0 flex-col gap-4 overflow-hidden rounded-xl bg-white p-8 shadow-xl transition-all duration-500 scrollbar-hide sm:w-[34rem]"
     >
       {/* Header */}
       <section className="flex items-center justify-between">
@@ -221,8 +221,11 @@ export default function ModalEntregasDetail({
               <div className="flex flex-col items-start justify-center">
                 {/* Información adicional */}
                 <div className="mb-3 flex shrink-0 grow items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-600/80">
-                  <FaCircleInfo size={16} /> Asegúrate de permitir el acceso a
-                  <p>la cámara cuando se solicite</p>
+                  <FaCircleInfo size={16} />
+                  <p>
+                    Asegúrate de permitir el acceso a la cámara cuando se
+                    solicite
+                  </p>
                 </div>
 
                 <Camara />

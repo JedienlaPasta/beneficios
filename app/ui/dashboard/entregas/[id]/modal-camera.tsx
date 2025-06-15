@@ -24,6 +24,10 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
   const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
   const [isCameraLoading, setIsCameraLoading] = useState(false);
 
+  const [frontIdPhoto, setFrontIdPhoto] = useState<string | null>(null);
+  const [backIdPhoto, setBackIdPhoto] = useState<string | null>(null);
+  const [isTakingFront, setIsTakingFront] = useState(true);
+
   const getCameras = async () => {
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
@@ -160,23 +164,6 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
           }
           toast.success("Foto tomada exitosamente");
         }
-        // if (context) {
-        //   canvasRef.current.width = videoRef.current.videoWidth;
-        //   canvasRef.current.height = videoRef.current.videoHeight;
-        //   context.drawImage(
-        //     videoRef.current,
-        //     0,
-        //     0,
-        //     canvasRef.current.width,
-        //     canvasRef.current.height,
-        //   );
-        //   const dataUrl = canvasRef.current.toDataURL("image/png");
-        //   setPhotoDataUrl(dataUrl);
-
-        //   if (onPhotoTaken) {
-        //     onPhotoTaken(dataUrl);
-        //   }
-        // }
       } catch (err) {
         console.error("Error al tomar la foto:", err);
         toast.error("Error al tomar la foto");
@@ -214,10 +201,13 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
       const pdfDoc = await PDFDocument.create();
       const page = pdfDoc.addPage();
 
-      // Convertir la Data URL a ArrayBuffer para pdf-lib
       // Eliminar el prefijo 'data:image/jpeg;base64,' y decodificar
       const base64Image = photoDataUrl.split(",")[1];
-      const imageBytes = Uint8Array.from(atob(base64Image)).buffer;
+
+      const decodedBinaryString = atob(base64Image);
+      const imageBytes = new Uint8Array(
+        decodedBinaryString.split("").map((char) => char.charCodeAt(0)),
+      );
 
       // Incrustar la imagen en el documento PDF
       const image = await pdfDoc.embedJpg(imageBytes);
