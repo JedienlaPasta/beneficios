@@ -2,6 +2,7 @@
 import { FaImage } from "react-icons/fa6";
 import React, { useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 
 interface CamaraComponentProps {
   onPhotoTaken?: (dataUrl: string) => void;
@@ -56,8 +57,9 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
 
       const constraints: MediaStreamConstraints = {
         video: {
-          // width: 1280,
-          // height: 720,
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: "environment",
           ...(deviceId && { deviceId: { exact: deviceId } }),
         },
       };
@@ -69,11 +71,8 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
 
-        // Manejar correctamente la promesa de play()
         try {
-          // Esperar a que la promesa de play() se resuelva antes de continuar
           await videoRef.current.play();
-          // Solo establecer el stream después de que play() se haya completado
           setStream(mediaStream);
         } catch (playError) {
           console.error("Error al reproducir el video:", playError);
@@ -100,10 +99,7 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
     const nextIndex = (currentCameraIndex + 1) % cameras.length;
     setCurrentCameraIndex(nextIndex);
 
-    // Esperar a que startCamera termine completamente
     await startCamera(cameras[nextIndex].deviceId);
-
-    // Solo mostrar el mensaje de éxito después de que la cámara se haya iniciado correctamente
     toast.success(`Cambiado a: ${cameras[nextIndex].label}`);
   };
 
@@ -141,22 +137,46 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
       try {
         const context = canvasRef.current.getContext("2d");
         if (context) {
-          canvasRef.current.width = videoRef.current.videoWidth;
-          canvasRef.current.height = videoRef.current.videoHeight;
-          context.drawImage(
-            videoRef.current,
-            0,
-            0,
-            canvasRef.current.width,
-            canvasRef.current.height,
+          const videoWidth = videoRef.current.videoWidth;
+          const videoHeight = videoRef.current.videoHeight;
+
+          const targetWidth = 1200;
+          const scaleFactor = targetWidth / videoWidth;
+          const targetHeight = videoHeight * scaleFactor;
+
+          canvasRef.current.width = targetWidth;
+          canvasRef.current.height = targetHeight;
+
+          context.drawImage(videoRef.current, 0, 0, targetWidth, targetHeight);
+
+          const compressedDataUrl = canvasRef.current.toDataURL(
+            "image/jpeg",
+            0.8,
           );
-          const dataUrl = canvasRef.current.toDataURL("image/png");
-          setPhotoDataUrl(dataUrl);
+          setPhotoDataUrl(compressedDataUrl);
 
           if (onPhotoTaken) {
-            onPhotoTaken(dataUrl);
+            onPhotoTaken(compressedDataUrl);
           }
+          toast.success("Foto tomada exitosamente");
         }
+        // if (context) {
+        //   canvasRef.current.width = videoRef.current.videoWidth;
+        //   canvasRef.current.height = videoRef.current.videoHeight;
+        //   context.drawImage(
+        //     videoRef.current,
+        //     0,
+        //     0,
+        //     canvasRef.current.width,
+        //     canvasRef.current.height,
+        //   );
+        //   const dataUrl = canvasRef.current.toDataURL("image/png");
+        //   setPhotoDataUrl(dataUrl);
+
+        //   if (onPhotoTaken) {
+        //     onPhotoTaken(dataUrl);
+        //   }
+        // }
       } catch (err) {
         console.error("Error al tomar la foto:", err);
         toast.error("Error al tomar la foto");
@@ -179,6 +199,73 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
         : 0;
       const newRotation = rotation ? 0 : 90;
       videoRef.current.style.transform = `rotate(${newRotation}deg)`;
+    }
+  };
+
+  const generatePdf = async () => {
+    if (!photoDataUrl) {
+      toast.error("No hay una foto para generar un PDF.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const pdfDoc = await PDFDocument.create();
+      const page = pdfDoc.addPage();
+
+      // Convertir la Data URL a ArrayBuffer para pdf-lib
+      // Eliminar el prefijo 'data:image/jpeg;base64,' y decodificar
+      const base64Image = photoDataUrl.split(",")[1];
+      const imageBytes = Uint8Array.from(atob(base64Image)).buffer;
+
+      // Incrustar la imagen en el documento PDF
+      const image = await pdfDoc.embedJpg(imageBytes);
+
+      // Calcular las dimensiones para dibujar la imagen en la página
+      // Ajustar la imagen a la página manteniendo el aspecto
+      const { width, height } = page.getSize();
+      const imageDimensions = image.scaleToFit(width - 40, height - 40); // Margen de 20px a cada lado
+
+      // Centrar la imagen en la página
+      const xPos = (width - imageDimensions.width) / 2;
+      const yPos = (height - imageDimensions.height) / 2;
+
+      // Dibujar la imagen en la página
+      page.drawImage(image, {
+        x: xPos,
+        y: yPos,
+        width: imageDimensions.width,
+        height: imageDimensions.height,
+      });
+
+      // Texto sobre la imagen (opcional)
+      page.drawText("Cédula de Identidad", {
+        x: 50,
+        y: height - 50,
+        font: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
+        size: 16,
+        color: rgb(0, 0, 0), // Color del texto
+      });
+
+      // Comprimir el PDF y guardar en la base de datos <==========================================
+
+      // Serializar el PDF a bytes
+      const pdfBytes = await pdfDoc.save();
+      // Descargar el PDF
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "documento.pdf";
+      link.click();
+
+      toast.success("PDF generado exitosamente");
+    } catch (err) {
+      console.error("Error al generar el PDF:", err);
+      toast.error("Error al generar el PDF");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -214,21 +301,20 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
                     </button>
                   </div>
                 )}
-                {true && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={rotateCamera}
-                      disabled={isCameraLoading}
-                      className="rounded-md bg-gray-600 px-3 py-1 text-sm text-white transition-colors duration-200 hover:bg-gray-700 disabled:bg-gray-400"
-                    >
-                      {isCameraLoading ? (
-                        <div className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent"></div>
-                      ) : (
-                        "🔄 Girar"
-                      )}
-                    </button>
-                  </div>
-                )}
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={rotateCamera}
+                    disabled={isCameraLoading}
+                    className="rounded-md bg-gray-600 px-3 py-1 text-sm text-white transition-colors duration-200 hover:bg-gray-700 disabled:bg-gray-400"
+                  >
+                    {isCameraLoading ? (
+                      <div className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent"></div>
+                    ) : (
+                      "🔄 Girar"
+                    )}
+                  </button>
+                </div>
               </div>
 
               <div className="relative overflow-hidden rounded-lg bg-gray-100">
@@ -266,12 +352,25 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
                 </button>
 
                 {photoDataUrl && (
-                  <button
-                    onClick={clearPhoto}
-                    className="h-10 rounded-lg bg-gray-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-600"
-                  >
-                    Limpiar
-                  </button>
+                  <>
+                    <button
+                      onClick={clearPhoto}
+                      className="h-10 rounded-lg bg-gray-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-600"
+                    >
+                      Limpiar
+                    </button>
+                    <button
+                      onClick={generatePdf} // Nuevo botón para generar PDF
+                      disabled={isLoading}
+                      className="flex h-10 items-center justify-center rounded-lg bg-green-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-green-600 active:scale-95 disabled:bg-green-300"
+                    >
+                      {isLoading ? (
+                        <div className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                      ) : (
+                        "Generar PDF"
+                      )}
+                    </button>
+                  </>
                 )}
               </div>
             </div>
