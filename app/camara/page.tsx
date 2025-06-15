@@ -4,9 +4,13 @@ import {
   fetchFilesByFolio,
 } from "@/app/lib/data/entregas";
 import ModalEntregasDetail from "@/app/ui/dashboard/entregas/[id]/modal-entregas-detail";
-import React, { Suspense } from "react";
-import { Modal } from "../ui/dashboard/modal";
+import React, { lazy, Suspense } from "react";
+// import { Modal } from "../ui/dashboard/modal";
 import ModalSkeleton from "../ui/modal-skeleton";
+
+const LazyModal = lazy(() =>
+  import("../ui/dashboard/modal").then((module) => ({ default: module.Modal })),
+);
 
 export default async function Test() {
   const folio = "1-25-TA";
@@ -24,7 +28,7 @@ export default async function Test() {
   return (
     <div className="flex h-screen w-full flex-col gap-6">
       <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
-        <Modal name="detailsModal" secondName="rut">
+        <LazyModal name="detailsModal" secondName="rut">
           <ModalEntregasDetail
             rut={rut}
             folio={folio}
@@ -32,7 +36,7 @@ export default async function Test() {
             entrega={entrega}
             files={files}
           />
-        </Modal>
+        </LazyModal>
       </Suspense>
     </div>
   );
