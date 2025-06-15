@@ -4,21 +4,16 @@ import React, { useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 
-interface CamaraComponentProps {
-  onPhotoTaken?: (dataUrl: string) => void;
-}
-
-interface CameraDevice {
+type CameraDevice = {
   deviceId: string;
   label: string;
   kind: string;
-}
+};
 
-function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
+export default function CamaraComponent() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [cameras, setCameras] = useState<CameraDevice[]>([]);
   const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
@@ -151,22 +146,38 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
           canvasRef.current.width = targetWidth;
           canvasRef.current.height = targetHeight;
 
+          await new Promise((resolve) => setTimeout(resolve, 50));
           context.drawImage(videoRef.current, 0, 0, targetWidth, targetHeight);
 
           const compressedDataUrl = canvasRef.current.toDataURL(
             "image/jpeg",
             0.8,
           );
-          setPhotoDataUrl(compressedDataUrl);
 
-          if (onPhotoTaken) {
-            onPhotoTaken(compressedDataUrl);
+          if (isTakingFront) {
+            setFrontIdPhoto(compressedDataUrl);
+            setIsTakingFront(false);
+            toast.success(
+              "Foto frontal capturada. ¡Ahora toma la foto del reverso!",
+              {
+                id: "PHOTO_CAPTURE_TOAST_ID",
+                duration: 3000,
+              },
+            );
+          } else {
+            setBackIdPhoto(compressedDataUrl);
+            toast.success(
+              "Ambas fotos capturadas exitosamente. ¡Puedes generar el PDF!",
+              {
+                id: "PHOTO_CAPTURE_TOAST_ID",
+                duration: 4000,
+              },
+            );
           }
-          toast.success("Foto tomada exitosamente");
         }
       } catch (err) {
         console.error("Error al tomar la foto:", err);
-        toast.error("Error al tomar la foto");
+        toast.error("Error al tomar la foto", { id: "PHOTO_CAPTURE_TOAST_ID" });
       } finally {
         setIsLoading(false);
       }
@@ -174,7 +185,24 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
   };
 
   const clearPhoto = () => {
-    setPhotoDataUrl(null);
+    if (backIdPhoto) {
+      setBackIdPhoto(null);
+      setIsTakingFront(false);
+      toast.success("Foto trasera eliminada exitosamente!", {
+        id: "PHOTO_DELETE_TOAST_ID",
+      });
+      return;
+    }
+    if (frontIdPhoto) {
+      setFrontIdPhoto(null);
+      setIsTakingFront(true);
+      toast.success("Foto frontal eliminada exitosamente!", {
+        id: "PHOTO_DELETE_TOAST_ID",
+      });
+      return;
+    }
+
+    toast.error("No fotos para eliminar");
   };
 
   const rotateCamera = () => {
@@ -190,70 +218,120 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
   };
 
   const generatePdf = async () => {
-    if (!photoDataUrl) {
-      toast.error("No hay una foto para generar un PDF.");
+    if (!frontIdPhoto || !backIdPhoto) {
+      let errorMessage = "";
+      if (!frontIdPhoto) {
+        errorMessage = "No has tomado la foto frontal.";
+      } else if (!backIdPhoto) {
+        errorMessage = "No has tomado la foto trasera.";
+      } else {
+        errorMessage = "No has tomado las fotos.";
+      }
+      toast.error(errorMessage);
       return;
     }
 
     setIsLoading(true);
+    const pdfGenerationToastId = toast.loading("Generando PDF...");
 
     try {
       const pdfDoc = await PDFDocument.create();
       const page = pdfDoc.addPage();
 
-      // Eliminar el prefijo 'data:image/jpeg;base64,' y decodificar
-      const base64Image = photoDataUrl.split(",")[1];
+      // --- Embed Front Photo ---
+      const base64FrontImage = frontIdPhoto.split(",")[1];
+      const decodedBinaryFrontString = atob(base64FrontImage);
+      const imageBytesFront = new Uint8Array(
+        decodedBinaryFrontString.split("").map((char) => char.charCodeAt(0)),
+      );
+      const embeddedFrontImage = await pdfDoc.embedJpg(imageBytesFront);
 
-      const decodedBinaryString = atob(base64Image);
-      const imageBytes = new Uint8Array(
-        decodedBinaryString.split("").map((char) => char.charCodeAt(0)),
+      // --- Embed Back Photo ---
+      const base64BackImage = backIdPhoto.split(",")[1];
+      const decodedBinaryBackString = atob(base64BackImage);
+      const imageBytesBack = new Uint8Array(
+        decodedBinaryBackString.split("").map((char) => char.charCodeAt(0)),
+      );
+      const embeddedBackImage = await pdfDoc.embedJpg(imageBytesBack);
+
+      // PDF Layout
+      const margin = 30;
+      const spaceBetweenImages = 20;
+
+      const { width, height } = page.getSize();
+      const contentWidth = width - margin * 2;
+      const contentHeight = height - margin * 2;
+
+      // Calculate maximum height for each image, splitting the available space
+      const individualImageMaxHeight = (contentHeight - spaceBetweenImages) / 2;
+
+      // Scale images to fit the available width and their allocated height
+      const frontImageDimensions = embeddedFrontImage.scaleToFit(
+        contentWidth,
+        individualImageMaxHeight,
+      );
+      const backImageDimensions = embeddedBackImage.scaleToFit(
+        contentWidth,
+        individualImageMaxHeight,
       );
 
-      // Incrustar la imagen en el documento PDF
-      const image = await pdfDoc.embedJpg(imageBytes);
+      // Calculate Y positions for vertical stacking (from bottom of the page upwards)
+      const yPosBack =
+        margin + (individualImageMaxHeight - backImageDimensions.height);
+      const yPosFront =
+        yPosBack + individualImageMaxHeight + spaceBetweenImages;
 
-      // Calcular las dimensiones para dibujar la imagen en la página
-      // Ajustar la imagen a la página manteniendo el aspecto
-      const { width, height } = page.getSize();
-      const imageDimensions = image.scaleToFit(width - 40, height - 40); // Margen de 20px a cada lado
+      // Calculate X positions to center horizontally
+      const xPosFront =
+        margin + (contentWidth - frontImageDimensions.width) / 2;
+      const xPosBack = margin + (contentWidth - backImageDimensions.width) / 2;
 
-      // Centrar la imagen en la página
-      const xPos = (width - imageDimensions.width) / 2;
-      const yPos = (height - imageDimensions.height) / 2;
-
-      // Dibujar la imagen en la página
-      page.drawImage(image, {
-        x: xPos,
-        y: yPos,
-        width: imageDimensions.width,
-        height: imageDimensions.height,
+      // Draw images
+      page.drawImage(embeddedFrontImage, {
+        x: xPosFront,
+        y: yPosFront,
+        width: frontImageDimensions.width,
+        height: frontImageDimensions.height,
       });
 
-      // Texto sobre la imagen (opcional)
-      page.drawText("Cédula de Identidad", {
-        x: 50,
-        y: height - 50,
-        font: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
-        size: 16,
-        color: rgb(0, 0, 0), // Color del texto
+      page.drawImage(embeddedBackImage, {
+        x: xPosBack,
+        y: yPosBack,
+        width: backImageDimensions.width,
+        height: backImageDimensions.height,
+      });
+
+      // Add a title to the PDF
+      const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      const titleText = "Cédula de Identidad (Frente y Reverso)";
+      const titleFontSize = 18;
+      const titleWidth = font.widthOfTextAtSize(titleText, titleFontSize);
+      const xPosTitle = (width - titleWidth) / 2;
+      const yPosTitle = height - margin - titleFontSize; // Place title closer to the top margin
+
+      page.drawText(titleText, {
+        x: xPosTitle,
+        y: yPosTitle,
+        font: font,
+        size: titleFontSize,
+        color: rgb(0, 0, 0),
       });
 
       // Comprimir el PDF y guardar en la base de datos <==========================================
 
-      // Serializar el PDF a bytes
+      // Serialize the PDF to bytes and trigger download
       const pdfBytes = await pdfDoc.save();
-      // Descargar el PDF
       const blob = new Blob([pdfBytes], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = "documento.pdf";
+      link.download = "documento_cedula.pdf"; // More descriptive filename
       link.click();
 
-      toast.success("PDF generado exitosamente");
+      toast.success("PDF generado exitosamente", { id: pdfGenerationToastId });
     } catch (err) {
       console.error("Error al generar el PDF:", err);
-      toast.error("Error al generar el PDF");
+      toast.error("Error al generar el PDF", { id: pdfGenerationToastId });
     } finally {
       setIsLoading(false);
     }
@@ -328,7 +406,11 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
               <div className="flex gap-3">
                 <button
                   onClick={takePhoto}
-                  disabled={isLoading || isCameraLoading}
+                  disabled={
+                    isLoading ||
+                    isCameraLoading ||
+                    (backIdPhoto !== null && frontIdPhoto !== null)
+                  }
                   className="flex h-10 grow items-center justify-center rounded-lg bg-blue-500 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-600 active:scale-95 disabled:bg-blue-300"
                 >
                   {isLoading ? (
@@ -337,17 +419,27 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
                       Procesando...
                     </>
                   ) : (
-                    <>Tomar foto</>
+                    <>
+                      {isTakingFront
+                        ? "Tomar foto frontal"
+                        : "Tomar foto trasera"}
+                    </>
                   )}
                 </button>
 
-                {photoDataUrl && (
+                {(frontIdPhoto || backIdPhoto) && (
                   <>
                     <button
-                      onClick={clearPhoto}
+                      onClick={() => {
+                        if (backIdPhoto) {
+                          clearPhoto();
+                        } else if (frontIdPhoto) {
+                          clearPhoto();
+                        }
+                      }}
                       className="h-10 rounded-lg bg-gray-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-600"
                     >
-                      Limpiar
+                      Limpiar foto {backIdPhoto ? "trasera" : "frontal"}
                     </button>
                     <button
                       onClick={generatePdf} // Nuevo botón para generar PDF
@@ -369,25 +461,55 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
             <div className="space-y-4">
               <h3 className="flex items-center gap-2 text-sm font-medium text-slate-600">
                 <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-                Imagen Capturada
+                Imágenes Capturadas
               </h3>
-              <div className="flex min-h-96 items-center justify-center rounded-lg bg-gray-100 p-4">
-                {photoDataUrl ? (
-                  <div className="w-full space-y-4">
-                    <img
-                      src={photoDataUrl}
-                      alt="Foto capturada"
-                      className="h-auto max-h-80 w-full rounded-lg object-contain shadow-md"
-                    />
-                  </div>
-                ) : (
-                  <div className="text-center text-gray-500">
-                    <div className="mb-1 text-5xl">
-                      <FaImage className="place-self-center" />
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="flex min-h-48 items-center justify-center rounded-lg bg-gray-100 p-4">
+                  {frontIdPhoto ? (
+                    <div className="w-full space-y-2">
+                      <h4 className="text-center text-sm font-medium text-slate-600">
+                        Frente
+                      </h4>
+                      <img
+                        src={frontIdPhoto}
+                        alt="Foto frontal"
+                        className="h-auto max-h-40 w-full rounded-lg object-contain shadow-md"
+                      />
                     </div>
-                    <p className="text-sm text-slate-400">Sin capturas aún</p>
-                  </div>
-                )}
+                  ) : (
+                    <div className="text-center text-gray-500">
+                      <div className="mb-1 text-3xl">
+                        <FaImage className="place-self-center" />
+                      </div>
+                      <p className="text-sm text-slate-400">
+                        Sin captura frontal
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <div className="flex min-h-48 items-center justify-center rounded-lg bg-gray-100 p-4">
+                  {backIdPhoto ? (
+                    <div className="w-full space-y-2">
+                      <h4 className="text-center text-sm font-medium text-slate-600">
+                        Reverso
+                      </h4>
+                      <img
+                        src={backIdPhoto}
+                        alt="Foto trasera"
+                        className="h-auto max-h-40 w-full rounded-lg object-contain shadow-md"
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-center text-gray-500">
+                      <div className="mb-1 text-3xl">
+                        <FaImage className="place-self-center" />
+                      </div>
+                      <p className="text-sm text-slate-400">
+                        Sin captura trasera
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -398,12 +520,4 @@ function CamaraComponent({ onPhotoTaken }: CamaraComponentProps) {
       <canvas ref={canvasRef} className="hidden"></canvas>
     </div>
   );
-}
-
-export default function Camara() {
-  const handlePhotoTaken = (dataUrl: string) => {
-    console.log("Foto tomada:", dataUrl.substring(0, 50) + "...");
-  };
-
-  return <CamaraComponent onPhotoTaken={handlePhotoTaken} />;
 }
