@@ -205,17 +205,17 @@ export default function CamaraComponent() {
     toast.error("No fotos para eliminar");
   };
 
-  const rotateCamera = () => {
-    if (videoRef.current) {
-      const currentRotation = videoRef.current.style.transform;
+  // const rotateCamera = () => {
+  //   if (videoRef.current) {
+  //     const currentRotation = videoRef.current.style.transform;
 
-      const rotation = currentRotation
-        ? parseFloat(currentRotation.replace("rotate(", "").replace("deg)", ""))
-        : 0;
-      const newRotation = rotation ? 0 : 90;
-      videoRef.current.style.transform = `rotate(${newRotation}deg)`;
-    }
-  };
+  //     const rotation = currentRotation
+  //       ? parseFloat(currentRotation.replace("rotate(", "").replace("deg)", ""))
+  //       : 0;
+  //     const newRotation = rotation ? 0 : 90;
+  //     videoRef.current.style.transform = `rotate(${newRotation}deg)`;
+  //   }
+  // };
 
   const generatePdf = async () => {
     if (!frontIdPhoto || !backIdPhoto) {
