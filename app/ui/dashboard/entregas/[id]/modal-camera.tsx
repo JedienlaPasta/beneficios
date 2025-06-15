@@ -255,15 +255,16 @@ export default function CamaraComponent() {
       const embeddedBackImage = await pdfDoc.embedJpg(imageBytesBack);
 
       // PDF Layout
-      const margin = 30;
-      const spaceBetweenImages = 20;
+      const margin = 110;
+      const spaceBetweenImages = 0;
 
       const { width, height } = page.getSize();
       const contentWidth = width - margin * 2;
       const contentHeight = height - margin * 2;
 
       // Calculate maximum height for each image, splitting the available space
-      const individualImageMaxHeight = (contentHeight - spaceBetweenImages) / 2;
+      const individualImageMaxHeight =
+        (contentHeight - spaceBetweenImages) / 2.2;
 
       // Scale images to fit the available width and their allocated height
       const frontImageDimensions = embeddedFrontImage.scaleToFit(
@@ -280,6 +281,10 @@ export default function CamaraComponent() {
         margin + (individualImageMaxHeight - backImageDimensions.height);
       const yPosFront =
         yPosBack + individualImageMaxHeight + spaceBetweenImages;
+      // const yPosBack =
+      //   margin + (individualImageMaxHeight - backImageDimensions.height);
+      // const yPosFront =
+      //   yPosBack + individualImageMaxHeight + spaceBetweenImages;
 
       // Calculate X positions to center horizontally
       const xPosFront =
@@ -307,7 +312,7 @@ export default function CamaraComponent() {
       const titleFontSize = 18;
       const titleWidth = font.widthOfTextAtSize(titleText, titleFontSize);
       const xPosTitle = (width - titleWidth) / 2;
-      const yPosTitle = height - margin - titleFontSize; // Place title closer to the top margin
+      const yPosTitle = height - margin - 0; // Place title closer to the top margin
 
       page.drawText(titleText, {
         x: xPosTitle,
@@ -370,7 +375,7 @@ export default function CamaraComponent() {
                   </div>
                 )}
 
-                <div className="flex items-center gap-2">
+                {/* <div className="flex items-center gap-2">
                   <button
                     onClick={rotateCamera}
                     disabled={isCameraLoading}
@@ -382,7 +387,7 @@ export default function CamaraComponent() {
                       "🔄 Girar"
                     )}
                   </button>
-                </div>
+                </div> */}
               </div>
 
               <div className="relative overflow-hidden rounded-lg bg-gray-100">
