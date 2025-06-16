@@ -172,15 +172,22 @@ export default function CamaraComponent() {
           context.save();
 
           if (isPortrait) {
-            // Rotate canvas to portrait orientation
+            const rotatedWidth = videoHeight * scaleFactor;
+            const rotatedHeight = videoWidth * scaleFactor;
+
             context.translate(targetWidth / 2, targetHeight / 2);
             context.rotate(-Math.PI / 2);
+
             context.drawImage(
               videoRef.current,
-              (-videoHeight * scaleFactor) / 2,
-              (-videoWidth * scaleFactor) / 2,
-              videoHeight * scaleFactor,
-              videoWidth * scaleFactor,
+              0,
+              0,
+              videoWidth,
+              videoHeight,
+              -rotatedHeight / 2,
+              -rotatedWidth / 2,
+              rotatedHeight,
+              rotatedWidth,
             );
           } else {
             context.drawImage(
