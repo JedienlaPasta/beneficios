@@ -360,10 +360,37 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
       };
     }
 
+    // Check current document count before uploading
+    const countRequest = pool.request().input("folio", sql.NVarChar, folio);
+    const countResult = await countRequest.query(`
+      SELECT COUNT(*) AS count
+      FROM documentos
+      WHERE folio = @folio
+    `);
+
+    const currentCount = countResult.recordset[0].count as number;
+
+    // After getting currentCount
+    if (currentCount >= 3) {
+      return {
+        success: false,
+        message: "Ya has alcanzado el máximo de 3 documentos permitidos.",
+      };
+    }
+
+    // Prevent upload if total would exceed 3 documents
+    if (currentCount + fileCount > 3) {
+      return {
+        success: false,
+        message: `No se pueden subir ${fileCount} documento(s). Ya hay ${currentCount} documento(s) y el máximo permitido es 3.`,
+      };
+    }
+
     const uploadPromises = [];
 
     for (let i = 0; i < fileCount; i++) {
       const file = formData.get(`file${i}`) as File;
+      console.log(file);
 
       if (!file) continue;
 
@@ -412,22 +439,13 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
     try {
       await transaction.begin();
 
-      // Get document count
-      const countRequest = new sql.Request(transaction);
-      const countResult = await countRequest.input("folio", sql.NVarChar, folio)
-        .query(`
-        SELECT COUNT(*) AS count
-        FROM documentos
-        WHERE folio = @folio
-      `);
-
-      const count = countResult.recordset[0].count;
+      const count = currentCount + fileCount;
 
       // Update status
       const updateRequest = new sql.Request(transaction);
       await updateRequest
-        .input("folio", sql.NVarChar, folio)
-        .input("estado", sql.NVarChar, count === 3 ? "Finalizado" : "En Curso")
+        .input("folio", sql.VarChar, folio)
+        .input("estado", sql.VarChar, count === 3 ? "Finalizado" : "En Curso")
         .query(`
         UPDATE entregas
         SET estado_documentos = @estado

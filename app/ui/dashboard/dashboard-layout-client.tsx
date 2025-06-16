@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Sidenav from "./sidenav";
 import { HiMenuAlt2 } from "react-icons/hi";
 import { Toaster } from "sonner";
@@ -13,6 +13,23 @@ export default function DashboardLayoutClient({
   userData: UserData;
 }) {
   const [sidenavOpen, setSidenavOpen] = useState(false);
+  const [toastPosition, setToastPosition] = useState<
+    "top-center" | "bottom-right"
+  >("bottom-right");
+
+  useEffect(() => {
+    const updatePosition = () => {
+      if (window.innerWidth < 768) {
+        setToastPosition("top-center");
+      } else {
+        setToastPosition("bottom-right");
+      }
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    return () => window.removeEventListener("resize", updatePosition);
+  }, []);
 
   return (
     <div className="min-h-screens flex min-h-svh">
@@ -46,7 +63,7 @@ export default function DashboardLayoutClient({
             </button>
             {children}
           </div>
-          <Toaster />
+          <Toaster position={toastPosition} />
         </div>
       </main>
     </div>

@@ -228,7 +228,7 @@ export default function ModalEntregasDetail({
                   </p>
                 </div>
 
-                <Camara />
+                <Camara folio={folio} />
               </div>
             </motion.div>
           ) : null}

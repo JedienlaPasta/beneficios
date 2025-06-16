@@ -3,6 +3,8 @@ import { FaImage } from "react-icons/fa6";
 import React, { useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { uploadPDFByFolio } from "@/app/lib/actions/entregas";
+import { useRouter } from "next/navigation";
 
 type CameraDevice = {
   deviceId: string;
@@ -10,7 +12,7 @@ type CameraDevice = {
   kind: string;
 };
 
-export default function CamaraComponent() {
+export default function CamaraComponent({ folio }: { folio: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -22,6 +24,7 @@ export default function CamaraComponent() {
   const [frontIdPhoto, setFrontIdPhoto] = useState<string | null>(null);
   const [backIdPhoto, setBackIdPhoto] = useState<string | null>(null);
   const [isTakingFront, setIsTakingFront] = useState(true);
+  const router = useRouter();
 
   const getCameras = async () => {
     try {
@@ -272,7 +275,7 @@ export default function CamaraComponent() {
     }
 
     setIsLoading(true);
-    const pdfGenerationToastId = toast.loading("Generando PDF...");
+    // const pdfGenerationToastId = toast.loading("Generando PDF...");
 
     try {
       const pdfDoc = await PDFDocument.create();
@@ -358,23 +361,60 @@ export default function CamaraComponent() {
         color: rgb(0, 0, 0),
       });
 
-      // Comprimir el PDF y guardar en la base de datos <==========================================
-
       // Serialize the PDF to bytes and trigger download
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: "application/pdf" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "documento_cedula.pdf"; // More descriptive filename
-      link.click();
 
-      toast.success("PDF generado exitosamente", { id: pdfGenerationToastId });
+      // toast.success("PDF generado exitosamente", { id: pdfGenerationToastId });
+      return blob;
     } catch (err) {
       console.error("Error al generar el PDF:", err);
-      toast.error("Error al generar el PDF", { id: pdfGenerationToastId });
+      // toast.error("Error al generar el PDF", { id: pdfGenerationToastId });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const viewPdf = async () => {
+    const pdfBlob = await generatePdf();
+    if (pdfBlob) {
+      const url = URL.createObjectURL(pdfBlob);
+      const newWindow = window.open(url, "_blank");
+
+      if (!newWindow) {
+        toast.error(
+          "Ventana bloqueada - Por favor permite ventanas emergentes para este sitio",
+        );
+        return;
+      }
+    }
+  };
+
+  const uploadPdf = async () => {
+    const pdfBlob = await generatePdf();
+    setIsLoading(true);
+    if (pdfBlob) {
+      const pdfNamedFile = new File([pdfBlob], "cedula.pdf", {
+        type: "application/pdf",
+      });
+      const formData = new FormData();
+      formData.append("file0", pdfNamedFile);
+      formData.append("fileCount", "1");
+      const toastId = toast.loading("Guardando PDF...");
+      try {
+        const response = await uploadPDFByFolio(folio, formData);
+        if (!response.success) {
+          throw new Error(response.message);
+        }
+        toast.success("PDF guardado exitosamente", { id: toastId });
+        router.refresh();
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Error al crear la entrega";
+        toast.error(message, { id: toastId });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -459,7 +499,7 @@ export default function CamaraComponent() {
               <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
               Imágenes Capturadas
             </h3>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <div className="flex min-h-40 items-center justify-center rounded-lg bg-gray-100 p-4">
                 {frontIdPhoto ? (
                   <div className="w-full space-y-2">
@@ -520,17 +560,30 @@ export default function CamaraComponent() {
                   >
                     Quitar foto {backIdPhoto ? "reverso" : "frontal"}
                   </button>
-                  <button
-                    onClick={generatePdf} // Nuevo botón para generar PDF
-                    disabled={isLoading || !(frontIdPhoto && backIdPhoto)}
-                    className="flex h-10 items-center justify-center rounded-lg bg-green-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-green-600 active:scale-95 disabled:bg-green-300"
-                  >
-                    {isLoading ? (
-                      <div className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                    ) : (
-                      "Generar PDF"
-                    )}
-                  </button>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={viewPdf}
+                      disabled={isLoading || !(frontIdPhoto && backIdPhoto)}
+                      className="flex h-10 items-center justify-center rounded-lg bg-green-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-green-600 active:scale-95 disabled:bg-green-300"
+                    >
+                      {isLoading ? (
+                        <div className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                      ) : (
+                        "Ver PDF"
+                      )}
+                    </button>
+                    <button
+                      onClick={uploadPdf}
+                      disabled={isLoading || !(frontIdPhoto && backIdPhoto)}
+                      className="flex h-10 items-center justify-center rounded-lg bg-blue-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-blue-600 active:scale-95 disabled:bg-blue-300"
+                    >
+                      {isLoading ? (
+                        <div className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                      ) : (
+                        "Guardar PDF"
+                      )}
+                    </button>
+                  </div>
                 </>
               )}
             </div>
@@ -538,7 +591,6 @@ export default function CamaraComponent() {
         </div>
       </div>
 
-      {/* <canvas ref={canvasRef} style={{ display: "none" }}></canvas> */}
       <canvas ref={canvasRef} className="hidden"></canvas>
     </div>
   );
