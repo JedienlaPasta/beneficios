@@ -44,7 +44,7 @@ interface UserData {
 
 // Crear Entrega
 const CreateEntregaFormSchema = z.object({
-  rut: z.string(),
+  rut: z.string().min(1, { message: "RUT es requerido" }),
   observaciones: z.string().optional(),
   campaigns: z.string(
     z.object({
@@ -79,22 +79,20 @@ export const createEntrega = async (id: string, formData: FormData) => {
   const fecha_entrega = formData.get("fecha_entrega");
   const campaigns = JSON.parse(formData.get("campaigns") as string);
 
-  if (!rut || !campaigns) {
+  if (!rut || campaigns.length === 0) {
     return {
       success: false,
       message: "Campos incompletos",
     };
   }
 
+  let code;
+  if (campaigns.length > 1) code = "DO";
+  else code = campaigns[0].code;
+
+  let newFolio: string = "";
+
   try {
-    let code;
-    if (campaigns.length === 0)
-      throw new Error("No se seleccionó ninguna campaña");
-    if (campaigns.length > 1) code = "DO";
-    else code = campaigns[0].code;
-
-    let newFolio: string = "";
-
     const pool = await connectToDB();
     if (!pool) {
       console.warn("No se pudo establecer una conexión a la base de datos.");
@@ -107,12 +105,11 @@ export const createEntrega = async (id: string, formData: FormData) => {
     let transaction: sql.Transaction | undefined;
     try {
       transaction = new sql.Transaction(pool);
-      await transaction.begin(sql.ISOLATION_LEVEL.READ_COMMITTED);
+      await transaction.begin(sql.ISOLATION_LEVEL.SERIALIZABLE);
 
-      // Use provided folio or generate a new one
-      if (folio) {
-        console.log(folio);
-        // Manual insert path
+      let userId: string;
+
+      if (correo) {
         const correoRequest = new sql.Request(transaction);
         const correoResult = await correoRequest.input(
           "correo",
@@ -127,8 +124,14 @@ export const createEntrega = async (id: string, formData: FormData) => {
             message: "Correo no registrado",
           };
         }
-        const userId = correoResult.recordset[0].id;
+        userId = correoResult.recordset[0].id;
+      } else {
+        userId = id;
+      }
 
+      // Use provided folio or generate a new one
+      if (folio) {
+        // Manual insert path
         const checkFolioRequest = new sql.Request(transaction);
         const checkFolioResult = await checkFolioRequest.input(
           "folio",
@@ -138,6 +141,7 @@ export const createEntrega = async (id: string, formData: FormData) => {
           SELECT folio FROM entregas WHERE folio = @folio
         `);
         if (checkFolioResult.recordset.length > 0) {
+          await transaction.rollback();
           return {
             success: false,
             message: "Este Folio ya se encuentra registrado",
@@ -147,65 +151,54 @@ export const createEntrega = async (id: string, formData: FormData) => {
         const entregaRequest = new sql.Request(transaction);
         await entregaRequest
           .input("folio", sql.VarChar, folio)
-          .input("observaciones", sql.VarChar, observaciones)
+          .input("observacion", sql.VarChar, observaciones)
           .input("fecha_entrega", sql.DateTime, fecha_entrega)
           .input("rut", sql.Int, rut)
-          .input("id", sql.UniqueIdentifier, userId).query(`
+          .input("id_usuario", sql.UniqueIdentifier, userId).query(`
             INSERT INTO entregas (folio, observacion, fecha_entrega, rut, id_usuario)
             VALUES (
               @folio,
-              @observaciones,
+              @observacion,
               @fecha_entrega,
               @rut,
-              @id
+              @id_usuario
             )
           `);
 
         newFolio = folio ? folio.toString() : "";
       } else {
-        // Generate a folio using MSSQL functions
-        const folioRequest = new sql.Request(transaction);
-        folioRequest
-          .input("observaciones", sql.VarChar, observaciones)
-          .input("rut", sql.Int, rut)
-          .input("id", sql.UniqueIdentifier, id)
-          .input("code", sql.VarChar, code);
+        // Generate a folio using MSSQL functions (auto)
+        const currentYear = new Date().getFullYear();
+        const spRequest = new sql.Request(transaction);
+        spRequest.input("p_rut", sql.Int, rut);
+        spRequest.input("p_observacion", sql.NVarChar, observaciones);
+        spRequest.input("p_fecha_entrega", sql.DateTime, fecha_entrega);
+        spRequest.input("p_id_usuario", sql.UniqueIdentifier, userId);
+        spRequest.input("p_current_year", sql.Int, currentYear);
+        spRequest.input("p_code", sql.VarChar, code);
+        spRequest.output("p_new_folio_output", sql.VarChar);
 
-        const folioResult = await folioRequest.query(`
-            DECLARE @UUID UNIQUEIDENTIFIER = NEWID();
-            DECLARE @UUIDString NVARCHAR(50) = REPLACE(CAST(@UUID AS NVARCHAR(50)), '-', '');
-            DECLARE @ShortUUID NVARCHAR(8) = SUBSTRING(@UUIDString, 1, 8);
-            DECLARE @YearCode NVARCHAR(2) = RIGHT(CAST(YEAR(GETUTCDATE()) AS NVARCHAR(4)), 2);
-            DECLARE @NewFolio NVARCHAR(50) = CONCAT(@ShortUUID, '-', @YearCode, '-', @code);
-            
-            INSERT INTO entregas (folio, observacion, fecha_entrega, rut, id_usuario)
-            OUTPUT INSERTED.folio
-            VALUES (
-              @NewFolio,
-              @observaciones,
-              GETUTCDATE(),
-              @rut,
-              @id
-            )
-        `);
+        const spResult = await spRequest.execute(
+          "dbo.GenerateAndInsertEntrega",
+        );
+        newFolio = spResult.output.p_new_folio_output;
 
-        if (!folioResult.recordset || folioResult.recordset.length === 0) {
-          throw new Error("No se pudo generar el folio");
+        if (!newFolio) {
+          throw new Error("No se pudo generar el folio automáticamente");
         }
-
-        // Store the generated folio
-        newFolio = folioResult.recordset[0].folio;
       }
 
       // Insert campaign details and update campaign counts
       if (campaigns.length > 0) {
         for (const campaign of campaigns) {
-          const detail = Number(campaign.detail)
-            ? campaign.detail
-            : campaign.detail.toUpperCase();
+          const detail =
+            typeof campaign.detail === "string"
+              ? campaign.detail.toUpperCase()
+              : String(campaign.detail);
 
-          const campaignRequest = new sql.Request(transaction);
-          await campaignRequest
+          // Insert into entrega
+          const insertEntregaCampaignRequest = new sql.Request(transaction);
+          await insertEntregaCampaignRequest
             .input("detail", sql.VarChar, detail)
             .input("folio", sql.VarChar, newFolio)
             .input("campaignId", sql.UniqueIdentifier, campaign.id).query(`
@@ -213,14 +206,14 @@ export const createEntrega = async (id: string, formData: FormData) => {
               VALUES (@detail, @folio, @campaignId)
             `);
 
-          const updateRequest = new sql.Request(transaction);
-          await updateRequest.input(
+          const updateCampaignRequest = new sql.Request(transaction);
+          await updateCampaignRequest.input(
             "campaignId",
             sql.UniqueIdentifier,
             campaign.id,
           ).query(`
               UPDATE campañas 
-              SET entregas = entregas + 1 
+              SET entregas = ISNULL(entregas, 0) + 1
               WHERE id = @campaignId
             `);
         }
@@ -228,6 +221,7 @@ export const createEntrega = async (id: string, formData: FormData) => {
 
       // Commit the transaction
       await transaction.commit();
+      console.log("Transaction committed successfully.");
     } catch (error) {
       // If there's an error, roll back the transaction
       if (transaction) await transaction.rollback();
