@@ -2,7 +2,7 @@
 
 ## Funcionalidades
 
-# Login
+### Login
 Iniciar Sesión.
 
 #Inicio (Dashboard)
