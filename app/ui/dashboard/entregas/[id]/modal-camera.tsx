@@ -11,9 +11,6 @@ type CameraDevice = {
 };
 
 export default function CamaraComponent() {
-  const [cameraPermission, setCameraPermission] = useState<boolean | null>(
-    null,
-  );
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -25,23 +22,6 @@ export default function CamaraComponent() {
   const [frontIdPhoto, setFrontIdPhoto] = useState<string | null>(null);
   const [backIdPhoto, setBackIdPhoto] = useState<string | null>(null);
   const [isTakingFront, setIsTakingFront] = useState(true);
-
-  const checkCameraPermission = async () => {
-    try {
-      const permissionStatus = await navigator.permissions.query({
-        name: "camera",
-      });
-
-      if (permissionStatus.state === "granted") {
-        return true;
-      } else if (permissionStatus.state === "denied") {
-        return false;
-      }
-    } catch (err) {
-      console.log("Error al verificar permisos de cámara:", err);
-    }
-    return false;
-  };
 
   const getCameras = async () => {
     try {
@@ -143,12 +123,6 @@ export default function CamaraComponent() {
     let mounted = true;
 
     const initializeCamera = async () => {
-      const hasCameraPermission = await checkCameraPermission();
-      if (!hasCameraPermission) {
-        toast.error("Necesitas habilitar los permisos de la cámara.");
-        return;
-      }
-
       const availableCameras = await getCameras();
 
       // Verificar que el componente sigue montado antes de continuar
@@ -170,15 +144,6 @@ export default function CamaraComponent() {
         stream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, []);
-
-  useEffect(() => {
-    const checkPermissions = async () => {
-      const hasPermission = await checkCameraPermission();
-      setCameraPermission(hasPermission);
-    };
-
-    checkPermissions();
   }, []);
 
   const takePhoto = async () => {
@@ -415,167 +380,165 @@ export default function CamaraComponent() {
 
   return (
     <div className="mx-auto w-full">
-      {cameraPermission ? (
-        <div className="overflow-hidden">
+      <div className="overflow-hidden">
+        <div className="space-y-4">
+          {/* Vista de la cámara */}
           <div className="space-y-4">
-            {/* Vista de la cámara */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="flex items-center gap-2 text-sm font-medium text-slate-600">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-                  Vista Cámara
-                </h3>
-                {cameras.length > 1 && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={switchCamera}
-                      disabled={isCameraLoading}
-                      className="rounded-md bg-gray-600 px-3 py-1 text-sm text-white transition-colors duration-200 hover:bg-gray-700 disabled:bg-gray-400"
-                    >
-                      {isCameraLoading ? (
-                        <div className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent"></div>
-                      ) : (
-                        "Cambiar cámara"
-                      )}
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <div className="relative overflow-hidden rounded-lg bg-gray-100">
-                <span className="absolute right-2 top-2 rounded-md bg-gray-800 bg-opacity-50 px-2 py-1 text-xs text-slate-200">
-                  {"Cámara " + (currentCameraIndex + 1)}
-                </span>
-                {isCameraLoading && (
-                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="flex items-center gap-2 text-white">
-                      <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                      <span>Cambiando cámara...</span>
-                    </div>
-                  </div>
-                )}
-                <video
-                  ref={videoRef}
-                  className="h-auto max-h-96 w-full object-cover"
-                  autoPlay
-                  playsInline
-                  muted
-                />
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={takePhoto}
-                  disabled={
-                    isLoading ||
-                    isCameraLoading ||
-                    (backIdPhoto !== null && frontIdPhoto !== null)
-                  }
-                  className="flex h-10 grow items-center justify-center rounded-lg bg-blue-500 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-600 active:scale-95 disabled:bg-blue-300"
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                      Procesando...
-                    </>
-                  ) : (
-                    <>
-                      {isTakingFront
-                        ? "Tomar foto frontal"
-                        : "Tomar foto trasera"}
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Vista previa de la foto */}
-            <div className="space-y-4">
+            <div className="flex items-center justify-between">
               <h3 className="flex items-center gap-2 text-sm font-medium text-slate-600">
                 <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-                Imágenes Capturadas
+                Vista Cámara
               </h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="flex min-h-40 items-center justify-center rounded-lg bg-gray-100 p-4">
-                  {frontIdPhoto ? (
-                    <div className="w-full space-y-2">
-                      <h4 className="mx-auto w-2/5 rounded bg-slate-800 bg-opacity-20 text-center text-sm font-medium text-slate-700">
-                        Frente
-                      </h4>
-                      <img
-                        src={frontIdPhoto}
-                        alt="Foto frontal"
-                        className="h-auto max-h-40 w-full rounded-lg object-contain shadow-md"
-                      />
-                    </div>
-                  ) : (
-                    <div className="text-center text-gray-500">
-                      <div className="mb-1 text-3xl">
-                        <FaImage className="place-self-center" />
-                      </div>
-                      <p className="text-sm text-slate-400">
-                        Sin captura frontal
-                      </p>
-                    </div>
-                  )}
+              {cameras.length > 1 && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={switchCamera}
+                    disabled={isCameraLoading}
+                    className="rounded-md bg-gray-600 px-3 py-1 text-sm text-white transition-colors duration-200 hover:bg-gray-700 disabled:bg-gray-400"
+                  >
+                    {isCameraLoading ? (
+                      <div className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent"></div>
+                    ) : (
+                      "Cambiar cámara"
+                    )}
+                  </button>
                 </div>
-                <div className="flex min-h-40 items-center justify-center rounded-lg bg-gray-100 p-4">
-                  {backIdPhoto ? (
-                    <div className="w-full space-y-2">
-                      <h4 className="text-center text-sm font-medium text-slate-600">
-                        Reverso
-                      </h4>
-                      <img
-                        src={backIdPhoto}
-                        alt="Foto trasera"
-                        className="h-auto max-h-40 w-full rounded-lg object-contain shadow-md"
-                      />
-                    </div>
-                  ) : (
-                    <div className="text-center text-gray-500">
-                      <div className="mb-1 text-3xl">
-                        <FaImage className="place-self-center" />
-                      </div>
-                      <p className="text-sm text-slate-400">
-                        Sin captura trasera
-                      </p>
-                    </div>
-                  )}
+              )}
+            </div>
+
+            <div className="relative overflow-hidden rounded-lg bg-gray-100">
+              <span className="absolute right-2 top-2 rounded-md bg-gray-800 bg-opacity-50 px-2 py-1 text-xs text-slate-200">
+                {"Cámara " + (currentCameraIndex + 1)}
+              </span>
+              {isCameraLoading && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
+                  <div className="flex items-center gap-2 text-white">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    <span>Cambiando cámara...</span>
+                  </div>
                 </div>
-                {(frontIdPhoto || backIdPhoto) && (
+              )}
+              <video
+                ref={videoRef}
+                className="h-auto max-h-96 w-full object-cover"
+                autoPlay
+                playsInline
+                muted
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={takePhoto}
+                disabled={
+                  isLoading ||
+                  isCameraLoading ||
+                  (backIdPhoto !== null && frontIdPhoto !== null)
+                }
+                className="flex h-10 grow items-center justify-center rounded-lg bg-blue-500 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-600 active:scale-95 disabled:bg-blue-300"
+              >
+                {isLoading ? (
                   <>
-                    <button
-                      onClick={() => {
-                        if (backIdPhoto) {
-                          clearPhoto();
-                        } else if (frontIdPhoto) {
-                          clearPhoto();
-                        }
-                      }}
-                      className="h-10 rounded-lg bg-gray-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-600"
-                    >
-                      Quitar foto {backIdPhoto ? "reverso" : "frontal"}
-                    </button>
-                    <button
-                      onClick={generatePdf} // Nuevo botón para generar PDF
-                      disabled={isLoading || !(frontIdPhoto && backIdPhoto)}
-                      className="flex h-10 items-center justify-center rounded-lg bg-green-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-green-600 active:scale-95 disabled:bg-green-300"
-                    >
-                      {isLoading ? (
-                        <div className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                      ) : (
-                        "Generar PDF"
-                      )}
-                    </button>
+                    <div className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    Procesando...
+                  </>
+                ) : (
+                  <>
+                    {isTakingFront
+                      ? "Tomar foto frontal"
+                      : "Tomar foto trasera"}
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+
+          {/* Vista previa de la foto */}
+          <div className="space-y-4">
+            <h3 className="flex items-center gap-2 text-sm font-medium text-slate-600">
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+              Imágenes Capturadas
+            </h3>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="flex min-h-40 items-center justify-center rounded-lg bg-gray-100 p-4">
+                {frontIdPhoto ? (
+                  <div className="w-full space-y-2">
+                    <h4 className="mx-auto w-2/5 rounded bg-slate-800 bg-opacity-20 text-center text-sm font-medium text-slate-700">
+                      Frente
+                    </h4>
+                    <img
+                      src={frontIdPhoto}
+                      alt="Foto frontal"
+                      className="h-auto max-h-40 w-full rounded-lg object-contain shadow-md"
+                    />
+                  </div>
+                ) : (
+                  <div className="text-center text-gray-500">
+                    <div className="mb-1 text-3xl">
+                      <FaImage className="place-self-center" />
+                    </div>
+                    <p className="text-sm text-slate-400">
+                      Sin captura frontal
+                    </p>
+                  </div>
+                )}
               </div>
+              <div className="flex min-h-40 items-center justify-center rounded-lg bg-gray-100 p-4">
+                {backIdPhoto ? (
+                  <div className="w-full space-y-2">
+                    <h4 className="text-center text-sm font-medium text-slate-600">
+                      Reverso
+                    </h4>
+                    <img
+                      src={backIdPhoto}
+                      alt="Foto trasera"
+                      className="h-auto max-h-40 w-full rounded-lg object-contain shadow-md"
+                    />
+                  </div>
+                ) : (
+                  <div className="text-center text-gray-500">
+                    <div className="mb-1 text-3xl">
+                      <FaImage className="place-self-center" />
+                    </div>
+                    <p className="text-sm text-slate-400">
+                      Sin captura trasera
+                    </p>
+                  </div>
+                )}
+              </div>
+              {(frontIdPhoto || backIdPhoto) && (
+                <>
+                  <button
+                    onClick={() => {
+                      if (backIdPhoto) {
+                        clearPhoto();
+                      } else if (frontIdPhoto) {
+                        clearPhoto();
+                      }
+                    }}
+                    className="h-10 rounded-lg bg-gray-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-600"
+                  >
+                    Quitar foto {backIdPhoto ? "reverso" : "frontal"}
+                  </button>
+                  <button
+                    onClick={generatePdf} // Nuevo botón para generar PDF
+                    disabled={isLoading || !(frontIdPhoto && backIdPhoto)}
+                    className="flex h-10 items-center justify-center rounded-lg bg-green-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-green-600 active:scale-95 disabled:bg-green-300"
+                  >
+                    {isLoading ? (
+                      <div className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    ) : (
+                      "Generar PDF"
+                    )}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
-      ) : (
-        <div>asd</div>
-      )}
+      </div>
+
+      {/* <canvas ref={canvasRef} style={{ display: "none" }}></canvas> */}
       <canvas ref={canvasRef} className="hidden"></canvas>
     </div>
   );
