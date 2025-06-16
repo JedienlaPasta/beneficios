@@ -2,7 +2,7 @@
 import { FaImage } from "react-icons/fa6";
 import React, { useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts, degrees, scale } from "pdf-lib";
 
 type CameraDevice = {
   deviceId: string;
@@ -36,6 +36,22 @@ export default function CamaraComponent() {
           kind: device.kind,
         }),
       );
+
+      const rearCameraIndex = cameraDevices.findIndex((camera) => {
+        const label = camera.label.toLowerCase();
+        return (
+          label.includes("back") ||
+          label.includes("rear") ||
+          label.includes("trasera") ||
+          label.includes("principal")
+        );
+      });
+
+      if (rearCameraIndex > 0) {
+        const rearCamera = cameraDevices.splice(rearCameraIndex, 1)[0];
+        cameraDevices.unshift(rearCamera);
+      }
+
       setCameras(cameraDevices);
       return cameraDevices;
     } catch (err) {
@@ -58,7 +74,8 @@ export default function CamaraComponent() {
         video: {
           width: { ideal: 1280 },
           height: { ideal: 720 },
-          facingMode: "environment",
+          // Priorizar cámara trasera si no se especifica un deviceId
+          facingMode: deviceId ? undefined : { ideal: "environment" },
           ...(deviceId && { deviceId: { exact: deviceId } }),
         },
       };
@@ -139,15 +156,43 @@ export default function CamaraComponent() {
           const videoWidth = videoRef.current.videoWidth;
           const videoHeight = videoRef.current.videoHeight;
 
+          const isPortrait = videoHeight > videoWidth;
+
           const targetWidth = 1200;
-          const scaleFactor = targetWidth / videoWidth;
-          const targetHeight = videoHeight * scaleFactor;
+          const scaleFactor =
+            targetWidth / (isPortrait ? videoHeight : videoWidth);
+          const targetHeight =
+            (isPortrait ? videoWidth : videoHeight) * scaleFactor;
 
           canvasRef.current.width = targetWidth;
           canvasRef.current.height = targetHeight;
 
           await new Promise((resolve) => setTimeout(resolve, 50));
-          context.drawImage(videoRef.current, 0, 0, targetWidth, targetHeight);
+          // context.drawImage(videoRef.current, 0, 0, targetWidth, targetHeight);
+          context.save();
+
+          if (isPortrait) {
+            // Rotate canvas to portrait orientation
+            context.translate(targetWidth / 2, targetHeight / 2);
+            context.rotate(-Math.PI / 2);
+            context.drawImage(
+              videoRef.current,
+              (-videoHeight * scaleFactor) / 2,
+              (-videoWidth * scaleFactor) / 2,
+              videoHeight * scaleFactor,
+              videoWidth * scaleFactor,
+            );
+          } else {
+            context.drawImage(
+              videoRef.current,
+              0,
+              0,
+              targetWidth,
+              targetHeight,
+            );
+          }
+
+          context.restore();
 
           const compressedDataUrl = canvasRef.current.toDataURL(
             "image/jpeg",
@@ -302,6 +347,7 @@ export default function CamaraComponent() {
       page.drawImage(embeddedBackImage, {
         x: xPosBack,
         y: yPosBack,
+        // rotate: degrees(90),
         width: backImageDimensions.width,
         height: backImageDimensions.height,
       });
@@ -345,7 +391,7 @@ export default function CamaraComponent() {
   return (
     <div className="mx-auto max-w-4xl">
       <div className="overflow-hidden">
-        <div className="p-6s">
+        <div className="">
           <div className="space-y-4">
             {/* Vista de la cámara */}
             <div className="space-y-4">
@@ -357,10 +403,6 @@ export default function CamaraComponent() {
                 {/* {cameras.length > 1 && ( */}
                 {true && (
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">
-                      {/* {cameras[currentCameraIndex]?.label || "Cámara actual"} */}
-                      {"Cámara " + (currentCameraIndex + 1)}
-                    </span>
                     <button
                       onClick={switchCamera}
                       disabled={isCameraLoading}
@@ -369,7 +411,8 @@ export default function CamaraComponent() {
                       {isCameraLoading ? (
                         <div className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent"></div>
                       ) : (
-                        "🔄 Cambiar"
+                        // "🔄 Cambiar"
+                        "Cambiar cámara"
                       )}
                     </button>
                   </div>
@@ -391,6 +434,9 @@ export default function CamaraComponent() {
               </div>
 
               <div className="relative overflow-hidden rounded-lg bg-gray-100">
+                <span className="absolute right-2 top-2 rounded-md bg-gray-800 bg-opacity-50 px-2 py-1 text-xs text-slate-200">
+                  {"Cámara " + (currentCameraIndex + 1)}
+                </span>
                 {isCameraLoading && (
                   <div className="absolute inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="flex items-center gap-2 text-white">
@@ -431,34 +477,6 @@ export default function CamaraComponent() {
                     </>
                   )}
                 </button>
-
-                {(frontIdPhoto || backIdPhoto) && (
-                  <>
-                    <button
-                      onClick={() => {
-                        if (backIdPhoto) {
-                          clearPhoto();
-                        } else if (frontIdPhoto) {
-                          clearPhoto();
-                        }
-                      }}
-                      className="h-10 rounded-lg bg-gray-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-600"
-                    >
-                      Limpiar foto {backIdPhoto ? "trasera" : "frontal"}
-                    </button>
-                    <button
-                      onClick={generatePdf} // Nuevo botón para generar PDF
-                      disabled={isLoading}
-                      className="flex h-10 items-center justify-center rounded-lg bg-green-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-green-600 active:scale-95 disabled:bg-green-300"
-                    >
-                      {isLoading ? (
-                        <div className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                      ) : (
-                        "Generar PDF"
-                      )}
-                    </button>
-                  </>
-                )}
               </div>
             </div>
 
@@ -469,10 +487,10 @@ export default function CamaraComponent() {
                 Imágenes Capturadas
               </h3>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="flex min-h-48 items-center justify-center rounded-lg bg-gray-100 p-4">
+                <div className="flex min-h-40 items-center justify-center rounded-lg bg-gray-100 p-4">
                   {frontIdPhoto ? (
                     <div className="w-full space-y-2">
-                      <h4 className="text-center text-sm font-medium text-slate-600">
+                      <h4 className="mx-auto w-2/5 rounded bg-slate-800 bg-opacity-20 text-center text-sm font-medium text-slate-700">
                         Frente
                       </h4>
                       <img
@@ -492,7 +510,7 @@ export default function CamaraComponent() {
                     </div>
                   )}
                 </div>
-                <div className="flex min-h-48 items-center justify-center rounded-lg bg-gray-100 p-4">
+                <div className="flex min-h-40 items-center justify-center rounded-lg bg-gray-100 p-4">
                   {backIdPhoto ? (
                     <div className="w-full space-y-2">
                       <h4 className="text-center text-sm font-medium text-slate-600">
@@ -515,6 +533,33 @@ export default function CamaraComponent() {
                     </div>
                   )}
                 </div>
+                {(frontIdPhoto || backIdPhoto) && (
+                  <>
+                    <button
+                      onClick={() => {
+                        if (backIdPhoto) {
+                          clearPhoto();
+                        } else if (frontIdPhoto) {
+                          clearPhoto();
+                        }
+                      }}
+                      className="h-10 rounded-lg bg-gray-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-600"
+                    >
+                      Quitar foto {backIdPhoto ? "reverso" : "frontal"}
+                    </button>
+                    <button
+                      onClick={generatePdf} // Nuevo botón para generar PDF
+                      disabled={isLoading || !(frontIdPhoto && backIdPhoto)}
+                      className="flex h-10 items-center justify-center rounded-lg bg-green-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-green-600 active:scale-95 disabled:bg-green-300"
+                    >
+                      {isLoading ? (
+                        <div className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                      ) : (
+                        "Generar PDF"
+                      )}
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
