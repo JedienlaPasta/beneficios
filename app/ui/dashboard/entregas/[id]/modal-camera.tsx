@@ -11,6 +11,9 @@ type CameraDevice = {
 };
 
 export default function CamaraComponent() {
+  const [cameraPermission, setCameraPermission] = useState<boolean | null>(
+    null,
+  );
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -22,6 +25,23 @@ export default function CamaraComponent() {
   const [frontIdPhoto, setFrontIdPhoto] = useState<string | null>(null);
   const [backIdPhoto, setBackIdPhoto] = useState<string | null>(null);
   const [isTakingFront, setIsTakingFront] = useState(true);
+
+  const checkCameraPermission = async () => {
+    try {
+      const permissionStatus = await navigator.permissions.query({
+        name: "camera",
+      });
+
+      if (permissionStatus.state === "granted") {
+        return true;
+      } else if (permissionStatus.state === "denied") {
+        return false;
+      }
+    } catch (err) {
+      console.log("Error al verificar permisos de cámara:", err);
+    }
+    return false;
+  };
 
   const getCameras = async () => {
     try {
@@ -123,6 +143,12 @@ export default function CamaraComponent() {
     let mounted = true;
 
     const initializeCamera = async () => {
+      const hasCameraPermission = await checkCameraPermission();
+      if (!hasCameraPermission) {
+        toast.error("Necesitas habilitar los permisos de la cámara.");
+        return;
+      }
+
       const availableCameras = await getCameras();
 
       // Verificar que el componente sigue montado antes de continuar
@@ -144,6 +170,15 @@ export default function CamaraComponent() {
         stream.getTracks().forEach((track) => track.stop());
       }
     };
+  }, []);
+
+  useEffect(() => {
+    const checkPermissions = async () => {
+      const hasPermission = await checkCameraPermission();
+      setCameraPermission(hasPermission);
+    };
+
+    checkPermissions();
   }, []);
 
   const takePhoto = async () => {
@@ -257,18 +292,6 @@ export default function CamaraComponent() {
     toast.error("No fotos para eliminar");
   };
 
-  // const rotateCamera = () => {
-  //   if (videoRef.current) {
-  //     const currentRotation = videoRef.current.style.transform;
-
-  //     const rotation = currentRotation
-  //       ? parseFloat(currentRotation.replace("rotate(", "").replace("deg)", ""))
-  //       : 0;
-  //     const newRotation = rotation ? 0 : 90;
-  //     videoRef.current.style.transform = `rotate(${newRotation}deg)`;
-  //   }
-  // };
-
   const generatePdf = async () => {
     if (!frontIdPhoto || !backIdPhoto) {
       let errorMessage = "";
@@ -333,10 +356,6 @@ export default function CamaraComponent() {
         margin + (individualImageMaxHeight - backImageDimensions.height);
       const yPosFront =
         yPosBack + individualImageMaxHeight + spaceBetweenImages;
-      // const yPosBack =
-      //   margin + (individualImageMaxHeight - backImageDimensions.height);
-      // const yPosFront =
-      //   yPosBack + individualImageMaxHeight + spaceBetweenImages;
 
       // Calculate X positions to center horizontally
       const xPosFront =
@@ -354,7 +373,6 @@ export default function CamaraComponent() {
       page.drawImage(embeddedBackImage, {
         x: xPosBack,
         y: yPosBack,
-        // rotate: degrees(90),
         width: backImageDimensions.width,
         height: backImageDimensions.height,
       });
@@ -365,7 +383,7 @@ export default function CamaraComponent() {
       const titleFontSize = 18;
       const titleWidth = font.widthOfTextAtSize(titleText, titleFontSize);
       const xPosTitle = (width - titleWidth) / 2;
-      const yPosTitle = height - margin - 0; // Place title closer to the top margin
+      const yPosTitle = height - margin;
 
       page.drawText(titleText, {
         x: xPosTitle,
@@ -396,19 +414,18 @@ export default function CamaraComponent() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <div className="overflow-hidden">
-        <div className="">
+    <div className="mx-auto w-full">
+      {cameraPermission ? (
+        <div className="overflow-hidden">
           <div className="space-y-4">
             {/* Vista de la cámara */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="flex items-center gap-2 text-sm font-medium text-slate-600">
                   <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-                  Vista de la Cámara
+                  Vista Cámara
                 </h3>
-                {/* {cameras.length > 1 && ( */}
-                {true && (
+                {cameras.length > 1 && (
                   <div className="flex items-center gap-2">
                     <button
                       onClick={switchCamera}
@@ -418,26 +435,11 @@ export default function CamaraComponent() {
                       {isCameraLoading ? (
                         <div className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent"></div>
                       ) : (
-                        // "🔄 Cambiar"
                         "Cambiar cámara"
                       )}
                     </button>
                   </div>
                 )}
-
-                {/* <div className="flex items-center gap-2">
-                  <button
-                    onClick={rotateCamera}
-                    disabled={isCameraLoading}
-                    className="rounded-md bg-gray-600 px-3 py-1 text-sm text-white transition-colors duration-200 hover:bg-gray-700 disabled:bg-gray-400"
-                  >
-                    {isCameraLoading ? (
-                      <div className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent"></div>
-                    ) : (
-                      "🔄 Girar"
-                    )}
-                  </button>
-                </div> */}
               </div>
 
               <div className="relative overflow-hidden rounded-lg bg-gray-100">
@@ -571,9 +573,9 @@ export default function CamaraComponent() {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* <canvas ref={canvasRef} style={{ display: "none" }}></canvas> */}
+      ) : (
+        <div>asd</div>
+      )}
       <canvas ref={canvasRef} className="hidden"></canvas>
     </div>
   );
