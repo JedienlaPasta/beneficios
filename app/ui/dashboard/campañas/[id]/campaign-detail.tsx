@@ -46,12 +46,12 @@ export default async function CampaignDetail({ id }: { id: string }) {
               {code}
             </p>
             <div className="flex flex-col">
-              <div className="flex items-center gap-2">
+              <div className="items-center gap-2 sm:flex">
                 <h1 className="text-xl font-semibold tracking-tight text-slate-700">
                   {nombre_campaña}
                 </h1>
                 <div
-                  className={`flex items-center gap-1.5 rounded-md px-2 py-0.5 ${colorEstado[0]}`}
+                  className={`flex w-fit items-center gap-1.5 rounded-md px-2 py-0.5 ${colorEstado[0]}`}
                 >
                   <span
                     className={`h-1.5 w-1.5 animate-pulse rounded-xl ${colorEstado[1]}`}
@@ -61,7 +61,9 @@ export default async function CampaignDetail({ id }: { id: string }) {
                   </p>
                 </div>
               </div>
-              <p className="text-sm font-medium text-slate-500">{tipo_dato}</p>
+              <p className="hidden text-sm font-medium text-slate-500 sm:block">
+                {tipo_dato}
+              </p>
             </div>
           </div>
           <RoleGuard allowedRoles={["Administrador", "Supervisor"]}>

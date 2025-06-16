@@ -313,7 +313,7 @@ export default function NewCitizenModal({ name }: { name: string }) {
                     />
                     <Input
                       placeHolder="Sí/No"
-                      label="Pertenece a pueblo indígena"
+                      label="Indígena"
                       type="text"
                       nombre="indigena"
                       value={indigena}

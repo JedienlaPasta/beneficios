@@ -43,7 +43,7 @@ export default function Breadcrumbs() {
           <li key={index} className="flex items-center">
             <button
               onClick={() => getPath(index)}
-              className={`h-6 rounded-md px-2 transition-all hover:bg-gray-300 hover:text-slate-600 ${breadCrumbs.length - 1 === index && "text-slate-700"}`}
+              className={`h-6 max-w-28 overflow-hidden text-ellipsis text-nowrap rounded-md px-2 transition-all hover:bg-gray-300 hover:text-slate-600 ${breadCrumbs.length - 1 === index && "text-slate-700"}`}
             >
               {index === 0 ? <FaHouseChimney /> : item[1]}
             </button>
