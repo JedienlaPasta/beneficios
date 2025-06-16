@@ -5,8 +5,8 @@
 ### Login
 Iniciar Sesión.
 
-#Inicio (Dashboard)
-Información general.
+### Inicio (Dashboard)
+Información general.\n
 Beneficios entregados.
 Registros de auditoria personales.
 
