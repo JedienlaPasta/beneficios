@@ -23,8 +23,8 @@ interface Entregas {
 }
 
 export async function importEntregas() {
-  // const file = "output.xlsx";
-  const file = "output_checked.xlsx";
+  const file = "output.xlsx";
+  // const file = "output_checked.xlsx";
   try {
     // const filePath = path.join(process.cwd(), "public", "input.xlsx");
     const filePath = path.join(process.cwd(), "public", file);
@@ -219,8 +219,9 @@ export async function importEntregas() {
 
       return {
         success: true,
-        message: `Successfully imported ${entregas.length} records, skipped ${skippedRows} rows`,
-        inserted: entregas.length,
+        message: `Successfully imported ${entregas.length - skippedRows} records, skipped ${skippedRows} rows`,
+        total: entregas.length,
+        inserted: entregas.length - skippedRows,
         skipped: skippedRows,
         // data: entregas,
         notFound: notFound,

@@ -1,5 +1,5 @@
 "use server";
-import sql from "mssql";
+import sql, { MSSQLError } from "mssql";
 import { z } from "zod";
 import { PDFDocument } from "pdf-lib";
 import fs from "fs";
@@ -51,7 +51,7 @@ const CreateEntregaFormSchema = z.object({
       id: z.string(),
       campaignName: z.string(),
       detail: z.string(),
-      code: z.string(),
+      code: z.string().length(2),
     }),
   ),
   folio: z
@@ -168,13 +168,14 @@ export const createEntrega = async (id: string, formData: FormData) => {
         newFolio = folio ? folio.toString() : "";
       } else {
         // Generate a folio using MSSQL functions (auto)
-        const currentYear = new Date().getFullYear();
+        const currentYearFull = new Date().getFullYear();
+        const currentYearTwoDigits = currentYearFull % 100;
+
         const spRequest = new sql.Request(transaction);
         spRequest.input("p_rut", sql.Int, rut);
         spRequest.input("p_observacion", sql.NVarChar, observaciones);
-        spRequest.input("p_fecha_entrega", sql.DateTime, fecha_entrega);
         spRequest.input("p_id_usuario", sql.UniqueIdentifier, userId);
-        spRequest.input("p_current_year", sql.Int, currentYear);
+        spRequest.input("p_current_year", sql.Int, currentYearTwoDigits);
         spRequest.input("p_code", sql.VarChar, code);
         spRequest.output("p_new_folio_output", sql.VarChar);
 
@@ -222,20 +223,43 @@ export const createEntrega = async (id: string, formData: FormData) => {
       // Commit the transaction
       await transaction.commit();
       console.log("Transaction committed successfully.");
+      await logAction("Crear", "registró una nueva entrega", "", newFolio);
+      return { success: true, message: "Entrega recibida" };
     } catch (error) {
-      // If there's an error, roll back the transaction
-      if (transaction) await transaction.rollback();
+      if (transaction && (transaction as any).aborted !== true) {
+        await transaction.rollback();
+        console.error("Transaction rolled back due to error.");
+      }
       console.error("Transaction error details:", error);
-      throw error;
+
+      if (error instanceof MSSQLError) {
+        if (
+          error.originalError &&
+          (error.originalError as any).info &&
+          (error.originalError as any).info.number === 1205
+        ) {
+          // Deadlock victim error
+          return {
+            success: false,
+            message:
+              "Error de concurrencia: Se detectó un conflicto. Por favor, inténtelo de nuevo.",
+          };
+        }
+        return {
+          success: false,
+          message: `Error en la base de datos: ${error.message}`,
+        };
+      }
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : String(error),
+      };
     }
-
-    await logAction("Crear", "registró una nueva entrega", "", newFolio);
-
-    return { success: true, message: "Entrega recibida" };
   } catch (error) {
+    console.error("Database connection error:", error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : String(error),
+      message: "No se pudo conectar a la base de datos.",
     };
   }
 };
