@@ -2,7 +2,7 @@
 import { FaImage } from "react-icons/fa6";
 import React, { useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { PDFDocument, rgb, StandardFonts, degrees, scale } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 
 type CameraDevice = {
   deviceId: string;
