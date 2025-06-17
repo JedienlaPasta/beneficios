@@ -13,7 +13,7 @@ import { formatDate, formatRUT, formatTime } from "@/app/lib/utils/format";
 import GetNewFileButton from "./new-file-button";
 import DeleteEntregasButton from "./delete-button";
 import RoleGuard from "@/app/ui/auth/role-guard";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Camara from "./modal-camera";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -52,6 +52,14 @@ export default function ModalEntregasDetail({
   // To disable camera on overlay click
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
 
   const handleOverlayClick = async () => {
     const params = new URLSearchParams(searchParams);

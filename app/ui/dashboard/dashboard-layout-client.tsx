@@ -4,6 +4,7 @@ import Sidenav from "./sidenav";
 import { HiMenuAlt2 } from "react-icons/hi";
 import { Toaster } from "sonner";
 import { UserData } from "@/app/lib/definitions";
+import SibasLogo from "./sibas-logo";
 
 export default function DashboardLayoutClient({
   children,
@@ -51,16 +52,25 @@ export default function DashboardLayoutClient({
       </div>
       <div className="z-0 hidden w-72 md:block"></div>
 
-      <main className="scrollbar-gutter-stable flex-1 overflow-x-hidden">
-        <div className="relative mx-auto h-fit w-full px-4 py-8 text-slate-900 md:px-12">
+      <main className="scrollbar-gutter-stable-to-remove flex-1 overflow-x-hidden">
+        <div className="flex h-20 items-center justify-between bg-[#171a1f] px-4 text-slate-300 md:hidden">
+          <SibasLogo />
+          <button
+            className="rounded-md p-2 text-gray-300 hover:bg-gray-800 hover:text-gray-100 focus:outline-none md:hidden"
+            onClick={() => setSidenavOpen(true)}
+          >
+            <HiMenuAlt2 className="h-6 w-6" />
+          </button>
+        </div>
+        <div className="relative mx-auto h-fit w-full px-4 py-4 text-slate-900 md:px-12 md:py-8">
           <div className="mb-4 flex flex-col items-start gap-2 3xl:w-[96rem] 3xl:justify-self-center">
             {/* Toggle button - only visible on mobile */}
-            <button
+            {/* <button
               className="mr-4 rounded-md p-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus:outline-none md:hidden"
               onClick={() => setSidenavOpen(true)}
             >
               <HiMenuAlt2 className="h-6 w-6" />
-            </button>
+            </button> */}
             {children}
           </div>
           <Toaster position={toastPosition} />

@@ -505,55 +505,57 @@ export default function CamaraComponent({
               <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
               Imágenes Capturadas
             </h3>
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <div className="flex min-h-40 items-center justify-center rounded-lg bg-gray-100 p-4">
-                {frontIdPhoto ? (
-                  <div className="w-full space-y-2">
-                    <h4 className="mx-auto w-2/5 rounded bg-slate-800 bg-opacity-20 text-center text-sm font-medium text-slate-700">
-                      Frente
-                    </h4>
-                    <img
-                      src={frontIdPhoto}
-                      alt="Foto frontal"
-                      className="h-auto max-h-40 w-full rounded-lg object-contain shadow-md"
-                    />
-                  </div>
-                ) : (
-                  <div className="text-center text-gray-500">
-                    <div className="mb-1 text-3xl">
-                      <FaImage className="place-self-center" />
+            <div>
+              <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="flex min-h-40 w-full items-center justify-center rounded-lg bg-gray-100 p-4">
+                  {frontIdPhoto ? (
+                    <div className="w-fit space-y-2">
+                      <h4 className="text-center text-sm font-medium text-slate-600">
+                        Frente
+                      </h4>
+                      <img
+                        src={frontIdPhoto}
+                        alt="Foto frontal"
+                        className="h-auto max-h-40 w-full rounded-lg object-contain shadow-md"
+                      />
                     </div>
-                    <p className="text-sm text-slate-400">
-                      Sin captura frontal
-                    </p>
-                  </div>
-                )}
-              </div>
-              <div className="flex min-h-40 items-center justify-center rounded-lg bg-gray-100 p-4">
-                {backIdPhoto ? (
-                  <div className="w-full space-y-2">
-                    <h4 className="text-center text-sm font-medium text-slate-600">
-                      Reverso
-                    </h4>
-                    <img
-                      src={backIdPhoto}
-                      alt="Foto trasera"
-                      className="h-auto max-h-40 w-full rounded-lg object-contain shadow-md"
-                    />
-                  </div>
-                ) : (
-                  <div className="text-center text-gray-500">
-                    <div className="mb-1 text-3xl">
-                      <FaImage className="place-self-center" />
+                  ) : (
+                    <div className="text-center text-gray-500">
+                      <div className="mb-1 text-3xl">
+                        <FaImage className="place-self-center" />
+                      </div>
+                      <p className="text-sm text-slate-400">
+                        Sin captura frontal
+                      </p>
                     </div>
-                    <p className="text-sm text-slate-400">
-                      Sin captura trasera
-                    </p>
-                  </div>
-                )}
+                  )}
+                </div>
+                <div className="flex min-h-40 items-center justify-center rounded-lg bg-gray-100 p-4">
+                  {backIdPhoto ? (
+                    <div className="w-fit space-y-2">
+                      <h4 className="text-center text-sm font-medium text-slate-600">
+                        Reverso
+                      </h4>
+                      <img
+                        src={backIdPhoto}
+                        alt="Foto trasera"
+                        className="h-auto max-h-40 w-full rounded-lg object-contain shadow-md"
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-center text-gray-500">
+                      <div className="mb-1 text-3xl">
+                        <FaImage className="place-self-center" />
+                      </div>
+                      <p className="text-sm text-slate-400">
+                        Sin captura trasera
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
               {(frontIdPhoto || backIdPhoto) && (
-                <div className="col-span-2 grid gap-3">
+                <div className="mt-4 grid gap-3">
                   <button
                     onClick={() => {
                       if (backIdPhoto) {

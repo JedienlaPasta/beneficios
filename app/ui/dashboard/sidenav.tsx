@@ -2,9 +2,9 @@ import Image from "next/image";
 import { anton_sc } from "../fonts";
 import NavLinks from "./nav-links";
 import PerfilUsuario from "./perfil-usuario";
-// import sibasImg from "@/public/logo_S.svg";
 import elquiscoImg from "@/public/elquisco.svg";
 import { UserData } from "@/app/lib/definitions";
+import SibasLogo from "./sibas-logo";
 
 type SidenavProps = {
   setSidenavOpen: (prev: boolean) => void;
@@ -15,22 +15,7 @@ export default function Sidenav({ setSidenavOpen, userData }: SidenavProps) {
   return (
     <div className="z-20 flex min-h-screen w-72 flex-col bg-[#171a1f] text-slate-300">
       <div className="flex h-20 min-h-[5rem] shrink-0 items-center border-b border-slate-700/50 px-4">
-        <div className="flex items-center gap-1">
-          <div className="rounded-xl">
-            <img
-              src="/logo_S.svg"
-              alt="SIBAS Logo"
-              className="h-12 w-12 drop-shadow-lg"
-            />
-          </div>
-          <div className="flex flex-col">
-            <h1
-              className={`${anton_sc.className} bg-gradient-to-br from-blue-100 via-slate-200 to-slate-500 bg-clip-text text-4xl tracking-wider text-transparent drop-shadow-md`}
-            >
-              IBAS
-            </h1>
-          </div>
-        </div>
+        <SibasLogo />
       </div>
 
       {/* Scrollable section */}
