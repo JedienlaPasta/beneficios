@@ -17,7 +17,10 @@ export default function CloseModalButton({
   const searchParams = useSearchParams();
 
   const closeModal = async () => {
-    setIsClosing && (await setIsClosing(true));
+    if (setIsClosing) {
+      setIsClosing(true);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
     const params = new URLSearchParams(searchParams);
     params.delete(name);
     params.delete(secondName || "");

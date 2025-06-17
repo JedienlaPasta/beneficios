@@ -232,11 +232,29 @@ export const createEntrega = async (id: string, formData: FormData) => {
       }
       console.error("Transaction error details:", error);
 
-      // Add this helper function at the top of the file or in a utils file
-      function isSQLServerError(
-        error: any,
-      ): error is { originalError: { info: { number: number } } } {
-        return error?.originalError?.info?.number !== undefined;
+      // Define the expected error structure
+      interface SQLServerError {
+        originalError: {
+          info: {
+            number: number;
+          };
+        };
+      }
+
+      // Type guard function - completely type-safe without any 'any' types
+      function isSQLServerError(error: unknown): error is SQLServerError {
+        return (
+          error !== null &&
+          typeof error === 'object' &&
+          'originalError' in error &&
+          error.originalError !== null &&
+          typeof error.originalError === 'object' &&
+          'info' in error.originalError &&
+          error.originalError.info !== null &&
+          typeof error.originalError.info === 'object' &&
+          'number' in error.originalError.info &&
+          typeof error.originalError.info.number === 'number'
+        );
       }
 
       // Then use it in your error handling:
