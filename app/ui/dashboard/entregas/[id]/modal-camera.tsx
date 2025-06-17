@@ -12,7 +12,13 @@ type CameraDevice = {
   kind: string;
 };
 
-export default function CamaraComponent({ folio }: { folio: string }) {
+export default function CamaraComponent({
+  folio,
+  isActive = true,
+}: {
+  folio: string;
+  isActive?: boolean;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -126,10 +132,10 @@ export default function CamaraComponent({ folio }: { folio: string }) {
     let mounted = true;
 
     const initializeCamera = async () => {
-      const availableCameras = await getCameras();
+      if (!isActive) return;
 
-      // Verificar que el componente sigue montado antes de continuar
-      if (!mounted) return;
+      const availableCameras = await getCameras();
+      if (!mounted || !isActive) return;
 
       if (availableCameras.length > 0) {
         await startCamera(availableCameras[0].deviceId);
@@ -138,16 +144,52 @@ export default function CamaraComponent({ folio }: { folio: string }) {
       }
     };
 
-    initializeCamera();
+    const handleDisableCamera = () => {
+      console.log('Disabling camera via custom event');
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+        setStream(null);
+        if (videoRef.current) {
+          videoRef.current.srcObject = null;
+        }
+      }
+    };
 
-    // Función de limpieza
+    // Listen for the disable camera event
+    if (typeof window !== 'undefined') {
+      window.addEventListener('disableCamera', handleDisableCamera);
+    }
+
+    if (isActive) {
+      initializeCamera();
+    } else {
+      handleDisableCamera();
+    }
+
     return () => {
       mounted = false;
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('disableCamera', handleDisableCamera);
+      }
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, []);
+  }, [isActive]); // Remove stream from dependencies to avoid loops
+
+  // REMOVE THIS ENTIRE SECOND useEffect - it conflicts with the first one
+  // useEffect(() => {
+  //   if (!isActive && stream) {
+  //     // Stop all tracks when component becomes inactive
+  //     stream.getTracks().forEach((track) => track.stop());
+  //     setStream(null);
+  //
+  //     // Clear the video source
+  //     if (videoRef.current) {
+  //       videoRef.current.srcObject = null;
+  //     }
+  //   }
+  // }, [isActive]); // Only depend on isActive, not stream
 
   const takePhoto = async () => {
     if (videoRef.current && canvasRef.current) {
@@ -547,7 +589,7 @@ export default function CamaraComponent({ folio }: { folio: string }) {
                 )}
               </div>
               {(frontIdPhoto || backIdPhoto) && (
-                <>
+                <div className="col-span-2 grid gap-3">
                   <button
                     onClick={() => {
                       if (backIdPhoto) {
@@ -556,7 +598,8 @@ export default function CamaraComponent({ folio }: { folio: string }) {
                         clearPhoto();
                       }
                     }}
-                    className="h-10 rounded-lg bg-gray-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-600"
+                    disabled={isLoading}
+                    className="h-10 rounded-lg bg-gray-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-600 disabled:bg-gray-300"
                   >
                     Quitar foto {backIdPhoto ? "reverso" : "frontal"}
                   </button>
@@ -566,11 +609,7 @@ export default function CamaraComponent({ folio }: { folio: string }) {
                       disabled={isLoading || !(frontIdPhoto && backIdPhoto)}
                       className="flex h-10 items-center justify-center rounded-lg bg-green-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-green-600 active:scale-95 disabled:bg-green-300"
                     >
-                      {isLoading ? (
-                        <div className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                      ) : (
-                        "Ver PDF"
-                      )}
+                      Ver PDF
                     </button>
                     <button
                       onClick={uploadPdf}
@@ -584,7 +623,7 @@ export default function CamaraComponent({ folio }: { folio: string }) {
                       )}
                     </button>
                   </div>
-                </>
+                </div>
               )}
             </div>
           </div>

@@ -5,13 +5,19 @@ import { RiCloseLine } from "react-icons/ri";
 type Props = {
   name: string;
   secondName?: string;
+  setIsClosing?: (close: boolean) => void;
 };
 
-export default function CloseModalButton({ name, secondName }: Props) {
+export default function CloseModalButton({
+  name,
+  secondName,
+  setIsClosing,
+}: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const closeModal = () => {
+  const closeModal = async () => {
+    setIsClosing && (await setIsClosing(true));
     const params = new URLSearchParams(searchParams);
     params.delete(name);
     params.delete(secondName || "");

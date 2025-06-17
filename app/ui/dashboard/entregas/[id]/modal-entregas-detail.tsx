@@ -16,6 +16,7 @@ import RoleGuard from "@/app/ui/auth/role-guard";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Camara from "./modal-camera";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type Props = {
   rut: string;
@@ -33,208 +34,249 @@ export default function ModalEntregasDetail({
   files,
 }: Props) {
   const [tab, setTab] = useState("Resumen");
+  const [isModalClosing, setIsModalClosing] = useState(false);
+
+  const formattedRUT = formatRUT(rut);
   const { nombre_usuario, fecha_entrega, observacion, estado_documentos } =
     entregas;
-  const formattedRUT = formatRUT(rut);
+
+  const handleTabChange = async (newTab: string) => {
+    if (newTab !== "Capturar") {
+      await setIsModalClosing(true);
+    } else {
+      await setIsModalClosing(false);
+    }
+    await setTab(newTab);
+  };
+
+  // To disable camera on overlay click
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handleOverlayClick = async () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete("detailsModal");
+    router.replace(`?${params.toString()}`, { scroll: false });
+    await setIsModalClosing(true);
+  };
 
   return (
-    <motion.div
-      layout
-      layoutRoot
-      transition={{ layout: { duration: 0.25 } }}
-      className="md:w-[34rem]s flex max-h-full w-[100%] shrink-0 flex-col gap-4 overflow-hidden rounded-xl bg-white p-8 shadow-xl transition-all duration-500 scrollbar-hide sm:w-[34rem]"
-    >
-      {/* Header */}
-      <section className="flex items-center justify-between">
-        <div className="flex flex-col gap-0.5">
-          <span className="text-xs font-medium text-slate-500">Folio</span>
-          <div className="flex items-center gap-3">
-            <h2 className="text-xl font-bold text-slate-700">#{folio}</h2>
-            <div
-              className={`flex items-center gap-2 rounded-md px-2.5 py-0.5 text-sm ${estado_documentos === "Finalizado" ? "bg-slate-100 text-slate-500" : "border border-yellow-100 bg-yellow-50 text-yellow-500"}`}
-            >
-              {/* <span
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div
+        className="fixed inset-0 bg-gray-900/50"
+        onClick={handleOverlayClick}
+      />
+      <div className={`relative z-10 mx-auto h-[90%] w-[95%] sm:w-fit`}>
+        <span onClick={handleOverlayClick} className="absolute inset-0 -z-10" />
+        <motion.div
+          layout
+          layoutRoot
+          transition={{ layout: { duration: 0.25 } }}
+          className="md:w-[34rem]s flex max-h-full w-[100%] shrink-0 flex-col gap-4 overflow-hidden rounded-xl bg-white p-8 shadow-xl transition-all duration-500 scrollbar-hide sm:w-[34rem]"
+        >
+          {/* Header */}
+          <section className="flex items-center justify-between">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs font-medium text-slate-500">Folio</span>
+              <div className="flex items-center gap-3">
+                <h2 className="text-xl font-bold text-slate-700">#{folio}</h2>
+                <div
+                  className={`flex items-center gap-2 rounded-md px-2.5 py-0.5 text-sm ${estado_documentos === "Finalizado" ? "bg-slate-100 text-slate-500" : "border border-yellow-100 bg-yellow-50 text-yellow-500"}`}
+                >
+                  {/* <span
                   className={`h-2 w-2 shrink-0 animate-pulse rounded-full ${estado_documentos === "Finalizado" ? "bg-slate-300" : "bg-yellow-400"} `}
                 /> */}
-              <p className="text-sm">{estado_documentos}</p>
-            </div>
-          </div>
-          <span className="flex gap-1 text-xs text-slate-500">
-            Beneficiario: <p className="text-blue-700">{formattedRUT}</p>
-          </span>
-        </div>
-        <CloseModalButton name="detailsModal" secondName="rut" />
-      </section>
-
-      {/* Tab Navigation */}
-      <section className="flex border-b border-gray-200">
-        <button
-          onClick={() => setTab("Resumen")}
-          className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors ${
-            tab === "Resumen"
-              ? "text-blue-600"
-              : "text-slate-500 hover:text-slate-700"
-          }`}
-        >
-          Resumen
-          {tab === "Resumen" && (
-            <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600"></span>
-          )}
-        </button>
-        <button
-          onClick={() => setTab("Importar")}
-          className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors ${
-            tab === "Importar"
-              ? "text-blue-600"
-              : "text-slate-500 hover:text-slate-700"
-          }`}
-        >
-          Importar
-          {tab === "Importar" && (
-            <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600"></span>
-          )}
-        </button>
-        <button
-          onClick={() => setTab("Capturar")}
-          className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors ${
-            tab === "Capturar"
-              ? "text-blue-600"
-              : "text-slate-500 hover:text-slate-700"
-          }`}
-        >
-          Capturar
-          {tab === "Capturar" && (
-            <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600"></span>
-          )}
-        </button>
-      </section>
-
-      {/* Content with Framer Motion transitions */}
-      <motion.div className="relative min-h-[8rem] overflow-y-auto scrollbar-hide">
-        <AnimatePresence mode="wait">
-          {tab === "Resumen" ? (
-            // Detail ==============================================================
-            <motion.div
-              key="resumen"
-              initial={{ opacity: 0, y: 10, height: 460 }}
-              animate={{ opacity: 1, y: 0, height: "auto" }}
-              exit={{ opacity: 0, y: -10, height: 440 }}
-              transition={{
-                duration: 0.3,
-                height: { duration: 0.4 },
-              }}
-              layout
-              className="flex flex-col gap-4"
-            >
-              {/* General Info */}
-              <section className="mt-1 rounded-xl border border-gray-200/80 bg-gray-50/70 p-5">
-                <div className="grid grid-cols-2 gap-5">
-                  <ModalGeneralInfoField
-                    name="Encargado"
-                    className="border-r border-gray-200/80 pr-4"
-                  >
-                    {nombre_usuario}
-                  </ModalGeneralInfoField>
-                  <ModalGeneralInfoField name="Fecha de Entrega">
-                    {fecha_entrega ? fecha_entrega : ""}
-                  </ModalGeneralInfoField>
-                  <ModalGeneralInfoField
-                    span="col-span-2"
-                    name="Justificación"
-                    className="mt-3 border-t border-gray-200/80 pt-4"
-                  >
-                    {observacion || "No especificada"}
-                  </ModalGeneralInfoField>
+                  <p className="text-sm">{estado_documentos}</p>
                 </div>
-              </section>
-
-              {/* Entregas List */}
-              <section className="flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="flex items-center gap-2 text-sm font-medium text-slate-600">
-                    <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-                    Beneficios Recibidos{" "}
-                    {entrega.length > 3 && "(" + entrega.length + ")"}
-                  </h3>
-                  <RoleGuard allowedRoles={["Administrador", "Supervisor"]}>
-                    <DeleteEntregasButton folio={folio} />
-                  </RoleGuard>
-                </div>
-                <div className="flex max-h-[206px] flex-col gap-2.5 overflow-y-auto">
-                  {entrega.map((item) => (
-                    <EntregasListItem key={item.nombre_campaña} item={item} />
-                  ))}
-                </div>
-              </section>
-
-              {/* Files List */}
-              <FilesList folio={folio} files={files} />
-            </motion.div>
-          ) : tab === "Importar" ? (
-            // Import ==============================================================
-            <motion.div
-              key="importar"
-              initial={{ opacity: 0, y: 10, height: 440 }}
-              animate={{ opacity: 1, y: 0, height: "auto" }}
-              exit={{ opacity: 0, y: -10, height: 460 }}
-              transition={{
-                duration: 0.3,
-                height: { duration: 0.4 },
-              }}
-              layout
-              className="flex flex-col gap-5"
-            >
-              {/* Files List */}
-              <FilesList folio={folio} files={files} />
-
-              {/* Import Form */}
-              <div className="border-t border-gray-100"></div>
-              <ModalImportForm folio={folio} savedFiles={files.length} />
-            </motion.div>
-          ) : tab === "Capturar" ? (
-            // Capture =============================================================
-            <motion.div
-              key="capturar"
-              initial={{ opacity: 0, y: 10, height: 440 }}
-              animate={{
-                opacity: 1,
-                y: 0,
-                height: "auto",
-                transition: {
-                  duration: 0.6,
-                  height: { duration: 0.8 },
-                },
-              }}
-              exit={{
-                opacity: 0,
-                y: -10,
-                height: 460,
-                transition: {
-                  duration: 0.5,
-                  height: { duration: 0.6 },
-                },
-              }}
-              layout
-              className="flex flex-col gap-5"
-            >
-              {/* Aquí puedes agregar el componente de captura de fotos */}
-              <div className="flex flex-col items-start justify-center">
-                {/* Información adicional */}
-                <div className="mb-3 flex w-full items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-600/80 sm:p-4">
-                  <FaCircleInfo className="shrink-0" size={16} />
-                  <p>
-                    Asegúrate de permitir el acceso a la cámara cuando se
-                    solicite.
-                  </p>
-                </div>
-
-                <Camara folio={folio} />
               </div>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
-      </motion.div>
-    </motion.div>
+              <span className="flex gap-1 text-xs text-slate-500">
+                Beneficiario: <p className="text-blue-700">{formattedRUT}</p>
+              </span>
+            </div>
+            <CloseModalButton
+              name="detailsModal"
+              secondName="rut"
+              setIsClosing={setIsModalClosing}
+            />
+          </section>
+
+          {/* Tab Navigation */}
+          <section className="flex border-b border-gray-200">
+            <button
+              onClick={() => handleTabChange("Resumen")}
+              className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors ${
+                tab === "Resumen"
+                  ? "text-blue-600"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              Resumen
+              {tab === "Resumen" && (
+                <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600"></span>
+              )}
+            </button>
+            <button
+              onClick={() => handleTabChange("Importar")}
+              className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors ${
+                tab === "Importar"
+                  ? "text-blue-600"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              Importar
+              {tab === "Importar" && (
+                <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600"></span>
+              )}
+            </button>
+            <button
+              onClick={() => handleTabChange("Capturar")}
+              className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors ${
+                tab === "Capturar"
+                  ? "text-blue-600"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              Capturar
+              {tab === "Capturar" && (
+                <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600"></span>
+              )}
+            </button>
+          </section>
+
+          {/* Content with Framer Motion transitions */}
+          <motion.div className="relative min-h-[8rem] overflow-y-auto scrollbar-hide">
+            <AnimatePresence mode="wait">
+              {tab === "Resumen" ? (
+                // Detail ==============================================================
+                <motion.div
+                  key="resumen"
+                  initial={{ opacity: 0, y: 10, height: 460 }}
+                  animate={{ opacity: 1, y: 0, height: "auto" }}
+                  exit={{ opacity: 0, y: -10, height: 440 }}
+                  transition={{
+                    duration: 0.3,
+                    height: { duration: 0.4 },
+                  }}
+                  layout
+                  className="flex flex-col gap-4"
+                >
+                  {/* General Info */}
+                  <section className="mt-1 rounded-xl border border-gray-200/80 bg-gray-50/70 p-5">
+                    <div className="grid grid-cols-2 gap-5">
+                      <ModalGeneralInfoField
+                        name="Encargado"
+                        className="border-r border-gray-200/80 pr-4"
+                      >
+                        {nombre_usuario}
+                      </ModalGeneralInfoField>
+                      <ModalGeneralInfoField name="Fecha de Entrega">
+                        {fecha_entrega ? fecha_entrega : ""}
+                      </ModalGeneralInfoField>
+                      <ModalGeneralInfoField
+                        span="col-span-2"
+                        name="Justificación"
+                        className="mt-3 border-t border-gray-200/80 pt-4"
+                      >
+                        {observacion || "No especificada"}
+                      </ModalGeneralInfoField>
+                    </div>
+                  </section>
+
+                  {/* Entregas List */}
+                  <section className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="flex items-center gap-2 text-sm font-medium text-slate-600">
+                        <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+                        Beneficios Recibidos{" "}
+                        {entrega.length > 3 && "(" + entrega.length + ")"}
+                      </h3>
+                      <RoleGuard allowedRoles={["Administrador", "Supervisor"]}>
+                        <DeleteEntregasButton folio={folio} />
+                      </RoleGuard>
+                    </div>
+                    <div className="flex max-h-[206px] flex-col gap-2.5 overflow-y-auto">
+                      {entrega.map((item) => (
+                        <EntregasListItem
+                          key={item.nombre_campaña}
+                          item={item}
+                        />
+                      ))}
+                    </div>
+                  </section>
+
+                  {/* Files List */}
+                  <FilesList folio={folio} files={files} />
+                </motion.div>
+              ) : tab === "Importar" ? (
+                // Import ==============================================================
+                <motion.div
+                  key="importar"
+                  initial={{ opacity: 0, y: 10, height: 440 }}
+                  animate={{ opacity: 1, y: 0, height: "auto" }}
+                  exit={{ opacity: 0, y: -10, height: 460 }}
+                  transition={{
+                    duration: 0.3,
+                    height: { duration: 0.4 },
+                  }}
+                  layout
+                  className="flex flex-col gap-5"
+                >
+                  {/* Files List */}
+                  <FilesList folio={folio} files={files} />
+
+                  {/* Import Form */}
+                  <div className="border-t border-gray-100"></div>
+                  <ModalImportForm folio={folio} savedFiles={files.length} />
+                </motion.div>
+              ) : tab === "Capturar" ? (
+                // Capture =============================================================
+                <motion.div
+                  key="capturar"
+                  initial={{ opacity: 0, y: 10, height: 440 }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                    height: "auto",
+                    transition: {
+                      duration: 0.6,
+                      height: { duration: 0.8 },
+                    },
+                  }}
+                  exit={{
+                    opacity: 0,
+                    y: -10,
+                    height: 460,
+                    transition: {
+                      duration: 0.5,
+                      height: { duration: 0.6 },
+                    },
+                  }}
+                  layout
+                  className="flex flex-col gap-5"
+                >
+                  {/* Aquí puedes agregar el componente de captura de fotos */}
+                  <div className="flex flex-col items-start justify-center">
+                    {/* Información adicional */}
+                    <div className="mb-3 flex w-full items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-600/80 sm:p-4">
+                      <FaCircleInfo className="shrink-0" size={16} />
+                      <p>
+                        Asegúrate de permitir el acceso a la cámara cuando se
+                        solicite.
+                      </p>
+                    </div>
+
+                    <Camara
+                      folio={folio}
+                      isActive={tab === "Capturar" && !isModalClosing}
+                    />
+                  </div>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+          </motion.div>
+        </motion.div>
+      </div>
+    </div>
   );
 }
 

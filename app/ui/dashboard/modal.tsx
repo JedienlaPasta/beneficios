@@ -2,7 +2,6 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
-// import { FiX } from "react-icons/fi";
 
 type ModalProps = {
   name: string;

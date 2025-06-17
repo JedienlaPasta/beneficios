@@ -226,17 +226,24 @@ export const createEntrega = async (id: string, formData: FormData) => {
       await logAction("Crear", "registró una nueva entrega", "", newFolio);
       return { success: true, message: "Entrega recibida" };
     } catch (error) {
-      if (transaction && (transaction as any).aborted !== true) {
+      if (transaction) {
         await transaction.rollback();
         console.error("Transaction rolled back due to error.");
       }
       console.error("Transaction error details:", error);
 
+      // Add this helper function at the top of the file or in a utils file
+      function isSQLServerError(
+        error: any,
+      ): error is { originalError: { info: { number: number } } } {
+        return error?.originalError?.info?.number !== undefined;
+      }
+
+      // Then use it in your error handling:
       if (error instanceof MSSQLError) {
         if (
-          error.originalError &&
-          (error.originalError as any).info &&
-          (error.originalError as any).info.number === 1205
+          isSQLServerError(error) &&
+          error.originalError.info.number === 1205
         ) {
           // Deadlock victim error
           return {
@@ -277,7 +284,7 @@ export const deleteEntregaByFolio = async (folio: string) => {
       };
     }
 
-    const transaction = new sql.Transaction(pool);
+    const transaction: sql.Transaction = new sql.Transaction(pool);
 
     try {
       await transaction.begin();

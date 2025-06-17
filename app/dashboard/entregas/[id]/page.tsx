@@ -45,11 +45,11 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
         </Modal>
       )}
       {detailsModal && (
-        <Modal name="detailsModal">
-          <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
-            <ModalEntregasDetailContext folio={detailsModal} rut={rut} />
-          </Suspense>
-        </Modal>
+        // <Modal name="detailsModal">
+        <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
+          <ModalEntregasDetailContext folio={detailsModal} rut={rut} />
+        </Suspense>
+        // </Modal>
       )}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 3xl:w-[96rem] 3xl:justify-self-center">
         <div>
