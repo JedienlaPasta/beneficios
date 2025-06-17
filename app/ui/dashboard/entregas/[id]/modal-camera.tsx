@@ -144,52 +144,16 @@ export default function CamaraComponent({
       }
     };
 
-    const handleDisableCamera = () => {
-      console.log('Disabling camera via custom event');
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-        setStream(null);
-        if (videoRef.current) {
-          videoRef.current.srcObject = null;
-        }
-      }
-    };
-
-    // Listen for the disable camera event
-    if (typeof window !== 'undefined') {
-      window.addEventListener('disableCamera', handleDisableCamera);
-    }
-
-    if (isActive) {
-      initializeCamera();
-    } else {
-      handleDisableCamera();
-    }
+    initializeCamera();
 
     return () => {
       mounted = false;
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('disableCamera', handleDisableCamera);
-      }
+
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [isActive]); // Remove stream from dependencies to avoid loops
-
-  // REMOVE THIS ENTIRE SECOND useEffect - it conflicts with the first one
-  // useEffect(() => {
-  //   if (!isActive && stream) {
-  //     // Stop all tracks when component becomes inactive
-  //     stream.getTracks().forEach((track) => track.stop());
-  //     setStream(null);
-  //
-  //     // Clear the video source
-  //     if (videoRef.current) {
-  //       videoRef.current.srcObject = null;
-  //     }
-  //   }
-  // }, [isActive]); // Only depend on isActive, not stream
+  }, [isActive]);
 
   const takePhoto = async () => {
     if (videoRef.current && canvasRef.current) {
