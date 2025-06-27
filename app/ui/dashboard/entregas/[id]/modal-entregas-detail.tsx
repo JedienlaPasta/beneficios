@@ -1,7 +1,7 @@
 "use client";
 import ModalImportForm from "./modal-import-form";
 import CloseModalButton from "../../close-modal-button";
-import { FaBoxOpen, FaCircleInfo } from "react-icons/fa6";
+import { FaBoxOpen } from "react-icons/fa6";
 import {
   EntregaByFolio,
   EntregasTableByFolio,
