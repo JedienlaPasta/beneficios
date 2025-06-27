@@ -1,11 +1,11 @@
 "use client";
-import { FaCamera, FaImage, FaTrashCan, FaX } from "react-icons/fa6";
+import { FaCamera, FaImage } from "react-icons/fa6";
 import React, { useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { uploadPDFByFolio } from "@/app/lib/actions/entregas";
 import { useRouter } from "next/navigation";
-import { Trash2, X } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 type CameraDevice = {
   deviceId: string;
@@ -251,26 +251,26 @@ export default function CamaraComponent({
     }
   };
 
-  const clearPhoto = () => {
-    if (backIdPhoto) {
-      setBackIdPhoto(null);
-      setIsTakingFront(false);
-      toast.success("Foto trasera eliminada exitosamente!", {
-        id: "PHOTO_DELETE_TOAST_ID",
-      });
-      return;
-    }
-    if (frontIdPhoto) {
-      setFrontIdPhoto(null);
-      setIsTakingFront(true);
-      toast.success("Foto frontal eliminada exitosamente!", {
-        id: "PHOTO_DELETE_TOAST_ID",
-      });
-      return;
-    }
+  // const clearPhoto = () => {
+  //   if (backIdPhoto) {
+  //     setBackIdPhoto(null);
+  //     setIsTakingFront(false);
+  //     toast.success("Foto trasera eliminada exitosamente!", {
+  //       id: "PHOTO_DELETE_TOAST_ID",
+  //     });
+  //     return;
+  //   }
+  //   if (frontIdPhoto) {
+  //     setFrontIdPhoto(null);
+  //     setIsTakingFront(true);
+  //     toast.success("Foto frontal eliminada exitosamente!", {
+  //       id: "PHOTO_DELETE_TOAST_ID",
+  //     });
+  //     return;
+  //   }
 
-    toast.error("No fotos para eliminar");
-  };
+  //   toast.error("No fotos para eliminar");
+  // };
 
   const generatePdf = async () => {
     if (!frontIdPhoto || !backIdPhoto) {
@@ -377,11 +377,9 @@ export default function CamaraComponent({
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: "application/pdf" });
 
-      // toast.success("PDF generado exitosamente", { id: pdfGenerationToastId });
       return blob;
     } catch (err) {
       console.error("Error al generar el PDF:", err);
-      // toast.error("Error al generar el PDF", { id: pdfGenerationToastId });
     } finally {
       setIsLoading(false);
     }
@@ -534,7 +532,6 @@ export default function CamaraComponent({
                         <h4 className="text-center text-sm font-medium text-slate-600">
                           Frente
                         </h4>
-                        {/* <FaTrashCan className="absolute right-1 top-0.5 text-red-400" /> */}
                         <Trash2
                           onClick={() => {
                             setFrontIdPhoto(null);
@@ -566,7 +563,12 @@ export default function CamaraComponent({
                         <h4 className="text-center text-sm font-medium text-slate-600">
                           Reverso
                         </h4>
-                        <Trash2 className="absolute right-1 top-0 size-5 text-slate-600" />
+                        <Trash2
+                          onClick={() => {
+                            setBackIdPhoto(null);
+                          }}
+                          className="absolute right-1 top-0 size-5 text-slate-600"
+                        />
                       </span>
                       <img
                         src={backIdPhoto}
@@ -588,19 +590,6 @@ export default function CamaraComponent({
               </div>
               {(frontIdPhoto || backIdPhoto) && (
                 <div className="mt-4 grid gap-3">
-                  {/* <button
-                    onClick={() => {
-                      if (backIdPhoto) {
-                        clearPhoto();
-                      } else if (frontIdPhoto) {
-                        clearPhoto();
-                      }
-                    }}
-                    disabled={isLoading}
-                    className="h-10 rounded-lg bg-gray-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-600 disabled:bg-gray-300"
-                  >
-                    Quitar foto {backIdPhoto ? "reverso" : "frontal"}
-                  </button> */}
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={viewPdf}
