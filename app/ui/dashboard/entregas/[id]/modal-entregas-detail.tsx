@@ -80,7 +80,7 @@ export default function ModalEntregasDetail({
           layout
           layoutRoot
           transition={{ layout: { duration: 0.25 } }}
-          className="md:w-[34rem]s flex max-h-full w-[100%] shrink-0 flex-col gap-4 overflow-hidden rounded-xl bg-white p-8 shadow-xl transition-all duration-500 scrollbar-hide sm:w-[34rem]"
+          className="flex max-h-full w-[100%] shrink-0 flex-col gap-4 overflow-hidden rounded-xl bg-white p-6 shadow-xl transition-all duration-500 scrollbar-hide sm:w-[34rem] md:p-8"
         >
           {/* Header */}
           <section className="flex items-center justify-between">

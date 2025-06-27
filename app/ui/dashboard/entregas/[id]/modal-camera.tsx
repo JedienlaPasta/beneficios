@@ -1,10 +1,11 @@
 "use client";
-import { FaImage } from "react-icons/fa6";
+import { FaCamera, FaImage, FaTrashCan, FaX } from "react-icons/fa6";
 import React, { useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { uploadPDFByFolio } from "@/app/lib/actions/entregas";
 import { useRouter } from "next/navigation";
+import { Trash2, X } from "lucide-react";
 
 type CameraDevice = {
   deviceId: string;
@@ -215,9 +216,9 @@ export default function CamaraComponent({
             0.8,
           );
 
-          if (isTakingFront) {
+          if (frontIdPhoto === null) {
             setFrontIdPhoto(compressedDataUrl);
-            setIsTakingFront(false);
+            // setIsTakingFront(false);
             toast.success(
               "Foto frontal capturada. ¡Ahora toma la foto del reverso!",
               {
@@ -225,7 +226,7 @@ export default function CamaraComponent({
                 duration: 3000,
               },
             );
-          } else {
+          } else if (backIdPhoto === null) {
             setBackIdPhoto(compressedDataUrl);
             toast.success(
               "Ambas fotos capturadas exitosamente. ¡Puedes generar el PDF!",
@@ -234,6 +235,11 @@ export default function CamaraComponent({
                 duration: 4000,
               },
             );
+          } else {
+            toast.info("Ya tienes ambas fotos.", {
+              id: "PHOTO_CAPTURE_TOAST_ID",
+              duration: 4000,
+            });
           }
         }
       } catch (err) {
@@ -471,9 +477,23 @@ export default function CamaraComponent({
                 playsInline
                 muted
               />
+              {/* Take photo button */}
+              <button
+                onClick={takePhoto}
+                disabled={
+                  isLoading ||
+                  isCameraLoading ||
+                  (backIdPhoto !== null && frontIdPhoto !== null)
+                }
+                className="absolute bottom-5 left-1/2 z-50 flex size-12 grow -translate-x-1/2 rotate-90 items-center justify-center rounded-full bg-slate-200 transition-all duration-200 active:scale-95 md:hidden"
+              >
+                <div className="flex size-10 items-center justify-center rounded-full border-2 border-slate-800 text-slate-800">
+                  <FaCamera />
+                </div>
+              </button>
             </div>
 
-            <div className="flex gap-3">
+            <div className="hidden gap-3 md:flex">
               <button
                 onClick={takePhoto}
                 disabled={
@@ -507,16 +527,25 @@ export default function CamaraComponent({
             </h3>
             <div>
               <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className="flex min-h-40 w-full items-center justify-center rounded-lg bg-gray-100 p-4">
+                <div className="flex min-h-40 w-full items-center justify-center rounded-lg bg-gray-100 p-2">
                   {frontIdPhoto ? (
-                    <div className="w-fit space-y-2">
-                      <h4 className="text-center text-sm font-medium text-slate-600">
-                        Frente
-                      </h4>
+                    <div className="relative w-fit space-y-2">
+                      <span>
+                        <h4 className="text-center text-sm font-medium text-slate-600">
+                          Frente
+                        </h4>
+                        {/* <FaTrashCan className="absolute right-1 top-0.5 text-red-400" /> */}
+                        <Trash2
+                          onClick={() => {
+                            setFrontIdPhoto(null);
+                          }}
+                          className="absolute right-1 top-0 size-5 text-slate-600"
+                        />
+                      </span>
                       <img
                         src={frontIdPhoto}
                         alt="Foto frontal"
-                        className="h-auto max-h-40 w-full rounded-lg object-contain shadow-md"
+                        className="h-auto w-full rounded-lg object-contain shadow-md"
                       />
                     </div>
                   ) : (
@@ -530,16 +559,19 @@ export default function CamaraComponent({
                     </div>
                   )}
                 </div>
-                <div className="flex min-h-40 items-center justify-center rounded-lg bg-gray-100 p-4">
+                <div className="flex min-h-40 items-center justify-center rounded-lg bg-gray-100 p-2">
                   {backIdPhoto ? (
-                    <div className="w-fit space-y-2">
-                      <h4 className="text-center text-sm font-medium text-slate-600">
-                        Reverso
-                      </h4>
+                    <div className="relative w-fit space-y-2">
+                      <span>
+                        <h4 className="text-center text-sm font-medium text-slate-600">
+                          Reverso
+                        </h4>
+                        <Trash2 className="absolute right-1 top-0 size-5 text-slate-600" />
+                      </span>
                       <img
                         src={backIdPhoto}
                         alt="Foto trasera"
-                        className="h-auto max-h-40 w-full rounded-lg object-contain shadow-md"
+                        className="h-auto w-full rounded-lg object-contain shadow-md"
                       />
                     </div>
                   ) : (
@@ -556,7 +588,7 @@ export default function CamaraComponent({
               </div>
               {(frontIdPhoto || backIdPhoto) && (
                 <div className="mt-4 grid gap-3">
-                  <button
+                  {/* <button
                     onClick={() => {
                       if (backIdPhoto) {
                         clearPhoto();
@@ -568,7 +600,7 @@ export default function CamaraComponent({
                     className="h-10 rounded-lg bg-gray-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-600 disabled:bg-gray-300"
                   >
                     Quitar foto {backIdPhoto ? "reverso" : "frontal"}
-                  </button>
+                  </button> */}
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={viewPdf}
