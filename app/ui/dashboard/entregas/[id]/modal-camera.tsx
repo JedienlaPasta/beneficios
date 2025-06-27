@@ -3,6 +3,8 @@ import { FaImage } from "react-icons/fa6";
 import React, { useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { uploadPDFByFolio } from "@/app/lib/actions/entregas";
+import { useRouter } from "next/navigation";
 
 type CameraDevice = {
   deviceId: string;
@@ -11,14 +13,11 @@ type CameraDevice = {
 };
 
 export default function CamaraComponent({
+  folio,
   isActive = true,
-  setTab,
-  setPdf,
 }: {
   folio: string;
   isActive?: boolean;
-  setTab: (tab: string) => void;
-  setPdf: (pdf: Blob) => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -27,11 +26,11 @@ export default function CamaraComponent({
   const [cameras, setCameras] = useState<CameraDevice[]>([]);
   const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
   const [isCameraLoading, setIsCameraLoading] = useState(false);
-  const [isCameraActive, setIsCameraActive] = useState<boolean>(isActive);
 
   const [frontIdPhoto, setFrontIdPhoto] = useState<string | null>(null);
   const [backIdPhoto, setBackIdPhoto] = useState<string | null>(null);
   const [isTakingFront, setIsTakingFront] = useState(true);
+  const router = useRouter();
 
   const getCameras = async () => {
     try {
@@ -133,10 +132,10 @@ export default function CamaraComponent({
     let mounted = true;
 
     const initializeCamera = async () => {
-      if (!isCameraActive) return;
+      if (!isActive) return;
 
       const availableCameras = await getCameras();
-      if (!mounted || !isCameraActive) return;
+      if (!mounted || !isActive) return;
 
       if (availableCameras.length > 0) {
         await startCamera(availableCameras[0].deviceId);
@@ -154,7 +153,7 @@ export default function CamaraComponent({
         stream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [isCameraActive]);
+  }, [isActive]);
 
   const takePhoto = async () => {
     if (videoRef.current && canvasRef.current) {
@@ -372,9 +371,11 @@ export default function CamaraComponent({
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: "application/pdf" });
 
+      // toast.success("PDF generado exitosamente", { id: pdfGenerationToastId });
       return blob;
     } catch (err) {
       console.error("Error al generar el PDF:", err);
+      // toast.error("Error al generar el PDF", { id: pdfGenerationToastId });
     } finally {
       setIsLoading(false);
     }
@@ -383,53 +384,45 @@ export default function CamaraComponent({
   const viewPdf = async () => {
     const pdfBlob = await generatePdf();
     if (pdfBlob) {
-      setTab("Pdf");
-      setPdf(pdfBlob);
-      setIsCameraActive(false);
+      const url = URL.createObjectURL(pdfBlob);
+      const newWindow = window.open(url, "_blank");
+
+      if (!newWindow) {
+        toast.error(
+          "Ventana bloqueada - Por favor permite ventanas emergentes para este sitio",
+        );
+        return;
+      }
     }
   };
-  // const viewPdf = async () => {
-  //   const pdfBlob = await generatePdf();
-  //   if (pdfBlob) {
-  //     const url = URL.createObjectURL(pdfBlob);
-  //     const newWindow = window.open(url, "_blank");
 
-  //     if (!newWindow) {
-  //       toast.error(
-  //         "Ventana bloqueada - Por favor permite ventanas emergentes para este sitio",
-  //       );
-  //       return;
-  //     }
-  //   }
-  // };
-
-  // const uploadPdf = async () => {
-  //   const pdfBlob = await generatePdf();
-  //   setIsLoading(true);
-  //   if (pdfBlob) {
-  //     const pdfNamedFile = new File([pdfBlob], "cedula.pdf", {
-  //       type: "application/pdf",
-  //     });
-  //     const formData = new FormData();
-  //     formData.append("file0", pdfNamedFile);
-  //     formData.append("fileCount", "1");
-  //     const toastId = toast.loading("Guardando PDF...");
-  //     try {
-  //       const response = await uploadPDFByFolio(folio, formData);
-  //       if (!response.success) {
-  //         throw new Error(response.message);
-  //       }
-  //       toast.success("PDF guardado exitosamente", { id: toastId });
-  //       router.refresh();
-  //     } catch (error) {
-  //       const message =
-  //         error instanceof Error ? error.message : "Error al crear la entrega";
-  //       toast.error(message, { id: toastId });
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   }
-  // };
+  const uploadPdf = async () => {
+    const pdfBlob = await generatePdf();
+    setIsLoading(true);
+    if (pdfBlob) {
+      const pdfNamedFile = new File([pdfBlob], "cedula.pdf", {
+        type: "application/pdf",
+      });
+      const formData = new FormData();
+      formData.append("file0", pdfNamedFile);
+      formData.append("fileCount", "1");
+      const toastId = toast.loading("Guardando PDF...");
+      try {
+        const response = await uploadPDFByFolio(folio, formData);
+        if (!response.success) {
+          throw new Error(response.message);
+        }
+        toast.success("PDF guardado exitosamente", { id: toastId });
+        router.refresh();
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Error al crear la entrega";
+        toast.error(message, { id: toastId });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
 
   return (
     <div className="mx-auto w-full">
@@ -473,7 +466,7 @@ export default function CamaraComponent({
               )}
               <video
                 ref={videoRef}
-                className="h-auto max-h-96 w-full object-cover"
+                className="max-h-96s h-auto w-full object-cover"
                 autoPlay
                 playsInline
                 muted
@@ -562,14 +555,7 @@ export default function CamaraComponent({
                 </div>
               </div>
               {(frontIdPhoto || backIdPhoto) && (
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <button
-                    onClick={viewPdf}
-                    disabled={isLoading || !(frontIdPhoto && backIdPhoto)}
-                    className="flex h-10 items-center justify-center rounded-lg bg-green-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-green-600 active:scale-95 disabled:bg-green-300"
-                  >
-                    Ver PDF
-                  </button>
+                <div className="mt-4 grid gap-3">
                   <button
                     onClick={() => {
                       if (backIdPhoto) {
@@ -583,6 +569,26 @@ export default function CamaraComponent({
                   >
                     Quitar foto {backIdPhoto ? "reverso" : "frontal"}
                   </button>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={viewPdf}
+                      disabled={isLoading || !(frontIdPhoto && backIdPhoto)}
+                      className="flex h-10 items-center justify-center rounded-lg bg-green-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-green-600 active:scale-95 disabled:bg-green-300"
+                    >
+                      Ver PDF
+                    </button>
+                    <button
+                      onClick={uploadPdf}
+                      disabled={isLoading || !(frontIdPhoto && backIdPhoto)}
+                      className="flex h-10 items-center justify-center rounded-lg bg-blue-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-blue-600 active:scale-95 disabled:bg-blue-300"
+                    >
+                      {isLoading ? (
+                        <div className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                      ) : (
+                        "Guardar PDF"
+                      )}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
