@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Camara from "./modal-camera";
 import { useRouter, useSearchParams } from "next/navigation";
+import PdfViewer from "../../pdf/PdfViewer";
 
 type Props = {
   rut: string;
@@ -34,6 +35,7 @@ export default function ModalEntregasDetail({
   files,
 }: Props) {
   const [tab, setTab] = useState("Resumen");
+  const [pdf, setPdf] = useState<Blob | null>(null);
   const [isModalClosing, setIsModalClosing] = useState(false);
 
   const formattedRUT = formatRUT(rut);
@@ -146,6 +148,19 @@ export default function ModalEntregasDetail({
             >
               Capturar
               {tab === "Capturar" && (
+                <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600"></span>
+              )}
+            </button>
+            <button
+              onClick={() => handleTabChange("Pdf")}
+              className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors ${
+                tab === "Pdf"
+                  ? "text-blue-600"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              Pdf
+              {tab === "Pdf" && (
                 <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600"></span>
               )}
             </button>
@@ -276,7 +291,41 @@ export default function ModalEntregasDetail({
                     <Camara
                       folio={folio}
                       isActive={tab === "Capturar" && !isModalClosing}
+                      setTab={setTab}
+                      setPdf={setPdf}
                     />
+                  </div>
+                </motion.div>
+              ) : tab === "Pdf" ? (
+                // Capture =============================================================
+                <motion.div
+                  key="pdf"
+                  initial={{ opacity: 0, y: 10, height: 440 }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                    height: "auto",
+                    transition: {
+                      duration: 0.6,
+                      height: { duration: 0.8 },
+                    },
+                  }}
+                  exit={{
+                    opacity: 0,
+                    y: -10,
+                    height: 460,
+                    transition: {
+                      duration: 0.5,
+                      height: { duration: 0.6 },
+                    },
+                  }}
+                  layout
+                  className="flex flex-col gap-5"
+                >
+                  {/* Aquí puedes agregar el componente de captura de fotos */}
+                  <div className="flex flex-col items-start justify-center">
+                    {/* Información adicional */}
+                    <PdfViewer pdf={pdf} folio={folio} />
                   </div>
                 </motion.div>
               ) : null}

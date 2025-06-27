@@ -15,9 +15,13 @@ type CameraDevice = {
 export default function CamaraComponent({
   folio,
   isActive = true,
+  setTab,
+  setPdf,
 }: {
   folio: string;
   isActive?: boolean;
+  setTab: (tab: string) => void;
+  setPdf: (pdf: Blob) => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -371,11 +375,9 @@ export default function CamaraComponent({
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: "application/pdf" });
 
-      // toast.success("PDF generado exitosamente", { id: pdfGenerationToastId });
       return blob;
     } catch (err) {
       console.error("Error al generar el PDF:", err);
-      // toast.error("Error al generar el PDF", { id: pdfGenerationToastId });
     } finally {
       setIsLoading(false);
     }
@@ -384,17 +386,24 @@ export default function CamaraComponent({
   const viewPdf = async () => {
     const pdfBlob = await generatePdf();
     if (pdfBlob) {
-      const url = URL.createObjectURL(pdfBlob);
-      const newWindow = window.open(url, "_blank");
-
-      if (!newWindow) {
-        toast.error(
-          "Ventana bloqueada - Por favor permite ventanas emergentes para este sitio",
-        );
-        return;
-      }
+      setTab("Pdf");
+      setPdf(pdfBlob);
     }
   };
+  // const viewPdf = async () => {
+  //   const pdfBlob = await generatePdf();
+  //   if (pdfBlob) {
+  //     const url = URL.createObjectURL(pdfBlob);
+  //     const newWindow = window.open(url, "_blank");
+
+  //     if (!newWindow) {
+  //       toast.error(
+  //         "Ventana bloqueada - Por favor permite ventanas emergentes para este sitio",
+  //       );
+  //       return;
+  //     }
+  //   }
+  // };
 
   const uploadPdf = async () => {
     const pdfBlob = await generatePdf();
@@ -555,7 +564,14 @@ export default function CamaraComponent({
                 </div>
               </div>
               {(frontIdPhoto || backIdPhoto) && (
-                <div className="mt-4 grid gap-3">
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <button
+                    onClick={viewPdf}
+                    disabled={isLoading || !(frontIdPhoto && backIdPhoto)}
+                    className="flex h-10 items-center justify-center rounded-lg bg-green-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-green-600 active:scale-95 disabled:bg-green-300"
+                  >
+                    Ver PDF
+                  </button>
                   <button
                     onClick={() => {
                       if (backIdPhoto) {
@@ -569,26 +585,6 @@ export default function CamaraComponent({
                   >
                     Quitar foto {backIdPhoto ? "reverso" : "frontal"}
                   </button>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      onClick={viewPdf}
-                      disabled={isLoading || !(frontIdPhoto && backIdPhoto)}
-                      className="flex h-10 items-center justify-center rounded-lg bg-green-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-green-600 active:scale-95 disabled:bg-green-300"
-                    >
-                      Ver PDF
-                    </button>
-                    <button
-                      onClick={uploadPdf}
-                      disabled={isLoading || !(frontIdPhoto && backIdPhoto)}
-                      className="flex h-10 items-center justify-center rounded-lg bg-blue-500 px-5 text-sm font-medium text-white transition-colors duration-200 hover:bg-blue-600 active:scale-95 disabled:bg-blue-300"
-                    >
-                      {isLoading ? (
-                        <div className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                      ) : (
-                        "Guardar PDF"
-                      )}
-                    </button>
-                  </div>
                 </div>
               )}
             </div>
