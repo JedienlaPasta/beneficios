@@ -3,8 +3,6 @@ import { FaImage } from "react-icons/fa6";
 import React, { useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
-import { uploadPDFByFolio } from "@/app/lib/actions/entregas";
-import { useRouter } from "next/navigation";
 
 type CameraDevice = {
   deviceId: string;
@@ -13,7 +11,6 @@ type CameraDevice = {
 };
 
 export default function CamaraComponent({
-  folio,
   isActive = true,
   setTab,
   setPdf,
@@ -34,7 +31,6 @@ export default function CamaraComponent({
   const [frontIdPhoto, setFrontIdPhoto] = useState<string | null>(null);
   const [backIdPhoto, setBackIdPhoto] = useState<string | null>(null);
   const [isTakingFront, setIsTakingFront] = useState(true);
-  const router = useRouter();
 
   const getCameras = async () => {
     try {
@@ -405,33 +401,33 @@ export default function CamaraComponent({
   //   }
   // };
 
-  const uploadPdf = async () => {
-    const pdfBlob = await generatePdf();
-    setIsLoading(true);
-    if (pdfBlob) {
-      const pdfNamedFile = new File([pdfBlob], "cedula.pdf", {
-        type: "application/pdf",
-      });
-      const formData = new FormData();
-      formData.append("file0", pdfNamedFile);
-      formData.append("fileCount", "1");
-      const toastId = toast.loading("Guardando PDF...");
-      try {
-        const response = await uploadPDFByFolio(folio, formData);
-        if (!response.success) {
-          throw new Error(response.message);
-        }
-        toast.success("PDF guardado exitosamente", { id: toastId });
-        router.refresh();
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Error al crear la entrega";
-        toast.error(message, { id: toastId });
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
+  // const uploadPdf = async () => {
+  //   const pdfBlob = await generatePdf();
+  //   setIsLoading(true);
+  //   if (pdfBlob) {
+  //     const pdfNamedFile = new File([pdfBlob], "cedula.pdf", {
+  //       type: "application/pdf",
+  //     });
+  //     const formData = new FormData();
+  //     formData.append("file0", pdfNamedFile);
+  //     formData.append("fileCount", "1");
+  //     const toastId = toast.loading("Guardando PDF...");
+  //     try {
+  //       const response = await uploadPDFByFolio(folio, formData);
+  //       if (!response.success) {
+  //         throw new Error(response.message);
+  //       }
+  //       toast.success("PDF guardado exitosamente", { id: toastId });
+  //       router.refresh();
+  //     } catch (error) {
+  //       const message =
+  //         error instanceof Error ? error.message : "Error al crear la entrega";
+  //       toast.error(message, { id: toastId });
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   }
+  // };
 
   return (
     <div className="mx-auto w-full">
