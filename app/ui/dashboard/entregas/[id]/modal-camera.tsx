@@ -482,9 +482,9 @@ export default function CamaraComponent({
                   isCameraLoading ||
                   (backIdPhoto !== null && frontIdPhoto !== null)
                 }
-                className="absolute bottom-5 left-1/2 z-50 flex size-16 grow -translate-x-1/2 rotate-90 items-center justify-center rounded-full bg-slate-200/70 transition-all duration-200 active:scale-90 md:hidden"
+                className="absolute bottom-5 left-1/2 z-50 flex size-20 grow -translate-x-1/2 rotate-90 items-center justify-center rounded-full bg-slate-200/70 transition-all duration-200 active:scale-90 md:hidden"
               >
-                <div className="flex size-14 items-center justify-center rounded-full border-2 border-slate-800 text-slate-800">
+                <div className="flex size-16 items-center justify-center rounded-full border-4 border-slate-900/80 text-slate-900/80">
                   <FaCamera size={20} />
                 </div>
               </button>
