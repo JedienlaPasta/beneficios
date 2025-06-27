@@ -466,7 +466,7 @@ export default function CamaraComponent({
               )}
               <video
                 ref={videoRef}
-                className="max-h-96s h-auto w-full object-cover"
+                className="aspect-[3/4] h-auto w-full object-cover md:aspect-[16/9]"
                 autoPlay
                 playsInline
                 muted
