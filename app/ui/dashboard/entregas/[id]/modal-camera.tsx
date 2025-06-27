@@ -30,7 +30,6 @@ export default function CamaraComponent({
 
   const [frontIdPhoto, setFrontIdPhoto] = useState<string | null>(null);
   const [backIdPhoto, setBackIdPhoto] = useState<string | null>(null);
-  const [isTakingFront, setIsTakingFront] = useState(true);
   const router = useRouter();
 
   const getCameras = async () => {
@@ -508,7 +507,7 @@ export default function CamaraComponent({
                   </>
                 ) : (
                   <>
-                    {isTakingFront
+                    {frontIdPhoto !== null
                       ? "Tomar foto frontal"
                       : "Tomar foto trasera"}
                   </>
