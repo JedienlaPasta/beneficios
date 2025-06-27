@@ -27,6 +27,7 @@ export default function CamaraComponent({
   const [cameras, setCameras] = useState<CameraDevice[]>([]);
   const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
   const [isCameraLoading, setIsCameraLoading] = useState(false);
+  const [isCameraActive, setIsCameraActive] = useState<boolean>(isActive);
 
   const [frontIdPhoto, setFrontIdPhoto] = useState<string | null>(null);
   const [backIdPhoto, setBackIdPhoto] = useState<string | null>(null);
@@ -132,10 +133,10 @@ export default function CamaraComponent({
     let mounted = true;
 
     const initializeCamera = async () => {
-      if (!isActive) return;
+      if (!isCameraActive) return;
 
       const availableCameras = await getCameras();
-      if (!mounted || !isActive) return;
+      if (!mounted || !isCameraActive) return;
 
       if (availableCameras.length > 0) {
         await startCamera(availableCameras[0].deviceId);
@@ -153,7 +154,7 @@ export default function CamaraComponent({
         stream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [isActive]);
+  }, [isCameraActive]);
 
   const takePhoto = async () => {
     if (videoRef.current && canvasRef.current) {
@@ -384,6 +385,7 @@ export default function CamaraComponent({
     if (pdfBlob) {
       setTab("Pdf");
       setPdf(pdfBlob);
+      setIsCameraActive(false);
     }
   };
   // const viewPdf = async () => {

@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Camara from "./modal-camera";
 import { useRouter, useSearchParams } from "next/navigation";
-import PdfViewer from "../../pdf/PdfViewer";
+import PdfViewer from "./PdfViewer";
 
 type Props = {
   rut: string;
@@ -325,7 +325,7 @@ export default function ModalEntregasDetail({
                   {/* Aquí puedes agregar el componente de captura de fotos */}
                   <div className="flex flex-col items-start justify-center">
                     {/* Información adicional */}
-                    <PdfViewer pdf={pdf} folio={folio} />
+                    <PdfViewer pdf={pdf} folio={folio} setTab={setTab} />
                   </div>
                 </motion.div>
               ) : null}

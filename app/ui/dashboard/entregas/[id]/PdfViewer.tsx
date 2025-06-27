@@ -8,9 +8,10 @@ import { toast } from "sonner";
 type PdfViewerProps = {
   pdf: Blob | null;
   folio: string;
+  setTab: (tab: string) => void;
 };
 
-export default function PdfViewer({ pdf, folio }: PdfViewerProps) {
+export default function PdfViewer({ pdf, folio, setTab }: PdfViewerProps) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
@@ -48,6 +49,7 @@ export default function PdfViewer({ pdf, folio }: PdfViewerProps) {
         toast.error(message, { id: toastId });
       } finally {
         setIsLoading(false);
+        setTab("Resumen");
       }
     }
   };
