@@ -276,6 +276,7 @@ export default function ModalEntregasDetail({
                     <Camara
                       folio={folio}
                       isActive={tab === "Capturar" && !isModalClosing}
+                      setTab={setTab}
                     />
                   </div>
                 </motion.div>

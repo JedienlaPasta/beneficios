@@ -16,9 +16,11 @@ type CameraDevice = {
 export default function CamaraComponent({
   folio,
   isActive = true,
+  setTab,
 }: {
   folio: string;
   isActive?: boolean;
+  setTab: (tab: string) => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -416,6 +418,7 @@ export default function CamaraComponent({
           throw new Error(response.message);
         }
         toast.success("PDF guardado exitosamente", { id: toastId });
+        setTab("Resumen");
         router.refresh();
       } catch (error) {
         const message =
