@@ -8,12 +8,15 @@ import CampaignEntregasTable from "@/app/ui/dashboard/campañas/[id]/campaign-en
 import CampaignEntregasTableSkeleton from "@/app/ui/dashboard/campañas/[id]/table-skeleton";
 import { Modal } from "@/app/ui/dashboard/modal";
 import ModalSkeleton from "@/app/ui/modal-skeleton";
+import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/modal-context";
 
 type CampaignProps = {
   searchParams?: Promise<{
     query?: string;
     page?: string;
     update?: string;
+    detailsModal?: string;
+    rut?: string;
   }>;
   params: Promise<{ id: string }>;
 };
@@ -22,6 +25,8 @@ export default async function Campaign(props: CampaignProps) {
   // Search params (query, page, modal)
   const searchParams = await props.searchParams;
   const showUpdateModal = searchParams?.update || "";
+  const detailsModal = searchParams?.detailsModal || "";
+  const rut = searchParams?.rut || "";
   const query = searchParams?.query || "";
   const paginaActual = Number(searchParams?.page) || 1;
   // Params (id)
@@ -36,6 +41,12 @@ export default async function Campaign(props: CampaignProps) {
             <UpdateCampaignModal id={id} />
           </Suspense>
         </Modal>
+      )}
+
+      {detailsModal && (
+        <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
+          <ModalEntregasDetailContext folio={detailsModal} rut={rut} />
+        </Suspense>
       )}
       <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
         <div>
