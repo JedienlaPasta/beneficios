@@ -60,14 +60,15 @@ export async function fetchEntregas(
     const request = pool.request();
     const result = await request
       .input("query", sql.VarChar, `%${query}%`)
+      .input("cleanedRut", sql.VarChar, `%${query.replace(/\D/g, "")}%`)
       .input("offset", sql.Int, offset)
       .input("pageSize", sql.Int, resultsPerPage).query(`
-        SELECT entregas.folio, entregas.fecha_entrega, entregas.estado_documentos, entregas.rut, rsh.nombres_rsh, rsh.apellidos_rsh,
+        SELECT entregas.folio, entregas.fecha_entrega, entregas.estado_documentos, entregas.rut, rsh.dv, rsh.nombres_rsh, rsh.apellidos_rsh,
         COUNT(*) OVER() AS total
         FROM entregas
         JOIN rsh ON entregas.rut = rsh.rut
         WHERE
-          entregas.rut LIKE @query OR
+          concat (entregas.rut, rsh.dv) LIKE @cleanedRut OR
           entregas.folio LIKE @query OR
           rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR 
           rsh.apellidos_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR 

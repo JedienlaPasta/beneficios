@@ -245,15 +245,15 @@ export const createEntrega = async (id: string, formData: FormData) => {
       function isSQLServerError(error: unknown): error is SQLServerError {
         return (
           error !== null &&
-          typeof error === 'object' &&
-          'originalError' in error &&
+          typeof error === "object" &&
+          "originalError" in error &&
           error.originalError !== null &&
-          typeof error.originalError === 'object' &&
-          'info' in error.originalError &&
+          typeof error.originalError === "object" &&
+          "info" in error.originalError &&
           error.originalError.info !== null &&
-          typeof error.originalError.info === 'object' &&
-          'number' in error.originalError.info &&
-          typeof error.originalError.info.number === 'number'
+          typeof error.originalError.info === "object" &&
+          "number" in error.originalError.info &&
+          typeof error.originalError.info.number === "number"
         );
       }
 
@@ -396,18 +396,18 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
     const currentCount = countResult.recordset[0].count as number;
 
     // After getting currentCount
-    if (currentCount >= 3) {
+    if (currentCount >= 4) {
       return {
         success: false,
-        message: "Ya has alcanzado el máximo de 3 documentos permitidos.",
+        message: "Ya has alcanzado el máximo de 4 documentos permitidos.",
       };
     }
 
-    // Prevent upload if total would exceed 3 documents
-    if (currentCount + fileCount > 3) {
+    // Prevent upload if total would exceed 4 documents
+    if (currentCount + fileCount > 4) {
       return {
         success: false,
-        message: `No se pueden subir ${fileCount} documento(s). Ya hay ${currentCount} documento(s) y el máximo permitido es 3.`,
+        message: `No se pueden subir ${fileCount} documento(s). Hay ${currentCount} documento(s) y el máximo permitido es 4.`,
       };
     }
 
@@ -470,7 +470,7 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
       const updateRequest = new sql.Request(transaction);
       await updateRequest
         .input("folio", sql.VarChar, folio)
-        .input("estado", sql.VarChar, count === 3 ? "Finalizado" : "En Curso")
+        .input("estado", sql.VarChar, count === 4 ? "Finalizado" : "En Curso")
         .query(`
         UPDATE entregas
         SET estado_documentos = @estado

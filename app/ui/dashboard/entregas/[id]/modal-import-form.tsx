@@ -42,41 +42,32 @@ export default function ModalImportForm({
     // Add the count of files
     myFormData.append("fileCount", selectedFiles.length.toString());
 
-    toast.promise(
-      uploadPDFByFolio(folio, myFormData).then((response) => {
-        if (!response.success) {
-          throw new Error(response.message);
-        }
-        setIsLoading(false);
-        setIsDisabled(false);
-        return response;
-      }),
-      {
-        loading: "Procesando archivos PDF...",
-        success: (response) => {
-          setIsLoading(false);
-          setSelectedFiles([]);
-          router.refresh();
-          // setTimeout(() => {
-          //   closeModal();
-          // }, 500);
-          return response.message;
-        },
-        error: (err) => {
-          setIsDisabled(false);
-          return err.message;
-        },
-      },
-    );
+    const toastId = toast.loading("Procesando archivos PDF...");
+    try {
+      const response = await uploadPDFByFolio(folio, myFormData);
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+      toast.success(response.message, { id: toastId });
+      setSelectedFiles([]);
+      router.refresh();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Error al subir archivos";
+      toast.error(message, { id: toastId });
+    } finally {
+      setIsLoading(false);
+      setIsDisabled(false);
+    }
   };
 
   const handleFiles = (files: FileList | []) => {
-    const remainingSlots = 3 - totalFiles;
+    const remainingSlots = 4 - totalFiles;
     if (!files || files.length === 0) return;
 
     // Early return if already at max files
-    if (totalFiles >= 3 || files.length > remainingSlots) {
-      toast.error("No se pueden agregar más de 3 archivos.");
+    if (totalFiles >= 4 || files.length > remainingSlots) {
+      toast.error("No se pueden agregar más de 4 archivos.");
       return;
     }
 
@@ -94,7 +85,7 @@ export default function ModalImportForm({
     toast.success(`${fileArray.length} archivo(s) PDF recibido(s).`);
   };
 
-  // files + selectedFiles.length > 3?? // Se borro
+  // files + selectedFiles.length > 4?? // Se borro
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const files = e.dataTransfer?.files;
@@ -147,16 +138,16 @@ export default function ModalImportForm({
             />
             <label
               htmlFor="fileInput"
-              className="cursor-pointer text-xs text-slate-500"
+              className="cursor-pointer rounded-md bg-slate-600 px-3 py-2 text-xs text-slate-100 transition-colors hover:bg-slate-700"
             >
               Seleccionar archivos PDF
             </label>
-            <p className="text-xs text-slate-500">({totalFiles}/3)</p>
+            <p className="text-xs text-slate-500">({totalFiles}/4)</p>
           </>
         )}
       </div>
       <p className="text-xs text-slate-500">
-        Solo archivos PDF (.pdf) - Máximo 3 archivos
+        Solo archivos PDF (.pdf) - Máximo 4 archivos
       </p>
 
       {/* Import Status - Show all selected files */}

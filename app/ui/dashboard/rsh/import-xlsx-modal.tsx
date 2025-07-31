@@ -143,7 +143,7 @@ export default function ImportXLSXModal({ name }: { name: string }) {
               />
               <label
                 htmlFor="fileInput"
-                className="cursor-pointer text-xs text-slate-500"
+                className="cursor-pointer rounded-md bg-slate-600 px-3 py-2 text-xs text-slate-100 transition-colors hover:bg-slate-700"
               >
                 Seleccionar archivo Excel
               </label>
