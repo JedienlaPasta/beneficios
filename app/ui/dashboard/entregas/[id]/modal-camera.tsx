@@ -180,7 +180,9 @@ export default function CamaraComponent({
           const scaleFactor =
             targetWidth / (isPortrait ? videoHeight : videoWidth);
           const targetHeight =
-            (isPortrait ? videoWidth : videoHeight) * scaleFactor;
+            (isPortrait && pdfMode === "smallDocument"
+              ? videoWidth
+              : videoHeight) * scaleFactor;
 
           canvasRef.current.width = targetWidth;
           canvasRef.current.height = targetHeight;
