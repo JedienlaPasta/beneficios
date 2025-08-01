@@ -454,7 +454,7 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
     let validRows = 0;
     let skippedRows = 0;
 
-    let columnMapping: { [key: string]: number } = {};
+    const columnMapping: { [key: string]: number } = {};
     let headersProcessed = false;
 
     worksheet.eachRow((row, rowNumber) => {
@@ -521,7 +521,9 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
       const citizen: CitizenData = {
         rut: rawRut,
         dv: getValueByHeader("dv"),
-        nombres_rsh: getValueByHeader("nombres"),
+        nombres_rsh: getValueByHeader("nombres")
+          ? capitalizeAll(getValueByHeader("nombres"))
+          : "",
         apellidopaterno,
         apellidomaterno,
         apellidos_rsh: `${apellidopaterno} ${apellidomaterno || ""}`.trim(),

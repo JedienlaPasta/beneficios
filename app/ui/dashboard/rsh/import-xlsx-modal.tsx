@@ -116,7 +116,7 @@ export default function ImportXLSXModal({ name }: { name: string }) {
       </div>
       <form onSubmit={formAction} className="flex flex-col gap-2">
         <div
-          className="flex h-40 grow flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-slate-400/60"
+          className="flex h-40 grow flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-400/60"
           onDrop={handleFileDrop}
           onDragOver={(e) => e.preventDefault()}
         >
@@ -130,8 +130,8 @@ export default function ImportXLSXModal({ name }: { name: string }) {
             </>
           ) : (
             <>
-              <p className="text font-medium text-slate-700">
-                Suelta aquí tu archivo
+              <p className="text text-sm font-medium text-slate-700">
+                Arrastra y suelta tu archivo aquí
               </p>
               <input
                 type="file"
@@ -143,7 +143,7 @@ export default function ImportXLSXModal({ name }: { name: string }) {
               />
               <label
                 htmlFor="fileInput"
-                className="cursor-pointer rounded-md bg-slate-600 px-3 py-2 text-xs text-slate-100 transition-colors hover:bg-slate-700"
+                className="cursor-pointer text-xs text-slate-500 underline transition-colors hover:text-slate-700"
               >
                 Seleccionar archivo Excel
               </label>

@@ -111,7 +111,7 @@ export default function ModalImportForm({
   return (
     <form onSubmit={formAction} className="flex flex-col gap-2">
       <div
-        className="flex h-40 grow flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-slate-400/60"
+        className="gap-1s flex h-40 grow flex-col items-center justify-center rounded-lg border border-dashed border-slate-400/60"
         onDrop={handleFileDrop}
         onDragOver={(e) => e.preventDefault()}
       >
@@ -124,8 +124,8 @@ export default function ModalImportForm({
           </>
         ) : (
           <>
-            <p className="text font-medium text-slate-700">
-              Suelta aquí tus archivos
+            <p className="text text-sm font-medium text-slate-700">
+              Arrastra y suelta tus archivos aquí
             </p>
             <input
               type="file"
@@ -138,11 +138,11 @@ export default function ModalImportForm({
             />
             <label
               htmlFor="fileInput"
-              className="cursor-pointer rounded-md bg-slate-600 px-3 py-2 text-xs text-slate-100 transition-colors hover:bg-slate-700"
+              className="cursor-pointer text-xs text-slate-500 underline transition-colors hover:text-slate-700"
             >
               Seleccionar archivos PDF
             </label>
-            <p className="text-xs text-slate-500">({totalFiles}/4)</p>
+            <p className="mt-0.5 text-xs text-slate-500">({totalFiles}/4)</p>
           </>
         )}
       </div>

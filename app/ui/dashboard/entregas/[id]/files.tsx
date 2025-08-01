@@ -87,9 +87,9 @@ export function Files({ item }: { item: EntregasFiles }) {
   return (
     <div className="group relative flex cursor-pointer items-center justify-start gap-2 overflow-hidden rounded-md bg-gray-100 p-3 shadow-sm transition-shadow hover:shadow">
       <Image className="h-8 w-8" src={pdf} alt="pdf.img" />
-      <div className="flex w-[80%] text-left text-[10px] text-slate-500">
+      <div className="flex w-[80%] text-left text-xs text-slate-600">
         <div
-          className="w-full truncate"
+          className="w-full truncate font-medium"
           title={item.nombre_documento || "Documento"}
         >
           {item.nombre_documento || "Documento"}
