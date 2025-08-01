@@ -176,13 +176,25 @@ export default function CamaraComponent({
 
           const isPortrait = videoHeight > videoWidth;
 
-          const targetWidth = 1200;
-          const scaleFactor =
-            targetWidth / (isPortrait ? videoHeight : videoWidth);
-          const targetHeight =
-            (isPortrait && pdfMode === "smallDocument"
-              ? videoWidth
-              : videoHeight) * scaleFactor;
+          let targetWidth, targetHeight;
+
+          if (pdfMode === "fullPage") {
+            // For fullPage mode, we want to maintain aspect ratio but use more space
+            if (isPortrait) {
+              // Portrait: make height larger than width for better PDF usage
+              targetWidth = 1200;
+              targetHeight = Math.round((videoHeight / videoWidth) * targetWidth);
+            } else {
+              // Landscape: standard approach
+              targetWidth = 1200;
+              targetHeight = Math.round((videoHeight / videoWidth) * targetWidth);
+            }
+          } else {
+            // smallDocument mode: existing logic
+            targetWidth = 1200;
+            const scaleFactor = targetWidth / (isPortrait ? videoHeight : videoWidth);
+            targetHeight = (isPortrait ? videoWidth : videoHeight) * scaleFactor;
+          }
 
           canvasRef.current.width = targetWidth;
           canvasRef.current.height = targetHeight;
@@ -192,6 +204,8 @@ export default function CamaraComponent({
           context.save();
 
           if (isPortrait && pdfMode === "smallDocument") {
+            // Only rotate for smallDocument mode
+            const scaleFactor = targetWidth / videoHeight;
             const rotatedWidth = videoHeight * scaleFactor;
             const rotatedHeight = videoWidth * scaleFactor;
 
@@ -210,6 +224,7 @@ export default function CamaraComponent({
               rotatedWidth,
             );
           } else {
+            // For fullPage mode or landscape, draw normally without rotation
             context.drawImage(
               videoRef.current,
               0,
