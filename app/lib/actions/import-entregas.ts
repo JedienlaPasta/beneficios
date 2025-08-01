@@ -33,41 +33,66 @@ export async function importEntregas() {
     await workbook.xlsx.readFile(filePath);
     const worksheet = workbook.worksheets[0];
 
+    // Get headers from the first row
+    const headerRow = worksheet.getRow(1);
+    const headers: { [key: string]: number } = {};
+
+    headerRow.eachCell((cell, colNumber) => {
+      const headerName = cell.value?.toString().toLowerCase().trim();
+      if (headerName) {
+        headers[headerName] = colNumber;
+      }
+    });
+
+    console.log("Headers found:", headers);
+
     const entregas: Entregas[] = [];
     worksheet.eachRow((row, rowNumber) => {
-      if (rowNumber === 1) return;
+      if (rowNumber === 1) return; // Skip header row
 
-      const values = row.values as ExcelJS.CellValue[];
+      // Helper function to get cell value by header name
+      const getCellValue = (headerName: string): string => {
+        const colIndex = headers[headerName.toLowerCase()];
+        return colIndex ? row.getCell(colIndex).value?.toString() || "" : "";
+      };
 
-      const rawRut = values[2] ? values[2].toString() : "";
+      console.log("Processing row:", rowNumber);
+
+      const rawRut = getCellValue("RUT");
       if (!rawRut) return;
       const rut = rawRut?.split("-")[0];
       const dv = rawRut?.split("-")[1];
 
       const beneficios_entregados: Entrega[] = [];
-      if (values[9]?.toString() && values[10]?.toString()) {
+
+      const campaña_1 = getCellValue("TARJETA");
+      const detalle_1 = getCellValue("CODIGO TARJETA");
+      if (campaña_1 && detalle_1) {
         beneficios_entregados.push({
-          id_campaña: values[9]?.toString() || "",
-          detalle: values[10]?.toString() || "",
+          id_campaña: campaña_1,
+          detalle: detalle_1,
         });
       }
-      if (values[11]?.toString() && values[12]?.toString()) {
+
+      const campaña_2 = getCellValue("GAS");
+      const detalle_2 = getCellValue("CODIGO GAS");
+      if (campaña_2 && detalle_2) {
         beneficios_entregados.push({
-          id_campaña: values[11]?.toString() || "",
-          detalle: values[12]?.toString() || "",
+          id_campaña: campaña_2,
+          detalle: detalle_2,
         });
       }
 
       const entrega: Entregas = {
-        folio: values[1]?.toString() || "",
+        folio: getCellValue("FOLIO"),
         rut,
         dv,
-        fecha_entrega: values[8]?.toString() || "",
+        fecha_entrega: getCellValue("FECHA DE ENTREGA"),
         beneficios_entregados: beneficios_entregados,
-        nombre_usuario: capitalizeAll(values[16]?.toString()) || "",
-        observacion: values[17]?.toString() || "",
-        nombre_beneficiario: capitalizeAll(values[3]?.toString()) || "",
-        // folio_rsh: values[5]?.toString() || "",
+        nombre_usuario: capitalizeAll(getCellValue("ENTREGADO POR")),
+        observacion: getCellValue("OBSERVACIONES") || "",
+        nombre_beneficiario: capitalizeAll(getCellValue("NOMBRE COMPLETO")),
+        // folio_rsh: getCellValue("folio_rsh"),
       };
 
       if (
@@ -76,6 +101,7 @@ export async function importEntregas() {
         !entrega.fecha_entrega ||
         !entrega.nombre_usuario
       ) {
+        console.log("Missing data:", entrega);
         return;
       }
       entregas.push(entrega);
@@ -113,7 +139,7 @@ export async function importEntregas() {
           await transaction.rollback();
           return {
             success: false,
-            message: `User not found for nombre_usuario: ${entrega}`,
+            message: `User not found by username: ${entrega.nombre_usuario}, folio: ${entrega.folio}`,
           };
         }
 
@@ -235,11 +261,6 @@ export async function importEntregas() {
       throw error;
     }
   } catch (error) {
-    console.error(error);
-    return {
-      success: false,
-      message:
-        error instanceof Error ? error.message : "An unknown error occurred",
-    };
+    console.error("Error importing entregas:", error);
   }
 }

@@ -189,7 +189,7 @@ export default function CamaraComponent({
 
           context.save();
 
-          if (isPortrait) {
+          if (isPortrait && pdfMode === "smallDocument") {
             const rotatedWidth = videoHeight * scaleFactor;
             const rotatedHeight = videoWidth * scaleFactor;
 

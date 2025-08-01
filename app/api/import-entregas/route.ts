@@ -8,7 +8,7 @@ export async function GET() {
       JSON.stringify(
         {
           success: true,
-          message: "Import completed successfully",
+          message: "Operation completed",
           data: res || {},
         },
         null,
@@ -22,15 +22,12 @@ export async function GET() {
       },
     );
   } catch (error) {
-    console.error("Error importing entregas:", error);
+    console.error("Operation failed:", error);
     return new NextResponse(
       JSON.stringify(
         {
           success: false,
-          message:
-            error instanceof Error
-              ? error.message
-              : "Failed to import entregas",
+          message: error instanceof Error ? error.message : "Operation failed",
         },
         null,
         2,
