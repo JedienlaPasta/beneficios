@@ -30,7 +30,7 @@ export default async function EntregasTable({
           </thead>
           <tbody className="divide-y divide-slate-200/80">
             {data?.map((item, index) => (
-              <EntregasTableRow key={index} item={item} />
+              <EntregasTableRow key={index} item={item} /> // x
             ))}
           </tbody>
         </table>

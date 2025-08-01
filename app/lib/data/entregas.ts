@@ -57,10 +57,13 @@ export async function fetchEntregas(
       return { data: [], pages: 0 };
     }
 
+    const hasDigits = /\d/.test(query);
+    const cleanedRut = hasDigits ? query.replace(/\D/g, "") : "";
+
     const request = pool.request();
     const result = await request
       .input("query", sql.VarChar, `%${query}%`)
-      .input("cleanedRut", sql.VarChar, `%${query.replace(/\D/g, "")}%`)
+      .input("cleanedRut", sql.VarChar, `%${cleanedRut}%`)
       .input("offset", sql.Int, offset)
       .input("pageSize", sql.Int, resultsPerPage).query(`
         SELECT entregas.folio, entregas.fecha_entrega, entregas.estado_documentos, entregas.rut, rsh.dv, rsh.nombres_rsh, rsh.apellidos_rsh,
@@ -68,7 +71,7 @@ export async function fetchEntregas(
         FROM entregas
         JOIN rsh ON entregas.rut = rsh.rut
         WHERE
-          concat (entregas.rut, rsh.dv) LIKE @cleanedRut OR
+          ${hasDigits ? "concat (entregas.rut, rsh.dv) LIKE @cleanedRut OR" : ""}
           entregas.folio LIKE @query OR
           rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR 
           rsh.apellidos_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR 

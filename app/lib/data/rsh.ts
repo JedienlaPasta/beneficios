@@ -66,32 +66,90 @@ export async function fetchRSH(
       return { data: [], pages: 0 };
     }
 
-    const request = pool.request();
-    const result = await request
+    const hasDigits = /\d/.test(query);
+    const cleanedRut = hasDigits ? query.replace(/\D/g, "") : "";
+
+    const queryWithoutPercent = query.replace(/%/g, "");
+    const searchTerms = queryWithoutPercent
+      .split(" ")
+      .filter((term) => term.trim().length > 0);
+
+    // Primero obtener el conteo total (query separada más eficiente)
+    const countRequest = pool.request();
+    const countResult = await countRequest
       .input("query", sql.NVarChar, `%${query}%`)
-      .input("offset", sql.Int, offset)
-      .input("pageSize", sql.Int, resultsPerPage).query(`
-        SELECT rsh.rut, rsh.dv, rsh.nombres_rsh, rsh.apellidos_rsh, rsh.direccion, rsh.sector, rsh.tramo,
-        (SELECT MAX(entregas.fecha_entrega) FROM entregas WHERE entregas.rut = rsh.rut) AS ultima_entrega,
-        mods.direccion_mod, mods.sector_mod, mods.telefono_mod, mods.correo_mod,
-        COUNT (*) OVER() AS total
+      .input("cleanedRut", sql.VarChar, `%${cleanedRut}%`).query(`
+        SELECT COUNT(*) as total
         FROM rsh
         LEFT JOIN rsh_mods mods ON rsh.rut = mods.rut
         WHERE 
-          rsh.rut LIKE @query OR
+          ${hasDigits ? "concat (rsh.rut, rsh.dv) LIKE @cleanedRut OR" : ""}
           rsh.direccion COLLATE Modern_Spanish_CI_AI LIKE @query OR
           rsh.sector COLLATE Modern_Spanish_CI_AI LIKE @query OR
           rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR
           rsh.apellidos_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR
           concat(rsh.nombres_rsh,' ', rsh.apellidos_rsh) COLLATE Modern_Spanish_CI_AI LIKE @query
-        ORDER BY rsh.apellidos_rsh ASC
-        OFFSET @offset ROWS
-        FETCH NEXT @pageSize ROWS ONLY
-        `);
+          ${
+            searchTerms.length > 1
+              ? `OR (
+            ${searchTerms
+              .map(
+                (term) =>
+                  `(rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE '%${term}%' OR rsh.apellidos_rsh COLLATE Modern_Spanish_CI_AI LIKE '%${term}%')`,
+              )
+              .join(" AND ")}
+          )`
+              : ""
+          }
+      `);
 
-    const pages = Math.ceil(
-      Number(result.recordset[0]?.total) / resultsPerPage,
-    );
+    const total: number = countResult.recordset[0].total;
+
+    // Luego obtener los datos paginados con JOIN optimizado
+    const dataRequest = pool.request();
+    const result = await dataRequest
+      .input("query", sql.NVarChar, `%${query}%`)
+      .input("cleanedRut", sql.VarChar, `%${cleanedRut}%`)
+      .input("startRow", sql.Int, offset + 1)
+      .input("endRow", sql.Int, offset + resultsPerPage).query(`
+        SELECT * FROM (
+          SELECT 
+            rsh.rut, rsh.dv, rsh.nombres_rsh, rsh.apellidos_rsh, rsh.direccion, rsh.sector, rsh.tramo,
+            ent_max.ultima_entrega,
+            mods.direccion_mod, mods.sector_mod, mods.telefono_mod, mods.correo_mod,
+            ROW_NUMBER() OVER (ORDER BY rsh.apellidos_rsh ASC) AS RowNum
+          FROM rsh
+          LEFT JOIN rsh_mods mods ON rsh.rut = mods.rut
+          LEFT JOIN (
+            SELECT rut, MAX(fecha_entrega) as ultima_entrega
+            FROM entregas
+            GROUP BY rut
+          ) ent_max ON rsh.rut = ent_max.rut
+          WHERE 
+            ${hasDigits ? "concat (rsh.rut, rsh.dv) LIKE @cleanedRut OR" : ""}
+            rsh.direccion COLLATE Modern_Spanish_CI_AI LIKE @query OR
+            rsh.sector COLLATE Modern_Spanish_CI_AI LIKE @query OR
+            rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR
+            rsh.apellidos_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR
+            concat(rsh.nombres_rsh,' ', rsh.apellidos_rsh) COLLATE Modern_Spanish_CI_AI LIKE @query
+            ${
+              searchTerms.length > 1
+                ? `OR (
+              ${searchTerms
+                .map(
+                  (term) =>
+                    `(rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE '%${term}%' OR rsh.apellidos_rsh COLLATE Modern_Spanish_CI_AI LIKE '%${term}%')`,
+                )
+                .join(" AND ")}
+            )`
+                : ""
+            }
+        ) AS NumberedResults
+        WHERE RowNum BETWEEN @startRow AND @endRow
+      `);
+
+    // Agregar el total a cada registro
+    const pages = Math.ceil(total / resultsPerPage);
     return { data: result.recordset as RSH[], pages };
   } catch (error) {
     console.error("Error al obtener registro social de hogares: ", error);
