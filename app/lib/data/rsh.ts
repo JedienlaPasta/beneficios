@@ -58,7 +58,7 @@ export async function fetchRSH(
   if (flattenQuery.length === 8) query = flattenQuery.slice(0, 7);
   if (flattenQuery.length === 9) query = flattenQuery.slice(0, 8);
   else query = flattenQuery;
-  const offset = (currentPage - 1) * resultsPerPage || 0;
+
   try {
     const pool = await connectToDB();
     if (!pool) {
@@ -68,6 +68,7 @@ export async function fetchRSH(
 
     const hasDigits = /\d/.test(query);
     const cleanedRut = hasDigits ? query.replace(/\D/g, "") : "";
+    const offset = (currentPage - 1) * resultsPerPage;
 
     const queryWithoutPercent = query.replace(/%/g, "");
     const searchTerms = queryWithoutPercent

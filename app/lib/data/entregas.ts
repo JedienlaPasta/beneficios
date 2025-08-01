@@ -9,47 +9,11 @@ import {
 } from "../definitions";
 import { connectToDB } from "../utils/db-connection";
 
-// export async function fetchEntrega(folio: string): Promise<Entregas> {
-//   const defaultEntrega: Entregas = {
-//     folio: "",
-//     fecha_entrega: null,
-//     estado_documentos: "",
-//     rut: null,
-//     nombres_rsh: "",
-//     apellidos_rsh: "",
-//   };
-
-//   try {
-//     const pool = await connectToDB();
-//     if (!pool) {
-//       console.warn("No se pudo establecer una conexión a la base de datos.");
-//       return defaultEntrega;
-//     }
-
-//     const request = pool.request();
-//     const result = await request.input("folio", sql.NVarChar, `%${folio}%`)
-//       .query(`
-//         SELECT TOP 1 entregas.folio, entregas.fecha_entrega, entregas.estado_documentos, entregas.rut, rsh.nombres_rsh, rsh.apellidos_rsh
-//         FROM entregas
-//         JOIN rsh ON entregas.rut = rsh.rut
-//         WHERE
-//           entregas.folio = @folio
-//       `);
-
-//     return result.recordset[0] as Entregas;
-//   } catch (error) {
-//     console.error("Error al obtener datos de la tabla de entregas:", error);
-//     return defaultEntrega;
-//   }
-// }
-
-// No se usa?
 export async function fetchEntregas(
   query: string,
   currentPage: number,
   resultsPerPage: number,
 ): Promise<{ data: Entregas[]; pages: number }> {
-  const offset = (currentPage - 1) * resultsPerPage;
   try {
     const pool = await connectToDB();
     if (!pool) {
@@ -59,15 +23,19 @@ export async function fetchEntregas(
 
     const hasDigits = /\d/.test(query);
     const cleanedRut = hasDigits ? query.replace(/\D/g, "") : "";
+    const offset = (currentPage - 1) * resultsPerPage;
 
-    const request = pool.request();
-    const result = await request
+    const queryWithoutPercent = query.replace(/%/g, "");
+    const searchTerms = queryWithoutPercent
+      .split(" ")
+      .filter((term) => term.trim().length > 0);
+
+    // Step 1: Get total count first (optimized)
+    const countRequest = pool.request();
+    const countResult = await countRequest
       .input("query", sql.VarChar, `%${query}%`)
-      .input("cleanedRut", sql.VarChar, `%${cleanedRut}%`)
-      .input("offset", sql.Int, offset)
-      .input("pageSize", sql.Int, resultsPerPage).query(`
-        SELECT entregas.folio, entregas.fecha_entrega, entregas.estado_documentos, entregas.rut, rsh.dv, rsh.nombres_rsh, rsh.apellidos_rsh,
-        COUNT(*) OVER() AS total
+      .input("cleanedRut", sql.VarChar, `%${cleanedRut}%`).query(`
+        SELECT COUNT(*) as total
         FROM entregas
         JOIN rsh ON entregas.rut = rsh.rut
         WHERE
@@ -76,15 +44,47 @@ export async function fetchEntregas(
           rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR 
           rsh.apellidos_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR 
           concat(rsh.nombres_rsh,' ', rsh.apellidos_rsh) COLLATE Modern_Spanish_CI_AI LIKE @query
-        ORDER BY entregas.fecha_entrega DESC
-        OFFSET @offset ROWS
-        FETCH NEXT @pageSize ROWS ONLY
       `);
 
-    let pages = 0;
-    if (result.recordset.length > 0) {
-      pages = Math.ceil(Number(result.recordset[0]?.total) / resultsPerPage);
-    }
+    const total: number = countResult.recordset[0].total;
+
+    // Step 2: Get paginated data (optimized with ROW_NUMBER)
+    const dataRequest = pool.request();
+    const result = await dataRequest
+      .input("query", sql.VarChar, `%${query}%`)
+      .input("cleanedRut", sql.VarChar, `%${cleanedRut}%`)
+      .input("startRow", sql.Int, offset + 1)
+      .input("endRow", sql.Int, offset + resultsPerPage).query(`
+        SELECT * FROM (
+          SELECT 
+            entregas.folio, entregas.fecha_entrega, entregas.estado_documentos, 
+            entregas.rut, rsh.dv, rsh.nombres_rsh, rsh.apellidos_rsh,
+            ROW_NUMBER() OVER (ORDER BY entregas.fecha_entrega DESC) AS RowNum
+          FROM entregas
+          JOIN rsh ON entregas.rut = rsh.rut
+          WHERE
+            ${hasDigits ? "concat (entregas.rut, rsh.dv) LIKE @cleanedRut OR" : ""}
+            entregas.folio LIKE @query OR
+            rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR 
+            rsh.apellidos_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR 
+            concat(rsh.nombres_rsh,' ', rsh.apellidos_rsh) COLLATE Modern_Spanish_CI_AI LIKE @query
+            ${
+              searchTerms.length > 1
+                ? `OR (
+              ${searchTerms
+                .map(
+                  (term) =>
+                    `(rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE '%${term}%' OR rsh.apellidos_rsh COLLATE Modern_Spanish_CI_AI LIKE '%${term}%')`,
+                )
+                .join(" AND ")}
+            )`
+                : ""
+            }
+        ) AS NumberedResults
+        WHERE RowNum BETWEEN @startRow AND @endRow
+      `);
+
+    const pages = Math.ceil(total / resultsPerPage);
     return { data: result.recordset as Entregas[], pages };
   } catch (error) {
     console.error("Error al obtener datos de la tabla de entregas:", error);

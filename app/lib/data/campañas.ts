@@ -42,56 +42,59 @@ export async function fetchCampaigns(
   currentPage: number,
   resultsPerPage: number,
 ): Promise<{ data: Campaign[]; pages: number }> {
-  const offset = (currentPage - 1) * resultsPerPage || 0;
   try {
     const pool = await connectToDB();
     if (!pool) {
       console.warn("No se pudo establecer una conexión a la base de datos.");
       return { data: [], pages: 0 };
     }
-    const request = new sql.Request(pool);
 
-    // Use a more efficient query structure
-    const result = await request
-      .input("query", sql.NVarChar, `%${query}%`)
-      .input("offset", sql.Int, offset)
-      .input("pageSize", sql.Int, resultsPerPage).query(`
-        SELECT c.*,
-          CASE 
-            WHEN c.fecha_inicio > GETUTCDATE() THEN 'Pendiente'
-            WHEN c.fecha_inicio <= GETUTCDATE() AND c.fecha_termino >= GETUTCDATE() THEN 'En Curso'
-            ELSE 'Finalizada'
-          END AS estado,
-          ISNULL(e.total_entregas, 0) AS total_entregas,
-          t.total_count AS total
-        FROM campañas c
-        OUTER APPLY (
-          SELECT COUNT(*) AS total_entregas 
-          FROM entrega 
-          WHERE entrega.id_campaña = c.id
-        ) e
-        CROSS JOIN (
-          SELECT COUNT(*) AS total_count 
-          FROM campañas 
-          WHERE nombre_campaña LIKE @query
-        ) t
-        WHERE c.nombre_campaña LIKE @query
-        ORDER BY c.fecha_inicio DESC
-        OFFSET @offset ROWS
-        FETCH NEXT @pageSize ROWS ONLY
+    const offset = (currentPage - 1) * resultsPerPage;
+
+    // Get total count (optimized)
+    const countRequest = pool.request();
+    const countResult = await countRequest.input(
+      "query",
+      sql.NVarChar,
+      `%${query}%`,
+    ).query(`
+        SELECT COUNT(*) as total
+        FROM campañas
+        WHERE nombre_campaña LIKE @query OR id LIKE @query
       `);
 
-    // WHERE nombre_campaña LIKE @query OR CAST(id AS NVARCHAR(50)) LIKE @query
-    // WHERE c.nombre_campaña LIKE @query OR CAST(c.id AS NVARCHAR(50)) LIKE @query
+    const total: number = countResult.recordset[0].total;
 
-    // Handle the case where no records are found
-    if (result.recordset.length === 0) {
-      return { data: [], pages: 0 };
-    }
+    // Get paginated data with precomputed entregas count (optimized)
+    const dataRequest = pool.request();
+    const result = await dataRequest
+      .input("query", sql.NVarChar, `%${query}%`)
+      .input("startRow", sql.Int, offset + 1)
+      .input("endRow", sql.Int, offset + resultsPerPage).query(`
+        SELECT * FROM (
+          SELECT 
+            c.*,
+            CASE 
+              WHEN c.fecha_inicio > GETUTCDATE() THEN 'Pendiente'
+              WHEN c.fecha_inicio <= GETUTCDATE() AND c.fecha_termino >= GETUTCDATE() THEN 'En Curso'
+              ELSE 'Finalizada'
+            END AS estado,
+            ISNULL(ent_count.total_entregas, 0) AS total_entregas,
+            ROW_NUMBER() OVER (ORDER BY c.fecha_inicio DESC) AS RowNum
+          FROM campañas c
+          LEFT JOIN (
+            SELECT 
+              id_campaña, 
+              COUNT(*) AS total_entregas 
+            FROM entrega 
+            GROUP BY id_campaña
+          ) ent_count ON c.id = ent_count.id_campaña
+          WHERE c.nombre_campaña LIKE @query OR c.id LIKE @query
+        ) AS NumberedResults
+        WHERE RowNum BETWEEN @startRow AND @endRow
+      `);
 
-    const pages = Math.ceil(
-      Number(result.recordset[0]?.total) / resultsPerPage,
-    );
+    const pages = Math.ceil(total / resultsPerPage);
     return { data: result.recordset as Campaign[], pages };
   } catch (error) {
     console.error("Error al obtener campañas:", error);
