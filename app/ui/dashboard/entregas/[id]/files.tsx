@@ -85,14 +85,16 @@ export function Files({ item }: { item: EntregasFiles }) {
   };
 
   return (
-    <div className="group relative flex cursor-pointer flex-col items-center justify-center rounded-md bg-white p-3 shadow-sm transition-shadow hover:shadow">
-      <Image className="mb-1 h-8 w-8" src={pdf} alt="pdf.img" />
-      <span className="w-full truncate text-center text-xs font-medium text-slate-700">
-        {item.nombre_documento || "Documento"}
-      </span>
-      <span className="text-center text-[10px] text-slate-500">
-        {item.tipo || ".pdf"}
-      </span>
+    <div className="group relative flex cursor-pointer items-center justify-start gap-2 overflow-hidden rounded-md bg-gray-200/60 p-3 shadow-sm transition-shadow hover:shadow">
+      <Image className="h-8 w-8" src={pdf} alt="pdf.img" />
+      <div className="flex w-[80%] text-left text-[10px] text-slate-500">
+        <div
+          className="w-full truncate"
+          title={item.nombre_documento || "Documento"}
+        >
+          {item.nombre_documento || "Documento"}
+        </div>
+      </div>
 
       {/* Overlay with buttons that appear on hover */}
       <div className="absolute inset-0 flex items-end justify-center gap-2 rounded-md bg-slate-800/70 pb-3 opacity-0 transition-opacity group-hover:opacity-100">

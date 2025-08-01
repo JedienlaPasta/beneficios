@@ -367,7 +367,7 @@ function FilesList({
       </div>
 
       {files.length > 0 ? (
-        <div className="grid grid-cols-3 gap-3 rounded-xl border border-gray-200/80 bg-gray-50/70 p-4 shadow-sm">
+        <div className="grid grid-cols-1 gap-3 rounded-xl border border-gray-200/80 bg-gray-50/70 p-4 shadow-sm sm:grid-cols-2">
           {files.map((item: EntregasFiles, index) => (
             <Files key={index} item={item} />
           ))}
