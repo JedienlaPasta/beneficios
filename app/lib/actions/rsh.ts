@@ -454,53 +454,96 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
     let validRows = 0;
     let skippedRows = 0;
 
+    let columnMapping: { [key: string]: number } = {};
+    let headersProcessed = false;
+
     worksheet.eachRow((row, rowNumber) => {
-      if (rowNumber === 1) return; // Saltar cabecera
+      // if (rowNumber === 1) return; // Saltar cabecera
 
       const values = row.values as ExcelJS.CellValue[];
 
+      if (rowNumber === 1) {
+        console.log("Headers encontrados:", Object.keys(columnMapping));
+        values.forEach((header, index) => {
+          if (header && typeof header === "string") {
+            const normalizedHeader = header
+              .toString()
+              .toLowerCase()
+              .trim()
+              .replace(/\s+/g, "_");
+
+            columnMapping[normalizedHeader] = index;
+          }
+        });
+        headersProcessed = true;
+        return;
+      }
+
+      if (!headersProcessed) {
+        throw new Error("No se pudieron procesar las cabeceras del archivo");
+      }
+
+      // Helper function to get value by header name
+      const getValueByHeader = (headerName: string): string => {
+        const columnIndex =
+          columnMapping[headerName.toLowerCase().replace(/\s+/g, "_")];
+        return columnIndex !== undefined && values[columnIndex]
+          ? String(values[columnIndex])
+          : "";
+      };
+
       // Validar RUT (campo obligatorio)
-      const rawRut = values[12] ? String(values[12]) : "";
+      // const rawRut = values[12] ? String(values[12]) : "";
+      // if (!rawRut) {
+      //   skippedRows++;
+      //   return;
+      // }
+      const rawRut = getValueByHeader("rut") || getValueByHeader("run");
       if (!rawRut) {
         skippedRows++;
         return;
       }
 
-      // Procesar campos (optimizado)
-      const apellidopaterno = values[14]
-        ? capitalizeWords(String(values[14]))
+      // Procesar campos usando headers
+      const apellidopaterno = getValueByHeader("apellidopaterno")
+        ? capitalizeWords(getValueByHeader("apellidopaterno"))
         : "";
-      const apellidomaterno = values[15]
-        ? capitalizeWords(String(values[15]))
+      const apellidomaterno = getValueByHeader("apellidomaterno")
+        ? capitalizeWords(getValueByHeader("apellidomaterno"))
         : null;
-      const calle = values[75] ? capitalizeAll(values[75]?.toString()) : "";
-      const numcalle = values[3] ? String(values[3]) : null;
-      const sector = values[78]
-        ? capitalizeAll(values[78]?.toString()).trim()
-        : null;
+      const calle = getValueByHeader("n_calle_uni_rsh")
+        ? capitalizeAll(getValueByHeader("n_calle_uni_rsh"))
+        : "";
+      const numcalle = getValueByHeader("numdomicilio") ?? null;
+      const sector = getValueByHeader("c_ah_nom")
+        ? capitalizeAll(getValueByHeader("c_ah_nom"))
+        : "";
       const citizen: CitizenData = {
         rut: rawRut,
-        dv: String(values[13]),
-        nombres_rsh: values[16] ? capitalizeWords(String(values[16])) : "",
+        dv: getValueByHeader("dv"),
+        nombres_rsh: getValueByHeader("nombres"),
         apellidopaterno,
         apellidomaterno,
         apellidos_rsh: `${apellidopaterno} ${apellidomaterno || ""}`.trim(),
-        telefono: values[1] ? String(values[1]).replace(/\D/g, "") : null,
-        correo: values[2] ? String(values[2]) : null,
+        telefono: getValueByHeader("telefono"),
+        correo: getValueByHeader("email"),
         indigena:
-          values[20] === null ||
-          values[20] === undefined ||
-          values[20] === "" ||
-          isNaN(Number(values[20]))
+          getValueByHeader("indigena") === null ||
+          getValueByHeader("indigena") === undefined ||
+          getValueByHeader("indigena") === "" ||
+          isNaN(Number(getValueByHeader("indigena")))
             ? null
-            : parseInt(String(values[20]), 10) === 0
+            : parseInt(String(getValueByHeader("indigena")), 10) === 0
               ? "No"
               : "Si",
-        genero: values[67] == 1 ? "Masculino" : "Femenino",
+        genero:
+          Number(getValueByHeader("sexo")) === 1 ? "Masculino" : "Femenino",
         nacionalidad:
-          values[69] && Number(values[69]) == 1
+          getValueByHeader("nacionalidad_id") &&
+          Number(getValueByHeader("nacionalidad_id")) === 1
             ? "Chilena"
-            : values[69]
+            : getValueByHeader("nacionalidad_id") &&
+                Number(getValueByHeader("nacionalidad_id")) === 2
               ? "Extranjera"
               : null,
         sector: sector
@@ -509,12 +552,16 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
             : sector
           : null,
         direccion: `${calle} ${numcalle}`.trim(),
-        tramo: values[70] ? String(values[70]) : "",
-        folio: values[64] ? String(values[64]) : "",
-        fecha_nacimiento: convertDate(String(values[68])),
-        fecha_encuesta: convertDate(String(values[63])),
-        fecha_modificacion: convertDate(String(values[65])),
-        fecha_calificacion: convertDate(String(values[71])),
+        tramo: getValueByHeader("tramo")
+          ? String(getValueByHeader("tramo"))
+          : "",
+        folio: getValueByHeader("nuevofolio")
+          ? String(getValueByHeader("nuevofolio"))
+          : "",
+        fecha_nacimiento: convertDate(getValueByHeader("fechanacimiento")),
+        fecha_encuesta: convertDate(getValueByHeader("fecha_encuesta")),
+        fecha_modificacion: convertDate(getValueByHeader("fecha_modificacion")),
+        fecha_calificacion: convertDate(getValueByHeader("fecha_calificacion")),
       };
 
       if (!citizen.rut || !citizen.nombres_rsh || !citizen.apellidopaterno) {

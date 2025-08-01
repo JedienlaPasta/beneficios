@@ -412,7 +412,7 @@ export default function CamaraComponent({
                   value={documentName}
                   onChange={(e) => setDocumentName(e.target.value)}
                   placeholder="Ingresa el nombre del documento"
-                  className="h-10 w-full rounded-lg border border-gray-300 px-3.5 outline-none focus:border-blue-500"
+                  className="h-10 w-full rounded-lg border border-gray-300 px-3.5 text-sm text-slate-700 outline-none focus:border-blue-500"
                 />
               </div>
 
@@ -424,7 +424,7 @@ export default function CamaraComponent({
                 <select
                   value={pdfMode}
                   onChange={(e) => setPdfMode(e.target.value as PDFMode)}
-                  className="h-10 w-full rounded-lg border border-gray-300 px-3.5 outline-none focus:border-blue-500"
+                  className="h-10 w-full rounded-lg border border-gray-300 px-3.5 text-sm text-slate-700 outline-none focus:border-blue-500"
                 >
                   <option value="smallDocument">Documento Pequeño</option>
                   <option value="fullPage">Página Completa</option>
