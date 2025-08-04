@@ -626,7 +626,10 @@ export const downloadPDFById = async (id: string) => {
   }
 };
 
-export const createAndDownloadPDFByFolio = async (folio: string) => {
+export const createAndDownloadPDFByFolio = async (
+  folio: string,
+  name?: string,
+) => {
   try {
     const pool = await connectToDB();
     if (!pool) {
@@ -693,13 +696,15 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
     if (encargadoResult.recordset.length === 0) {
       return { success: false, error: "Empleado no encontrado", status: 404 };
     }
+
     const encargado = encargadoResult.recordset[0] as UserData;
+    const nombreCompleto = name
+      ? name
+      : `${ciudadano.nombres_rsh} ${ciudadano.apellidos_rsh}`;
 
     const form = pdfDoc.getForm();
     form.getTextField("Folio").setText(String(folio));
-    form
-      .getTextField("NombreCiudadano")
-      .setText(` ${ciudadano.nombres_rsh} ${ciudadano.apellidos_rsh}`);
+    form.getTextField("NombreCiudadano").setText(` ${nombreCompleto}`);
     form.getTextField("Rut").setText(` ${ciudadano.rut}-${ciudadano.dv}`);
     form.getTextField("Domicilio").setText(" " + String(ciudadano.direccion));
     form.getTextField("Tramo").setText(` ${ciudadano.tramo}%`);

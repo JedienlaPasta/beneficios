@@ -23,8 +23,8 @@ interface Entregas {
 }
 
 export async function importEntregas() {
-  const file = "output.xlsx";
-  // const file = "output_checked.xlsx";
+  // const file = "output.xlsx";
+  const file = "output_checked.xlsx";
   try {
     // const filePath = path.join(process.cwd(), "public", "input.xlsx");
     const filePath = path.join(process.cwd(), "public", file);
