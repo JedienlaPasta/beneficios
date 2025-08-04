@@ -12,7 +12,7 @@ import ConfirmModal from "../../confirmation-modal";
 export default function CampaignOptionsMenu({ id }: { id: string }) {
   const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
   const [showConfirmEndModal, setShowConfirmEndModal] = useState(false);
-  const [isDisabled, setIsDisabled] = useState(false);
+  // const [isDisabled, setIsDisabled] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const deleteCampaignWithId = deleteCampaign.bind(null, id);
@@ -33,7 +33,7 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
 
   const confirmDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    setIsDisabled(true);
+    // setIsDisabled(true);
 
     const toastId = toast.loading("Eliminando campaña...");
     try {
@@ -50,8 +50,6 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
       const message =
         error instanceof Error ? error.message : "Error desconocido";
       toast.error(message, { id: toastId });
-    } finally {
-      setIsDisabled(false);
     }
   };
 
@@ -61,12 +59,12 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
 
   const confirmEndCampaing = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    setIsDisabled(true);
+    // setIsDisabled(true);
     toast.promise(endCampaignWithId(), {
       loading: "Terminando campaña...",
       success: async (response) => {
         setShowConfirmEndModal(false);
-        setIsDisabled(false);
+        // setIsDisabled(false);
         router.refresh();
         return {
           message: response.message,
@@ -145,7 +143,6 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
       {showConfirmDeleteModal && (
         <ConfirmModal
           id={id}
-          isDisabled={isDisabled}
           setShowConfirmModal={setShowConfirmDeleteModal}
           action={(id, e) => confirmDelete(e)}
           content="Eliminar"
@@ -154,7 +151,6 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
       {showConfirmEndModal && (
         <ConfirmModal
           id={id}
-          isDisabled={isDisabled}
           setShowConfirmModal={setShowConfirmEndModal}
           action={(id, e) => confirmEndCampaing(e)}
           content="Terminar"
