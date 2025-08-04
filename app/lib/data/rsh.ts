@@ -85,6 +85,7 @@ export async function fetchRSH(
         LEFT JOIN rsh_mods mods ON rsh.rut = mods.rut
         WHERE 
           ${hasDigits ? "concat (rsh.rut, rsh.dv) LIKE @cleanedRut OR" : ""}
+          rsh.folio LIKE @query OR
           rsh.direccion COLLATE Modern_Spanish_CI_AI LIKE @query OR
           rsh.sector COLLATE Modern_Spanish_CI_AI LIKE @query OR
           rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR
@@ -128,6 +129,7 @@ export async function fetchRSH(
           ) ent_max ON rsh.rut = ent_max.rut
           WHERE 
             ${hasDigits ? "concat (rsh.rut, rsh.dv) LIKE @cleanedRut OR" : ""}
+            rsh.folio LIKE @query OR
             rsh.direccion COLLATE Modern_Spanish_CI_AI LIKE @query OR
             rsh.sector COLLATE Modern_Spanish_CI_AI LIKE @query OR
             rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR

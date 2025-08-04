@@ -458,12 +458,9 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
     let headersProcessed = false;
 
     worksheet.eachRow((row, rowNumber) => {
-      // if (rowNumber === 1) return; // Saltar cabecera
-
       const values = row.values as ExcelJS.CellValue[];
 
       if (rowNumber === 1) {
-        console.log("Headers encontrados:", Object.keys(columnMapping));
         values.forEach((header, index) => {
           if (header && typeof header === "string") {
             const normalizedHeader = header
@@ -476,6 +473,7 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
           }
         });
         headersProcessed = true;
+        console.log("Headers encontrados:", Object.keys(columnMapping));
         return;
       }
 
@@ -487,20 +485,30 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
       const getValueByHeader = (headerName: string): string => {
         const columnIndex =
           columnMapping[headerName.toLowerCase().replace(/\s+/g, "_")];
-        return columnIndex !== undefined && values[columnIndex]
-          ? String(values[columnIndex])
-          : "";
+
+        if (columnIndex === undefined) return "";
+        // Special handling for 'dv' field - "0" is a valid value
+        if (headerName === "dv") {
+          return values[columnIndex] !== undefined &&
+            values[columnIndex] !== null
+            ? String(values[columnIndex])
+            : "";
+        }
+        // For other fields, check for falsy values but allow "0" as a valid value
+        if (
+          values[columnIndex] === undefined ||
+          values[columnIndex] === null ||
+          values[columnIndex] === ""
+        ) {
+          return "";
+        }
+        return String(values[columnIndex]);
       };
 
-      // Validar RUT (campo obligatorio)
-      // const rawRut = values[12] ? String(values[12]) : "";
-      // if (!rawRut) {
-      //   skippedRows++;
-      //   return;
-      // }
-      const rawRut = getValueByHeader("rut") || getValueByHeader("run");
+      const rawRut = getValueByHeader("run") || getValueByHeader("rut");
       if (!rawRut) {
         skippedRows++;
+        console.log("Row skipped:", rowNumber);
         return;
       }
 
@@ -644,7 +652,7 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
                 nullable: false,
               });
               tvp.columns.add("sector", sql.VarChar(50), { nullable: true });
-              tvp.columns.add("telefono", sql.VarChar(20), { nullable: true });
+              tvp.columns.add("telefono", sql.VarChar(15), { nullable: true });
               tvp.columns.add("correo", sql.VarChar(50), { nullable: true });
               tvp.columns.add("tramo", sql.VarChar(10), { nullable: false });
               tvp.columns.add("genero", sql.VarChar(20), { nullable: true });
@@ -679,8 +687,10 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
                   !citizen.direccion ||
                   !citizen.tramo ||
                   !citizen.folio
-                )
+                ) {
+                  skippedRows++;
                   continue;
+                }
 
                 try {
                   // Add row to TVP
@@ -736,7 +746,7 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
             });
             tvp.columns.add("direccion", sql.VarChar(200), { nullable: false });
             tvp.columns.add("sector", sql.VarChar(50), { nullable: true });
-            tvp.columns.add("telefono", sql.VarChar(20), { nullable: true });
+            tvp.columns.add("telefono", sql.VarChar(15), { nullable: true });
             tvp.columns.add("correo", sql.VarChar(50), { nullable: true });
             tvp.columns.add("tramo", sql.VarChar(10), { nullable: false });
             tvp.columns.add("genero", sql.VarChar(20), { nullable: true });
@@ -772,8 +782,10 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
                 !citizen.direccion ||
                 !citizen.tramo ||
                 !citizen.folio
-              )
+              ) {
+                skippedRows++;
                 continue;
+              }
 
               try {
                 // Add row to TVP
@@ -834,6 +846,7 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
         console.log(
           `Importación completada en ${minutes > 0 ? `${minutes}m ` : ""}${remainingSeconds}s (${elapsedTime}ms)`,
         );
+        console.log(`Procesadas ${validRows} filas, (${skippedRows} omitidas)`);
       } catch (error) {
         console.error("Error en transacción:", error);
 
@@ -870,7 +883,7 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
 
     return {
       success: true,
-      message: `Procesadas ${validRows} filas (${skippedRows} omitidas)`,
+      message: `Procesadas ${validRows} filas, (${skippedRows} omitidas)`,
     };
   } catch (error) {
     console.error("Error en importación:", error);

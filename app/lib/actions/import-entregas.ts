@@ -66,7 +66,7 @@ export async function importEntregas() {
       const beneficios_entregados: Entrega[] = [];
 
       const campaña_1 = getCellValue("TARJETA");
-      const detalle_1 = getCellValue("CODIGO TARJETA");
+      const detalle_1 = getCellValue("CODIGO_TARJETA");
       if (campaña_1 && detalle_1) {
         beneficios_entregados.push({
           id_campaña: campaña_1,
@@ -75,7 +75,7 @@ export async function importEntregas() {
       }
 
       const campaña_2 = getCellValue("GAS");
-      const detalle_2 = getCellValue("CODIGO GAS");
+      const detalle_2 = getCellValue("CODIGO_GAS");
       if (campaña_2 && detalle_2) {
         beneficios_entregados.push({
           id_campaña: campaña_2,
@@ -87,11 +87,11 @@ export async function importEntregas() {
         folio: getCellValue("FOLIO"),
         rut,
         dv,
-        fecha_entrega: getCellValue("FECHA DE ENTREGA"),
+        fecha_entrega: getCellValue("FECHA_DE_ENTREGA"),
         beneficios_entregados: beneficios_entregados,
-        nombre_usuario: capitalizeAll(getCellValue("ENTREGADO POR")),
+        nombre_usuario: capitalizeAll(getCellValue("ENTREGADO_POR")),
         observacion: getCellValue("OBSERVACIONES") || "",
-        nombre_beneficiario: capitalizeAll(getCellValue("NOMBRE COMPLETO")),
+        nombre_beneficiario: capitalizeAll(getCellValue("NOMBRE_COMPLETO")),
         // folio_rsh: getCellValue("folio_rsh"),
       };
 
