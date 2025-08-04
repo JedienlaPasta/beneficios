@@ -41,6 +41,7 @@ export async function fetchEntregas(
         WHERE
           ${hasDigits ? "concat (entregas.rut, rsh.dv) LIKE @cleanedRut OR" : ""}
           entregas.folio LIKE @query OR
+          rsh.folio LIKE @query OR
           rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR 
           rsh.apellidos_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR 
           concat(rsh.nombres_rsh,' ', rsh.apellidos_rsh) COLLATE Modern_Spanish_CI_AI LIKE @query
@@ -65,6 +66,7 @@ export async function fetchEntregas(
           WHERE
             ${hasDigits ? "concat (entregas.rut, rsh.dv) LIKE @cleanedRut OR" : ""}
             entregas.folio LIKE @query OR
+            rsh.folio LIKE @query OR
             rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR 
             rsh.apellidos_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR 
             concat(rsh.nombres_rsh,' ', rsh.apellidos_rsh) COLLATE Modern_Spanish_CI_AI LIKE @query

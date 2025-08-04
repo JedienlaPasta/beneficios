@@ -31,7 +31,7 @@ export default function TableRow({
 
   const colorEstado =
     estado === "En curso"
-      ? "bg-green-100 text-green-600"
+      ? "bg-emerald-100 text-emerald-600"
       : "bg-slate-100/80 text-slate-500";
 
   const copyToClipboard = async (text: string) => {
@@ -44,13 +44,15 @@ export default function TableRow({
   };
 
   return (
-    <tr
-      onClick={handleClick}
-      className="grid cursor-pointer grid-cols-26 gap-9 text-nowrap px-6 text-sm tabular-nums transition-colors hover:bg-slate-50"
-    >
+    <tr className="grid grid-cols-26 gap-9 text-nowrap px-6 text-sm tabular-nums transition-colors hover:bg-slate-50">
       <td className="group col-span-5 flex min-h-12 items-center py-5 text-slate-600">
         <div className="relative flex items-center gap-2">
-          <div className="max-w-[160px] truncate">{id}</div>
+          <div
+            onClick={handleClick}
+            className="max-w-[160px] cursor-pointer truncate hover:underline"
+          >
+            {id}
+          </div>
           <div className="absolute left-[110%] hidden rounded p-[3px] hover:bg-slate-200 group-hover:block">
             <TbCopy
               onClick={(e) => {
@@ -62,8 +64,13 @@ export default function TableRow({
           </div>
         </div>
       </td>
-      <td className="col-span-7 flex items-center py-4 text-slate-600">
-        {nombre_campaña}
+      <td className="col-span-7 flex items-center py-4">
+        <p
+          onClick={handleClick}
+          className="cursor-pointer text-slate-600 hover:underline"
+        >
+          {nombre_campaña}
+        </p>
       </td>
       <td className="col-span-3 flex items-center gap-3 py-4 text-left text-slate-700/90">
         <FiBox className="col-span-1 flex w-fit justify-start" />

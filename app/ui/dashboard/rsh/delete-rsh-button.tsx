@@ -1,12 +1,13 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { deleteRSH } from "@/app/lib/actions/rsh";
 
 export default function DeleteRSHButton({ rut }: { rut: number | null }) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
+  const [countdown, setCountdown] = useState(5);
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -22,12 +23,35 @@ export default function DeleteRSHButton({ rut }: { rut: number | null }) {
       return;
     }
     setShowConfirmModal(true);
+    setIsDisabled(true);
+    setCountdown(5);
   };
+
+  // Effect para manejar el countdown
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (showConfirmModal && isDisabled && countdown > 0) {
+      interval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            setIsDisabled(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [showConfirmModal, isDisabled, countdown]);
 
   const confirmDelete = async () => {
     setIsDisabled(true);
 
-    const toastId = toast.loading("Eliminando entrega...");
+    const toastId = toast.loading("Eliminando registro...");
     try {
       const response = await deleteRSH(String(rut));
       if (!response.success) {
@@ -40,7 +64,9 @@ export default function DeleteRSHButton({ rut }: { rut: number | null }) {
       router.refresh();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Error al crear el registro";
+        error instanceof Error
+          ? error.message
+          : "Error al eliminar el registro";
       toast.error(message, { id: toastId });
       setIsDisabled(false);
     }
@@ -51,7 +77,7 @@ export default function DeleteRSHButton({ rut }: { rut: number | null }) {
       <button
         type="button"
         onClick={handleDeleteButton}
-        title="Eliminar Entregas"
+        title="Eliminar Registro"
         className="rounded-md border border-red-100 bg-red-50 px-3 py-1 text-sm font-medium text-red-400 transition-all duration-300 hover:border-red-200 hover:bg-red-100/70 active:scale-95"
       >
         Eliminar
@@ -65,23 +91,26 @@ export default function DeleteRSHButton({ rut }: { rut: number | null }) {
               Confirmar eliminación
             </h3>
             <p className="mb-6 text-sm text-gray-500">
-              ¿Estás seguro de que deseas eliminar esta entrega? Esta acción no
+              ¿Estás seguro de que deseas eliminar este registro? Esta acción no
               se puede deshacer.
             </p>
             <div className="flex justify-end space-x-4">
               <button
                 type="button"
                 onClick={() => setShowConfirmModal(false)}
-                className={`rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 ${isDisabled ? "cursor-not-allowed" : "hover:bg-gray-200"}`}
+                className={`rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:scale-95`}
               >
                 Cancelar
               </button>
               <button
                 type="button"
+                disabled={isDisabled}
                 onClick={confirmDelete}
-                className={`rounded-md px-4 py-2 text-sm font-medium text-white ${isDisabled ? "cursor-not-allowed bg-red-300" : "bg-red-500 hover:bg-red-600"}`}
+                className={`rounded-md px-4 py-2 text-sm font-medium text-white focus:scale-95 ${isDisabled ? "cursor-not-allowed bg-red-300" : "bg-red-500 hover:bg-red-600"}`}
               >
-                Eliminar
+                {isDisabled && countdown > 0
+                  ? `Eliminar (${countdown})`
+                  : "Eliminar"}
               </button>
             </div>
           </div>

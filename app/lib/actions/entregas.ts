@@ -715,7 +715,7 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
         form.getTextField("CodigoGas").setText(detail);
       } else if (campaign_name.includes("Pañales")) {
         ["RN", "G", "XXG", "P", "XG", "Adultos"].forEach((tipo) => {
-          if (detail.includes(tipo)) form.getTextField(tipo).setText("X");
+          if (detail === tipo) form.getTextField(tipo).setText("X");
         });
       } else if (campaign_name.includes("Tarjeta de Comida")) {
         form.getTextField("CodigoTarjeta").setText(detail);

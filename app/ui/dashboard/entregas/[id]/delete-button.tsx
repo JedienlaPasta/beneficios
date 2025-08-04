@@ -2,11 +2,12 @@
 import { deleteEntregaByFolio } from "@/app/lib/actions/entregas";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function DeleteEntregasButton({ folio }: { folio: string }) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [isDisabled, setIsDisabled] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(true);
+  const [countdown, setCountdown] = useState(5);
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -21,7 +22,30 @@ export default function DeleteEntregasButton({ folio }: { folio: string }) {
   // Mostrar modal de confirmación en lugar de eliminar directamente
   const handleDeleteButton = async () => {
     setShowConfirmModal(true);
+    setIsDisabled(true);
+    setCountdown(5);
   };
+
+  // Effect para manejar el countdown
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (showConfirmModal && isDisabled && countdown > 0) {
+      interval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            setIsDisabled(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [showConfirmModal, isDisabled, countdown]);
 
   const confirmDelete = async () => {
     setIsDisabled(true);
@@ -68,16 +92,17 @@ export default function DeleteEntregasButton({ folio }: { folio: string }) {
               <button
                 type="button"
                 onClick={() => setShowConfirmModal(false)}
-                className={`rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 ${isDisabled ? "cursor-not-allowed" : "hover:bg-gray-200"}`}
+                className={`rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-transform focus:scale-95 ${isDisabled ? "cursor-not-allowed" : "hover:bg-gray-200"}`}
               >
                 Cancelar
               </button>
               <button
                 type="button"
+                disabled={isDisabled}
                 onClick={confirmDelete}
-                className={`rounded-md px-4 py-2 text-sm font-medium text-white ${isDisabled ? "cursor-not-allowed bg-red-300" : "bg-red-500 hover:bg-red-600"}`}
+                className={`rounded-md px-4 py-2 text-sm font-medium text-white transition-transform focus:scale-95 ${isDisabled ? "cursor-not-allowed bg-red-300" : "bg-red-500 hover:bg-red-600"}`}
               >
-                Eliminar
+                {isDisabled && countdown > 0 ? `Eliminar (${countdown})` : "Eliminar"}
               </button>
             </div>
           </div>

@@ -25,13 +25,22 @@ export default function TableRow({ item }: TableRowProps) {
   };
 
   return (
-    <tr
-      onClick={handleClick}
-      className="grid cursor-pointer grid-cols-26 gap-8 text-nowrap px-8 text-sm tabular-nums transition-colors hover:bg-slate-200/50"
-    >
-      <td className="col-span-5 py-4 text-slate-700">{folio}</td>
-      <td className="col-span-13 py-4 text-slate-600">
-        {nombres_rsh} {apellidos_rsh}
+    <tr className="grid grid-cols-26 gap-8 text-nowrap px-8 text-sm tabular-nums transition-colors hover:bg-slate-200/50">
+      <td className="col-span-5 py-4">
+        <p
+          onClick={handleClick}
+          className="w-fit cursor-pointer text-slate-600 hover:underline"
+        >
+          {folio}
+        </p>
+      </td>
+      <td className="col-span-13 py-4">
+        <p
+          onClick={handleClick}
+          className="w-fit cursor-pointer text-slate-600 hover:underline"
+        >
+          {nombres_rsh} {apellidos_rsh}
+        </p>
       </td>
       <td className="col-span-4 py-4 text-right text-slate-600">
         {formatted_rut}

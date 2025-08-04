@@ -1,5 +1,9 @@
 "use client";
-import { formatDate, formatRUT } from "@/app/lib/utils/format";
+import {
+  formatDate,
+  formatRUT,
+  formatToTimePassed,
+} from "@/app/lib/utils/format";
 import { useRouter } from "next/navigation";
 
 export default function RSHTableRow({
@@ -41,16 +45,20 @@ export default function RSHTableRow({
   const verifiedTramo = tramo !== null ? tramo : 0;
 
   return (
-    <tr
-      onClick={handleClick}
-      className="grid cursor-pointer grid-cols-26 gap-9 text-nowrap px-6 text-sm tabular-nums transition-colors hover:bg-slate-50"
-    >
+    <tr className="grid grid-cols-26 gap-9 text-nowrap px-6 text-sm tabular-nums transition-colors hover:bg-slate-50">
       <td className="group col-span-4 flex items-center py-3.5 text-slate-600">
-        {formattedRut}
+        <p onClick={handleClick} className="cursor-pointer hover:underline">
+          {formattedRut}
+        </p>
       </td>
       <td className="col-span-6 py-3.5 text-slate-600">
-        {apellidos_rsh}
-        <div className="mt-1 text-xs text-slate-500/90">{nombres_rsh}</div>
+        <div
+          onClick={handleClick}
+          className="w-fit cursor-pointer hover:underline"
+        >
+          {nombres_rsh}
+          <p className="mt-0.5 text-xs text-slate-500/90">{apellidos_rsh}</p>
+        </div>
       </td>
       <td className="col-span-8 py-3.5 text-left text-slate-600">
         {direccion_mod ? direccion_mod : direccion}
@@ -92,7 +100,9 @@ export default function RSHTableRow({
         {ultima_entrega ? (
           <div className="text-slate-600">
             {formatDate(ultima_entrega)}
-            <p className="text-xs font-normal text-slate-400">Última entrega</p>
+            <p className="text-xs font-normal text-slate-400">
+              {formatToTimePassed(ultima_entrega)}
+            </p>
           </div>
         ) : (
           <span className="rounded-md bg-slate-50 px-2 py-1 text-xs font-medium text-slate-500 ring-1 ring-inset ring-slate-200">

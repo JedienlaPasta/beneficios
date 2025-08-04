@@ -32,7 +32,12 @@ export default async function CampaignDetail({ id }: { id: string }) {
     : "";
   const colorEstado =
     estado === "En curso"
-      ? ["bg-green-100", "bg-green-500", "text-green-500", "border-green-200"]
+      ? [
+          "bg-emerald-100",
+          "bg-emerald-500",
+          "text-emerald-500",
+          "border-emerald-200",
+        ]
       : ["bg-slate-100", "bg-slate-500", "text-slate-500", "border-slate-200"];
 
   // return <CampaignDetailSkeleton />;

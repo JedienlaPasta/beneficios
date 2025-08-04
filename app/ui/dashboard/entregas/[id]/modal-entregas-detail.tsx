@@ -40,6 +40,11 @@ export default function ModalEntregasDetail({
   const { nombre_usuario, fecha_entrega, observacion, estado_documentos } =
     entregas;
 
+  const estadoTextColor =
+    estado_documentos === "Finalizado"
+      ? "bg-emerald-100 text-emerald-600"
+      : "bg-amber-100/60 text-amber-500/90";
+
   const handleTabChange = async (newTab: string) => {
     if (newTab !== "Capturar") {
       await setIsModalClosing(true);
@@ -89,12 +94,12 @@ export default function ModalEntregasDetail({
               <div className="flex items-center gap-3">
                 <h2 className="text-xl font-bold text-slate-700">#{folio}</h2>
                 <div
-                  className={`flex items-center gap-2 rounded-md px-2.5 py-0.5 text-sm ${estado_documentos === "Finalizado" ? "bg-slate-100 text-slate-500" : "border border-yellow-100 bg-yellow-50 text-yellow-500"}`}
+                  className={`flex items-center gap-2 rounded-md px-2.5 py-0.5 ${estadoTextColor}`}
                 >
                   {/* <span
                   className={`h-2 w-2 shrink-0 animate-pulse rounded-full ${estado_documentos === "Finalizado" ? "bg-slate-300" : "bg-yellow-400"} `}
                 /> */}
-                  <p className="text-sm">{estado_documentos}</p>
+                  <p className="text-xs font-medium">{estado_documentos}</p>
                 </div>
               </div>
               <span className="flex gap-1 text-xs text-slate-500">

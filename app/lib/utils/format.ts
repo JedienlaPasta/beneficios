@@ -27,6 +27,34 @@ export const formatTime = (date: Date | null) => {
   return hora;
 };
 
+// Formats a date to show how much time has passed
+export const formatToTimePassed = (date: Date | null) => {
+  if (!date) return "";
+
+  const now = new Date();
+  const past = new Date(date);
+  const diffMs = now.getTime() - past.getTime();
+
+  if (diffMs < 0) return "Fecha futura";
+
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return "Hoy";
+  if (diffDays === 1) return "Hace 1 día";
+  if (diffDays < 7) return `Hace ${diffDays} días`;
+  if (diffDays < 30) {
+    const weeks = Math.floor(diffDays / 7);
+    return `Hace ${weeks} semana${weeks !== 1 ? "s" : ""}`;
+  }
+  if (diffDays < 365) {
+    const months = Math.floor(diffDays / 30);
+    return `Hace ${months} mes${months !== 1 ? "es" : ""}`;
+  }
+
+  const years = Math.floor(diffDays / 365);
+  return `Hace ${years} año${years !== 1 ? "s" : ""}`;
+};
+
 // Takes: Wed Mar 05 2025 15:06:42 GMT-0300 (hora de verano de Chile) => Returns: 2025-03-05T18:06:42.000Z
 export const formatDateForDB = (dateString: string) => {
   const date = new Date(dateString);
