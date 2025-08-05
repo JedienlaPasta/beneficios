@@ -28,6 +28,7 @@ export async function importEntregas() {
   try {
     // const filePath = path.join(process.cwd(), "public", "input.xlsx");
     const filePath = path.join(process.cwd(), "public", file);
+    let skippedRows = 0;
 
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePath);
@@ -102,12 +103,14 @@ export async function importEntregas() {
         !entrega.nombre_usuario
       ) {
         console.log("Missing data:", entrega);
+        skippedRows++;
         return;
       }
       // Validate folio format: number-year-code
       const folioRegex = /^\d+-\d{2}-(TA|GA|DO)$/;
       if (!folioRegex.test(entrega.folio)) {
         console.log("Invalid folio format:", entrega.folio);
+        skippedRows++;
         return;
       }
       entregas.push(entrega);
@@ -126,7 +129,6 @@ export async function importEntregas() {
     await transaction.begin();
 
     try {
-      let skippedRows = 0;
       const notFound = [];
       const duplicated = [];
       // let index = 1;
