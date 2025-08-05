@@ -1,6 +1,6 @@
 import { getDV } from "./get-values";
 
-export const formatDate = (date: Date | null) => {
+export const formatDate = (date: Date | null, length?: string) => {
   if (!date) return "";
   const esDate = date.toLocaleString("es-ES", {
     year: "numeric",
@@ -9,7 +9,10 @@ export const formatDate = (date: Date | null) => {
   });
   const splitDate = esDate.toString().split(" ");
   const dia = splitDate[0];
-  const mes = splitDate[2][0].toUpperCase() + splitDate[2].slice(1, 3);
+  const mes =
+    length === "fullDate"
+      ? splitDate[2]
+      : splitDate[2][0].toUpperCase() + splitDate[2].slice(1, 3);
   const año = splitDate[4];
 
   return dia + " " + mes + ", " + año;

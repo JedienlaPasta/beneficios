@@ -708,7 +708,7 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
       .setText(" " + String(ciudadano.telefono || "No aplica"));
     form
       .getTextField("FechaSolicitud")
-      .setText(" " + formatDate(fecha_entrega));
+      .setText(" " + formatDate(fecha_entrega, "fullDate"));
 
     campaigns.forEach(({ campaign_name, detail }) => {
       if (campaign_name.includes("Vale de Gas")) {
@@ -729,7 +729,9 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
       .getTextField("NombreProfesional")
       .setText(" " + encargado.nombre_usuario);
     form.getTextField("Cargo").setText(" " + encargado.cargo);
-    form.getTextField("FechaEntrega").setText(" " + formatDate(fecha_entrega));
+    form
+      .getTextField("FechaEntrega")
+      .setText(" " + formatDate(fecha_entrega, "fullDate"));
 
     // Guardar el PDF en un Buffer
     const pdfBuffer = await pdfDoc.save();
