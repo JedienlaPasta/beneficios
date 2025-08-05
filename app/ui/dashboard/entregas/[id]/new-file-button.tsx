@@ -1,6 +1,5 @@
 "use client";
 import { createAndDownloadPDFByFolio } from "@/app/lib/actions/entregas";
-import React, { useState } from "react";
 import { toast } from "sonner";
 
 type Props = {
@@ -9,14 +8,12 @@ type Props = {
 };
 
 export default function GetNewFileButton({ children, folio }: Props) {
-  const [name, setName] = useState("");
-  console.log(name);
   const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     const toastId = toast.loading("Generando documento...");
 
     try {
-      const response = await createAndDownloadPDFByFolio(folio, name);
+      const response = await createAndDownloadPDFByFolio(folio);
 
       if (!response.success) {
         toast.error(response.message || "Error al descargar documento", {
@@ -104,13 +101,6 @@ export default function GetNewFileButton({ children, folio }: Props) {
   };
   return (
     <div className="flex flex-col items-end">
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Nombre Beneficiario"
-        className="rounded-md border px-2 py-1 text-xs text-slate-600 outline-none md:w-64"
-      />
       <button
         onClick={handleClick}
         className="flex items-center gap-1 rounded-md border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600 transition-all hover:border-blue-200 hover:bg-blue-100/70 active:scale-95"

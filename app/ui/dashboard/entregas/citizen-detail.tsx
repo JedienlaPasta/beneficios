@@ -3,6 +3,7 @@ import DetailRow from "../campañas/[id]/detail-card";
 import { redirect } from "next/navigation";
 import { fetchRSHByRUT } from "@/app/lib/data/rsh";
 import { getAge } from "@/app/lib/utils/get-values";
+import ChangeNameButton from "./change-name-btn";
 
 type Props = {
   rut: string;
@@ -42,9 +43,7 @@ export default async function CitizenDetail({ rut }: Props) {
         {/* Header Section */}
         <div className="flex flex-col items-start justify-between rounded-xl bg-white px-10 py-6 sm:flex-row sm:items-center">
           <div className="flex gap-4">
-            <p className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-base font-medium text-white shadow-sm">
-              {descripcion}
-            </p>
+            <ChangeNameButton description={descripcion} />
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-semibold tracking-tight text-slate-800">

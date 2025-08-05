@@ -367,7 +367,6 @@ function FilesList({
           <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
           Documentos Adjuntos
         </h3>
-
         <GetNewFileButton folio={folio}>Nueva Acta</GetNewFileButton>
       </div>
 

@@ -626,10 +626,7 @@ export const downloadPDFById = async (id: string) => {
   }
 };
 
-export const createAndDownloadPDFByFolio = async (
-  folio: string,
-  name?: string,
-) => {
+export const createAndDownloadPDFByFolio = async (folio: string) => {
   try {
     const pool = await connectToDB();
     if (!pool) {
@@ -698,9 +695,7 @@ export const createAndDownloadPDFByFolio = async (
     }
 
     const encargado = encargadoResult.recordset[0] as UserData;
-    const nombreCompleto = name
-      ? name
-      : `${ciudadano.nombres_rsh} ${ciudadano.apellidos_rsh}`;
+    const nombreCompleto = `${ciudadano.nombres_rsh} ${ciudadano.apellidos_rsh}`;
 
     const form = pdfDoc.getForm();
     form.getTextField("Folio").setText(String(folio));

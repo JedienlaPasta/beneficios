@@ -294,6 +294,99 @@ export async function updateRSH(formData: FormData) {
   }
 }
 
+const RSHUpdateNameFormSchema = z.object({
+  rut: z
+    .string()
+    .min(7, { message: "RUT debe tener al menos 7 dígitos" })
+    .regex(/^\d+$/, { message: "RUT debe contener solo números" }),
+  nombres: z
+    .string()
+    .min(3, { message: "Nombres deben tener al menos 3 caracteres" }),
+  apellidos: z
+    .string()
+    .min(3, { message: "Apellidos deben tener al menos 3 caracteres" }),
+});
+
+export async function updateRSHName(formData: FormData) {
+  console.log(formData);
+  const rut = formData.get("rut") as string;
+  const nombres = formData.get("nombres_rsh") as string;
+  const apellidos = formData.get("apellidos_rsh") as string;
+
+  const validationResult = RSHUpdateNameFormSchema.safeParse({
+    rut,
+    nombres,
+    apellidos,
+  });
+
+  if (!validationResult.success) {
+    return {
+      success: false,
+      message: validationResult.error.errors[0].message,
+    };
+  }
+
+  const formatedRut = formatRUT(rut);
+
+  try {
+    const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
+
+    const transaction = new sql.Transaction(pool);
+
+    try {
+      await transaction.begin();
+      const rshRequest = new sql.Request(transaction);
+      const rshResult = await rshRequest
+        .input("rut", sql.Int, rut)
+        .query("SELECT 1 FROM rsh WHERE rut = @rut");
+
+      if (rshResult.recordset.length === 0) {
+        return {
+          success: false,
+          message: `No se encontraron coincidencias para ${formatedRut}`,
+        };
+      }
+
+      const updateRshRequest = new sql.Request(transaction);
+      await updateRshRequest
+        .input("rut", sql.Int, validationResult.data.rut)
+        .input("nombres_rsh", sql.VarChar, validationResult.data.nombres)
+        .input("apellidos_rsh", sql.VarChar, validationResult.data.apellidos)
+        .query(`
+            UPDATE rsh
+            SET
+              nombres_rsh = @nombres_rsh,
+              apellidos_rsh = @apellidos_rsh
+            WHERE rut = @rut
+          `);
+
+      await transaction.commit();
+      await logAction("Editar", "editó el nombre de", formatedRut);
+      revalidatePath(`/dashboard/entregas/${rut}`);
+      return {
+        success: true,
+        message: `Registro ${formatedRut} actualizado exitosamente`,
+      };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  } catch (error) {
+    console.error(error || "Error actualizar el registro.");
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
 // Eliminar RSH
 export async function deleteRSH(rut: string) {
   try {

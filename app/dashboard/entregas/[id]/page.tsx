@@ -12,6 +12,7 @@ import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/modal-c
 import ModalSkeleton from "@/app/ui/modal-skeleton";
 import NewEntregaModalContext from "@/app/ui/dashboard/entregas/modal-context";
 import { formatRUT } from "@/app/lib/utils/format";
+import ChangeNameModal from "@/app/ui/dashboard/entregas/change-name-modal";
 // import { Spinner } from "@/app/ui/dashboard/loaders";
 
 type CitizenRecordProps = {
@@ -20,6 +21,7 @@ type CitizenRecordProps = {
     page?: string;
     newsocialaid?: string;
     detailsModal?: string;
+    changeNameModal?: string;
   }>;
   params: Promise<{ id: string }>;
 };
@@ -29,6 +31,7 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
   const searchParams = await props.searchParams;
   const newSocialAid = searchParams?.newsocialaid || "";
   const detailsModal = searchParams?.detailsModal || "";
+  const changeNameModal = searchParams?.changeNameModal || "";
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
   // Params (id)
@@ -50,6 +53,13 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
           <ModalEntregasDetailContext folio={detailsModal} rut={rut} />
         </Suspense>
         // </Modal>
+      )}
+      {changeNameModal === "true" && (
+        <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
+          <Modal name="changeNameModal">
+            <ChangeNameModal rut={rut} />
+          </Modal>
+        </Suspense>
       )}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 3xl:w-[96rem] 3xl:justify-self-center">
         <div>
