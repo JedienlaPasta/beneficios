@@ -56,7 +56,7 @@ export async function importEntregas() {
         return colIndex ? row.getCell(colIndex).value?.toString() || "" : "";
       };
 
-      console.log("Processing row:", rowNumber);
+      // console.log("Processing row:", rowNumber);
 
       const rawRut = getCellValue("RUT");
       if (!rawRut) return;
@@ -102,6 +102,12 @@ export async function importEntregas() {
         !entrega.nombre_usuario
       ) {
         console.log("Missing data:", entrega);
+        return;
+      }
+      // Validate folio format: number-year-code
+      const folioRegex = /^\d+-\d{2}-(TA|GA|DO)$/;
+      if (!folioRegex.test(entrega.folio)) {
+        console.log("Invalid folio format:", entrega.folio);
         return;
       }
       entregas.push(entrega);
@@ -217,7 +223,7 @@ export async function importEntregas() {
         const folio = entregaResult.recordset[0].folio;
 
         for (const beneficio of entrega.beneficios_entregados) {
-          console.log(index + ": " + beneficio.id_campaña + " - " + folio);
+          // console.log(index + ": " + beneficio.id_campaña + " - " + folio);
           const beneficioRequest = new sql.Request(transaction);
           await beneficioRequest
             .input("detalle", sql.NVarChar, beneficio.detalle)
