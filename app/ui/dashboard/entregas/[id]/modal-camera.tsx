@@ -90,8 +90,9 @@ export default function CamaraComponent({
 
       const constraints: MediaStreamConstraints = {
         video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
+          width: { ideal: 1920, min: 1280 },
+          height: { ideal: 1080, min: 720 },
+          frameRate: { ideal: 30 },
           // Priorizar cámara trasera si no se especifica un deviceId
           facingMode: deviceId ? undefined : { ideal: "environment" },
           ...(deviceId && { deviceId: { exact: deviceId } }),
@@ -182,18 +183,24 @@ export default function CamaraComponent({
             // For fullPage mode, we want to maintain aspect ratio but use more space
             if (isPortrait) {
               // Portrait: make height larger than width for better PDF usage
-              targetWidth = 1200;
-              targetHeight = Math.round((videoHeight / videoWidth) * targetWidth);
+              targetWidth = 2400;
+              targetHeight = Math.round(
+                (videoHeight / videoWidth) * targetWidth,
+              );
             } else {
               // Landscape: standard approach
-              targetWidth = 1200;
-              targetHeight = Math.round((videoHeight / videoWidth) * targetWidth);
+              targetWidth = 2400;
+              targetHeight = Math.round(
+                (videoHeight / videoWidth) * targetWidth,
+              );
             }
           } else {
             // smallDocument mode: existing logic
-            targetWidth = 1200;
-            const scaleFactor = targetWidth / (isPortrait ? videoHeight : videoWidth);
-            targetHeight = (isPortrait ? videoWidth : videoHeight) * scaleFactor;
+            targetWidth = 2400;
+            const scaleFactor =
+              targetWidth / (isPortrait ? videoHeight : videoWidth);
+            targetHeight =
+              (isPortrait ? videoWidth : videoHeight) * scaleFactor;
           }
 
           canvasRef.current.width = targetWidth;
