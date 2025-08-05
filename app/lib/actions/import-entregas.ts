@@ -129,7 +129,7 @@ export async function importEntregas() {
       let skippedRows = 0;
       const notFound = [];
       const duplicated = [];
-      let index = 1;
+      // let index = 1;
       for (const entrega of entregas) {
         const nombre = entrega.nombre_usuario;
         const userRequest = new sql.Request(transaction);
@@ -244,7 +244,7 @@ export async function importEntregas() {
               WHERE id = @id_campaña
             `);
         }
-        index++;
+        // index++;
       }
 
       await transaction.commit();
