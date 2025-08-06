@@ -180,20 +180,9 @@ export default function CamaraComponent({
           let targetWidth, targetHeight;
 
           if (pdfMode === "fullPage") {
-            // For fullPage mode, we want to maintain aspect ratio but use more space
-            if (isPortrait) {
-              // Portrait: make height larger than width for better PDF usage
-              targetWidth = 2400;
-              targetHeight = Math.round(
-                (videoHeight / videoWidth) * targetWidth,
-              );
-            } else {
-              // Landscape: standard approach
-              targetWidth = 2400;
-              targetHeight = Math.round(
-                (videoHeight / videoWidth) * targetWidth,
-              );
-            }
+            // For fullPage mode, use 3:4 aspect ratio (card/A4-like)
+            targetWidth = 2400;
+            targetHeight = Math.round(targetWidth * (4/3)); // 3:4 aspect ratio
           } else {
             // smallDocument mode: existing logic
             targetWidth = 2400;
@@ -231,14 +220,45 @@ export default function CamaraComponent({
               rotatedWidth,
             );
           } else {
-            // For fullPage mode or landscape, draw normally without rotation
-            context.drawImage(
-              videoRef.current,
-              0,
-              0,
-              targetWidth,
-              targetHeight,
-            );
+            // For fullPage mode or landscape, draw with cropping for 3:4 aspect ratio
+            if (pdfMode === "fullPage") {
+              // Calculate source dimensions to crop from center with 3:4 ratio
+              const sourceAspectRatio = videoWidth / videoHeight;
+              const targetAspectRatio = 3 / 4;
+              
+              let sourceX = 0, sourceY = 0, sourceWidth = videoWidth, sourceHeight = videoHeight;
+              
+              if (sourceAspectRatio > targetAspectRatio) {
+                // Video is wider than target, crop sides
+                sourceWidth = videoHeight * targetAspectRatio;
+                sourceX = (videoWidth - sourceWidth) / 2;
+              } else {
+                // Video is taller than target, crop top/bottom
+                sourceHeight = videoWidth / targetAspectRatio;
+                sourceY = (videoHeight - sourceHeight) / 2;
+              }
+              
+              context.drawImage(
+                videoRef.current,
+                sourceX,
+                sourceY,
+                sourceWidth,
+                sourceHeight,
+                0,
+                0,
+                targetWidth,
+                targetHeight,
+              );
+            } else {
+              // Regular drawing for non-fullPage mode
+              context.drawImage(
+                videoRef.current,
+                0,
+                0,
+                targetWidth,
+                targetHeight,
+              );
+            }
           }
 
           context.restore();

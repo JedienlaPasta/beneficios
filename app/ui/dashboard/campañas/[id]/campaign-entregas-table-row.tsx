@@ -25,7 +25,7 @@ export default function TableRow({ item }: TableRowProps) {
   };
 
   return (
-    <tr className="grid grid-cols-26 gap-8 text-nowrap px-8 text-sm tabular-nums transition-colors hover:bg-slate-200/50">
+    <tr className="grid grid-cols-26 gap-8 text-nowrap px-5 text-sm tabular-nums transition-colors hover:bg-slate-200/50 md:px-8">
       <td className="col-span-5 py-4">
         <p
           onClick={handleClick}

@@ -23,15 +23,13 @@ export default async function EntregasTable({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[44rem]">
           <thead className="border-y border-slate-200/70 bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-600/70">
-            <tr className="grid grid-cols-26 gap-8">
-              <th className="col-span-7 py-4 pl-10 text-left font-normal">
-                Folio
-              </th>
+            <tr className="grid grid-cols-26 gap-8 px-5 md:px-8">
+              <th className="col-span-7 py-4 text-left font-normal">Folio</th>
               <th className="col-span-10 py-4 text-left font-normal">
                 Encargado
               </th>
               <th className="col-span-5 py-4 font-normal">Documentos</th>
-              <th className="col-span-4 py-4 pr-10 text-right font-normal">
+              <th className="col-span-4 py-4 text-right font-normal">
                 Entrega
               </th>
             </tr>

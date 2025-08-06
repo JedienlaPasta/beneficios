@@ -39,9 +39,9 @@ export default async function CitizenDetail({ rut }: Props) {
 
   return (
     <div className="items-centers relative flex flex-col justify-center">
-      <div className="grid gap-4 rounded-xl">
+      <div className="grid gap-4 rounded-xl md:gap-6">
         {/* Header Section */}
-        <div className="flex flex-col items-start justify-between rounded-xl bg-white px-10 py-6 sm:flex-row sm:items-center">
+        <div className="flex flex-col items-start justify-between gap-2 rounded-xl bg-white px-3 py-4 sm:flex-row lg:px-8 lg:py-6">
           <div className="flex gap-4">
             <ChangeNameButton description={descripcion} />
             <div className="flex flex-col">
@@ -49,30 +49,35 @@ export default async function CitizenDetail({ rut }: Props) {
                 <h1 className="text-xl font-semibold tracking-tight text-slate-800">
                   {nombres_rsh + " " + apellidos_rsh}
                 </h1>
-                <div className="hidden items-center gap-1 rounded-md bg-slate-200 px-2 py-0.5 sm:flex">
+                <div className="hidden items-center gap-1 rounded-md bg-slate-200 px-2 py-0.5 lg:flex">
                   <p className="text-xs font-medium text-slate-500">
                     {"F#" + folio}
                   </p>
                 </div>
               </div>
-              <p className="text-sm font-medium text-slate-500">
+              <span className="flex items-start gap-2 text-sm font-medium text-slate-500">
+                <div className="flex items-center gap-1 rounded-md bg-slate-200 px-2 py-0.5 lg:hidden">
+                  <p className="text-xs font-medium text-slate-500">
+                    {"F#" + folio}
+                  </p>
+                </div>
                 {formattedRut}
-              </p>
+              </span>
             </div>
           </div>
-          <span className="flex flex-col text-slate-500">
+          <span className="flex flex-col place-self-center text-slate-500 sm:place-self-end">
             <p className="text-xs uppercase tracking-wider">Tramo</p>
             <p className="text-2xl font-bold text-slate-600">{tramo}%</p>
           </span>
         </div>
 
         {/* Details Grid */}
-        <div className="mt-2 grid auto-rows-fr gap-6 xl:grid-cols-2 2xl:grid-cols-3">
+        <div className="grid auto-rows-fr gap-4 md:gap-6 xl:grid-cols-2 2xl:grid-cols-3">
           <div className="rounded-xl border border-slate-200 bg-gray-100">
-            <h2 className="px-10 py-4 text-sm font-medium text-slate-400">
+            <h2 className="px-5 py-4 text-sm font-medium text-slate-400 lg:px-8">
               Información General
             </h2>
-            <div className="rounded-xl bg-white px-10 py-2">
+            <div className="rounded-xl bg-white px-5 py-1 lg:px-8 lg:py-2">
               <DetailRow
                 name="Nacionalidad"
                 value={nacionalidad || "No especificada"}
@@ -88,10 +93,10 @@ export default async function CitizenDetail({ rut }: Props) {
           </div>
           {/* 2nd segment */}
           <div className="rounded-xl border border-slate-200 bg-gray-100">
-            <h2 className="px-10 py-4 text-sm font-medium text-slate-400">
+            <h2 className="px-5 py-4 text-sm font-medium text-slate-400 lg:px-8">
               Información Contacto RSH
             </h2>
-            <div className="rounded-xl bg-white px-10 py-2">
+            <div className="rounded-xl bg-white px-5 py-1 lg:px-8 lg:py-2">
               <DetailRow
                 name="Teléfono"
                 value={telefono ? telefono.toString() : "No registrado"}
@@ -107,10 +112,10 @@ export default async function CitizenDetail({ rut }: Props) {
           </div>
           {/* 3rd segment */}
           <div className="rounded-xl border border-slate-200 bg-gray-100 xl:col-span-2 2xl:col-span-1">
-            <h2 className="px-10 py-4 text-sm font-medium text-slate-400">
+            <h2 className="px-5 py-4 text-sm font-medium text-slate-400 lg:px-8">
               Información Contacto Modificado
             </h2>
-            <div className="rounded-xl bg-white px-10 py-2">
+            <div className="rounded-xl bg-white px-5 py-1 lg:px-8 lg:py-2">
               <DetailRow
                 name="Teléfono"
                 value={formatPhone(telefono_mod) || "No registrado"}

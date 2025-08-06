@@ -45,7 +45,7 @@ export default function RSHTableRow({
   const verifiedTramo = tramo !== null ? tramo : 0;
 
   return (
-    <tr className="grid grid-cols-26 gap-9 text-nowrap px-6 text-sm tabular-nums transition-colors hover:bg-slate-50">
+    <tr className="grid grid-cols-26 gap-9 text-nowrap px-5 text-sm tabular-nums transition-colors hover:bg-slate-50 md:px-8">
       <td className="group col-span-4 flex items-center py-3.5 text-slate-600">
         <p onClick={handleClick} className="cursor-pointer hover:underline">
           {formattedRut}

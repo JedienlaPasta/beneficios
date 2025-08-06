@@ -44,7 +44,7 @@ export default function TableRow({
   };
 
   return (
-    <tr className="grid grid-cols-26 gap-9 text-nowrap px-6 text-sm tabular-nums transition-colors hover:bg-slate-50">
+    <tr className="grid grid-cols-26 gap-9 text-nowrap px-5 text-sm tabular-nums transition-colors hover:bg-slate-50 md:px-8">
       <td className="group col-span-5 flex min-h-12 items-center py-5 text-slate-600">
         <div className="relative flex items-center gap-2">
           <div

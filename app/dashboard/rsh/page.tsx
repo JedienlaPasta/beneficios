@@ -57,7 +57,7 @@ export default async function RSH(props: RSHProps) {
       <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
         <RSHGeneralInfo />
         <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50">
-          <div className="flex flex-wrap items-center justify-between gap-4 px-6 pt-4 3xl:w-[96rem] 3xl:self-center">
+          <div className="flex flex-wrap items-center justify-between gap-4 px-5 pt-4 md:px-8 3xl:w-[96rem] 3xl:self-center">
             <span className="flex flex-wrap items-center gap-2 text-nowrap text-lg font-semibold text-slate-800">
               <p>Ciudadanos Registrados</p>
             </span>

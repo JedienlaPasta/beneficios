@@ -22,8 +22,8 @@ export default function TableRow({ item }: { item: EntregasTable }) {
       : "bg-amber-100/60 text-amber-500/90";
 
   return (
-    <tr className="grid grid-cols-26 gap-8 text-nowrap text-sm tabular-nums transition-colors hover:bg-slate-200/50">
-      <td className="col-span-7 flex min-h-12 items-center px-10">
+    <tr className="grid grid-cols-26 gap-8 text-nowrap px-5 text-sm tabular-nums transition-colors hover:bg-slate-200/50 md:px-8">
+      <td className="col-span-7 flex min-h-12 items-center">
         <p
           onClick={handleClick}
           className="cursor-pointer text-slate-600 hover:underline"
@@ -41,7 +41,7 @@ export default function TableRow({ item }: { item: EntregasTable }) {
           <p className="z-10">{estado_documentos}</p>
         </div>
       </td>
-      <td className="col-span-4 flex items-center justify-end px-10 py-3 text-right text-slate-600">
+      <td className="col-span-4 flex items-center justify-end py-3 text-right text-slate-600">
         <div>
           <p>{fecha}</p>
           <p className="text-xs text-slate-500">{hora}</p>
