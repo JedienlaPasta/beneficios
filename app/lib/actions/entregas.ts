@@ -148,11 +148,22 @@ export const createEntrega = async (id: string, formData: FormData) => {
           };
         }
 
+        let fechaEntregaConHora;
+        if (fecha_entrega) {
+          const fecha = new Date(fecha_entrega as string);
+          fecha.setHours(12, 0, 0, 0);
+          fechaEntregaConHora = fecha;
+        } else {
+          const hoy = new Date();
+          hoy.setHours(12, 0, 0, 0);
+          fechaEntregaConHora = hoy;
+        }
+
         const entregaRequest = new sql.Request(transaction);
         await entregaRequest
           .input("folio", sql.VarChar, folio)
           .input("observacion", sql.VarChar, observaciones)
-          .input("fecha_entrega", sql.DateTime, fecha_entrega)
+          .input("fecha_entrega", sql.DateTime, fechaEntregaConHora)
           .input("rut", sql.Int, rut)
           .input("id_usuario", sql.UniqueIdentifier, userId).query(`
             INSERT INTO entregas (folio, observacion, fecha_entrega, rut, id_usuario)
