@@ -18,12 +18,12 @@ export default function BoardCube({
   const isToday = dateStr === today;
 
   const stateColor = [
-    "bg-slate-200/60 border-slate-300/60",
-    "bg-green-100/80 border-green-300/80",
-    "bg-green-100 border-green-300",
-    "bg-green-200 border-green-400",
-    "bg-green-300 border-green-500",
-    "bg-green-400 border-green-600",
+    "bg-slate-200/60 border-slate-300/40",
+    "bg-emerald-100/80 border-emerald-200/80",
+    "bg-emerald-100 border-emerald-200",
+    "bg-emerald-200 border-emerald-300",
+    "bg-emerald-300 border-emerald-400",
+    "bg-emerald-400 border-emerald-500",
   ];
 
   // Select the color based on count thresholds—or highlight if today.
@@ -42,7 +42,7 @@ export default function BoardCube({
   // const cubeClass = disabled
   //   ? "bg-slate-50 border-slate-200/90"
   //   : isToday
-  //     ? "bg-green-300 border-blue-blue-400"
+  //     ? "bg-emerald-300 border-blue-blue-400"
   //     : stateColor[getStateFromCount(count, thresholds)];
 
   const year = dateStr?.slice(0, 4);
@@ -58,7 +58,7 @@ export default function BoardCube({
     >
       {isToday && (
         <span
-          className={`group relative flex size-2 items-center justify-center rounded-[2px] border !bg-green-100 ${clsx(cubeClass)}`}
+          className={`group relative flex size-2 items-center justify-center rounded-[2px] border !bg-emerald-100 ${clsx(cubeClass)}`}
         ></span>
       )}
       {!disabled && (
