@@ -159,9 +159,11 @@ export const createEntrega = async (id: string, formData: FormData) => {
           fechaEntregaConHora = hoy;
         }
 
+        const upperCaseFolio = String(folio).toUpperCase();
+
         const entregaRequest = new sql.Request(transaction);
         await entregaRequest
-          .input("folio", sql.VarChar, folio)
+          .input("folio", sql.VarChar, upperCaseFolio)
           .input("observacion", sql.VarChar, observaciones)
           .input("fecha_entrega", sql.DateTime, fechaEntregaConHora)
           .input("rut", sql.Int, rut)

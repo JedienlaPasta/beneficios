@@ -5,23 +5,48 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { deletePDFById, downloadPDFById } from "@/app/lib/actions/entregas";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function Files({ item }: { item: EntregasFiles }) {
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
+  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [countdown, setCountdown] = useState(5);
   const router = useRouter();
 
   const deleteFileWithId = deletePDFById.bind(null, item.id);
 
   const handleDeleteButton = async () => {
     setShowConfirmModal(true);
+    setIsDisabled(true);
+    setCountdown(5);
   };
+
+  // Effect para manejar el countdown
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (isDisabled && countdown > 0) {
+      interval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            setIsDisabled(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isDisabled, countdown]);
 
   const confirmDelete = async () => {
     setIsDisabled(true);
     toast.promise(deleteFileWithId(), {
-      loading: "Eliminando...",
+      loading: "Eliminando documento...",
       success: (response) => {
         setShowConfirmModal(false);
         setIsDisabled(false);
@@ -38,7 +63,7 @@ export function Files({ item }: { item: EntregasFiles }) {
     e.stopPropagation();
 
     // Create a toast ID to reference later
-    const toastId = toast.loading("Descargando documento...");
+    const toastId = toast.loading("Abriendo documento...");
 
     try {
       const response = await downloadPDFById(item.id);
@@ -97,11 +122,16 @@ export function Files({ item }: { item: EntregasFiles }) {
       </div>
 
       {/* Overlay with buttons that appear on hover */}
-      <div className="absolute inset-0 flex items-end justify-center gap-2 rounded-md bg-slate-800/70 pb-3 opacity-0 transition-opacity group-hover:opacity-100">
+      <div
+        className="absolute inset-0 flex items-end justify-center gap-2 rounded-md bg-slate-800/70 pb-3 opacity-0 transition-opacity group-hover:opacity-100"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <button
-          className="flex h-8 w-8 items-center justify-center rounded bg-gray-500 text-white transition-transform hover:scale-110 hover:bg-blue-500 active:scale-90"
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-gray-500 text-white transition-all hover:bg-blue-500 active:scale-90"
           onClick={handleDownload}
-          title="Descargar"
+          disabled={!isHovered}
+          title="Ver"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -119,8 +149,9 @@ export function Files({ item }: { item: EntregasFiles }) {
           </svg>
         </button>
         <button
-          className="flex h-8 w-8 items-center justify-center rounded bg-gray-500 text-white transition-transform hover:scale-110 hover:bg-red-500 active:scale-90"
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-gray-500 text-white transition-all hover:bg-red-500 active:scale-90"
           onClick={handleDeleteButton}
+          disabled={!isHovered}
           title="Eliminar"
         >
           <svg
@@ -152,7 +183,6 @@ export function Files({ item }: { item: EntregasFiles }) {
             <div className="flex justify-end space-x-4">
               <button
                 type="button"
-                disabled={isDisabled}
                 onClick={() => setShowConfirmModal(false)}
                 className={`rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 ${isDisabled ? "cursor-not-allowed" : "hover:bg-gray-200"}`}
               >
@@ -164,7 +194,9 @@ export function Files({ item }: { item: EntregasFiles }) {
                 onClick={confirmDelete}
                 className={`rounded-md px-4 py-2 text-sm font-medium text-white ${isDisabled ? "cursor-not-allowed bg-red-300" : "bg-red-500 hover:bg-red-600"}`}
               >
-                Eliminar
+                {isDisabled && countdown > 0
+                  ? `Eliminar (${countdown})`
+                  : "Eliminar"}
               </button>
             </div>
           </div>
