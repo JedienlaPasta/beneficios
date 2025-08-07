@@ -17,6 +17,8 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Camara from "./modal-camera";
 import { useRouter, useSearchParams } from "next/navigation";
+import { toggleEntregaStatus } from "@/app/lib/actions/entregas";
+import { toast } from "sonner";
 
 type Props = {
   rut: string;
@@ -35,6 +37,7 @@ export default function ModalEntregasDetail({
 }: Props) {
   const [tab, setTab] = useState("Resumen");
   const [isModalClosing, setIsModalClosing] = useState(false);
+  const [isToggleButtonDisabled, setIsToggleButtonDisabled] = useState(false);
 
   const formattedRUT = formatRUT(rut);
   const { nombre_usuario, fecha_entrega, observacion, estado_documentos } =
@@ -73,6 +76,32 @@ export default function ModalEntregasDetail({
     await setIsModalClosing(true);
   };
 
+  const handleEntregaStatus = async () => {
+    setIsToggleButtonDisabled(true);
+    const newStatus =
+      estado_documentos === "Finalizado" ? "En curso" : "Finalizado";
+    const toastId = toast.loading("Cambiando estado...");
+    try {
+      const response = await toggleEntregaStatus(folio, newStatus);
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+
+      toast.success(response.message, { id: toastId });
+      router.refresh();
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Error al cambiar el estado de la entrega";
+      toast.error(message, { id: toastId });
+    } finally {
+      setTimeout(() => {
+        setIsToggleButtonDisabled(false);
+      }, 1000);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div
@@ -93,14 +122,16 @@ export default function ModalEntregasDetail({
               <span className="text-xs font-medium text-slate-500">Folio</span>
               <div className="flex items-center gap-3">
                 <h2 className="text-xl font-bold text-slate-700">#{folio}</h2>
-                <div
+                <button
+                  onClick={handleEntregaStatus}
+                  disabled={isToggleButtonDisabled}
                   className={`flex items-center gap-2 rounded-md px-2.5 py-0.5 ${estadoTextColor}`}
                 >
                   {/* <span
                   className={`h-2 w-2 shrink-0 animate-pulse rounded-full ${estado_documentos === "Finalizado" ? "bg-slate-300" : "bg-yellow-400"} `}
                 /> */}
                   <p className="text-xs font-medium">{estado_documentos}</p>
-                </div>
+                </button>
               </div>
               <span className="flex gap-1 text-xs text-slate-500">
                 Beneficiario: <p className="text-blue-700">{formattedRUT}</p>

@@ -774,3 +774,41 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
     };
   }
 };
+
+export const toggleEntregaStatus = async (folio: string, newStatus: string) => {
+  try {
+    const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
+
+    const request = pool.request();
+    const result = await request
+      .input("folio", sql.NVarChar, folio)
+      .input("estado", sql.NVarChar, newStatus).query(`
+      UPDATE entregas
+      SET estado_documentos = @estado
+      WHERE folio = @folio
+    `);
+    if (result.rowsAffected[0] === 0) {
+      return {
+        success: false,
+        message: "Entrega no encontrada",
+      };
+    }
+    return {
+      success: true,
+      message: "Estado actualizado",
+    };
+  } catch (error) {
+    console.error("Error al actualizar el estado de la entrega:", error);
+    return {
+      success: false,
+      message: "Error al cambiar el estado de la entrega",
+    };
+  }
+};
