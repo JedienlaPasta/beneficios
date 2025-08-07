@@ -35,12 +35,10 @@ const fileModeList = [
   {
     id: "1",
     name: "Documento Pequeño",
-    mode: "smallDocument",
   },
   {
     id: "2",
     name: "Página Completa",
-    mode: "fullPage",
   },
 ];
 
@@ -217,7 +215,7 @@ export default function CamaraComponent({
 
           let targetWidth, targetHeight;
 
-          if (pdfMode === "fullPage") {
+          if (pdfMode === "Página Completa") {
             // For fullPage mode, use 3:4 aspect ratio (card/A4-like)
             targetWidth = 2400;
             targetHeight = Math.round(targetWidth * (4 / 3)); // 3:4 aspect ratio
@@ -237,7 +235,7 @@ export default function CamaraComponent({
 
           context.save();
 
-          if (isPortrait && pdfMode === "smallDocument") {
+          if (isPortrait && pdfMode === "Documento Pequeño") {
             // Only rotate for smallDocument mode
             const scaleFactor = targetWidth / videoHeight;
             const rotatedWidth = videoHeight * scaleFactor;
@@ -259,7 +257,7 @@ export default function CamaraComponent({
             );
           } else {
             // For fullPage mode or landscape, draw with cropping for 3:4 aspect ratio
-            if (pdfMode === "fullPage") {
+            if (pdfMode === "Página Completa") {
               // Calculate source dimensions to crop from center with 3:4 ratio
               const sourceAspectRatio = videoWidth / videoHeight;
               const targetAspectRatio = 3 / 4;
@@ -351,7 +349,7 @@ export default function CamaraComponent({
 
       const { width, height } = page.getSize();
 
-      if (pdfMode === "fullPage") {
+      if (pdfMode === "Página Completa") {
         // Full page mode - image takes up the entire page
         const imageAspectRatio = embeddedImage.width / embeddedImage.height;
         const pageAspectRatio = width / height;
