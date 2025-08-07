@@ -9,6 +9,20 @@ import Input from "../campañas/new-campaign-input";
 import { SubmitButton } from "../submit-button";
 import CustomAntdDatePicker from "../datepicker";
 import dayjs from "dayjs";
+import UserDropdown from "./user-dropdown";
+
+const usersList = [
+  {
+    id: "1",
+    name: "Karina Hormazabal",
+    email: "khormazabal@temporal.cl",
+  },
+  {
+    id: "2",
+    name: "Jenifer Rojas",
+    email: "jrojas@temporal.com",
+  },
+];
 
 type NewModalFormProps = {
   activeCampaigns?: Campaign[];
@@ -221,7 +235,16 @@ export default function NewModalFormManual({
         />
       </div>
 
-      <Input
+      <UserDropdown
+        placeHolder="tu@correo.com..."
+        label="Correo"
+        name="correo"
+        userEmail={correo}
+        setUserEmail={setCorreo}
+        usersList={usersList}
+      />
+
+      {/* <Input
         placeHolder="tu@correo.com..."
         label="Correo"
         type="email"
@@ -229,7 +252,7 @@ export default function NewModalFormManual({
         value={correo}
         setData={setCorreo}
         required
-      />
+      /> */}
 
       <div className="max-h-[400px] overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-4 scrollbar-hide">
         <div className="justify- mb-4 flex items-baseline justify-between">
