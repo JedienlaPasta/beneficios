@@ -50,7 +50,7 @@ type CameraDevice = {
   kind: string;
 };
 
-type PDFMode = "fullPage" | "smallDocument";
+// type PDFMode = "fullPage" | "smallDocument";
 
 export default function CamaraComponent({
   folio,
