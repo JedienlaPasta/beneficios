@@ -203,7 +203,7 @@ export default function CamaraComponent({
     };
   }, [isActive]);
 
-  const takePhoto = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const takePhoto = async () => {
     if (videoRef.current && canvasRef.current) {
       setIsLoading(true);
 
@@ -238,69 +238,24 @@ export default function CamaraComponent({
           context.save();
 
           if (isPortrait && pdfMode === "smallDocument") {
-            // Remove rotation - draw normally with 3:4 aspect ratio (3:width, 4:height)
-            const targetAspectRatio = 3 / 4; // width/height ratio
-            const currentWidth = targetWidth; // Keep the current width
-            const newHeight = Math.round(currentWidth / targetAspectRatio); // Calculate height for 3:4 ratio (height should be larger)
+            // Only rotate for smallDocument mode
+            const scaleFactor = targetWidth / videoHeight;
+            const rotatedWidth = videoHeight * scaleFactor;
+            const rotatedHeight = videoWidth * scaleFactor;
 
-            // Update canvas dimensions
-            canvasRef.current.width = currentWidth;
-            canvasRef.current.height = newHeight;
-
-            // Get the visible area of the video element
-            const videoElement = videoRef.current;
-            const videoRect = videoElement.getBoundingClientRect();
-            const videoDisplayWidth = videoRect.width;
-            const videoDisplayHeight = videoRect.height;
-
-            // Calculate the actual video dimensions that are visible
-            const videoAspectRatio = videoWidth / videoHeight;
-            const displayAspectRatio = videoDisplayWidth / videoDisplayHeight;
-
-            let visibleVideoWidth,
-              visibleVideoHeight,
-              offsetX = 0,
-              offsetY = 0;
-
-            if (videoAspectRatio > displayAspectRatio) {
-              // Video is wider than display area, so top/bottom are visible, sides are cropped
-              visibleVideoHeight = videoHeight;
-              visibleVideoWidth = videoHeight * displayAspectRatio;
-              offsetX = (videoWidth - visibleVideoWidth) / 2;
-            } else {
-              // Video is taller than display area, so left/right are visible, top/bottom are cropped
-              visibleVideoWidth = videoWidth;
-              visibleVideoHeight = videoWidth / displayAspectRatio;
-              offsetY = (videoHeight - visibleVideoHeight) / 2;
-            }
-
-            // Now crop the visible area to 3:4 aspect ratio
-            const visibleAspectRatio = visibleVideoWidth / visibleVideoHeight;
-            let sourceX = offsetX,
-              sourceY = offsetY,
-              sourceWidth = visibleVideoWidth,
-              sourceHeight = visibleVideoHeight;
-
-            if (visibleAspectRatio > targetAspectRatio) {
-              // Visible area is wider than target, crop sides
-              sourceWidth = visibleVideoHeight * targetAspectRatio;
-              sourceX = offsetX + (visibleVideoWidth - sourceWidth) / 2;
-            } else {
-              // Visible area is taller than target, crop top/bottom
-              sourceHeight = visibleVideoWidth / targetAspectRatio;
-              sourceY = offsetY + (visibleVideoHeight - sourceHeight) / 2;
-            }
+            context.translate(targetWidth / 2, targetHeight / 2);
+            context.rotate(-Math.PI / 2);
 
             context.drawImage(
               videoRef.current,
-              sourceX,
-              sourceY,
-              sourceWidth,
-              sourceHeight,
               0,
               0,
-              currentWidth,
-              newHeight,
+              videoWidth,
+              videoHeight,
+              -rotatedHeight / 2,
+              -rotatedWidth / 2,
+              rotatedHeight,
+              rotatedWidth,
             );
           } else {
             // For fullPage mode or landscape, draw with cropping for 3:4 aspect ratio
@@ -359,28 +314,6 @@ export default function CamaraComponent({
             id: "PHOTO_CAPTURE_TOAST_ID",
             duration: 3000,
           });
-
-          e.preventDefault();
-          const element = document.getElementById("preview_image");
-          if (element) {
-            const isMobile = window.innerWidth <= 768;
-            if (!isMobile) return;
-
-            const scrollableContainer =
-              document.getElementById("content-container");
-            if (scrollableContainer) {
-              // Get element position relative to the scrollable container
-              const containerRect = scrollableContainer.getBoundingClientRect();
-              const elementRect = element.getBoundingClientRect();
-              const relativeTop = elementRect.top - containerRect.top;
-
-              // Scroll within the container
-              scrollableContainer.scrollTo({
-                top: scrollableContainer.scrollTop + relativeTop,
-                behavior: "smooth",
-              });
-            }
-          }
         }
       } catch (err) {
         console.error("Error al tomar la foto:", err);
