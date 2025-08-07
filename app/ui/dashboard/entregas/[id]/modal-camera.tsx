@@ -6,6 +6,43 @@ import { PDFDocument } from "pdf-lib";
 import { uploadPDFByFolio } from "@/app/lib/actions/entregas";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
+import FileNameDropdown from "./file-name-dropdown";
+
+const filesList = [
+  {
+    id: "1",
+    name: "Cédula y Entregas",
+  },
+  {
+    id: "2",
+    name: "Cartola RSH",
+  },
+  {
+    id: "3",
+    name: "Acta de Entrega",
+  },
+  {
+    id: "3",
+    name: "Cédula",
+  },
+  {
+    id: "3",
+    name: "Entregas",
+  },
+];
+
+const fileModeList = [
+  {
+    id: "1",
+    name: "Documento Pequeño",
+    mode: "smallDocument",
+  },
+  {
+    id: "2",
+    name: "Página Completa",
+    mode: "fullPage",
+  },
+];
 
 type CameraDevice = {
   deviceId: string;
@@ -36,8 +73,9 @@ export default function CamaraComponent({
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
 
   // PDF mode and document name
-  const [pdfMode, setPdfMode] = useState<PDFMode>("smallDocument");
-  const [documentName, setDocumentName] = useState("Cedula");
+  const [pdfMode, setPdfMode] = useState<string>(fileModeList[0].name);
+
+  const [documentName, setDocumentName] = useState<string>(filesList[0].name);
 
   const router = useRouter();
 
@@ -165,7 +203,7 @@ export default function CamaraComponent({
     };
   }, [isActive]);
 
-  const takePhoto = async () => {
+  const takePhoto = async (e: React.MouseEvent<HTMLButtonElement>) => {
     if (videoRef.current && canvasRef.current) {
       setIsLoading(true);
 
@@ -182,7 +220,7 @@ export default function CamaraComponent({
           if (pdfMode === "fullPage") {
             // For fullPage mode, use 3:4 aspect ratio (card/A4-like)
             targetWidth = 2400;
-            targetHeight = Math.round(targetWidth * (4/3)); // 3:4 aspect ratio
+            targetHeight = Math.round(targetWidth * (4 / 3)); // 3:4 aspect ratio
           } else {
             // smallDocument mode: existing logic
             targetWidth = 2400;
@@ -200,24 +238,42 @@ export default function CamaraComponent({
           context.save();
 
           if (isPortrait && pdfMode === "smallDocument") {
-            // Only rotate for smallDocument mode
-            const scaleFactor = targetWidth / videoHeight;
-            const rotatedWidth = videoHeight * scaleFactor;
-            const rotatedHeight = videoWidth * scaleFactor;
+            // Remove rotation - draw normally with 3:4 aspect ratio
+            const targetAspectRatio = 3 / 4;
+            const currentWidth = targetWidth; // Keep the current width
+            const newHeight = Math.round(currentWidth * (4 / 3)); // Calculate height for 3:4 ratio
 
-            context.translate(targetWidth / 2, targetHeight / 2);
-            context.rotate(-Math.PI / 2);
+            // Update canvas dimensions
+            canvasRef.current.width = currentWidth;
+            canvasRef.current.height = newHeight;
+
+            // Calculate source cropping for 3:4 aspect ratio
+            const sourceAspectRatio = videoWidth / videoHeight;
+            let sourceX = 0,
+              sourceY = 0,
+              sourceWidth = videoWidth,
+              sourceHeight = videoHeight;
+
+            if (sourceAspectRatio > targetAspectRatio) {
+              // Video is wider than target, crop sides
+              sourceWidth = videoHeight * targetAspectRatio;
+              sourceX = (videoWidth - sourceWidth) / 2;
+            } else {
+              // Video is taller than target, crop top/bottom
+              sourceHeight = videoWidth / targetAspectRatio;
+              sourceY = (videoHeight - sourceHeight) / 2;
+            }
 
             context.drawImage(
               videoRef.current,
+              sourceX,
+              sourceY,
+              sourceWidth,
+              sourceHeight,
               0,
               0,
-              videoWidth,
-              videoHeight,
-              -rotatedHeight / 2,
-              -rotatedWidth / 2,
-              rotatedHeight,
-              rotatedWidth,
+              currentWidth,
+              newHeight,
             );
           } else {
             // For fullPage mode or landscape, draw with cropping for 3:4 aspect ratio
@@ -225,9 +281,12 @@ export default function CamaraComponent({
               // Calculate source dimensions to crop from center with 3:4 ratio
               const sourceAspectRatio = videoWidth / videoHeight;
               const targetAspectRatio = 3 / 4;
-              
-              let sourceX = 0, sourceY = 0, sourceWidth = videoWidth, sourceHeight = videoHeight;
-              
+
+              let sourceX = 0,
+                sourceY = 0,
+                sourceWidth = videoWidth,
+                sourceHeight = videoHeight;
+
               if (sourceAspectRatio > targetAspectRatio) {
                 // Video is wider than target, crop sides
                 sourceWidth = videoHeight * targetAspectRatio;
@@ -237,7 +296,7 @@ export default function CamaraComponent({
                 sourceHeight = videoWidth / targetAspectRatio;
                 sourceY = (videoHeight - sourceHeight) / 2;
               }
-              
+
               context.drawImage(
                 videoRef.current,
                 sourceX,
@@ -273,6 +332,28 @@ export default function CamaraComponent({
             id: "PHOTO_CAPTURE_TOAST_ID",
             duration: 3000,
           });
+
+          e.preventDefault();
+          const element = document.getElementById("preview_image");
+          if (element) {
+            const isMobile = window.innerWidth <= 768;
+            if (!isMobile) return;
+
+            const scrollableContainer =
+              document.getElementById("content-container");
+            if (scrollableContainer) {
+              // Get element position relative to the scrollable container
+              const containerRect = scrollableContainer.getBoundingClientRect();
+              const elementRect = element.getBoundingClientRect();
+              const relativeTop = elementRect.top - containerRect.top;
+
+              // Scroll within the container
+              scrollableContainer.scrollTo({
+                top: scrollableContainer.scrollTop + relativeTop,
+                behavior: "smooth",
+              });
+            }
+          }
         }
       } catch (err) {
         console.error("Error al tomar la foto:", err);
@@ -447,7 +528,7 @@ export default function CamaraComponent({
 
             <div className="grid gap-4 sm:grid-cols-2">
               {/* Document Name Input */}
-              <div>
+              {/* <div>
                 <label className="mb-2 block text-sm font-medium text-slate-600">
                   Nombre del Documento
                 </label>
@@ -458,11 +539,28 @@ export default function CamaraComponent({
                   placeholder="Ingresa el nombre del documento"
                   className="h-10 w-full rounded-lg border border-gray-300 px-3.5 text-sm text-slate-700 outline-none focus:border-blue-500"
                 />
-              </div>
+              </div> */}
+              <FileNameDropdown
+                placeHolder="Nombre archivo..."
+                label="Nombre del Documento"
+                name="nombre_documento"
+                value={documentName}
+                setValue={setDocumentName}
+                valuesList={filesList}
+              />
+
+              <FileNameDropdown
+                placeHolder="Modo pdf..."
+                label="Modo de PDF"
+                name="modo_pdf"
+                value={pdfMode}
+                setValue={setPdfMode}
+                valuesList={fileModeList}
+              />
 
               {/* PDF Mode Selection */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-600">
+              {/* <div>
+                <label className="mb-1 block text-xs text-slate-500">
                   Modo de PDF
                 </label>
                 <select
@@ -473,7 +571,7 @@ export default function CamaraComponent({
                   <option value="smallDocument">Documento Pequeño</option>
                   <option value="fullPage">Página Completa</option>
                 </select>
-              </div>
+              </div> */}
             </div>
           </div>
 
@@ -557,7 +655,10 @@ export default function CamaraComponent({
               Imagen Capturada
             </h3>
             <div>
-              <div className="flex min-h-40 w-full items-center justify-center rounded-lg bg-gray-100 p-2">
+              <div
+                id="preview_image"
+                className="flex min-h-40 w-full items-center justify-center rounded-lg bg-gray-100 p-2"
+              >
                 {capturedPhoto ? (
                   <div className="relative w-fit space-y-2">
                     <div className="flex items-center justify-between">

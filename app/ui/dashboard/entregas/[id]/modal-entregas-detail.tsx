@@ -157,7 +157,10 @@ export default function ModalEntregasDetail({
           </section>
 
           {/* Content with Framer Motion transitions */}
-          <motion.div className="relative min-h-[8rem] overflow-y-auto scrollbar-hide">
+          <motion.div
+            id="content-container"
+            className="relative min-h-[8rem] overflow-y-auto scrollbar-hide"
+          >
             <AnimatePresence mode="wait">
               {tab === "Resumen" ? (
                 // Detail ==============================================================
