@@ -248,8 +248,8 @@ export default function CamaraComponent({
               videoRef.current,
               0,
               0,
-              videoWidth * 2,
-              videoHeight * 2,
+              videoWidth,
+              videoHeight,
               -rotatedHeight / 2,
               -rotatedWidth / 2,
               rotatedHeight,
@@ -378,11 +378,11 @@ export default function CamaraComponent({
       } else {
         // Small document mode - image with margins and title
         const margin = 110;
-        const titleHeight = 0;
+        // const titleHeight = 0;
         // const titleHeight = 60;
 
-        const contentWidth = width - margin * 2;
-        const contentHeight = height - margin * 2 - titleHeight;
+        const contentWidth = width - margin;
+        const contentHeight = height - margin;
 
         const imageDimensions = embeddedImage.scaleToFit(
           contentWidth,
