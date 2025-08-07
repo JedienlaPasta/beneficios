@@ -18,9 +18,12 @@ export default function ConfirmModal({
   action,
 }: Props) {
   const [isDisabled, setIsDisabled] = useState(true);
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(3);
+
   const handleCancelButton = () => {
     setShowConfirmModal(false);
+    setIsDisabled(true);
+    setCountdown(3);
   };
 
   const title =

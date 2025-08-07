@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 export default function DeleteEntregasButton({ folio }: { folio: string }) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(3);
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -23,13 +23,13 @@ export default function DeleteEntregasButton({ folio }: { folio: string }) {
   const handleDeleteButton = async () => {
     setShowConfirmModal(true);
     setIsDisabled(true);
-    setCountdown(5);
+    setCountdown(3);
   };
 
   // Effect para manejar el countdown
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    
+
     if (showConfirmModal && isDisabled && countdown > 0) {
       interval = setInterval(() => {
         setCountdown((prev) => {
@@ -102,7 +102,9 @@ export default function DeleteEntregasButton({ folio }: { folio: string }) {
                 onClick={confirmDelete}
                 className={`rounded-md px-4 py-2 text-sm font-medium text-white transition-transform focus:scale-95 ${isDisabled ? "cursor-not-allowed bg-red-300" : "bg-red-500 hover:bg-red-600"}`}
               >
-                {isDisabled && countdown > 0 ? `Eliminar (${countdown})` : "Eliminar"}
+                {isDisabled && countdown > 0
+                  ? `Eliminar (${countdown})`
+                  : "Eliminar"}
               </button>
             </div>
           </div>

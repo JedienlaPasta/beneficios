@@ -11,7 +11,7 @@ export function Files({ item }: { item: EntregasFiles }) {
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const [isHovered, setIsHovered] = useState<boolean>(false);
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(3);
   const router = useRouter();
 
   const deleteFileWithId = deletePDFById.bind(null, item.id);
@@ -19,7 +19,7 @@ export function Files({ item }: { item: EntregasFiles }) {
   const handleDeleteButton = async () => {
     setShowConfirmModal(true);
     setIsDisabled(true);
-    setCountdown(5);
+    setCountdown(3);
   };
 
   // Effect para manejar el countdown
@@ -128,7 +128,7 @@ export function Files({ item }: { item: EntregasFiles }) {
         onMouseLeave={() => setIsHovered(false)}
       >
         <button
-          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-gray-500 text-white transition-all hover:bg-blue-500 active:scale-90"
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-gray-300 text-white transition-all hover:bg-blue-300 active:scale-90"
           onClick={handleDownload}
           disabled={!isHovered}
           title="Ver"
@@ -149,7 +149,7 @@ export function Files({ item }: { item: EntregasFiles }) {
           </svg>
         </button>
         <button
-          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-gray-500 text-white transition-all hover:bg-red-500 active:scale-90"
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-gray-300 text-white transition-all hover:bg-red-300 active:scale-90"
           onClick={handleDeleteButton}
           disabled={!isHovered}
           title="Eliminar"
@@ -165,18 +165,18 @@ export function Files({ item }: { item: EntregasFiles }) {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.993-1.838L3 7m3 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
             />
           </svg>
         </button>
       </div>
       {showConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-30 flex items-center justify-center bg-black bg-opacity-30">
           <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
             <h3 className="mb-3 text-lg font-medium text-gray-900">
               Confirmar eliminación
             </h3>
-            <p className="mb-6 text-sm text-gray-500">
+            <p className="mb-6 text-sm text-gray-300">
               ¿Estás seguro de que deseas eliminar este documento? Esta acción
               no se puede deshacer.
             </p>
@@ -192,7 +192,7 @@ export function Files({ item }: { item: EntregasFiles }) {
                 type="button"
                 disabled={isDisabled}
                 onClick={confirmDelete}
-                className={`rounded-md px-4 py-2 text-sm font-medium text-white ${isDisabled ? "cursor-not-allowed bg-red-300" : "bg-red-500 hover:bg-red-600"}`}
+                className={`rounded-md px-4 py-2 text-sm font-medium text-white ${isDisabled ? "cursor-not-allowed bg-red-300" : "bg-red-300 hover:bg-red-600"}`}
               >
                 {isDisabled && countdown > 0
                   ? `Eliminar (${countdown})`
