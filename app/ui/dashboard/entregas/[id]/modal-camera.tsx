@@ -237,9 +237,11 @@ export default function CamaraComponent({
 
           if (isPortrait && pdfMode === "Documento Pequeño") {
             // Only rotate for smallDocument mode
-            const scaleFactor = targetWidth / videoHeight;
-            const rotatedWidth = videoHeight * scaleFactor;
-            const rotatedHeight = videoWidth * scaleFactor;
+            // const scaleFactor = targetWidth / videoHeight;
+            const rotatedWidth = videoHeight;
+            // const rotatedWidth = videoHeight * scaleFactor;
+            const rotatedHeight = videoWidth;
+            // const rotatedHeight = videoWidth * scaleFactor;
 
             context.translate(targetWidth / 2, targetHeight / 2);
             context.rotate(-Math.PI / 2);
