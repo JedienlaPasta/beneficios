@@ -238,30 +238,57 @@ export default function CamaraComponent({
           context.save();
 
           if (isPortrait && pdfMode === "smallDocument") {
-            // Remove rotation - draw normally with 3:4 aspect ratio
-            const targetAspectRatio = 3 / 4;
+            // Remove rotation - draw normally with 3:4 aspect ratio (3:width, 4:height)
+            const targetAspectRatio = 3 / 4; // width/height ratio
             const currentWidth = targetWidth; // Keep the current width
-            const newHeight = Math.round(currentWidth * (4 / 3)); // Calculate height for 3:4 ratio
+            const newHeight = Math.round(currentWidth / targetAspectRatio); // Calculate height for 3:4 ratio (height should be larger)
 
             // Update canvas dimensions
             canvasRef.current.width = currentWidth;
             canvasRef.current.height = newHeight;
 
-            // Calculate source cropping for 3:4 aspect ratio
-            const sourceAspectRatio = videoWidth / videoHeight;
-            let sourceX = 0,
-              sourceY = 0,
-              sourceWidth = videoWidth,
-              sourceHeight = videoHeight;
+            // Get the visible area of the video element
+            const videoElement = videoRef.current;
+            const videoRect = videoElement.getBoundingClientRect();
+            const videoDisplayWidth = videoRect.width;
+            const videoDisplayHeight = videoRect.height;
 
-            if (sourceAspectRatio > targetAspectRatio) {
-              // Video is wider than target, crop sides
-              sourceWidth = videoHeight * targetAspectRatio;
-              sourceX = (videoWidth - sourceWidth) / 2;
+            // Calculate the actual video dimensions that are visible
+            const videoAspectRatio = videoWidth / videoHeight;
+            const displayAspectRatio = videoDisplayWidth / videoDisplayHeight;
+
+            let visibleVideoWidth,
+              visibleVideoHeight,
+              offsetX = 0,
+              offsetY = 0;
+
+            if (videoAspectRatio > displayAspectRatio) {
+              // Video is wider than display area, so top/bottom are visible, sides are cropped
+              visibleVideoHeight = videoHeight;
+              visibleVideoWidth = videoHeight * displayAspectRatio;
+              offsetX = (videoWidth - visibleVideoWidth) / 2;
             } else {
-              // Video is taller than target, crop top/bottom
-              sourceHeight = videoWidth / targetAspectRatio;
-              sourceY = (videoHeight - sourceHeight) / 2;
+              // Video is taller than display area, so left/right are visible, top/bottom are cropped
+              visibleVideoWidth = videoWidth;
+              visibleVideoHeight = videoWidth / displayAspectRatio;
+              offsetY = (videoHeight - visibleVideoHeight) / 2;
+            }
+
+            // Now crop the visible area to 3:4 aspect ratio
+            const visibleAspectRatio = visibleVideoWidth / visibleVideoHeight;
+            let sourceX = offsetX,
+              sourceY = offsetY,
+              sourceWidth = visibleVideoWidth,
+              sourceHeight = visibleVideoHeight;
+
+            if (visibleAspectRatio > targetAspectRatio) {
+              // Visible area is wider than target, crop sides
+              sourceWidth = visibleVideoHeight * targetAspectRatio;
+              sourceX = offsetX + (visibleVideoWidth - sourceWidth) / 2;
+            } else {
+              // Visible area is taller than target, crop top/bottom
+              sourceHeight = visibleVideoWidth / targetAspectRatio;
+              sourceY = offsetY + (visibleVideoHeight - sourceHeight) / 2;
             }
 
             context.drawImage(
