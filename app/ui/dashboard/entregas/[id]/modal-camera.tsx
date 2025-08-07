@@ -377,12 +377,10 @@ export default function CamaraComponent({
         });
       } else {
         // Small document mode - image with margins and title
-        const margin = 110;
-        // const titleHeight = 0;
-        // const titleHeight = 60;
+        const margin = 50;
 
-        const contentWidth = width - margin;
-        const contentHeight = height - margin;
+        const contentWidth = width - margin * 2; // Subtract margin from both sides
+        const contentHeight = height - margin * 2; // Subtract margin from top and bottom
 
         const imageDimensions = embeddedImage.scaleToFit(
           contentWidth,
