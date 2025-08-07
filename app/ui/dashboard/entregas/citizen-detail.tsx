@@ -4,12 +4,24 @@ import { redirect } from "next/navigation";
 import { fetchRSHByRUT } from "@/app/lib/data/rsh";
 import { getAge } from "@/app/lib/utils/get-values";
 import ChangeNameButton from "./change-name-btn";
+import ChangeNameModal from "./change-name-modal";
+import { Modal } from "../modal";
+import ModalSkeleton from "../../modal-skeleton";
+import { Suspense } from "react";
 
-type Props = {
+// type Props = {
+//   rut: string;
+// };
+
+type CitizenRecordProps = {
   rut: string;
+  isModalOpen: boolean;
 };
 
-export default async function CitizenDetail({ rut }: Props) {
+export default async function CitizenDetail({
+  rut,
+  isModalOpen,
+}: CitizenRecordProps) {
   const response = await fetchRSHByRUT(rut);
   if (!response.rut) {
     redirect("/dashboard/entregas");
@@ -32,106 +44,124 @@ export default async function CitizenDetail({ rut }: Props) {
 
   const formattedRut = formatRUT(rut);
   const descripcion = nombres_rsh[0] + apellidos_rsh[0];
+  console.log("Nombres:", nombres_rsh);
+  console.log("Apellidos:", apellidos_rsh);
 
   const age = fecha_nacimiento
     ? getAge(fecha_nacimiento.toString()).toString()
     : "No registrado";
 
   return (
-    <div className="items-centers relative flex flex-col justify-center">
-      <div className="grid gap-4 rounded-xl md:gap-6">
-        {/* Header Section */}
-        <div className="flex flex-col items-start justify-between gap-2 rounded-xl bg-white px-3 py-4 sm:flex-row lg:px-8 lg:py-6">
-          <div className="flex gap-4">
-            <ChangeNameButton description={descripcion} />
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-semibold tracking-tight text-slate-800">
-                  {nombres_rsh + " " + apellidos_rsh}
-                </h1>
-                <div className="hidden items-center gap-1 rounded-md bg-slate-200 px-2 py-0.5 lg:flex">
-                  <p className="text-xs font-medium text-slate-500">
-                    {"F#" + folio}
-                  </p>
+    <>
+      {isModalOpen === true && (
+        <Suspense fallback={<ModalSkeleton name="changeNameModal" />}>
+          <Modal name="changeNameModal">
+            <ChangeNameModal
+              rut={rut}
+              nombres_rsh={nombres_rsh}
+              apellidos_rsh={apellidos_rsh}
+            />
+          </Modal>
+        </Suspense>
+      )}
+      <div className="items-centers relative flex flex-col justify-center">
+        <div className="grid gap-4 rounded-xl md:gap-6">
+          {/* Header Section */}
+          <div className="flex flex-col items-start justify-between gap-2 rounded-xl bg-white px-3 py-4 sm:flex-row lg:px-8 lg:py-6">
+            <div className="flex gap-4">
+              <ChangeNameButton description={descripcion} />
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl font-semibold tracking-tight text-slate-800">
+                    {nombres_rsh + " " + apellidos_rsh}
+                  </h1>
+                  <div className="hidden items-center gap-1 rounded-md bg-slate-200 px-2 py-0.5 lg:flex">
+                    <p className="text-xs font-medium text-slate-500">
+                      {"F#" + folio}
+                    </p>
+                  </div>
                 </div>
+                <span className="flex items-start gap-2 text-sm font-medium text-slate-500">
+                  <div className="flex items-center gap-1 rounded-md bg-slate-200 px-2 py-0.5 lg:hidden">
+                    <p className="text-xs font-medium text-slate-500">
+                      {"F#" + folio}
+                    </p>
+                  </div>
+                  {formattedRut}
+                </span>
               </div>
-              <span className="flex items-start gap-2 text-sm font-medium text-slate-500">
-                <div className="flex items-center gap-1 rounded-md bg-slate-200 px-2 py-0.5 lg:hidden">
-                  <p className="text-xs font-medium text-slate-500">
-                    {"F#" + folio}
-                  </p>
-                </div>
-                {formattedRut}
-              </span>
             </div>
+            <span className="flex flex-col place-self-center text-slate-500 sm:place-self-end">
+              <p className="text-xs uppercase tracking-wider">Tramo</p>
+              <p className="text-2xl font-bold text-slate-600">{tramo}%</p>
+            </span>
           </div>
-          <span className="flex flex-col place-self-center text-slate-500 sm:place-self-end">
-            <p className="text-xs uppercase tracking-wider">Tramo</p>
-            <p className="text-2xl font-bold text-slate-600">{tramo}%</p>
-          </span>
-        </div>
 
-        {/* Details Grid */}
-        <div className="grid auto-rows-fr gap-4 md:gap-6 xl:grid-cols-2 2xl:grid-cols-3">
-          <div className="rounded-xl border border-slate-200 bg-gray-100">
-            <h2 className="px-5 py-4 text-sm font-medium text-slate-400 lg:px-8">
-              Información General
-            </h2>
-            <div className="rounded-xl bg-white px-5 py-1 lg:px-8 lg:py-2">
-              <DetailRow
-                name="Nacionalidad"
-                value={nacionalidad || "No especificada"}
-                border={true}
-              />
-              <DetailRow
-                name="Género"
-                value={genero || "No especificado"}
-                border={true}
-              />
-              <DetailRow name="Edad" value={age} />
+          {/* Details Grid */}
+          <div className="grid auto-rows-fr gap-4 md:gap-6 xl:grid-cols-2 2xl:grid-cols-3">
+            <div className="rounded-xl border border-slate-200 bg-gray-100">
+              <h2 className="px-5 py-4 text-sm font-medium text-slate-400 lg:px-8">
+                Información General
+              </h2>
+              <div className="rounded-xl bg-white px-5 py-1 lg:px-8 lg:py-2">
+                <DetailRow
+                  name="Nacionalidad"
+                  value={nacionalidad || "No especificada"}
+                  border={true}
+                />
+                <DetailRow
+                  name="Género"
+                  value={genero || "No especificado"}
+                  border={true}
+                />
+                <DetailRow name="Edad" value={age} />
+              </div>
             </div>
-          </div>
-          {/* 2nd segment */}
-          <div className="rounded-xl border border-slate-200 bg-gray-100">
-            <h2 className="px-5 py-4 text-sm font-medium text-slate-400 lg:px-8">
-              Información Contacto RSH
-            </h2>
-            <div className="rounded-xl bg-white px-5 py-1 lg:px-8 lg:py-2">
-              <DetailRow
-                name="Teléfono"
-                value={telefono ? telefono.toString() : "No registrado"}
-                border={true}
-              />
-              <DetailRow
-                name="Dirección"
-                value={direccion || "No especificada"}
-                border={true}
-              />
-              <DetailRow name="Correo" value={correo || "No registrado"} />
+            {/* 2nd segment */}
+            <div className="rounded-xl border border-slate-200 bg-gray-100">
+              <h2 className="px-5 py-4 text-sm font-medium text-slate-400 lg:px-8">
+                Información Contacto RSH
+              </h2>
+              <div className="rounded-xl bg-white px-5 py-1 lg:px-8 lg:py-2">
+                <DetailRow
+                  name="Teléfono"
+                  value={telefono ? telefono.toString() : "No registrado"}
+                  border={true}
+                />
+                <DetailRow
+                  name="Dirección"
+                  value={direccion || "No especificada"}
+                  border={true}
+                />
+                <DetailRow name="Correo" value={correo || "No registrado"} />
+              </div>
             </div>
-          </div>
-          {/* 3rd segment */}
-          <div className="rounded-xl border border-slate-200 bg-gray-100 xl:col-span-2 2xl:col-span-1">
-            <h2 className="px-5 py-4 text-sm font-medium text-slate-400 lg:px-8">
-              Información Contacto Modificado
-            </h2>
-            <div className="rounded-xl bg-white px-5 py-1 lg:px-8 lg:py-2">
-              <DetailRow
-                name="Teléfono"
-                value={formatPhone(telefono_mod) || "No registrado"}
-                border={true}
-              />
-              <DetailRow
-                name="Dirección"
-                value={direccion_mod || "No especificada"}
-                border={true}
-              />
-              <DetailRow name="Correo" value={correo_mod || "No registrado"} />
+            {/* 3rd segment */}
+            <div className="rounded-xl border border-slate-200 bg-gray-100 xl:col-span-2 2xl:col-span-1">
+              <h2 className="px-5 py-4 text-sm font-medium text-slate-400 lg:px-8">
+                Información Contacto Modificado
+              </h2>
+              <div className="rounded-xl bg-white px-5 py-1 lg:px-8 lg:py-2">
+                <DetailRow
+                  name="Teléfono"
+                  value={formatPhone(telefono_mod) || "No registrado"}
+                  border={true}
+                />
+                <DetailRow
+                  name="Dirección"
+                  value={direccion_mod || "No especificada"}
+                  border={true}
+                />
+                <DetailRow
+                  name="Correo"
+                  value={correo_mod || "No registrado"}
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

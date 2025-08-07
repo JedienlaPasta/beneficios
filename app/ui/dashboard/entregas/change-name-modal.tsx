@@ -8,11 +8,21 @@ import Input from "../campañas/new-campaign-input";
 import { toast } from "sonner";
 import { updateRSHName } from "@/app/lib/actions/rsh";
 
-export default function ChangeNameModal({ rut }: { rut: string }) {
-  const [nombres, setNombres] = useState("");
-  const [apellidos, setApellidos] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDisabled, setIsDisabled] = useState(false);
+type Props = {
+  rut: string;
+  nombres_rsh: string;
+  apellidos_rsh: string;
+};
+
+export default function ChangeNameModal({
+  rut,
+  nombres_rsh,
+  apellidos_rsh,
+}: Props) {
+  const [nombres, setNombres] = useState<string>(nombres_rsh || "");
+  const [apellidos, setApellidos] = useState<string>(apellidos_rsh || "");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -81,9 +91,9 @@ export default function ChangeNameModal({ rut }: { rut: string }) {
           <AnimatePresence mode="wait">
             <motion.section
               key="obligatorio"
-              initial={{ opacity: 0, y: 10, height: 200 }}
+              initial={{ opacity: 0, y: 10, height: 160 }}
               animate={{ opacity: 1, y: 0, height: "auto" }}
-              exit={{ opacity: 0, y: -10, height: 200 }}
+              exit={{ opacity: 0, y: -10, height: 160 }}
               transition={{
                 duration: 0.4,
                 height: { duration: 0.4 },

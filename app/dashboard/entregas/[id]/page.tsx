@@ -3,7 +3,6 @@ import { Suspense } from "react";
 import CitizenDetail, {
   CitizenDetailSkeleton,
 } from "@/app/ui/dashboard/entregas/citizen-detail";
-// import NewEntregaModal from "@/app/ui/dashboard/entregas/new-modal";
 import NewButton from "@/app/ui/dashboard/new-button";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import EntregasTable from "@/app/ui/dashboard/entregas/[id]/entregas-table";
@@ -12,7 +11,6 @@ import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/modal-c
 import ModalSkeleton from "@/app/ui/modal-skeleton";
 import NewEntregaModalContext from "@/app/ui/dashboard/entregas/modal-context";
 import { formatRUT } from "@/app/lib/utils/format";
-import ChangeNameModal from "@/app/ui/dashboard/entregas/change-name-modal";
 // import { Spinner } from "@/app/ui/dashboard/loaders";
 
 type CitizenRecordProps = {
@@ -48,17 +46,8 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
         </Modal>
       )}
       {detailsModal && (
-        // <Modal name="detailsModal">
         <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
           <ModalEntregasDetailContext folio={detailsModal} rut={rut} />
-        </Suspense>
-        // </Modal>
-      )}
-      {changeNameModal === "true" && (
-        <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
-          <Modal name="changeNameModal">
-            <ChangeNameModal rut={rut} />
-          </Modal>
         </Suspense>
       )}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 3xl:w-[96rem] 3xl:justify-self-center">
@@ -75,7 +64,7 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
 
       <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
         <Suspense fallback={<CitizenDetailSkeleton />}>
-          <CitizenDetail rut={rut} />
+          <CitizenDetail rut={rut} isModalOpen={Boolean(changeNameModal)} />
         </Suspense>
         <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50">
           <div className="flex flex-wrap items-center justify-between gap-4 px-5 pt-4 md:px-8 3xl:w-[96rem] 3xl:self-center">

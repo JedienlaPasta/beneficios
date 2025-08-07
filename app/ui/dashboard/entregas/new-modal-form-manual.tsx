@@ -244,16 +244,6 @@ export default function NewModalFormManual({
         usersList={usersList}
       />
 
-      {/* <Input
-        placeHolder="tu@correo.com..."
-        label="Correo"
-        type="email"
-        nombre="correo"
-        value={correo}
-        setData={setCorreo}
-        required
-      /> */}
-
       <div className="max-h-[400px] overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-4 scrollbar-hide">
         <div className="justify- mb-4 flex items-baseline justify-between">
           <h3 className="text-sm font-medium text-slate-700">

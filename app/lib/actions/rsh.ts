@@ -315,8 +315,8 @@ export async function updateRSHName(formData: FormData) {
 
   const validationResult = RSHUpdateNameFormSchema.safeParse({
     rut,
-    nombres,
-    apellidos,
+    nombres: capitalizeAll(nombres),
+    apellidos: capitalizeAll(apellidos),
   });
 
   if (!validationResult.success) {
