@@ -92,7 +92,7 @@ export default function DeleteEntregasButton({ folio }: { folio: string }) {
               <button
                 type="button"
                 onClick={() => setShowConfirmModal(false)}
-                className={`rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-transform focus:scale-95 ${isDisabled ? "cursor-not-allowed" : "hover:bg-gray-200"}`}
+                className={`rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-transform hover:bg-gray-200 focus:scale-95`}
               >
                 Cancelar
               </button>

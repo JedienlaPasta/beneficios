@@ -14,13 +14,13 @@ import UserDropdown from "./user-dropdown";
 const usersList = [
   {
     id: "1",
-    name: "Karina Hormazabal",
-    email: "khormazabal@temporal.cl",
+    name: "Jenifer Rojas",
+    email: "tsdepartamentosocial@elquisco.cl",
   },
   {
     id: "2",
-    name: "Jenifer Rojas",
-    email: "jrojas@temporal.com",
+    name: "Karina Hormazabal",
+    email: "karinat.s.d.q@gmail.com",
   },
 ];
 
