@@ -69,11 +69,11 @@ export default function CamaraComponent({
 
   // Single photo state
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
+  const [isFlashing, setIsFlashing] = useState(false);
 
   // PDF mode and document name
   const [pdfMode, setPdfMode] = useState<string>(fileModeList[0].name);
-
-  const [documentName, setDocumentName] = useState<string>(filesList[0].name);
+  const [documentName, setDocumentName] = useState<string>(filesList[3].name);
 
   const router = useRouter();
 
@@ -201,9 +201,17 @@ export default function CamaraComponent({
     };
   }, [isActive]);
 
+  const triggerFlashEffect = () => {
+    setIsFlashing(true);
+    setTimeout(() => {
+      setIsFlashing(false);
+    }, 200);
+  };
+
   const takePhoto = async () => {
     if (videoRef.current && canvasRef.current) {
       setIsLoading(true);
+      triggerFlashEffect();
 
       try {
         const context = canvasRef.current.getContext("2d");
@@ -569,7 +577,9 @@ export default function CamaraComponent({
               )}
               <video
                 ref={videoRef}
-                className="aspect-[3/4] h-auto w-full object-cover md:aspect-[16/9]"
+                className={`aspect-[3/4] h-auto w-full object-cover transition-opacity duration-200 md:aspect-[16/9] ${
+                  isFlashing ? "opacity-30" : "opacity-100"
+                }`}
                 autoPlay
                 playsInline
                 muted
