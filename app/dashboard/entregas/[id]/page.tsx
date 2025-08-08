@@ -6,10 +6,8 @@ import CitizenDetail, {
 import NewButton from "@/app/ui/dashboard/new-button";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import EntregasTable from "@/app/ui/dashboard/entregas/[id]/entregas-table";
-import { Modal } from "@/app/ui/dashboard/modal";
 import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/modal-context";
 import ModalSkeleton from "@/app/ui/modal-skeleton";
-import NewEntregaModalContext from "@/app/ui/dashboard/entregas/modal-context";
 import { formatRUT } from "@/app/lib/utils/format";
 // import { Spinner } from "@/app/ui/dashboard/loaders";
 
@@ -38,13 +36,6 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
 
   return (
     <div>
-      {newSocialAid === "open" && (
-        <Modal name="newsocialaid">
-          <Suspense fallback={<ModalSkeleton name="newsocialaid" />}>
-            <NewEntregaModalContext rut={rut} />
-          </Suspense>
-        </Modal>
-      )}
       {detailsModal && (
         <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
           <ModalEntregasDetailContext folio={detailsModal} rut={rut} />
@@ -77,7 +68,12 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
             <SearchBar placeholder="Buscar..." />
           </div>
           <Suspense fallback={<TablaCampañasSkeleton />}>
-            <EntregasTable rut={rut} query={query} currentPage={currentPage} />
+            <EntregasTable
+              rut={rut}
+              query={query}
+              currentPage={currentPage}
+              isModalOpen={newSocialAid === "open"}
+            />
           </Suspense>
         </div>
       </div>

@@ -3,21 +3,24 @@ import { toast } from "sonner";
 import Input from "../campañas/new-campaign-input";
 import { SubmitButton } from "../submit-button";
 import { useState } from "react";
-import { Campaign } from "@/app/lib/definitions";
+import { Campaign, EntregasTable } from "@/app/lib/definitions";
 import { createEntrega } from "@/app/lib/actions/entregas";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import dayjs from "dayjs";
 
 type NewModalFormProps = {
   activeCampaigns?: Campaign[];
   rut: string;
   userId: string;
+  entregas: EntregasTable[];
 };
 
 export default function NewModalForm({
   activeCampaigns,
   rut,
   userId,
+  entregas,
 }: NewModalFormProps) {
   const router = useRouter();
   const [observaciones, setObservaciones] = useState("");
@@ -92,6 +95,17 @@ export default function NewModalForm({
   };
 
   const formAction = async (formData: FormData) => {
+    if (entregas && entregas.length > 0) {
+      const latestEntregaDate = dayjs(entregas[0].fecha_entrega);
+      const currentDate = dayjs();
+      if (currentDate.isSame(latestEntregaDate, "day")) {
+        toast.error(
+          "No se pueden asignar más beneficios a esta persona por hoy.",
+        );
+        return;
+      }
+    }
+
     setIsLoading(true);
     setIsDisabled(true);
 

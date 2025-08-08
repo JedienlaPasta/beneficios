@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import RSHTable from "@/app/ui/dashboard/entregas/rsh-table";
 import SelectSearch from "@/app/ui/dashboard/entregas/select-search";
 import EntregasTable from "@/app/ui/dashboard/entregas/entregas-table";
-// import { Modal } from "@/app/ui/dashboard/modal";
 import ModalSkeleton from "@/app/ui/modal-skeleton";
 import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/modal-context";
 
@@ -29,11 +28,9 @@ export default async function Entregas(props: SocialAidProps) {
   return (
     <div className="flex flex-col gap-6">
       {detailsModal && (
-        // <Modal name="detailsModal" secondName="rut">
         <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
           <ModalEntregasDetailContext folio={detailsModal} rut={rut} />
         </Suspense>
-        // </Modal>
       )}
       <div className="flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
         <div>

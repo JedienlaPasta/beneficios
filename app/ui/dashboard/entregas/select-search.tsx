@@ -28,7 +28,7 @@ export default function SelectSearch() {
           <div
             className={`flex items-center gap-4 text-slate-600 transition-all duration-500`}
           >
-            <span className="text-lg font-medium">Ciudadanos</span>
+            <span className="text-lg font-medium">Hacer entrega</span>
           </div>
           <div
             className={`absolute right-6 -z-10 size-2 rounded-full border-2 border-white bg-white ring-4 transition-all duration-500 ${currentTable === "ciudadanos" ? "ring-blue-400" : "scale-75 ring-slate-300"}`}
@@ -50,7 +50,7 @@ export default function SelectSearch() {
           <div
             className={`flex items-center gap-4 text-slate-600 transition-all duration-500`}
           >
-            <span className="text-lg font-medium">Entregas</span>
+            <span className="text-lg font-medium">Ver entregas</span>
           </div>
           <div
             className={`absolute right-6 -z-10 size-2 rounded-full border-2 border-white bg-white ring-4 transition-all duration-500 ${currentTable === "entregas" ? "ring-blue-400" : "scale-75 ring-slate-300"}`}

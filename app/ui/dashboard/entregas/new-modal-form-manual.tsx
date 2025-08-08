@@ -1,6 +1,6 @@
 "use client";
 import { createEntrega } from "@/app/lib/actions/entregas";
-import { Campaign } from "@/app/lib/definitions";
+import { Campaign, EntregasTable } from "@/app/lib/definitions";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -28,12 +28,14 @@ type NewModalFormProps = {
   activeCampaigns?: Campaign[];
   rut: string;
   userId: string;
+  entregas: EntregasTable[];
 };
 
 export default function NewModalFormManual({
   activeCampaigns,
   rut,
   userId,
+  entregas,
 }: NewModalFormProps) {
   const router = useRouter();
   const [folio, setFolio] = useState("");
@@ -112,6 +114,20 @@ export default function NewModalFormManual({
   };
 
   const formAction = async (formData: FormData) => {
+    if (entregas && entregas.length > 0) {
+      const hasMatchingDate = entregas.some((entrega) =>
+        dayjs(entrega.fecha_entrega).isSame(dayjs(fechaEntrega), "day"),
+      );
+      console.log(hasMatchingDate);
+
+      if (hasMatchingDate) {
+        toast.error(
+          `Ya recibió un beneficio el día [${dayjs(fechaEntrega).format("DD-MM-YYYY")}], solo se puede ingresar 1 beneficio por día.`,
+        );
+        return;
+      }
+    }
+
     setIsLoading(true);
     setIsDisabled(true);
 

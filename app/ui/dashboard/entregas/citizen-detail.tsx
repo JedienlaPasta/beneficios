@@ -9,10 +9,6 @@ import { Modal } from "../modal";
 import ModalSkeleton from "../../modal-skeleton";
 import { Suspense } from "react";
 
-// type Props = {
-//   rut: string;
-// };
-
 type CitizenRecordProps = {
   rut: string;
   isModalOpen: boolean;
@@ -44,8 +40,6 @@ export default async function CitizenDetail({
 
   const formattedRut = formatRUT(rut);
   const descripcion = nombres_rsh[0] + apellidos_rsh[0];
-  console.log("Nombres:", nombres_rsh);
-  console.log("Apellidos:", apellidos_rsh);
 
   const age = fecha_nacimiento
     ? getAge(fecha_nacimiento.toString()).toString()
