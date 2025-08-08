@@ -118,7 +118,6 @@ export default function NewModalFormManual({
       const hasMatchingDate = entregas.some((entrega) =>
         dayjs(entrega.fecha_entrega).isSame(dayjs(fechaEntrega), "day"),
       );
-      console.log(hasMatchingDate);
 
       if (hasMatchingDate) {
         toast.error(
