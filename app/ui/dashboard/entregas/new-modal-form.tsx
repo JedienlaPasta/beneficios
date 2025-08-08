@@ -96,9 +96,13 @@ export default function NewModalForm({
 
   const formAction = async (formData: FormData) => {
     if (entregas && entregas.length > 0) {
-      const latestEntregaDate = dayjs(entregas[0].fecha_entrega);
       const currentDate = dayjs();
-      if (currentDate.isSame(latestEntregaDate, "day")) {
+      const hasMatchingDate = entregas.some((entrega) =>
+        dayjs(entrega.fecha_entrega).isSame(dayjs(currentDate), "day"),
+      );
+      console.log(hasMatchingDate);
+
+      if (hasMatchingDate) {
         toast.error(
           "No se pueden asignar más beneficios a esta persona por hoy.",
         );
