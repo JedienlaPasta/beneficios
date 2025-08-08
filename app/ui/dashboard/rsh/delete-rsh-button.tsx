@@ -85,12 +85,12 @@ export default function DeleteRSHButton({ rut }: { rut: number | null }) {
 
       {/* Modal de confirmación */}
       {showConfirmModal && (
-        <div className="fixed inset-0 z-30 flex items-center justify-center bg-gray-900/30">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50">
           <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
             <h3 className="mb-3 text-lg font-medium text-gray-900">
               Confirmar eliminación
             </h3>
-            <p className="mb-6 text-sm text-gray-300">
+            <p className="mb-6 text-sm text-gray-500">
               ¿Estás seguro de que deseas eliminar este registro? Esta acción no
               se puede deshacer.
             </p>
@@ -98,7 +98,7 @@ export default function DeleteRSHButton({ rut }: { rut: number | null }) {
               <button
                 type="button"
                 onClick={() => setShowConfirmModal(false)}
-                className={`focus:scale-93 rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200`}
+                className={`rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-transform hover:bg-gray-200 focus:scale-95`}
               >
                 Cancelar
               </button>
@@ -106,7 +106,7 @@ export default function DeleteRSHButton({ rut }: { rut: number | null }) {
                 type="button"
                 disabled={isDisabled}
                 onClick={confirmDelete}
-                className={`focus:scale-93 rounded-md px-4 py-2 text-sm font-medium text-white ${isDisabled ? "cursor-not-allowed bg-red-300" : "bg-red-300 hover:bg-red-600"}`}
+                className={`rounded-md px-4 py-2 text-sm font-medium text-white transition-transform focus:scale-95 ${isDisabled ? "cursor-not-allowed bg-red-300" : "bg-red-500 hover:bg-red-600"}`}
               >
                 {isDisabled && countdown > 0
                   ? `Eliminar (${countdown})`

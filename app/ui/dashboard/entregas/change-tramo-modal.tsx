@@ -6,21 +6,15 @@ import CloseModalButton from "../close-modal-button";
 import { SubmitButton } from "../submit-button";
 import Input from "../campañas/new-campaign-input";
 import { toast } from "sonner";
-import { updateRSHName } from "@/app/lib/actions/rsh";
+import { updateTramo } from "@/app/lib/actions/rsh";
 
 type Props = {
   rut: string;
-  nombres_rsh: string;
-  apellidos_rsh: string;
+  tramo: number | null;
 };
 
-export default function ChangeNameModal({
-  rut,
-  nombres_rsh,
-  apellidos_rsh,
-}: Props) {
-  const [nombres, setNombres] = useState<string>(nombres_rsh || "");
-  const [apellidos, setApellidos] = useState<string>(apellidos_rsh || "");
+export default function ChangeTramoModal({ rut, tramo }: Props) {
+  const [newTramo, setNewTramo] = useState<string>(String(tramo) || "");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const router = useRouter();
@@ -28,7 +22,7 @@ export default function ChangeNameModal({
 
   const closeModal = () => {
     const params = new URLSearchParams(searchParams);
-    params.delete("changeNameModal");
+    params.delete("changeTramoModal");
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
@@ -40,12 +34,11 @@ export default function ChangeNameModal({
     const myFormData = new FormData();
 
     myFormData.append("rut", rut);
-    myFormData.append("nombres_rsh", nombres);
-    myFormData.append("apellidos_rsh", apellidos);
+    myFormData.append("tramo", newTramo);
 
     const toastId = toast.loading("Guardando...");
     try {
-      const response = await updateRSHName(myFormData);
+      const response = await updateTramo(myFormData);
       if (!response.success) {
         throw new Error(response.message);
       }
@@ -63,9 +56,7 @@ export default function ChangeNameModal({
   };
 
   const isFormValid = () => {
-    return (
-      rut.trim() !== "" && nombres.trim() !== "" && apellidos.trim() !== ""
-    );
+    return rut.trim() !== "" && String(tramo).trim() !== "";
   };
 
   return (
@@ -78,12 +69,12 @@ export default function ChangeNameModal({
       {/* Header */}
       <section className="flex flex-shrink-0 items-center justify-between">
         <h2 className="text-lg font-semibold tracking-tight text-slate-700">
-          Cambiar Nombres y Apellidos RSH
+          Cambiar Tramo Registro Social de Hogares
         </h2>
-        <CloseModalButton name="changeNameModal" />
+        <CloseModalButton name="changeTramoModal" />
       </section>
       <p className="text-xs text-gray-500">
-        Los campos marcados con (*) son obligatorios.
+        Ingresa el valor del tramo en porcentaje. Ejemplo: 40%
       </p>
 
       <form onSubmit={handleSubmit} className="overflow-y-auto scrollbar-hide">
@@ -91,9 +82,9 @@ export default function ChangeNameModal({
           <AnimatePresence mode="wait">
             <motion.section
               key="obligatorio"
-              initial={{ opacity: 0, y: 10, height: 160 }}
+              initial={{ opacity: 0, y: 10, height: 100 }}
               animate={{ opacity: 1, y: 0, height: "auto" }}
-              exit={{ opacity: 0, y: -10, height: 160 }}
+              exit={{ opacity: 0, y: -10, height: 100 }}
               transition={{
                 duration: 0.4,
                 height: { duration: 0.4 },
@@ -105,24 +96,14 @@ export default function ChangeNameModal({
               {/* Verificar Estilo */}
               <div className="flex flex-col gap-3 pt-2">
                 <Input
-                  placeHolder="Nombres"
-                  label="Nombres *"
+                  placeHolder="40"
+                  label="Tramo (%)"
                   type="text"
-                  nombre="nombres"
-                  value={nombres}
-                  setData={setNombres}
+                  nombre="tramo"
+                  value={newTramo}
+                  setData={setNewTramo}
                   required
-                  maxLength={50}
-                />
-                <Input
-                  placeHolder="Apellidos"
-                  label="Apellidos *"
-                  type="text"
-                  nombre="apellidos"
-                  value={apellidos}
-                  setData={setApellidos}
-                  required
-                  maxLength={50}
+                  maxLength={2}
                 />
               </div>
             </motion.section>

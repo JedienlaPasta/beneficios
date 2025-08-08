@@ -8,15 +8,19 @@ import ChangeNameModal from "./change-name-modal";
 import { Modal } from "../modal";
 import ModalSkeleton from "../../modal-skeleton";
 import { Suspense } from "react";
+import ChangeTramoButton from "./change-tramo-btn";
+import ChangeTramoModal from "./change-tramo-modal";
 
 type CitizenRecordProps = {
   rut: string;
-  isModalOpen: boolean;
+  isNameModalOpen: boolean;
+  isTramoModalOpen: boolean;
 };
 
 export default async function CitizenDetail({
   rut,
-  isModalOpen,
+  isNameModalOpen,
+  isTramoModalOpen,
 }: CitizenRecordProps) {
   const response = await fetchRSHByRUT(rut);
   if (!response.rut) {
@@ -47,7 +51,7 @@ export default async function CitizenDetail({
 
   return (
     <>
-      {isModalOpen === true && (
+      {isNameModalOpen === true && (
         <Suspense fallback={<ModalSkeleton name="changeNameModal" />}>
           <Modal name="changeNameModal">
             <ChangeNameModal
@@ -55,6 +59,13 @@ export default async function CitizenDetail({
               nombres_rsh={nombres_rsh}
               apellidos_rsh={apellidos_rsh}
             />
+          </Modal>
+        </Suspense>
+      )}
+      {isTramoModalOpen === true && (
+        <Suspense fallback={<ModalSkeleton name="changeTramoModal" />}>
+          <Modal name="changeTramoModal">
+            <ChangeTramoModal rut={rut} tramo={tramo} />
           </Modal>
         </Suspense>
       )}
@@ -85,10 +96,7 @@ export default async function CitizenDetail({
                 </span>
               </div>
             </div>
-            <span className="flex flex-col place-self-center text-slate-500 sm:place-self-end">
-              <p className="text-xs uppercase tracking-wider">Tramo</p>
-              <p className="text-2xl font-bold text-slate-600">{tramo}%</p>
-            </span>
+            <ChangeTramoButton tramo={tramo} />
           </div>
 
           {/* Details Grid */}

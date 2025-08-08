@@ -79,19 +79,19 @@ export async function createRSH(formData: FormData) {
   }
 
   const validationResult = RSHFormSchema.safeParse({
-    rut,
-    dv,
+    rut: rut.trim(),
+    dv: dv.trim(),
     nombres_rsh: capitalizeAll(nombresRSH),
     apellidos_rsh: capitalizeAll(apellidosRSH),
     direccion: capitalizeAll(direccion),
     sector: capitalizeAll(sector),
-    telefono,
-    correo,
-    tramo,
+    telefono: telefono.trim(),
+    correo: correo.trim(),
+    tramo: tramo.trim(),
     genero: capitalize(genero),
     indigena: capitalize(indigena),
     nacionalidad: capitalize(nacionalidad),
-    folio,
+    folio: folio.trim(),
     fecha_nacimiento: fecha_nacimiento
       ? new Date(fecha_nacimiento).toISOString()
       : undefined,
@@ -189,7 +189,6 @@ const RSHUpdateFormSchema = z.object({
 
 // Editar RSH
 export async function updateRSH(formData: FormData) {
-  console.log(formData);
   const rut = formData.get("rut") as string;
   const direccion = formData.get("direccion") as string;
   const sector = formData.get("sector") as string;
@@ -197,11 +196,11 @@ export async function updateRSH(formData: FormData) {
   const correo = formData.get("correo") as string;
 
   const validationResult = RSHUpdateFormSchema.safeParse({
-    rut,
+    rut: rut.trim(),
     direccion: capitalizeAll(direccion),
     sector: capitalizeAll(sector),
-    telefono,
-    correo,
+    telefono: telefono.trim(),
+    correo: correo.trim(),
   });
 
   if (!validationResult.success) {
@@ -308,13 +307,12 @@ const RSHUpdateNameFormSchema = z.object({
 });
 
 export async function updateRSHName(formData: FormData) {
-  console.log(formData);
   const rut = formData.get("rut") as string;
   const nombres = formData.get("nombres_rsh") as string;
   const apellidos = formData.get("apellidos_rsh") as string;
 
   const validationResult = RSHUpdateNameFormSchema.safeParse({
-    rut,
+    rut: rut,
     nombres: capitalizeAll(nombres),
     apellidos: capitalizeAll(apellidos),
   });
@@ -369,6 +367,92 @@ export async function updateRSHName(formData: FormData) {
 
       await transaction.commit();
       await logAction("Editar", "editó el nombre de", formatedRut);
+      revalidatePath(`/dashboard/entregas/${rut}`);
+      return {
+        success: true,
+        message: `Registro ${formatedRut} actualizado exitosamente`,
+      };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  } catch (error) {
+    console.error(error || "Error actualizar el registro.");
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+// Update Tramo RSH
+const RSHUpdateTramoFormSchema = z.object({
+  rut: z
+    .string()
+    .min(7, { message: "RUT debe tener al menos 7 dígitos" })
+    .regex(/^\d+$/, { message: "RUT debe contener solo números" }),
+  tramo: z.enum(["40", "50", "60", "70", "80", "90", "100"], {
+    message:
+      "Tramo debe ser uno de los valores permitidos: 40, 50, 60, 70, 80, 90 o 100",
+  }),
+});
+
+export async function updateTramo(formData: FormData) {
+  const rut = formData.get("rut") as string;
+  const tramo = formData.get("tramo") as string;
+
+  const validationResult = RSHUpdateTramoFormSchema.safeParse({
+    rut,
+    tramo: tramo.trim(),
+  });
+
+  if (!validationResult.success) {
+    return {
+      success: false,
+      message: validationResult.error.errors[0].message,
+    };
+  }
+
+  const formatedRut = formatRUT(rut);
+
+  try {
+    const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
+
+    const transaction = new sql.Transaction(pool);
+
+    try {
+      await transaction.begin();
+      const rshRequest = new sql.Request(transaction);
+      const rshResult = await rshRequest
+        .input("rut", sql.Int, rut)
+        .query("SELECT 1 FROM rsh WHERE rut = @rut");
+
+      if (rshResult.recordset.length === 0) {
+        return {
+          success: false,
+          message: `No se encontraron coincidencias para ${formatedRut}`,
+        };
+      }
+
+      const updateRshRequest = new sql.Request(transaction);
+      await updateRshRequest
+        .input("rut", sql.Int, validationResult.data.rut)
+        .input("tramo", sql.VarChar, validationResult.data.tramo).query(`
+            UPDATE rsh
+            SET
+              tramo = @tramo
+            WHERE rut = @rut
+          `);
+
+      await transaction.commit();
+      await logAction("Editar", "editó el tramo de", formatedRut);
       revalidatePath(`/dashboard/entregas/${rut}`);
       return {
         success: true,

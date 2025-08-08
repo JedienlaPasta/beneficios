@@ -138,7 +138,7 @@ export const createEntrega = async (id: string, formData: FormData) => {
         const checkFolioResult = await checkFolioRequest.input(
           "folio",
           sql.VarChar,
-          folio,
+          String(folio).trim(),
         ).query(`
           SELECT folio FROM entregas WHERE folio = @folio
         `);
@@ -161,12 +161,12 @@ export const createEntrega = async (id: string, formData: FormData) => {
           fechaEntregaConHora = hoy;
         }
 
-        const upperCaseFolio = String(folio).toUpperCase();
+        const upperCaseFolio = String(folio).toUpperCase().trim();
 
         const entregaRequest = new sql.Request(transaction);
         await entregaRequest
           .input("folio", sql.VarChar, upperCaseFolio)
-          .input("observacion", sql.VarChar, observaciones)
+          .input("observacion", sql.VarChar, String(observaciones).trim())
           .input("fecha_entrega", sql.DateTime, fechaEntregaConHora)
           .input("rut", sql.Int, rut)
           .input("id_usuario", sql.UniqueIdentifier, userId).query(`
@@ -180,7 +180,7 @@ export const createEntrega = async (id: string, formData: FormData) => {
             )
           `);
 
-        newFolio = folio ? folio.toString() : "";
+        newFolio = folio ? folio.toString().trim() : "";
       } else {
         // Generate a folio using MSSQL functions (auto)
         const currentYearFull = new Date().getFullYear();
@@ -188,10 +188,14 @@ export const createEntrega = async (id: string, formData: FormData) => {
 
         const spRequest = new sql.Request(transaction);
         spRequest.input("p_rut", sql.Int, rut);
-        spRequest.input("p_observacion", sql.NVarChar, observaciones);
+        spRequest.input(
+          "p_observacion",
+          sql.NVarChar,
+          String(observaciones).trim(),
+        );
         spRequest.input("p_id_usuario", sql.UniqueIdentifier, userId);
         spRequest.input("p_current_year", sql.Int, currentYearTwoDigits);
-        spRequest.input("p_code", sql.VarChar, code);
+        spRequest.input("p_code", sql.VarChar, String(code).trim());
         spRequest.output("p_new_folio_output", sql.VarChar);
 
         const spResult = await spRequest.execute(
@@ -209,8 +213,8 @@ export const createEntrega = async (id: string, formData: FormData) => {
         for (const campaign of campaigns) {
           const detail =
             typeof campaign.detail === "string"
-              ? campaign.detail.toUpperCase()
-              : String(campaign.detail);
+              ? campaign.detail.toUpperCase().trim()
+              : String(campaign.detail).trim();
 
           // Insert into entrega
           const insertEntregaCampaignRequest = new sql.Request(transaction);

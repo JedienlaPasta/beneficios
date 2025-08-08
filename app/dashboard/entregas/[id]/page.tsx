@@ -18,6 +18,7 @@ type CitizenRecordProps = {
     newsocialaid?: string;
     detailsModal?: string;
     changeNameModal?: string;
+    changeTramoModal?: string;
   }>;
   params: Promise<{ id: string }>;
 };
@@ -28,6 +29,7 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
   const newSocialAid = searchParams?.newsocialaid || "";
   const detailsModal = searchParams?.detailsModal || "";
   const changeNameModal = searchParams?.changeNameModal || "";
+  const changeTramoModal = searchParams?.changeTramoModal || "";
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
   // Params (id)
@@ -55,7 +57,11 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
 
       <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
         <Suspense fallback={<CitizenDetailSkeleton />}>
-          <CitizenDetail rut={rut} isModalOpen={Boolean(changeNameModal)} />
+          <CitizenDetail
+            rut={rut}
+            isNameModalOpen={Boolean(changeNameModal)}
+            isTramoModalOpen={Boolean(changeTramoModal)}
+          />
         </Suspense>
         <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50">
           <div className="flex flex-wrap items-center justify-between gap-4 px-5 pt-4 md:px-8 3xl:w-[96rem] 3xl:self-center">
