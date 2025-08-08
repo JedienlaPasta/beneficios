@@ -7,7 +7,7 @@ import path from "path";
 import { compressPdfBuffer } from "../utils/pdf-compress";
 import { connectToDB } from "../utils/db-connection";
 import { logAction } from "./auditoria";
-import { formatDate } from "../utils/format";
+import { formatDate, formatPhone, formatRUT } from "../utils/format";
 
 interface CitizenData {
   telefono: string | null;
@@ -31,6 +31,8 @@ interface CitizenData {
   fecha_encuesta: Date | null;
   fecha_modificacion: Date | null;
   fecha_calificacion: Date | null;
+  direccion_mod?: string;
+  telefono_mod?: string;
 }
 
 interface UserData {
@@ -693,7 +695,21 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
     if (ciudadanoResult.recordset.length === 0) {
       return { success: false, error: "Persona no encontrada", status: 404 };
     }
-    const ciudadano = ciudadanoResult.recordset[0] as CitizenData;
+
+    let ciudadano = ciudadanoResult.recordset[0] as CitizenData;
+
+    // Get rsh_mod info
+    const rshModRequest = pool.request().input("rut", sql.Int, rut);
+    const rshModResult = await rshModRequest.query(`
+      SELECT direccion_mod, telefono_mod FROM rsh_mods WHERE rut = @rut
+    `);
+
+    ciudadano = {
+      ...ciudadano,
+      ...rshModResult.recordset[0],
+    };
+
+    console.log(ciudadano);
 
     // Get employee info
     const encargadoRequest = pool
@@ -713,12 +729,21 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
     const form = pdfDoc.getForm();
     form.getTextField("Folio").setText(String(folio));
     form.getTextField("NombreCiudadano").setText(` ${nombreCompleto}`);
-    form.getTextField("Rut").setText(` ${ciudadano.rut}-${ciudadano.dv}`);
-    form.getTextField("Domicilio").setText(" " + String(ciudadano.direccion));
+    form
+      .getTextField("Rut")
+      .setText(` ${formatRUT(ciudadano.rut, ciudadano.dv)}`);
+    form
+      .getTextField("Domicilio")
+      .setText(" " + String(ciudadano.direccion_mod || ciudadano.direccion));
     form.getTextField("Tramo").setText(` ${ciudadano.tramo}%`);
     form
       .getTextField("Telefono")
-      .setText(" " + String(ciudadano.telefono || "No aplica"));
+      .setText(
+        ciudadano.telefono_mod || ciudadano.telefono
+          ? " " +
+              formatPhone(String(ciudadano.telefono_mod || ciudadano.telefono))
+          : " No registrado",
+      );
     form
       .getTextField("FechaSolicitud")
       .setText(" " + formatDate(fecha_entrega, "fullDate"));

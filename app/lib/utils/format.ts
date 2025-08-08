@@ -74,8 +74,9 @@ export const formatNumber = (num: number | string) => {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
 
-export const formatRUT = (rut: string | number) => {
+export const formatRUT = (rut: string | number, dv?: string) => {
   if (!rut) return "";
+  if (dv) return formatNumber(rut) + "-" + dv;
   return formatNumber(rut) + "-" + getDV(String(rut));
 };
 
