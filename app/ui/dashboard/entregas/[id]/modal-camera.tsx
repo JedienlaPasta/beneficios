@@ -15,10 +15,6 @@ const filesList = [
   },
   {
     id: "2",
-    name: "Cartola RSH",
-  },
-  {
-    id: "3",
     name: "Acta de Entrega",
   },
   {
@@ -26,7 +22,7 @@ const filesList = [
     name: "Cedula",
   },
   {
-    id: "3",
+    id: "4",
     name: "Entregas",
   },
 ];

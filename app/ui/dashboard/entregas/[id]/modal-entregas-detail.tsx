@@ -43,6 +43,9 @@ export default function ModalEntregasDetail({
   const { nombre_usuario, fecha_entrega, observacion, estado_documentos } =
     entregas;
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const estadoTextColor =
     estado_documentos === "Finalizado"
       ? "bg-emerald-100 text-emerald-600"
@@ -55,11 +58,8 @@ export default function ModalEntregasDetail({
       await setIsModalClosing(false);
     }
     await setTab(newTab);
+    router.refresh();
   };
-
-  // To disable camera on overlay click
-  const router = useRouter();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -68,7 +68,7 @@ export default function ModalEntregasDetail({
       document.body.style.overflow = "auto";
     };
   }, []);
-
+  // To disable camera on overlay click
   const handleOverlayClick = async () => {
     const params = new URLSearchParams(searchParams);
     params.delete("detailsModal");
@@ -79,7 +79,7 @@ export default function ModalEntregasDetail({
   const handleEntregaStatus = async () => {
     setIsToggleButtonDisabled(true);
     const newStatus =
-      estado_documentos === "Finalizado" ? "En curso" : "Finalizado";
+      estado_documentos === "Finalizado" ? "En Curso" : "Finalizado";
     const toastId = toast.loading("Cambiando estado...");
     try {
       const response = await toggleEntregaStatus(folio, newStatus);
@@ -114,7 +114,7 @@ export default function ModalEntregasDetail({
           layout
           layoutRoot
           transition={{ layout: { duration: 0.25 } }}
-          className="flex max-h-full w-[100%] shrink-0 flex-col gap-4 overflow-hidden rounded-xl bg-white p-6 shadow-xl transition-all duration-500 scrollbar-hide sm:w-[34rem] md:p-8"
+          className="scrollbar-hidex flex max-h-full w-[100%] shrink-0 flex-col gap-4 overflow-hidden rounded-xl bg-white p-6 shadow-xl transition-all duration-500 sm:w-[34rem] md:p-8"
         >
           {/* Header */}
           <section className="flex items-center justify-between">
@@ -190,7 +190,7 @@ export default function ModalEntregasDetail({
           {/* Content with Framer Motion transitions */}
           <motion.div
             id="content-container"
-            className="relative min-h-[8rem] overflow-y-auto scrollbar-hide"
+            className="scrollbar-hidex relative min-h-[8rem] overflow-y-auto"
           >
             <AnimatePresence mode="wait">
               {tab === "Resumen" ? (
@@ -407,7 +407,7 @@ function FilesList({
       {files.length > 0 ? (
         <div className="grid grid-cols-1 gap-3 rounded-xl border border-gray-200/80 bg-gray-50/70 p-4 shadow-sm sm:grid-cols-2">
           {files.map((item: EntregasFiles, index) => (
-            <Files key={index} item={item} />
+            <Files key={index} item={item} folio={folio} />
           ))}
         </div>
       ) : (

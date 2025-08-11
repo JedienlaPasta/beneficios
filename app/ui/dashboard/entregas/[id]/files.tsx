@@ -7,7 +7,7 @@ import { deletePDFById, downloadPDFById } from "@/app/lib/actions/entregas";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export function Files({ item }: { item: EntregasFiles }) {
+export function Files({ item, folio }: { item: EntregasFiles; folio: string }) {
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const [isHovered, setIsHovered] = useState<boolean>(false);
@@ -45,18 +45,24 @@ export function Files({ item }: { item: EntregasFiles }) {
 
   const confirmDelete = async () => {
     setIsDisabled(true);
-    toast.promise(deleteFileWithId(), {
-      loading: "Eliminando documento...",
-      success: (response) => {
-        setShowConfirmModal(false);
-        setIsDisabled(false);
-        router.refresh();
-        return response.message;
-      },
-      error: (err) => {
-        return err.message;
-      },
-    });
+    const toastId = toast.loading("Eliminando documento...");
+    try {
+      const response = await deleteFileWithId(folio);
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+      toast.success(response.message, { id: toastId });
+      router.refresh();
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Error al cambiar el estado de la entrega";
+      toast.error(message, { id: toastId });
+    } finally {
+      setShowConfirmModal(false);
+      setIsDisabled(false);
+    }
   };
 
   const handleDownload = async (e: React.MouseEvent) => {

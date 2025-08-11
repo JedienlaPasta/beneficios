@@ -49,21 +49,23 @@ export default function DeleteEntregasButton({ folio }: { folio: string }) {
 
   const confirmDelete = async () => {
     setIsDisabled(true);
-    toast.promise(deleteCampaignWithId(), {
-      loading: "Eliminando entrega...",
-      success: async (response) => {
-        setShowConfirmModal(false);
-        setIsDisabled(false);
-        closeModal();
-        return {
-          message: response.message,
-        };
-      },
-      error: () => ({
-        message: "Error al eliminar la entrega",
-        description: "No se pudo eliminar la entrega. Intente nuevamente.",
-      }),
-    });
+    const toastId = toast.loading("Eliminando entrega...");
+    try {
+      const response = await deleteCampaignWithId();
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+      toast.success(response.message, { id: toastId });
+      closeModal();
+      router.refresh();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Error al eliminar la entrega";
+      toast.error(message, { id: toastId });
+    } finally {
+      setShowConfirmModal(false);
+      setIsDisabled(false);
+    }
   };
 
   return (

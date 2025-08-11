@@ -37,6 +37,12 @@ html {
   }
 }
 
+::-webkit-scrollbar-track {
+  background: #f2f3f4; /* Light gray background */
+  border-radius: 100vh;
+  margin: 5px 0;
+}
+
 ::-webkit-scrollbar-thumb {
   background: #58636e;
   border-radius: 100vh;

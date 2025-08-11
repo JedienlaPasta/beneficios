@@ -127,7 +127,7 @@ export default async function CitizenDetail({
               <div className="rounded-xl bg-white px-5 py-1 lg:px-8 lg:py-2">
                 <DetailRow
                   name="Teléfono"
-                  value={telefono ? telefono.toString() : "No registrado"}
+                  value={telefono ? formatPhone(telefono) : "No registrado"}
                   border={true}
                 />
                 <DetailRow
@@ -146,7 +146,9 @@ export default async function CitizenDetail({
               <div className="rounded-xl bg-white px-5 py-1 lg:px-8 lg:py-2">
                 <DetailRow
                   name="Teléfono"
-                  value={formatPhone(telefono_mod) || "No registrado"}
+                  value={
+                    telefono_mod ? formatPhone(telefono_mod) : "No registrado"
+                  }
                   border={true}
                 />
                 <DetailRow

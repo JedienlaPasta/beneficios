@@ -317,16 +317,33 @@ export default function NewModalForm({
         </div>
       </div>
 
-      <Input
+      {/* <Input
         placeHolder="Observaciones..."
         label="Observaciones"
         type="text"
         nombre="observaciones"
         value={observaciones}
         setData={setObservaciones}
-      />
+      /> */}
+      <div className="flex grow flex-col gap-1">
+        <label htmlFor={observaciones} className="text-xs text-slate-500">
+          Observaciones
+        </label>
+        <textarea
+          name="observaciones"
+          id="observaciones"
+          // cols={30}
+          rows={4}
+          required
+          maxLength={450}
+          value={observaciones}
+          onChange={(e) => setObservaciones(e.target.value)}
+          placeholder="Observaciones..."
+          className="w-full rounded-lg border border-slate-300 bg-transparent bg-white px-4 py-2 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus-within:border-blue-500"
+        ></textarea>
+      </div>
 
-      <div className="mt-2 flex">
+      <div className="mt-1 flex">
         <SubmitButton isDisabled={isDisabled || !isFormValid()}>
           {isLoading ? "Guardando..." : "Guardar"}
         </SubmitButton>

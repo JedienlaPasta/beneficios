@@ -329,11 +329,38 @@ export const deleteEntregaByFolio = async (folio: string) => {
       const folioRequest = new sql.Request(transaction);
       const folioResult = await folioRequest.input("folio", sql.NVarChar, folio)
         .query(`
-        SELECT folio FROM entregas WHERE folio = @folio
+        SELECT folio, estado_documentos FROM entregas WHERE folio = @folio
       `);
 
       if (folioResult.recordset.length === 0) {
         return { success: false, message: "Entrega no encontrada" };
+      }
+
+      console.log(folioResult.recordset[0].estado_documentos);
+      if (folioResult.recordset[0].estado_documentos !== "En Curso") {
+        return {
+          success: false,
+          message:
+            "Solo se pueden eliminar las entregas con estado 'En Curso'.",
+        };
+      }
+
+      const next_folio_num = Number(folio.split("-")[0]) + 1;
+      const nextFolioRequest = new sql.Request(transaction);
+      const nextFolioResult = await nextFolioRequest.input(
+        "folio_num",
+        sql.Int,
+        next_folio_num,
+      ).query(`
+        SELECT folio_num FROM entregas WHERE folio_num = @folio_num
+      `);
+
+      if (nextFolioResult.recordset.length > 0) {
+        return {
+          success: false,
+          message:
+            "Ya no se puede eliminar esta entrega. Existe una entrega posterior.",
+        };
       }
 
       // Get campaign IDs to update campaign counts
@@ -516,7 +543,7 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
 };
 
 // eliminar documento mediante id
-export const deletePDFById = async (id: string) => {
+export const deletePDFById = async (id: string, folio: string) => {
   try {
     const pool = await connectToDB();
     if (!pool) {
@@ -527,10 +554,31 @@ export const deletePDFById = async (id: string) => {
       };
     }
 
+    const folioRequest = pool.request().input("folio", sql.NVarChar, folio);
+    const folioResult = await folioRequest.query(`
+    SELECT estado_documentos FROM entregas
+    WHERE folio = @folio
+  `);
+
+    if (folioResult.recordset.length === 0) {
+      return {
+        success: false,
+        message: "Folio no encontrado",
+      };
+    }
+
+    const estado = folioResult.recordset[0].estado_documentos;
+    if (estado === "Finalizado") {
+      return {
+        success: false,
+        message: "No se puede eliminar un documento de una entrega finalizada.",
+      };
+    }
+
     // Check if document exists before deleting
     const documentRequest = pool.request().input("id", sql.NVarChar, id);
     const documentResult = await documentRequest.query(`
-    SELECT id, folio FROM documentos
+    SELECT id FROM documentos
     WHERE id = @id
   `);
 
@@ -560,7 +608,7 @@ export const deletePDFById = async (id: string) => {
       const updateRequest = new sql.Request(transaction).input(
         "folio",
         sql.NVarChar,
-        documentResult.recordset[0].folio,
+        folio,
       );
       await updateRequest.query(`
       UPDATE entregas
@@ -574,12 +622,7 @@ export const deletePDFById = async (id: string) => {
       throw error;
     }
 
-    await logAction(
-      "Eliminar",
-      "eliminó 1 documento",
-      "PDF",
-      documentResult.recordset[0].folio,
-    );
+    await logAction("Eliminar", "eliminó 1 documento", "PDF", folio);
     return {
       success: true,
       message: "Documento eliminado correctamente",
