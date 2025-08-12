@@ -434,12 +434,14 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
     // Check current document count before uploading
     const countRequest = pool.request().input("folio", sql.NVarChar, folio);
     const countResult = await countRequest.query(`
-      SELECT COUNT(*) AS count
+      SELECT COUNT(*) AS count, nombre_documento
       FROM documentos
       WHERE folio = @folio
+      GROUP BY nombre_documento;
     `);
 
     const currentCount = countResult.recordset[0].count as number;
+    const fileNames = countResult.recordset.map((doc) => doc.nombre_documento);
 
     // After getting currentCount
     if (currentCount >= 4) {
@@ -461,9 +463,18 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
 
     for (let i = 0; i < fileCount; i++) {
       const file = formData.get(`file${i}`) as File;
-      console.log(file);
 
       if (!file) continue;
+
+      const fileName = file.name;
+      // Revisar si funciona cuando se suben multiple archivos PENDING
+      const fileNameExists = fileNames.some((name) => name === fileName);
+      if (fileNameExists) {
+        return {
+          success: false,
+          message: `No se puede volver a subir el documento ${fileName}`,
+        };
+      }
 
       const fileArrayBuffer = await file.arrayBuffer();
       const fileBuffer = Buffer.from(fileArrayBuffer);
@@ -471,7 +482,6 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
       // Acrchivo que se ingresa
       const fileBase64 = compressedBuffer.toString("base64");
 
-      const fileName = file.name;
       const fileType = ".pdf";
       const fecha = new Date();
       fecha.setMilliseconds(fecha.getMilliseconds() + i);

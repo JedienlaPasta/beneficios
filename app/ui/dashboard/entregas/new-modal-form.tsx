@@ -32,7 +32,9 @@ export default function NewModalForm({
     if (activeCampaigns && activeCampaigns.length > 0) {
       return activeCampaigns.reduce(
         (acc, campaign) => {
-          acc[campaign.id] = { selected: false, detail: "" };
+          const defaultValue =
+            campaign.nombre_campaña === "Tarjeta de Comida" ? "NN" : "";
+          acc[campaign.id] = { selected: false, detail: defaultValue };
           return acc;
         },
         {} as { [key: string]: { selected: boolean; detail: string } },
@@ -335,7 +337,7 @@ export default function NewModalForm({
           // cols={30}
           rows={4}
           required
-          maxLength={450}
+          maxLength={500}
           value={observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
           placeholder="Observaciones..."

@@ -23,6 +23,8 @@ export default function ModalImportForm({
   // Button handlers
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  console.log(errorMessage);
 
   const formAction = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -54,6 +56,7 @@ export default function ModalImportForm({
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Error al subir archivos";
+      setErrorMessage(message);
       toast.error(message, { id: toastId });
     } finally {
       setIsLoading(false);
@@ -156,11 +159,15 @@ export default function ModalImportForm({
           {selectedFiles.map((file, index) => (
             <span
               key={index}
-              className="flex items-center justify-between gap-2 rounded-lg border border-gray-200 px-4 py-3"
+              className={`flex items-center justify-between gap-2 rounded-lg border px-4 py-3 ${errorMessage ? "border-rose-400" : "border-gray-200"}`}
             >
               <span className="flex items-center justify-between gap-2">
                 <Image className="h-6 w-6" src={pdf} alt="pdf.img" />
-                <p className="text-sm text-slate-600">{file.name}</p>
+                <p
+                  className={`text-sm ${errorMessage ? "text-rose-500" : "text-slate-600"}`}
+                >
+                  {file.name}
+                </p>
               </span>
               {isLoading && (
                 <p className="h-3 w-3 shrink-0 grow-0 animate-pulse rounded-full bg-blue-500 text-sm text-slate-600"></p>

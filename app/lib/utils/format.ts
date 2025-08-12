@@ -91,12 +91,27 @@ export const capitalize = (str: string) => {
 
 export const capitalizeAll = (str?: string) => {
   if (!str) return "";
-  const ignoredWords = ["el", "la", "los", "las", "de"];
+
+  const ignoredWords = [
+    "el",
+    "la",
+    "los",
+    "las",
+    "de",
+    "del",
+    "y",
+    "o",
+    "en",
+    "con",
+  ];
+
   return str
+    .replace(/\s+/g, " ")
     .trim()
     .toLowerCase()
     .split(" ")
-    .map((word) => {
+    .map((word, index) => {
+      if (index === 0) return capitalize(word);
       if (word.length < 3 || ignoredWords.includes(word)) {
         return word;
       }

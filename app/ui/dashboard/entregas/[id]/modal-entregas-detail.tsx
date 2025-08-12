@@ -347,10 +347,12 @@ function ModalGeneralInfoField({
       <p className="flex items-center gap-2 text-sm font-medium text-slate-500">
         {name}
       </p>
-      <span className="flex items-baseline gap-2">
-        <p className="mt-1 text-sm text-slate-700">{value}</p>
+      <span className="relative mt-1 text-sm text-slate-700">
+        {value}
         {typeof children === "object" && (
-          <p className="text-xs text-slate-500">{hour}</p>
+          <p className="absolute left-[calc(100%+7px)] top-0 rounded bg-slate-200/60 px-2 py-0.5 text-xs text-slate-500">
+            {hour}
+          </p>
         )}
       </span>
     </div>
