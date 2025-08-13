@@ -460,6 +460,7 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
     }
 
     const uploadPromises = [];
+    let uploadedFilesNames = "";
 
     for (let i = 0; i < fileCount; i++) {
       const file = formData.get(`file${i}`) as File;
@@ -467,6 +468,8 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
       if (!file) continue;
 
       const fileName = file.name;
+      uploadedFilesNames += fileName + uploadedFilesNames === "" ? "" : ", ";
+
       // Revisar si funciona cuando se suben multiple archivos PENDING
       const fileNameExists = fileNames.some((name) => name === fileName);
       if (fileNameExists) {
@@ -539,7 +542,12 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
       throw error;
     }
 
-    await logAction("Subir", `subió ${fileCount} documento(s)`, "PDF", folio);
+    await logAction(
+      "Subir",
+      `subió ${fileCount} documento(s) PDF`,
+      uploadedFilesNames, // PENDING
+      folio,
+    );
     return {
       success: true,
       message: `${fileCount} documento(s) guardado(s) correctamente`,
@@ -676,12 +684,12 @@ export const downloadPDFById = async (id: string) => {
     // Get base64 string and document name
     const { archivo, nombre_documento } = documentResult.recordset[0];
 
-    await logAction(
-      "Descargar",
-      "descargó 1 documento",
-      "PDF",
-      documentResult.recordset[0].folio,
-    );
+    // await logAction(
+    //   "Descargar",
+    //   "descargó 1 documento",
+    //   "PDF",
+    //   documentResult.recordset[0].folio,
+    // );
     return {
       success: true,
       data: {
