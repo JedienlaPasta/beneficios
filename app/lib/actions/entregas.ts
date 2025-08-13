@@ -109,6 +109,29 @@ export const createEntrega = async (id: string, formData: FormData) => {
       transaction = new sql.Transaction(pool);
       await transaction.begin(sql.ISOLATION_LEVEL.SERIALIZABLE);
 
+      // Verificar que no ha recibido entregas por hoy (PENDING)
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const todayEnd = new Date();
+      todayEnd.setHours(23, 59, 59, 999);
+      const dailyCheckRequest = new sql.Request(transaction);
+      const dailyCheckResult = await dailyCheckRequest
+        .input("rut", sql.Int, rut)
+        .input("todayStart", sql.DateTime, todayStart)
+        .input("todayEnd", sql.DateTime, todayEnd).query(`
+          SELECT COUNT(*) as count FROM entregas
+          WHERE rut = @rut AND fecha_entrega >= @todayStart AND fecha_entrega <= @todayEnd
+        `);
+      const count = dailyCheckResult.recordset[0].count;
+      if (count > 0) {
+        await transaction.rollback();
+        return {
+          success: false,
+          message:
+            "No se pueden asignar más beneficios a esta persona por hoy.",
+        };
+      }
+
       let userId: string;
 
       if (correo) {
@@ -818,11 +841,16 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
         form.getTextField("CodigoGas").setText(detail);
       } else if (campaign_name.includes("Pañales")) {
         ["RN", "G", "XXG", "P", "XG", "Adultos"].forEach((tipo) => {
-          if (detail === tipo) form.getTextField(tipo).setText("X");
+          if (detail === tipo) form.getTextField(tipo).setText("X"); // Cambiar "X" por cantidad de pañales. Mover "Adultos" a otro campo que si se marcara con "X".
         });
+        // } else if (campaign_name.includes("Pañales")) {
+        //   ["RN", "G", "XXG", "P", "XG", "Adultos"].forEach((tipo) => {
+        //     if (detail === tipo) form.getTextField(tipo).setText("X");
+        //   });
       } else if (campaign_name.includes("Tarjeta de Comida")) {
         form.getTextField("CodigoTarjeta").setText(detail);
       } else {
+        form.getTextField("OtrosNombre").setText(detail); // Nombre campaña
         form.getTextField("Otros").setText(detail);
       }
     });
@@ -830,6 +858,9 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
     form.getTextField("Justificacion").setText(observacion);
     form
       .getTextField("NombreProfesional")
+      .setText(" " + encargado.nombre_usuario);
+    form
+      .getTextField("NombreProfesionalFirma")
       .setText(" " + encargado.nombre_usuario);
     form.getTextField("Cargo").setText(" " + encargado.cargo);
     form
