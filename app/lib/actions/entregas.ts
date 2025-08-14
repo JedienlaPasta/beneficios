@@ -903,18 +903,18 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
     campaigns.forEach(({ campaign_name, detail }) => {
       if (campaign_name.includes("Vale de Gas")) {
         form.getTextField("CodigoGas").setText(detail);
-      } else if (campaign_name.includes("Pañales")) {
-        ["RN", "G", "XXG", "P", "XG", "Adultos"].forEach((tipo) => {
-          if (detail === tipo) form.getTextField(tipo).setText("X"); // Cambiar "X" por cantidad de pañales. Mover "Adultos" a otro campo que si se marcara con "X".
-        });
         // } else if (campaign_name.includes("Pañales")) {
         //   ["RN", "G", "XXG", "P", "XG", "Adultos"].forEach((tipo) => {
-        //     if (detail === tipo) form.getTextField(tipo).setText("X");
+        //     if (detail === tipo) form.getTextField(tipo).setText("X"); // Cambiar "X" por cantidad de pañales. Mover "Adultos" a otro campo que si se marcara con "X".
         //   });
+      } else if (campaign_name.includes("Pañales")) {
+        ["RN", "G", "XXG", "P", "XG", "Adultos"].forEach((tipo) => {
+          if (detail === tipo) form.getTextField(tipo).setText("X");
+        });
       } else if (campaign_name.includes("Tarjeta de Comida")) {
         form.getTextField("CodigoTarjeta").setText(detail);
       } else {
-        form.getTextField("OtrosNombre").setText(detail); // Nombre campaña
+        // form.getTextField("OtrosNombre").setText(detail); // Nombre campaña
         form.getTextField("Otros").setText(detail);
       }
     });
@@ -923,9 +923,9 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
     form
       .getTextField("NombreProfesional")
       .setText(" " + encargado.nombre_usuario);
-    form
-      .getTextField("NombreProfesionalFirma")
-      .setText(" " + encargado.nombre_usuario);
+    // form
+    //   .getTextField("NombreProfesionalFirma")
+    //   .setText(" " + encargado.nombre_usuario);
     form.getTextField("Cargo").setText(" " + encargado.cargo);
     form
       .getTextField("FechaEntrega")
