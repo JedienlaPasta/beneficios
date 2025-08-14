@@ -158,7 +158,7 @@ export default function NewModalForm({
     }, 200);
   };
 
-  // Add this function to check if form is valid
+  // Check if form is valid
   const isFormValid = () => {
     // Check if any campaigns are selected
     const selectedCount = Object.values(selectedCampaigns).filter(
@@ -181,18 +181,18 @@ export default function NewModalForm({
           const campaign = activeCampaigns?.find((c) => c.id === campaignId);
           const detail = value.detail.trim();
 
-          // Validación especial para "Tarjeta de Comida"
+          // Special validation for "Tarjeta de Comida"
           if (campaign?.nombre_campaña === "Tarjeta de Comida") {
             const invalidValues = ["", "N", "NN"];
             if (invalidValues.includes(detail)) {
               return true;
             }
-            // Valida que empiece con "NN" seguido de números
+            // Regex to validate it starts with "NN" & is followed by numbers
             const validFormat = /^NN\d+$/.test(detail);
-            return !validFormat; // Es inválido si no cumple el formato
+            return !validFormat; // Invalid if doesnt start with "NN" & is not followed by numbers
           }
 
-          // Para otras campañas, solo verificar si está vacío
+          // For other campaigns, validate if it's not empty
           return detail === "";
         },
       );
