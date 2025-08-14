@@ -1,16 +1,13 @@
 import { fetchActiveCampaigns } from "@/app/lib/data/campañas";
 import NewEntregaModal from "./new-modal";
 import { getSession } from "@/app/lib/session";
-import { EntregasTable } from "@/app/lib/definitions";
 
 type NewEntregaModalContextProps = {
   rut: string;
-  entregas: EntregasTable[];
 };
 
 export default async function NewEntregaModalContext({
   rut,
-  entregas,
 }: NewEntregaModalContextProps) {
   const response = await fetchActiveCampaigns();
 
@@ -22,12 +19,7 @@ export default async function NewEntregaModalContext({
 
   return (
     <>
-      <NewEntregaModal
-        rut={rut}
-        userId={userId}
-        activeCampaigns={response}
-        entregas={entregas}
-      />
+      <NewEntregaModal rut={rut} userId={userId} activeCampaigns={response} />
     </>
   );
 }

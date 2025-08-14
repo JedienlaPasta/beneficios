@@ -1,6 +1,6 @@
 "use client";
 import { createEntrega } from "@/app/lib/actions/entregas";
-import { Campaign, EntregasTable } from "@/app/lib/definitions";
+import { Campaign } from "@/app/lib/definitions";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -28,14 +28,12 @@ type NewModalFormProps = {
   activeCampaigns?: Campaign[];
   rut: string;
   userId: string;
-  entregas: EntregasTable[];
 };
 
 export default function NewModalFormManual({
   activeCampaigns,
   rut,
   userId,
-  entregas,
 }: NewModalFormProps) {
   const router = useRouter();
   const [folio, setFolio] = useState("");

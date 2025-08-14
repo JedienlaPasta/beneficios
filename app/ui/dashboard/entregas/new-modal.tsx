@@ -1,5 +1,5 @@
 "use client";
-import { Campaign, EntregasTable } from "@/app/lib/definitions";
+import { Campaign } from "@/app/lib/definitions";
 import CloseModalButton from "../close-modal-button";
 import NewModalForm from "./new-modal-form";
 import { AnimatePresence, motion } from "framer-motion";
@@ -10,14 +10,12 @@ type NewEntregaModalProps = {
   rut: string;
   userId: string;
   activeCampaigns: Campaign[];
-  entregas: EntregasTable[];
 };
 
 export default function NewEntregaModal({
   rut,
   userId,
   activeCampaigns,
-  entregas,
 }: NewEntregaModalProps) {
   const tabs = ["Rápido", "Manual"];
   const [tab, setTab] = useState(tabs[0]);
@@ -92,7 +90,6 @@ export default function NewEntregaModal({
                 activeCampaigns={activeCampaigns}
                 rut={rut}
                 userId={userId}
-                entregas={entregas}
               />
             </motion.div>
           )}
@@ -113,7 +110,6 @@ export default function NewEntregaModal({
                 activeCampaigns={activeCampaigns}
                 rut={rut}
                 userId={userId}
-                entregas={entregas}
               />
             </motion.div>
           )}

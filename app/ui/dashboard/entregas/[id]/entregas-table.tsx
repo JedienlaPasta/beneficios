@@ -29,7 +29,7 @@ export default async function EntregasTable({
       {isModalOpen && (
         <Modal name="newsocialaid">
           <Suspense fallback={<ModalSkeleton name="newsocialaid" />}>
-            <NewEntregaModalContext rut={rut} entregas={data} />
+            <NewEntregaModalContext rut={rut} />
           </Suspense>
         </Modal>
       )}
