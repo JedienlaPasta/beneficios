@@ -178,11 +178,7 @@ export default function ImportXLSXModal({ name }: { name: string }) {
         ) : null}
 
         <div className="flex pt-3">
-          <SubmitButton
-            isDisabled={isDisabled || !selectedFile}
-            isLoading={isLoading}
-            setIsDisabled={setIsDisabled}
-          >
+          <SubmitButton isDisabled={isDisabled || !selectedFile}>
             {isLoading ? "Procesando..." : "Importar"}
           </SubmitButton>
         </div>
