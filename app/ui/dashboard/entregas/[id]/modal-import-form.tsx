@@ -187,11 +187,7 @@ export default function ModalImportForm({
       )}
 
       <div className="flex pt-3">
-        <SubmitButton
-          isDisabled={isDisabled || selectedFiles.length === 0}
-          isLoading={isLoading}
-          setIsDisabled={setIsDisabled}
-        >
+        <SubmitButton isDisabled={isDisabled || selectedFiles.length === 0}>
           {isLoading ? "Guardando..." : "Guardar"}
         </SubmitButton>
       </div>
