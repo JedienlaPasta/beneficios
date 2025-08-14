@@ -17,6 +17,7 @@ type CitizenRecordProps = {
     page?: string;
     newsocialaid?: string;
     detailsModal?: string;
+    editCitizenModal: string;
     changeNameModal?: string;
     changeTramoModal?: string;
   }>;
@@ -29,6 +30,7 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
   const newSocialAid = searchParams?.newsocialaid || "";
   const detailsModal = searchParams?.detailsModal || "";
   const changeNameModal = searchParams?.changeNameModal || "";
+  const editCitizenModal = searchParams?.editCitizenModal || "";
   const changeTramoModal = searchParams?.changeTramoModal || "";
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
@@ -61,6 +63,7 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
             rut={rut}
             isNameModalOpen={Boolean(changeNameModal)}
             isTramoModalOpen={Boolean(changeTramoModal)}
+            isEditModalOpen={Boolean(editCitizenModal)}
           />
         </Suspense>
         <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50">

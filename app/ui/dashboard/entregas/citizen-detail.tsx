@@ -10,17 +10,21 @@ import ModalSkeleton from "../../modal-skeleton";
 import { Suspense } from "react";
 import ChangeTramoButton from "./change-tramo-btn";
 import ChangeTramoModal from "./change-tramo-modal";
+import EditCitizenContactInfoModal from "./edit-citizen-modal";
+import EditCitizenButton from "./edit-citizen-btn";
 
 type CitizenRecordProps = {
   rut: string;
   isNameModalOpen: boolean;
   isTramoModalOpen: boolean;
+  isEditModalOpen: boolean;
 };
 
 export default async function CitizenDetail({
   rut,
   isNameModalOpen,
   isTramoModalOpen,
+  isEditModalOpen,
 }: CitizenRecordProps) {
   const response = await fetchRSHByRUT(rut);
   if (!response.rut) {
@@ -69,6 +73,17 @@ export default async function CitizenDetail({
           </Modal>
         </Suspense>
       )}
+      {isEditModalOpen === true && (
+        <Suspense fallback={<ModalSkeleton name="editCitizenModal" />}>
+          <Modal name="editCitizenModal">
+            <EditCitizenContactInfoModal
+              name="editCitizenModal"
+              citizen={response}
+            />
+          </Modal>
+        </Suspense>
+      )}
+
       <div className="items-centers relative flex flex-col justify-center">
         <div className="grid gap-4 rounded-xl md:gap-6">
           {/* Header Section */}
@@ -102,7 +117,7 @@ export default async function CitizenDetail({
           {/* Details Grid */}
           <div className="grid auto-rows-fr gap-4 md:gap-6 xl:grid-cols-2 2xl:grid-cols-3">
             <div className="rounded-xl border border-slate-200 bg-gray-100">
-              <h2 className="px-5 py-4 text-sm font-medium text-slate-400 lg:px-8">
+              <h2 className="flex h-14 items-center px-5 text-sm font-medium text-slate-400 lg:px-8">
                 Información General
               </h2>
               <div className="rounded-xl bg-white px-5 py-1 lg:px-8 lg:py-2">
@@ -121,7 +136,7 @@ export default async function CitizenDetail({
             </div>
             {/* 2nd segment */}
             <div className="rounded-xl border border-slate-200 bg-gray-100">
-              <h2 className="px-5 py-4 text-sm font-medium text-slate-400 lg:px-8">
+              <h2 className="flex h-14 items-center px-5 text-sm font-medium text-slate-400 lg:px-8">
                 Información Contacto RSH
               </h2>
               <div className="rounded-xl bg-white px-5 py-1 lg:px-8 lg:py-2">
@@ -140,8 +155,9 @@ export default async function CitizenDetail({
             </div>
             {/* 3rd segment */}
             <div className="rounded-xl border border-slate-200 bg-gray-100 xl:col-span-2 2xl:col-span-1">
-              <h2 className="px-5 py-4 text-sm font-medium text-slate-400 lg:px-8">
+              <h2 className="flex h-14 items-center justify-between px-5 text-sm font-medium text-slate-400 lg:px-8">
                 Información Contacto Modificado
+                <EditCitizenButton name="editCitizenModal" />
               </h2>
               <div className="rounded-xl bg-white px-5 py-1 lg:px-8 lg:py-2">
                 <DetailRow
