@@ -51,7 +51,9 @@ export default function NewModalFormManual({
     if (activeCampaigns && activeCampaigns.length > 0) {
       return activeCampaigns.reduce(
         (acc, campaign) => {
-          acc[campaign.id] = { selected: false, detail: "" };
+          const defaultValue =
+            campaign.nombre_campaña === "Tarjeta de Comida" ? "NN" : "";
+          acc[campaign.id] = { selected: false, detail: defaultValue };
           return acc;
         },
         {} as { [key: string]: { selected: boolean; detail: string } },
@@ -114,19 +116,6 @@ export default function NewModalFormManual({
   };
 
   const formAction = async (formData: FormData) => {
-    if (entregas && entregas.length > 0) {
-      const hasMatchingDate = entregas.some((entrega) =>
-        dayjs(entrega.fecha_entrega).isSame(dayjs(fechaEntrega), "day"),
-      );
-
-      if (hasMatchingDate) {
-        toast.error(
-          `Ya recibió un beneficio el día [${dayjs(fechaEntrega).format("DD-MM-YYYY")}], solo se puede ingresar 1 beneficio por día.`,
-        );
-        return;
-      }
-    }
-
     setIsLoading(true);
     setIsDisabled(true);
 
@@ -174,22 +163,24 @@ export default function NewModalFormManual({
     formData.append("correo", correo);
 
     const toastId = toast.loading("Guardando...");
-    try {
-      const response = await createEntregaWithId(formData);
-      if (!response.success) {
-        throw new Error(response.message);
+    setTimeout(async () => {
+      try {
+        const response = await createEntregaWithId(formData);
+        if (!response.success) {
+          throw new Error(response.message);
+        }
+        toast.success(response.message, { id: toastId });
+        closeModal();
+        router.refresh();
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Error al crear la entrega";
+        toast.error(message, { id: toastId });
+        setIsDisabled(false);
+      } finally {
+        setIsLoading(false);
       }
-      toast.success(response.message, { id: toastId });
-      closeModal();
-      router.refresh();
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Error al crear la entrega";
-      toast.error(message, { id: toastId });
-      setIsDisabled(false);
-    } finally {
-      setIsLoading(false);
-    }
+    }, 200);
   };
 
   const fechaEntregaHandler = (pickerDate: dayjs.Dayjs | null) => {
@@ -380,14 +371,22 @@ export default function NewModalFormManual({
         </div>
       </div>
 
-      <Input
-        placeHolder="Observaciones..."
-        label="Observaciones"
-        type="text"
-        nombre="observaciones"
-        value={observaciones}
-        setData={setObservaciones}
-      />
+      <div className="flex grow flex-col gap-1">
+        <label htmlFor={observaciones} className="text-xs text-slate-500">
+          Observaciones
+        </label>
+        <textarea
+          name="observaciones"
+          id="observaciones"
+          // cols={30}
+          rows={4}
+          maxLength={500}
+          value={observaciones}
+          onChange={(e) => setObservaciones(e.target.value)}
+          placeholder="Observaciones..."
+          className="w-full rounded-lg border border-slate-300 bg-transparent bg-white px-4 py-2 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus-within:border-blue-500"
+        ></textarea>
+      </div>
 
       <div className="mt-2 flex">
         <SubmitButton isDisabled={isDisabled || !isFormValid()}>

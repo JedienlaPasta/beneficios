@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 export default function DeleteEntregasButton({ folio }: { folio: string }) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState(2);
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -23,7 +23,7 @@ export default function DeleteEntregasButton({ folio }: { folio: string }) {
   const handleDeleteButton = async () => {
     setShowConfirmModal(true);
     setIsDisabled(true);
-    setCountdown(3);
+    setCountdown(2);
   };
 
   // Effect para manejar el countdown

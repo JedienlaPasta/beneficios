@@ -110,25 +110,24 @@ export const createEntrega = async (id: string, formData: FormData) => {
       await transaction.begin(sql.ISOLATION_LEVEL.SERIALIZABLE);
 
       // Verificar que no ha recibido entregas por hoy (PENDING)
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-      const todayEnd = new Date();
-      todayEnd.setHours(23, 59, 59, 999);
+      const startDate = new Date(fecha_entrega as string) || new Date();
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(fecha_entrega as string) || new Date();
+      endDate.setHours(23, 59, 59, 999);
       const dailyCheckRequest = new sql.Request(transaction);
       const dailyCheckResult = await dailyCheckRequest
         .input("rut", sql.Int, rut)
-        .input("todayStart", sql.DateTime, todayStart)
-        .input("todayEnd", sql.DateTime, todayEnd).query(`
+        .input("startDate", sql.DateTime, startDate)
+        .input("endDate", sql.DateTime, endDate).query(`
           SELECT COUNT(*) as count FROM entregas
-          WHERE rut = @rut AND fecha_entrega >= @todayStart AND fecha_entrega <= @todayEnd
+          WHERE rut = @rut AND fecha_entrega >= @startDate AND fecha_entrega <= @endDate
         `);
       const count = dailyCheckResult.recordset[0].count;
       if (count > 0) {
         await transaction.rollback();
         return {
           success: false,
-          message:
-            "No se pueden asignar más beneficios a esta persona por hoy.",
+          message: `${fecha_entrega ? "No se pueden asignar más beneficios a esta persona en la fecha seleccionada." : "No se pueden asignar más beneficios a esta persona por hoy."}`,
         };
       }
 
@@ -437,6 +436,7 @@ export const deleteEntregaByFolio = async (folio: string) => {
 export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
   try {
     const fileCount = Number(formData.get("fileCount") || "0");
+    console.log("fileCount:", fileCount);
 
     if (fileCount === 0) {
       return {
@@ -454,127 +454,181 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
       };
     }
 
-    // Check current document count before uploading
-    const countRequest = pool.request().input("folio", sql.NVarChar, folio);
-    const countResult = await countRequest.query(`
-      SELECT COUNT(*) AS count, nombre_documento
-      FROM documentos
-      WHERE folio = @folio
-      GROUP BY nombre_documento;
-    `);
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
 
-    const currentCount = countResult.recordset[0].count as number;
-    const fileNames = countResult.recordset.map((doc) => doc.nombre_documento);
+    try {
+      // Check current document count before uploading
+      const countRequest = new sql.Request(transaction);
+      countRequest.input("folio", sql.NVarChar, folio);
+      const countResult = await countRequest.query(`
+        SELECT COUNT(*) AS count
+        FROM documentos
+        WHERE folio = @folio;
+      `);
 
-    // After getting currentCount
-    if (currentCount >= 4) {
-      return {
-        success: false,
-        message: "Ya has alcanzado el máximo de 4 documentos permitidos.",
-      };
-    }
+      const currentCount = (countResult.recordset[0]?.count as number) || 0;
+      console.log("currentCount:", currentCount);
 
-    // Prevent upload if total would exceed 4 documents
-    if (currentCount + fileCount > 4) {
-      return {
-        success: false,
-        message: `No se pueden subir ${fileCount} documento(s). Hay ${currentCount} documento(s) y el máximo permitido es 4.`,
-      };
-    }
+      const fileNamesRequest = new sql.Request(transaction);
+      fileNamesRequest.input("folio", sql.NVarChar, folio);
+      const fileNamesResult = await fileNamesRequest.query(`
+        SELECT DISTINCT nombre_documento
+        FROM documentos
+        WHERE folio = @folio;
+      `);
 
-    const uploadPromises = [];
-    let uploadedFilesNames = "";
+      const fileNames = fileNamesResult.recordset.map(
+        (doc) => doc.nombre_documento,
+      );
 
-    for (let i = 0; i < fileCount; i++) {
-      const file = formData.get(`file${i}`) as File;
-
-      if (!file) continue;
-
-      const fileName = file.name;
-      uploadedFilesNames += fileName + uploadedFilesNames === "" ? "" : ", ";
-
-      // Revisar si funciona cuando se suben multiple archivos PENDING
-      const fileNameExists = fileNames.some((name) => name === fileName);
-      if (fileNameExists) {
+      // After getting currentCount
+      if (currentCount >= 4) {
+        await transaction.rollback();
         return {
           success: false,
-          message: `No se puede volver a subir el documento ${fileName}`,
+          message: "Ya has alcanzado el máximo de 4 documentos permitidos.",
         };
       }
 
-      const fileArrayBuffer = await file.arrayBuffer();
-      const fileBuffer = Buffer.from(fileArrayBuffer);
-      const compressedBuffer = await compressPdfBuffer(fileBuffer);
-      // Acrchivo que se ingresa
-      const fileBase64 = compressedBuffer.toString("base64");
+      // Prevent upload if total would exceed 4 documents
+      if (currentCount + fileCount > 4) {
+        await transaction.rollback();
+        return {
+          success: false,
+          message: `No se pueden subir ${fileCount} documento(s). Hay ${currentCount} documento(s) y el máximo permitido es 4.`,
+        };
+      }
 
-      const fileType = ".pdf";
-      const fecha = new Date();
-      fecha.setMilliseconds(fecha.getMilliseconds() + i);
+      const uploadPromises = [];
+      let uploadedFilesNames = "";
 
-      const insertPromise = pool
-        .request()
-        .input("fecha", sql.DateTime, fecha)
-        .input("fileName", sql.NVarChar, fileName)
-        .input("fileBase64", sql.NVarChar, fileBase64)
-        .input("fileType", sql.NVarChar, fileType)
-        .input("folio", sql.NVarChar, folio).query(`
-        INSERT INTO documentos (
-          fecha_guardado,
-          nombre_documento,
-          archivo,
-          tipo,
-          folio
-        )
-        VALUES (
-          @fecha,
-          @fileName,
-          @fileBase64,
-          @fileType,
-          @folio
-        )
-      `);
+      // First, validate all files before starting any database operations
+      const filesToUpload: File[] = [];
+      for (let i = 0; i < fileCount; i++) {
+        const file = formData.get(`file${i}`) as File;
+        if (!file) continue;
 
-      uploadPromises.push(insertPromise);
-    }
+        const fileName = file.name;
 
-    // Primero se insertan los documentos en la tabla "documentos"
-    await Promise.all(uploadPromises);
+        // Check if file name already exists
+        const fileNameExists = fileNames.some((name) => name === fileName);
+        if (fileNameExists) {
+          await transaction.rollback();
+          return {
+            success: false,
+            message: `No se puede volver a subir el documento ${fileName}`,
+          };
+        }
 
-    // Luego se actualiza el estado de la entrega en la tabla "entregas" de acuerdo a la cantidad de documentos
-    const transaction = new sql.Transaction(pool);
-    try {
-      await transaction.begin();
+        // Check for duplicates within the current upload batch
+        const duplicateInBatch = filesToUpload.some(
+          (file) => file.name === fileName,
+        );
+        if (duplicateInBatch) {
+          await transaction.rollback();
+          return {
+            success: false,
+            message: `No se pueden subir archivos con nombres duplicados: ${fileName}`,
+          };
+        }
 
-      const count = currentCount + fileCount;
+        filesToUpload.push(file);
+        if (uploadedFilesNames === "") uploadedFilesNames += fileName;
+        else uploadedFilesNames = `${uploadedFilesNames}, ${fileName}`;
+      }
+      console.log(uploadedFilesNames);
+
+      // Now process all validated files
+      for (let i = 0; i < filesToUpload.length; i++) {
+        const file = filesToUpload[i];
+        const fileName = file.name;
+
+        const fileArrayBuffer = await file.arrayBuffer();
+        const fileBuffer = Buffer.from(fileArrayBuffer);
+        const compressedBuffer = await compressPdfBuffer(fileBuffer);
+        const fileBase64 = compressedBuffer.toString("base64");
+
+        const fileType = ".pdf";
+        const fecha = new Date();
+        fecha.setMilliseconds(fecha.getMilliseconds() + i);
+
+        const insertRequest = new sql.Request(transaction);
+        const insertPromise = insertRequest
+          .input("fecha", sql.DateTime, fecha)
+          .input("fileName", sql.NVarChar, fileName)
+          .input("fileBase64", sql.NVarChar, fileBase64)
+          .input("fileType", sql.NVarChar, fileType)
+          .input("folio", sql.NVarChar, folio).query(`
+            INSERT INTO documentos (
+              fecha_guardado,
+              nombre_documento,
+              archivo,
+              tipo,
+              folio
+            )
+            VALUES (
+              @fecha,
+              @fileName,
+              @fileBase64,
+              @fileType,
+              @folio
+            )
+          `);
+
+        uploadPromises.push(insertPromise);
+      }
+
+      // Insert all documents
+      await Promise.all(uploadPromises);
 
       // Update status
+      const count = currentCount + fileCount;
+      console.log(count);
       const updateRequest = new sql.Request(transaction);
       await updateRequest
         .input("folio", sql.VarChar, folio)
         .input("estado", sql.VarChar, count === 4 ? "Finalizado" : "En Curso")
         .query(`
-        UPDATE entregas
-        SET estado_documentos = @estado
-        WHERE folio = @folio
-      `);
+          UPDATE entregas
+          SET estado_documentos = @estado
+          WHERE folio = @folio
+        `);
 
       await transaction.commit();
+
+      // Audit log description that fits within 50 characters
+      let logDescription;
+      if (fileCount === 1) {
+        // For single file, use the filename (truncated if needed)
+        logDescription =
+          uploadedFilesNames.length > 35
+            ? uploadedFilesNames.substring(0, 35) + "..."
+            : uploadedFilesNames;
+      } else {
+        const countText = `${fileCount} archivos: `;
+        const remainingSpace = 35 - countText.length;
+
+        logDescription = `${countText}${uploadedFilesNames.substring(0, remainingSpace - 3)}...`;
+      }
+
+      // Ensure final length doesn't exceed 50
+      const finalDescription =
+        logDescription.length > 35
+          ? logDescription.substring(0, 35) + "..."
+          : logDescription;
+
+      await logAction("Subir", `subió`, finalDescription, folio);
+
+      return {
+        success: true,
+        message: `${fileCount} documento(s) guardado(s) correctamente`,
+      };
     } catch (error) {
-      if (transaction) await transaction.rollback();
+      // Rollback transaction on any error
+      await transaction.rollback();
       throw error;
     }
-
-    await logAction(
-      "Subir",
-      `subió ${fileCount} documento(s) PDF`,
-      uploadedFilesNames, // PENDING
-      folio,
-    );
-    return {
-      success: true,
-      message: `${fileCount} documento(s) guardado(s) correctamente`,
-    };
   } catch (error) {
     return {
       success: false,
@@ -594,6 +648,8 @@ export const deletePDFById = async (id: string, folio: string) => {
         message: "No se pudo establecer una conexión a la base de datos.",
       };
     }
+
+    let logDescription = "PDF";
 
     const folioRequest = pool.request().input("folio", sql.NVarChar, folio);
     const folioResult = await folioRequest.query(`
@@ -619,9 +675,11 @@ export const deletePDFById = async (id: string, folio: string) => {
     // Check if document exists before deleting
     const documentRequest = pool.request().input("id", sql.NVarChar, id);
     const documentResult = await documentRequest.query(`
-    SELECT id FROM documentos
+    SELECT id, nombre_documento FROM documentos
     WHERE id = @id
   `);
+
+    logDescription = documentResult.recordset[0].nombre_documento;
 
     if (documentResult.recordset.length === 0) {
       return {
@@ -663,7 +721,13 @@ export const deletePDFById = async (id: string, folio: string) => {
       throw error;
     }
 
-    await logAction("Eliminar", "eliminó 1 documento", "PDF", folio);
+    // Ensure final length doesn't exceed 50 characters
+    const finalDescription =
+      logDescription.length > 28
+        ? logDescription.substring(0, 28) + "..."
+        : logDescription;
+
+    await logAction("Eliminar", "eliminó", finalDescription, folio);
     return {
       success: true,
       message: "Documento eliminado correctamente",

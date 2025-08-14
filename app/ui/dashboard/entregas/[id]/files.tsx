@@ -11,7 +11,7 @@ export function Files({ item, folio }: { item: EntregasFiles; folio: string }) {
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const [isHovered, setIsHovered] = useState<boolean>(false);
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState(2);
   const router = useRouter();
 
   const deleteFileWithId = deletePDFById.bind(null, item.id);
@@ -19,7 +19,7 @@ export function Files({ item, folio }: { item: EntregasFiles; folio: string }) {
   const handleDeleteButton = async () => {
     setShowConfirmModal(true);
     setIsDisabled(true);
-    setCountdown(3);
+    setCountdown(2);
   };
 
   // Effect para manejar el countdown

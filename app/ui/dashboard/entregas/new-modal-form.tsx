@@ -3,24 +3,21 @@ import { toast } from "sonner";
 import Input from "../campañas/new-campaign-input";
 import { SubmitButton } from "../submit-button";
 import { useState } from "react";
-import { Campaign, EntregasTable } from "@/app/lib/definitions";
+import { Campaign } from "@/app/lib/definitions";
 import { createEntrega } from "@/app/lib/actions/entregas";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import dayjs from "dayjs";
 
 type NewModalFormProps = {
   activeCampaigns?: Campaign[];
   rut: string;
   userId: string;
-  entregas: EntregasTable[];
 };
 
 export default function NewModalForm({
   activeCampaigns,
   rut,
   userId,
-  entregas,
 }: NewModalFormProps) {
   const router = useRouter();
   const [observaciones, setObservaciones] = useState("");
@@ -97,20 +94,6 @@ export default function NewModalForm({
   };
 
   const formAction = async (formData: FormData) => {
-    if (entregas && entregas.length > 0) {
-      const currentDate = dayjs();
-      const hasMatchingDate = entregas.some((entrega) =>
-        dayjs(entrega.fecha_entrega).isSame(dayjs(currentDate), "day"),
-      );
-
-      if (hasMatchingDate) {
-        toast.error(
-          "No se pueden asignar más beneficios a esta persona por hoy.",
-        );
-        return;
-      }
-    }
-
     setIsLoading(true);
     setIsDisabled(true);
 
@@ -155,22 +138,24 @@ export default function NewModalForm({
     formData.append("observaciones", observaciones);
 
     const toastId = toast.loading("Guardando...");
-    try {
-      const response = await createEntregaWithId(formData);
-      if (!response.success) {
-        throw new Error(response.message);
+    setTimeout(async () => {
+      try {
+        const response = await createEntregaWithId(formData);
+        if (!response.success) {
+          throw new Error(response.message);
+        }
+        toast.success(response.message, { id: toastId });
+        closeModal();
+        router.refresh();
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Error al crear la entrega";
+        toast.error(message, { id: toastId });
+        setIsDisabled(false);
+      } finally {
+        setIsLoading(false);
       }
-      toast.success(response.message, { id: toastId });
-      closeModal();
-      router.refresh();
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Error al crear la entrega";
-      toast.error(message, { id: toastId });
-      setIsDisabled(false);
-    } finally {
-      setIsLoading(false);
-    }
+    }, 200);
   };
 
   // Add this function to check if form is valid
@@ -189,8 +174,27 @@ export default function NewModalForm({
           value.selected,
       )
       .some(
-        ([, value]: [string, { selected: boolean; detail: string }]) =>
-          value.detail.trim() === "",
+        ([campaignId, value]: [
+          string,
+          { selected: boolean; detail: string },
+        ]) => {
+          const campaign = activeCampaigns?.find((c) => c.id === campaignId);
+          const detail = value.detail.trim();
+
+          // Validación especial para "Tarjeta de Comida"
+          if (campaign?.nombre_campaña === "Tarjeta de Comida") {
+            const invalidValues = ["", "N", "NN"];
+            if (invalidValues.includes(detail)) {
+              return true;
+            }
+            // Valida que empiece con "NN" seguido de números
+            const validFormat = /^NN\d+$/.test(detail);
+            return !validFormat; // Es inválido si no cumple el formato
+          }
+
+          // Para otras campañas, solo verificar si está vacío
+          return detail === "";
+        },
       );
 
     return !hasEmptyDetails;
@@ -336,7 +340,6 @@ export default function NewModalForm({
           id="observaciones"
           // cols={30}
           rows={4}
-          required
           maxLength={500}
           value={observaciones}
           onChange={(e) => setObservaciones(e.target.value)}

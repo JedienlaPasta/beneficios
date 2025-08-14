@@ -1,46 +1,26 @@
 "use client";
-import clsx from "clsx";
 import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 
 export function SubmitButton({
   children,
   isDisabled,
-  isLoading,
-  setIsDisabled,
 }: {
   children: string | React.JSX.Element;
   isDisabled: boolean;
-  isLoading?: boolean;
-  setIsDisabled?: (
-    prevState: boolean | ((prevState: boolean) => boolean),
-  ) => void;
 }) {
   const btnText = children;
-
-  const handleSubmit = () => {
-    if (setIsDisabled) {
-      setTimeout(() => {
-        setIsDisabled(true);
-      }, 50);
-    }
-  };
 
   return (
     <button
       type="submit"
       disabled={isDisabled}
-      onClick={handleSubmit}
-      className={clsx(
-        "flex h-10 grow items-center justify-center rounded-lg text-sm font-medium transition-all active:scale-95",
-        {
-          "cursor-not-allowed bg-slate-300 text-slate-500":
-            isDisabled && !isLoading,
-          "bg-blue-500 text-white hover:bg-blue-600": !isDisabled,
-          "animate-pulse cursor-not-allowed bg-blue-400 text-slate-100":
-            isLoading && isDisabled,
-        },
-      )}
+      onClick={() => console.log(isDisabled)}
+      className={`flex h-10 grow items-center justify-center rounded-lg text-sm font-medium transition-all active:scale-95 ${
+        isDisabled
+          ? "cursor-not-allowed bg-slate-300 text-slate-500"
+          : "bg-blue-500 text-white hover:bg-blue-600"
+      }`}
     >
       {btnText}
     </button>
@@ -50,13 +30,9 @@ export function SubmitButton({
 export function CancelButton({
   name,
   isDisabled,
-  setIsDisabled,
 }: {
   name: string;
   isDisabled: boolean;
-  setIsDisabled: (
-    prevState: boolean | ((prevState: boolean) => boolean),
-  ) => void;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -68,7 +44,6 @@ export function CancelButton({
   };
 
   const handleSubmit = () => {
-    setIsDisabled(true);
     closeModal();
   };
 

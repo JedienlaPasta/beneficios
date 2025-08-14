@@ -167,11 +167,7 @@ export default function UpdateForm({ data }: { data: Campaign }) {
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <CancelButton
-          name="update"
-          isDisabled={isDisabled}
-          setIsDisabled={setIsDisabled}
-        ></CancelButton>
+        <CancelButton name="update" isDisabled={isDisabled}></CancelButton>
         <SubmitButton isDisabled={isDisabled || !isFormValid()}>
           {isLoading ? "Guardando..." : "Guardar"}
         </SubmitButton>
