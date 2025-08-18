@@ -19,6 +19,7 @@ import Camara from "./modal-camera";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toggleEntregaStatus } from "@/app/lib/actions/entregas";
 import { toast } from "sonner";
+import DiscardEntregasButton from "./discard_button";
 
 type Props = {
   rut: string;
@@ -46,10 +47,14 @@ export default function ModalEntregasDetail({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const estadoTextColor =
-    estado_documentos === "Finalizado"
-      ? "bg-emerald-100 text-emerald-600"
-      : "bg-amber-100/60 text-amber-500/90";
+  let stateColor;
+  if (estado_documentos === "Anulado") {
+    stateColor = "bg-red-100 text-red-600";
+  } else if (estado_documentos === "En Curso") {
+    stateColor = "bg-amber-100/60 text-amber-500/90";
+  } else if (estado_documentos === "Finalizado") {
+    stateColor = "bg-emerald-100 text-emerald-600";
+  }
 
   const handleTabChange = async (newTab: string) => {
     if (newTab !== "Capturar") {
@@ -125,7 +130,7 @@ export default function ModalEntregasDetail({
                 <button
                   onClick={handleEntregaStatus}
                   disabled={isToggleButtonDisabled}
-                  className={`flex items-center gap-2 rounded-md px-2.5 py-0.5 ${estadoTextColor}`}
+                  className={`flex items-center gap-2 rounded-md px-2.5 py-0.5 ${stateColor}`}
                 >
                   {/* <span
                   className={`h-2 w-2 shrink-0 animate-pulse rounded-full ${estado_documentos === "Finalizado" ? "bg-slate-300" : "bg-yellow-400"} `}
@@ -237,9 +242,21 @@ export default function ModalEntregasDetail({
                         Beneficios Recibidos{" "}
                         {entrega.length > 3 && "(" + entrega.length + ")"}
                       </h3>
-                      <RoleGuard allowedRoles={["Administrador", "Supervisor"]}>
-                        <DeleteEntregasButton folio={folio} />
-                      </RoleGuard>
+                      <span className="flex items-center gap-2">
+                        <RoleGuard
+                          allowedRoles={["Administrador", "Supervisor"]}
+                        >
+                          <DeleteEntregasButton folio={folio} />
+                        </RoleGuard>
+                        <RoleGuard
+                          allowedRoles={["Administrador", "Supervisor"]}
+                        >
+                          <DiscardEntregasButton
+                            folio={folio}
+                            estadoDocumentos={estado_documentos}
+                          />
+                        </RoleGuard>
+                      </span>
                     </div>
                     <div className="flex max-h-[206px] flex-col gap-2.5 overflow-y-auto">
                       {entrega.map((item) => (

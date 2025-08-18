@@ -358,7 +358,6 @@ export const deleteEntregaByFolio = async (folio: string) => {
         return { success: false, message: "Entrega no encontrada" };
       }
 
-      console.log(folioResult.recordset[0].estado_documentos);
       if (folioResult.recordset[0].estado_documentos !== "En Curso") {
         return {
           success: false,
@@ -425,6 +424,111 @@ export const deleteEntregaByFolio = async (folio: string) => {
     }
   } catch (error) {
     console.error("Error al eliminar entregas:", error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : String(error),
+    };
+  }
+};
+
+export const toggleDiscardEntregaByFolio = async (
+  folio: string,
+  newState: string,
+) => {
+  try {
+    const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
+
+    const transaction: sql.Transaction = new sql.Transaction(pool);
+
+    try {
+      await transaction.begin();
+      // Check if entrega exists
+      const folioRequest = new sql.Request(transaction);
+      const folioResult = await folioRequest.input("folio", sql.NVarChar, folio)
+        .query(`
+        SELECT folio, estado_documentos FROM entregas WHERE folio = @folio
+
+      `);
+
+      if (folioResult.recordset.length === 0) {
+        return { success: false, message: "Entrega no encontrada" };
+      }
+
+      const currentState = folioResult.recordset[0].estado_documentos;
+
+      // Only allow state change if current state is not "Finalizado"
+      if (currentState === "Finalizado") {
+        return {
+          success: false,
+          message:
+            "No se pueden modificar las entregas con estado 'Finalizado'.",
+        };
+      }
+
+      // Get campaign IDs to update campaign counts
+      const campaignRequest = new sql.Request(transaction);
+      const campaignResult = await campaignRequest.input(
+        "folio",
+        sql.NVarChar,
+        folio,
+      ).query(`
+        SELECT id_campaña FROM entrega WHERE folio = @folio
+      `);
+
+      // Determine campaign counter based on state transition
+      let entregaCounter = 0;
+      if (currentState === "En Curso" && newState === "Anulado") {
+        entregaCounter = -1; // Decrease count when canceling
+      } else if (currentState === "Anulado" && newState === "En Curso") {
+        entregaCounter = 1; // Increase count when reactivating
+      }
+
+      // Update campaign counts
+      if (entregaCounter !== 0) {
+        for (const campaign of campaignResult.recordset) {
+          const updateCampaignRequest = new sql.Request(transaction);
+          await updateCampaignRequest
+            .input("campaignId", sql.UniqueIdentifier, campaign.id_campaña)
+            .input("entregaCounter", sql.Int, entregaCounter).query(`
+          UPDATE campañas
+          SET entregas = entregas + @entregaCounter
+          WHERE id = @campaignId
+        `);
+        }
+      }
+
+      // Update entrega state
+      const updateEntregaRequest = new sql.Request(transaction);
+      await updateEntregaRequest
+        .input("folio", sql.NVarChar, folio)
+        .input("newState", sql.NVarChar, newState).query(`
+        UPDATE entregas SET estado_documentos = @newState WHERE folio = @folio
+      `);
+
+      await transaction.commit();
+      const actionMessage =
+        newState === "Anulado"
+          ? "anuló la entrega"
+          : "cambió el estado de la entrega";
+      await logAction("Editar", actionMessage, "", folio);
+      return {
+        success: true,
+        message: `Estado cambiado a '${newState}' correctamente`,
+      };
+    } catch (error) {
+      // Rollback transaction on error
+      await transaction.rollback();
+      throw error;
+    }
+  } catch (error) {
+    console.error("Error al cambiar estado de entrega:", error);
     return {
       success: false,
       message: error instanceof Error ? error.message : String(error),
@@ -971,23 +1075,48 @@ export const toggleEntregaStatus = async (folio: string, newStatus: string) => {
       };
     }
 
-    const request = pool.request();
-    const result = await request
-      .input("folio", sql.NVarChar, folio)
-      .input("estado", sql.NVarChar, newStatus).query(`
-      UPDATE entregas
-      SET estado_documentos = @estado
-      WHERE folio = @folio
-    `);
-    if (result.rowsAffected[0] === 0) {
+    const checkRequest = pool.request();
+    const checkResult = await checkRequest.input("folio", sql.NVarChar, folio)
+      .query(`
+        SELECT estado_documentos FROM entregas WHERE folio = @folio
+      `);
+
+    if (checkResult.recordset.length === 0) {
       return {
         success: false,
         message: "Entrega no encontrada",
       };
     }
+
+    const currentState = checkResult.recordset[0].estado_documentos;
+
+    // Prevent changes if current state is "Anulado"
+    if (currentState === "Anulado") {
+      return {
+        success: false,
+        message: "Entrega anulada, no se puede cambiar el estado",
+      };
+    }
+
+    const updateRequest = pool.request();
+    const result = await updateRequest
+      .input("folio", sql.NVarChar, folio)
+      .input("estado", sql.NVarChar, newStatus).query(`
+        UPDATE entregas
+        SET estado_documentos = @estado
+        WHERE folio = @folio
+      `);
+
+    if (result.rowsAffected[0] === 0) {
+      return {
+        success: false,
+        message: "No se pudo actualizar la entrega",
+      };
+    }
+
     return {
       success: true,
-      message: "Estado actualizado",
+      message: "Estado actualizado correctamente",
     };
   } catch (error) {
     console.error("Error al actualizar el estado de la entrega:", error);

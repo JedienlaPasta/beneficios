@@ -34,10 +34,14 @@ export default function EntregasTableRow({ item }: EntregasProps) {
 
   const formattedRut = rut ? formatRUT(rut) : "";
 
-  const estadoTextColor =
-    estado_documentos === "Finalizado"
-      ? "bg-emerald-100 text-emerald-600"
-      : "bg-amber-100/60 text-amber-500/90";
+  let stateColor;
+  if (estado_documentos === "Anulado") {
+    stateColor = "bg-red-100 text-red-600";
+  } else if (estado_documentos === "En Curso") {
+    stateColor = "bg-amber-100/60 text-amber-500/90";
+  } else if (estado_documentos === "Finalizado") {
+    stateColor = "bg-emerald-100 text-emerald-600";
+  }
 
   return (
     <tr className="grid grid-cols-26 gap-8 text-nowrap px-5 text-sm tabular-nums transition-colors hover:bg-slate-200/50 md:px-8">
@@ -66,7 +70,7 @@ export default function EntregasTableRow({ item }: EntregasProps) {
       {/* <td className="col-span-4 py-3 text-slate-600">{estado_documentos}</td> */}
       <td className="col-span-4 flex items-center self-center text-slate-600">
         <div
-          className={`rounded-md px-3 py-1 text-xs font-medium ${estadoTextColor}`}
+          className={`rounded-md px-3 py-1 text-xs font-medium ${stateColor}`}
         >
           <p className="z-10">{estado_documentos}</p>
         </div>
