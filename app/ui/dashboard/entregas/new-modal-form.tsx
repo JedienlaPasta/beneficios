@@ -188,7 +188,7 @@ export default function NewModalForm({
               return true;
             }
             // Regex to validate it starts with "NN" & is followed by numbers
-            const validFormat = /^NN\d+$/.test(detail);
+            const validFormat = /^NN\w+$/.test(detail);
             return !validFormat; // Invalid if doesnt start with "NN" & is not followed by numbers
           }
 
