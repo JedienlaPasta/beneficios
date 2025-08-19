@@ -378,7 +378,7 @@ export default function NewModalFormManual({
           id="observaciones"
           // cols={30}
           rows={4}
-          maxLength={500}
+          maxLength={390}
           value={observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
           placeholder="Justificación..."

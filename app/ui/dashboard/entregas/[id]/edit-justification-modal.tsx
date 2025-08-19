@@ -88,7 +88,7 @@ export default function EditJustificationModal({
           <CloseModalButton name="justification" />
         </section>
         <p className="text-xs text-gray-500">
-          Puedes redactar una justificación de hasta 500 caracteres.
+          Puedes redactar una justificación de hasta 390 caracteres.
         </p>
 
         <form
@@ -124,7 +124,7 @@ export default function EditJustificationModal({
                       id="justification"
                       // cols={30}
                       rows={10}
-                      maxLength={500}
+                      maxLength={390}
                       value={justification}
                       onChange={(e) => setJustification(e.target.value)}
                       placeholder="Justificación..."
