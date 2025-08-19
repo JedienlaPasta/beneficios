@@ -69,7 +69,7 @@ export default function CamaraComponent({
 
   // PDF mode and document name
   const [pdfMode, setPdfMode] = useState<string>(fileModeList[0].name);
-  const [documentName, setDocumentName] = useState<string>(filesList[3].name);
+  const [documentName, setDocumentName] = useState<string>(filesList[2].name);
 
   const router = useRouter();
 
