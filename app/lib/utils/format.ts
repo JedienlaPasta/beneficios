@@ -36,7 +36,12 @@ export const formatToTimePassed = (date: Date | null) => {
 
   const now = new Date();
   const past = new Date(date);
-  const diffMs = now.getTime() - past.getTime();
+
+  // Resetear las horas para comparar solo fechas
+  const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const pastDate = new Date(past.getFullYear(), past.getMonth(), past.getDate());
+  
+  const diffMs = nowDate.getTime() - pastDate.getTime();
 
   if (diffMs < 0) return "Fecha futura";
 

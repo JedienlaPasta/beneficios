@@ -422,21 +422,29 @@ export const deleteEntregaByFolio = async (folio: string) => {
         };
       }
 
-      const next_folio_num = Number(folio.split("-")[0]) + 1;
-      const nextFolioRequest = new sql.Request(transaction);
-      const nextFolioResult = await nextFolioRequest.input(
-        "folio_num",
-        sql.Int,
-        next_folio_num,
-      ).query(`
-        SELECT folio_num FROM entregas WHERE folio_num = @folio_num
-      `);
+      // Obtener información del folio actual
+      const current_folio_num = Number(folio.split("-")[0]);
+      const folio_year = Number(folio.split("-")[1]);
+      const folio_code = folio.split("-")[2];
 
-      if (nextFolioResult.recordset.length > 0) {
+      // Verificar si existen entregas posteriores en la misma campaña
+      const posteriorEntregasRequest = new sql.Request(transaction);
+      const posteriorEntregasResult = await posteriorEntregasRequest
+        .input("current_folio_num", sql.Int, current_folio_num)
+        .input("folio_year", sql.Int, folio_year)
+        .input("folio_code", sql.NVarChar, folio_code)
+        .query(`
+          SELECT COUNT(*) as count 
+          FROM entregas 
+          WHERE folio_num > @current_folio_num 
+            AND folio_year = @folio_year 
+            AND folio_code = @folio_code
+        `);
+
+      if (posteriorEntregasResult.recordset[0].count > 0) {
         return {
           success: false,
-          message:
-            "Ya no se puede eliminar esta entrega. Existe una entrega posterior.",
+          message: "Ya no se puede eliminar esta entrega. Existen entregas posteriores en esta campaña.",
         };
       }
 
