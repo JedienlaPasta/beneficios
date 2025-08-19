@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function EditCitizenButton({ name }: { name: string }) {
+export default function EditButton({ name }: { name: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 

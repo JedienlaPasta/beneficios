@@ -65,12 +65,12 @@ export default function ModalImportForm({
   };
 
   const handleFiles = (files: FileList | []) => {
-    const remainingSlots = 4 - totalFiles;
+    const remainingSlots = 5 - totalFiles;
     if (!files || files.length === 0) return;
 
     // Early return if already at max files
-    if (totalFiles >= 4 || files.length > remainingSlots) {
-      toast.error("No se pueden agregar más de 4 archivos.");
+    if (totalFiles >= 5 || files.length > remainingSlots) {
+      toast.error("No se pueden agregar más de 5 archivos.");
       return;
     }
 
@@ -145,12 +145,12 @@ export default function ModalImportForm({
             >
               Seleccionar archivos PDF
             </label>
-            <p className="mt-0.5 text-xs text-slate-500">({totalFiles}/4)</p>
+            <p className="mt-0.5 text-xs text-slate-500">({totalFiles}/5)</p>
           </>
         )}
       </div>
       <p className="text-xs text-slate-500">
-        Solo archivos PDF (.pdf) - Máximo 4 archivos
+        Solo archivos PDF (.pdf) - Máximo 5 archivos
       </p>
 
       {/* Import Status - Show all selected files */}

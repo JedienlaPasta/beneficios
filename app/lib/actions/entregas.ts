@@ -175,11 +175,11 @@ export const createEntrega = async (id: string, formData: FormData) => {
         let fechaEntregaConHora;
         if (fecha_entrega) {
           const fecha = new Date(fecha_entrega as string);
-          fecha.setHours(12, 0, 0, 0);
+          fecha.setHours(18, 0, 0, 0);
           fechaEntregaConHora = fecha;
         } else {
           const hoy = new Date();
-          hoy.setHours(12, 0, 0, 0);
+          hoy.setHours(18, 0, 0, 0);
           fechaEntregaConHora = hoy;
         }
 
@@ -332,6 +332,62 @@ export const createEntrega = async (id: string, formData: FormData) => {
 
 // Editar Entrega ================================================================================= (pendiente)
 
+export const updateJustificationByFolio = async (
+  folio: string,
+  formData: FormData,
+) => {
+  try {
+    const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
+
+    const justification = formData.get("justification");
+    if (!justification) {
+      return { success: false, message: "Justificación es requerida" };
+    }
+
+    const folioRequest = pool.request();
+    const folioResult = await folioRequest.input("folio", sql.NVarChar, folio)
+      .query(`
+        SELECT folio FROM entregas WHERE folio = @folio
+      `);
+
+    if (folioResult.recordset.length === 0) {
+      return { success: false, message: "Entrega no encontrada" };
+    }
+
+    const updateRequest = pool.request();
+    await updateRequest
+      .input("justification", sql.NVarChar, justification)
+      .input("folio", sql.NVarChar, folio).query(`
+        UPDATE entregas
+        SET observacion = @justification
+        WHERE folio = @folio
+      `);
+
+    await logAction(
+      "Editar",
+      "cambió la justificación de la entrega",
+      "",
+      folio,
+    );
+
+    return { success: true, message: "Justificación actualizada" };
+  } catch (error) {
+    console.error("Error al actualizar justificacion:", error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : String(error),
+    };
+  }
+};
+
+// Delete Entrega
 export const deleteEntregaByFolio = async (folio: string) => {
   try {
     const pool = await connectToDB();
@@ -587,20 +643,20 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
       );
 
       // After getting currentCount
-      if (currentCount >= 4) {
+      if (currentCount >= 5) {
         await transaction.rollback();
         return {
           success: false,
-          message: "Ya has alcanzado el máximo de 4 documentos permitidos.",
+          message: "Ya has alcanzado el máximo de 5 documentos permitidos.",
         };
       }
 
       // Prevent upload if total would exceed 4 documents
-      if (currentCount + fileCount > 4) {
+      if (currentCount + fileCount > 5) {
         await transaction.rollback();
         return {
           success: false,
-          message: `No se pueden subir ${fileCount} documento(s). Hay ${currentCount} documento(s) y el máximo permitido es 4.`,
+          message: `No se pueden subir ${fileCount} documento(s). Hay ${currentCount} documento(s) y el máximo permitido es 5.`,
         };
       }
 
@@ -643,13 +699,38 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
       }
       console.log(uploadedFilesNames);
 
-      // Now process all validated files
+      // Process all validated files
       for (let i = 0; i < filesToUpload.length; i++) {
         const file = filesToUpload[i];
         const fileName = file.name;
 
         const fileArrayBuffer = await file.arrayBuffer();
-        const fileBuffer = Buffer.from(fileArrayBuffer);
+        let fileBuffer = Buffer.from(fileArrayBuffer);
+
+        // Check if filename contains 'cartola' and extract first page only
+        if (fileName.toLowerCase().includes("cartola")) {
+          try {
+            const pdfDoc = await PDFDocument.load(fileArrayBuffer);
+
+            // Create a new PDF with only the first page
+            const newPdfDoc = await PDFDocument.create();
+            const [firstPage] = await newPdfDoc.copyPages(pdfDoc, [0]);
+            newPdfDoc.addPage(firstPage);
+
+            // Convert back to buffer
+            const pdfBytes = await newPdfDoc.save();
+            fileBuffer = Buffer.from(pdfBytes);
+
+            console.log(`Extracted first page from: ${fileName}`);
+          } catch (error) {
+            console.error(
+              `Error extracting first page from ${fileName}:`,
+              error,
+            );
+            // If extraction fails, use the original file
+          }
+        }
+
         const compressedBuffer = await compressPdfBuffer(fileBuffer);
         const fileBase64 = compressedBuffer.toString("base64");
 
@@ -686,14 +767,39 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
       // Insert all documents
       await Promise.all(uploadPromises);
 
-      // Update status
-      const count = currentCount + fileCount;
-      console.log(count);
+      // Check for required document types instead of count
+      const checkDocumentsRequest = new sql.Request(transaction);
+      const documentsResult = await checkDocumentsRequest.input(
+        "folio",
+        sql.VarChar,
+        folio,
+      ).query(`
+          SELECT nombre_documento 
+          FROM documentos 
+          WHERE folio = @folio
+        `);
+
+      const existingDocuments = documentsResult.recordset.map((doc) =>
+        doc.nombre_documento.toLowerCase(),
+      );
+
+      // Check if all required document types are present
+      const requiredDocTypes = ["entregas", "cedula", "acta", "cartola"];
+      const hasAllRequiredDocs = requiredDocTypes.every((docType) =>
+        existingDocuments.some((docName) => docName.includes(docType)),
+      );
+
+      const newEstado = hasAllRequiredDocs ? "Finalizado" : "En Curso";
+
+      console.log(
+        `Required docs check: ${hasAllRequiredDocs ? "Complete" : "Incomplete"}`,
+      );
+      console.log(`Existing documents: ${existingDocuments.join(", ")}`);
+
       const updateRequest = new sql.Request(transaction);
       await updateRequest
         .input("folio", sql.VarChar, folio)
-        .input("estado", sql.VarChar, count === 4 ? "Finalizado" : "En Curso")
-        .query(`
+        .input("estado", sql.VarChar, newEstado).query(`
           UPDATE entregas
           SET estado_documentos = @estado
           WHERE folio = @folio
@@ -807,15 +913,42 @@ export const deletePDFById = async (id: string, folio: string) => {
       WHERE id = @id
     `);
 
-      // Update entregas status
-      const updateRequest = new sql.Request(transaction).input(
+      // Check for required document types after deletion
+      const checkDocumentsRequest = new sql.Request(transaction);
+      const documentsResult = await checkDocumentsRequest.input(
         "folio",
-        sql.NVarChar,
+        sql.VarChar,
         folio,
+      ).query(`
+          SELECT nombre_documento 
+          FROM documentos 
+          WHERE folio = @folio
+        `);
+
+      const existingDocuments = documentsResult.recordset.map((doc) =>
+        doc.nombre_documento.toLowerCase(),
       );
+
+      // Check if all required document types are present
+      const requiredDocTypes = ["entregas", "cedula", "acta", "cartola"];
+      const hasAllRequiredDocs = requiredDocTypes.every((docType) =>
+        existingDocuments.some((docName) => docName.includes(docType)),
+      );
+
+      const newEstado = hasAllRequiredDocs ? "Finalizado" : "En Curso";
+
+      console.log(
+        `After deletion - Required docs check: ${hasAllRequiredDocs ? "Complete" : "Incomplete"}`,
+      );
+      console.log(`Remaining documents: ${existingDocuments.join(", ")}`);
+
+      // Update entregas status based on document type validation
+      const updateRequest = new sql.Request(transaction)
+        .input("folio", sql.NVarChar, folio)
+        .input("estado", sql.VarChar, newEstado);
       await updateRequest.query(`
       UPDATE entregas
-      SET estado_documentos = 'En Curso'
+      SET estado_documentos = @estado
       WHERE folio = @folio
     `);
 

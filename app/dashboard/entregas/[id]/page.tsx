@@ -20,6 +20,7 @@ type CitizenRecordProps = {
     editCitizenModal: string;
     changeNameModal?: string;
     changeTramoModal?: string;
+    justification?: string;
   }>;
   params: Promise<{ id: string }>;
 };
@@ -32,6 +33,7 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
   const changeNameModal = searchParams?.changeNameModal || "";
   const editCitizenModal = searchParams?.editCitizenModal || "";
   const changeTramoModal = searchParams?.changeTramoModal || "";
+  const justificationModal = searchParams?.justification || "";
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
   // Params (id)
@@ -42,9 +44,14 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
     <div>
       {detailsModal && (
         <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
-          <ModalEntregasDetailContext folio={detailsModal} rut={rut} />
+          <ModalEntregasDetailContext
+            folio={detailsModal}
+            rut={rut}
+            isOnEditForJustification={justificationModal === "true"}
+          />
         </Suspense>
       )}
+
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 3xl:w-[96rem] 3xl:justify-self-center">
         <div>
           <h2 className="text-2xl font-bold text-slate-800">

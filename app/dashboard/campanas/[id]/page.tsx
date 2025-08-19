@@ -17,6 +17,7 @@ type CampaignProps = {
     update?: string;
     detailsModal?: string;
     rut?: string;
+    justification?: string;
   }>;
   params: Promise<{ id: string }>;
 };
@@ -26,6 +27,8 @@ export default async function Campaign(props: CampaignProps) {
   const searchParams = await props.searchParams;
   const showUpdateModal = searchParams?.update || "";
   const detailsModal = searchParams?.detailsModal || "";
+  const justificationModal = searchParams?.justification || "";
+
   const rut = searchParams?.rut || "";
   const query = searchParams?.query || "";
   const paginaActual = Number(searchParams?.page) || 1;
@@ -45,7 +48,11 @@ export default async function Campaign(props: CampaignProps) {
 
       {detailsModal && (
         <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
-          <ModalEntregasDetailContext folio={detailsModal} rut={rut} />
+          <ModalEntregasDetailContext
+            folio={detailsModal}
+            rut={rut}
+            isOnEditForJustification={justificationModal === "true"}
+          />
         </Suspense>
       )}
       <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">

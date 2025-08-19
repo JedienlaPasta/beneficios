@@ -11,19 +11,19 @@ import FileNameDropdown from "./file-name-dropdown";
 const filesList = [
   {
     id: "1",
-    name: "Cedula y Entregas",
-  },
-  {
-    id: "2",
     name: "Acta de Entrega",
   },
   {
-    id: "3",
+    id: "2",
     name: "Cedula",
   },
   {
-    id: "4",
+    id: "3",
     name: "Entregas",
+  },
+  {
+    id: "4",
+    name: "Otro",
   },
 ];
 

@@ -11,7 +11,7 @@ import { Suspense } from "react";
 import ChangeTramoButton from "./change-tramo-btn";
 import ChangeTramoModal from "./change-tramo-modal";
 import EditCitizenContactInfoModal from "./edit-citizen-modal";
-import EditCitizenButton from "./edit-citizen-btn";
+import EditButton from "../edit-btn";
 
 type CitizenRecordProps = {
   rut: string;
@@ -157,7 +157,7 @@ export default async function CitizenDetail({
             <div className="rounded-xl border border-slate-200 bg-gray-100 xl:col-span-2 2xl:col-span-1">
               <h2 className="flex h-14 items-center justify-between px-5 text-sm font-medium text-slate-400 lg:px-8">
                 Información Contacto Modificado
-                <EditCitizenButton name="editCitizenModal" />
+                <EditButton name="editCitizenModal" />
               </h2>
               <div className="rounded-xl bg-white px-5 py-1 lg:px-8 lg:py-2">
                 <DetailRow

@@ -20,6 +20,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toggleEntregaStatus } from "@/app/lib/actions/entregas";
 import { toast } from "sonner";
 import DiscardEntregasButton from "./discard_button";
+import EditButton from "../../edit-btn";
 
 type Props = {
   rut: string;
@@ -132,9 +133,6 @@ export default function ModalEntregasDetail({
                   disabled={isToggleButtonDisabled}
                   className={`flex items-center gap-2 rounded-md px-2.5 py-0.5 ${stateColor}`}
                 >
-                  {/* <span
-                  className={`h-2 w-2 shrink-0 animate-pulse rounded-full ${estado_documentos === "Finalizado" ? "bg-slate-300" : "bg-yellow-400"} `}
-                /> */}
                   <p className="text-xs font-medium">{estado_documentos}</p>
                 </button>
               </div>
@@ -213,21 +211,24 @@ export default function ModalEntregasDetail({
                   className="flex flex-col gap-4"
                 >
                   {/* General Info */}
-                  <section className="mt-1 rounded-xl border border-gray-200/80 bg-gray-50/70 p-5">
-                    <div className="grid grid-cols-2 gap-5">
+                  <section className="">
+                    <div className="grid grid-cols-2 gap-3">
                       <ModalGeneralInfoField
                         name="Encargado"
-                        className="border-r border-gray-200/80 pr-4"
+                        className="rounded-lg border border-gray-200/80 bg-gray-50/70 px-4 py-2"
                       >
                         {nombre_usuario}
                       </ModalGeneralInfoField>
-                      <ModalGeneralInfoField name="Fecha de Entrega">
+                      <ModalGeneralInfoField
+                        name="Fecha de Entrega"
+                        className="rounded-lg border border-gray-200/80 bg-gray-50/70 px-4 py-2"
+                      >
                         {fecha_entrega ? fecha_entrega : ""}
                       </ModalGeneralInfoField>
                       <ModalGeneralInfoField
                         span="col-span-2"
                         name="Justificación"
-                        className="mt-3 border-t border-gray-200/80 pt-4"
+                        className="rounded-lg border border-gray-200/80 bg-gray-50/70 px-4 py-2"
                       >
                         {observacion || "No especificada"}
                       </ModalGeneralInfoField>
@@ -345,26 +346,29 @@ export default function ModalEntregasDetail({
   );
 }
 
+interface ModalGeneralInfoFieldProps {
+  name: string;
+  children: string | Date;
+  span?: string;
+  className?: string;
+}
+
 function ModalGeneralInfoField({
   name,
   children,
   span,
   className,
-}: {
-  name: string;
-  children: string | Date;
-  span?: string;
-  className?: string;
-}) {
+}: ModalGeneralInfoFieldProps) {
   const value = typeof children === "string" ? children : formatDate(children);
-  const hour = typeof children === "object" ? formatTime(children) : "";
+  const hour = children instanceof Date ? formatTime(children) : "";
 
   return (
     <div className={`${span} ${className || ""}`}>
-      <p className="flex items-center gap-2 text-sm font-medium text-slate-500">
-        {name}
-      </p>
-      <span className="relative mt-1 text-sm text-slate-700">
+      <span className="flex items-center justify-between text-xs font-medium text-slate-500/80">
+        <p>{name}</p>
+        {name === "Justificación" && <EditButton name="justification" />}
+      </span>
+      <span className="relative text-sm text-slate-700">
         {value}
         {typeof children === "object" && (
           <p className="absolute left-[calc(100%+7px)] top-0 rounded bg-slate-200/60 px-2 py-0.5 text-xs text-slate-500">

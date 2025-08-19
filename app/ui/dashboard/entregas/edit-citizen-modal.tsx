@@ -165,7 +165,7 @@ function UpdateForm({ name, citizen }: UpdateFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="overflow-y-auto scrollbar-hide">
-      <motion.div className="relative grid min-h-[6rem] gap-6">
+      <motion.div className="relative min-h-[6rem]">
         <AnimatePresence mode="wait">
           <motion.section
             key="opcional"
@@ -173,11 +173,12 @@ function UpdateForm({ name, citizen }: UpdateFormProps) {
             animate={{ opacity: 1, y: 0, height: "auto" }}
             exit={{ opacity: 0, y: -10, height: 270 }}
             transition={{
-              duration: 0.4,
+              duration: 0.3,
               height: { duration: 0.4 },
               ease: "easeInOut",
             }}
             layout
+            className="space-y-6"
           >
             <div className="flex flex-col gap-5 pt-2">
               <Input
@@ -220,13 +221,13 @@ function UpdateForm({ name, citizen }: UpdateFormProps) {
                 setData={setCorreo}
               />
             </div>
+            <div className="z-10 flex">
+              <SubmitButton isDisabled={isDisabled || !isFormValid()}>
+                {isLoading ? "Guardando..." : "Guardar"}
+              </SubmitButton>
+            </div>
           </motion.section>
         </AnimatePresence>
-        <div className="z-10 flex">
-          <SubmitButton isDisabled={isDisabled || !isFormValid()}>
-            {isLoading ? "Guardando..." : "Guardar"}
-          </SubmitButton>
-        </div>
       </motion.div>
     </form>
   );

@@ -13,6 +13,7 @@ type SocialAidProps = {
     page?: string;
     table?: string;
     detailsModal?: string;
+    justification?: string;
     rut?: string;
   }>;
 };
@@ -23,13 +24,18 @@ export default async function Entregas(props: SocialAidProps) {
   const currentPage = Number(searchParams?.page) || 1;
   const table = searchParams?.table || "ciudadanos";
   const detailsModal = searchParams?.detailsModal || "";
+  const justificationModal = searchParams?.justification || "";
   const rut = searchParams?.rut || "";
 
   return (
     <div className="flex flex-col gap-6">
       {detailsModal && (
         <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
-          <ModalEntregasDetailContext folio={detailsModal} rut={rut} />
+          <ModalEntregasDetailContext
+            folio={detailsModal}
+            rut={rut}
+            isOnEditForJustification={justificationModal === "true"}
+          />
         </Suspense>
       )}
       <div className="flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
