@@ -53,6 +53,8 @@ const CreateEntregaFormSchema = z.object({
       id: z.string(),
       campaignName: z.string(),
       detail: z.string(),
+      forAdult: z.boolean().optional(),
+      quantity: z.number().optional(),
       code: z.string().length(2),
     }),
   ),
@@ -432,8 +434,7 @@ export const deleteEntregaByFolio = async (folio: string) => {
       const posteriorEntregasResult = await posteriorEntregasRequest
         .input("current_folio_num", sql.Int, current_folio_num)
         .input("folio_year", sql.Int, folio_year)
-        .input("folio_code", sql.NVarChar, folio_code)
-        .query(`
+        .input("folio_code", sql.NVarChar, folio_code).query(`
           SELECT COUNT(*) as count 
           FROM entregas 
           WHERE folio_num > @current_folio_num 
@@ -444,7 +445,8 @@ export const deleteEntregaByFolio = async (folio: string) => {
       if (posteriorEntregasResult.recordset[0].count > 0) {
         return {
           success: false,
-          message: "Ya no se puede eliminar esta entrega. Existen entregas posteriores en esta campaña.",
+          message:
+            "Ya no se puede eliminar esta entrega. Existen entregas posteriores en esta campaña.",
         };
       }
 
