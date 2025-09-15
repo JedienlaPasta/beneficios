@@ -109,10 +109,21 @@ export const createEntrega = async (id: string, formData: FormData) => {
       transaction = new sql.Transaction(pool);
       await transaction.begin(sql.ISOLATION_LEVEL.SERIALIZABLE);
 
-      // Verificar que no ha recibido entregas por hoy (PENDING)
-      const startDate = new Date(fecha_entrega as string) || new Date();
+      // Verificar que no ha recibido entregas por hoy
+      let targetDate: Date;
+      if (fecha_entrega && fecha_entrega.toString().trim() !== "") {
+        targetDate = new Date(fecha_entrega as string);
+        // Verificar si la fecha es válida
+        if (isNaN(targetDate.getTime())) {
+          targetDate = new Date(); // Usar fecha actual si la fecha proporcionada es inválida
+        }
+      } else {
+        targetDate = new Date(); // Usar fecha actual si no se proporciona fecha
+      }
+
+      const startDate = new Date(targetDate);
       startDate.setHours(0, 0, 0, 0);
-      const endDate = new Date(fecha_entrega as string) || new Date();
+      const endDate = new Date(targetDate);
       endDate.setHours(23, 59, 59, 999);
       const dailyCheckRequest = new sql.Request(transaction);
       const dailyCheckResult = await dailyCheckRequest
@@ -120,7 +131,7 @@ export const createEntrega = async (id: string, formData: FormData) => {
         .input("startDate", sql.DateTime, startDate)
         .input("endDate", sql.DateTime, endDate).query(`
           SELECT COUNT(*) as count FROM entregas
-          WHERE rut = @rut AND fecha_entrega >= @startDate AND fecha_entrega <= @endDate
+          WHERE rut = @rut AND fecha_entrega >= @startDate AND fecha_entrega <= @endDate AND estado_documentos <> 'Anulado'
         `);
       const count = dailyCheckResult.recordset[0].count;
       if (count > 0) {
@@ -432,8 +443,7 @@ export const deleteEntregaByFolio = async (folio: string) => {
       const posteriorEntregasResult = await posteriorEntregasRequest
         .input("current_folio_num", sql.Int, current_folio_num)
         .input("folio_year", sql.Int, folio_year)
-        .input("folio_code", sql.NVarChar, folio_code)
-        .query(`
+        .input("folio_code", sql.NVarChar, folio_code).query(`
           SELECT COUNT(*) as count 
           FROM entregas 
           WHERE folio_num > @current_folio_num 
@@ -444,7 +454,8 @@ export const deleteEntregaByFolio = async (folio: string) => {
       if (posteriorEntregasResult.recordset[0].count > 0) {
         return {
           success: false,
-          message: "Ya no se puede eliminar esta entrega. Existen entregas posteriores en esta campaña.",
+          message:
+            "Ya no se puede eliminar esta entrega. Existen entregas posteriores en esta campaña.",
         };
       }
 
