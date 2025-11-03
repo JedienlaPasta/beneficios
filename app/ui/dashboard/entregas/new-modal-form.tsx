@@ -24,17 +24,34 @@ export default function NewModalForm({
   const [lastSelection, setLastSelection] = useState("");
   // Initialize selectedCampaigns with a lazy initializer function
   const [selectedCampaigns, setSelectedCampaigns] = useState<{
-    [campaignId: string]: { selected: boolean; detail: string };
+    [campaignId: string]: {
+      selected: boolean;
+      detail: string;
+      forAdult: boolean;
+      quantity: number;
+    };
   }>(() => {
     if (activeCampaigns && activeCampaigns.length > 0) {
       return activeCampaigns.reduce(
         (acc, campaign) => {
           const defaultValue =
             campaign.nombre_campaña === "Tarjeta de Comida" ? "NN" : "";
-          acc[campaign.id] = { selected: false, detail: defaultValue };
+          acc[campaign.id] = {
+            selected: false,
+            detail: defaultValue,
+            forAdult: false,
+            quantity: 0,
+          };
           return acc;
         },
-        {} as { [key: string]: { selected: boolean; detail: string } },
+        {} as {
+          [key: string]: {
+            selected: boolean;
+            detail: string;
+            forAdult: boolean;
+            quantity: number;
+          };
+        },
       );
     }
     return {};
@@ -100,8 +117,15 @@ export default function NewModalForm({
     // Convert selectedCampaigns to formFields format
     const campaignsToSubmit = Object.entries(selectedCampaigns)
       .filter(
-        ([, value]: [string, { selected: boolean; detail: string }]) =>
-          value.selected,
+        ([, value]: [
+          string,
+          {
+            selected: boolean;
+            detail: string;
+            forAdult: boolean;
+            quantity: number;
+          },
+        ]) => value.selected,
       )
       .map(([id, value]) => {
         const campaign = activeCampaigns?.find(
@@ -111,6 +135,8 @@ export default function NewModalForm({
           id,
           campaignName: campaign?.nombre_campaña || "",
           detail: value.detail,
+          forAdult: value.forAdult,
+          quantity: value.quantity,
           code: campaign?.code || "",
         };
       });

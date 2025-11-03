@@ -53,6 +53,8 @@ const CreateEntregaFormSchema = z.object({
       id: z.string(),
       campaignName: z.string(),
       detail: z.string(),
+      forAdult: z.boolean().optional(),
+      quantity: z.number().optional(),
       code: z.string().length(2),
     }),
   ),

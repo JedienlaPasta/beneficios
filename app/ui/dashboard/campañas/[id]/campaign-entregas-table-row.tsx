@@ -1,7 +1,6 @@
 "use client";
 import { EntregasCampañaDetail } from "@/app/lib/definitions";
 import { formatDate, formatNumber } from "@/app/lib/utils/format";
-import { getDV } from "@/app/lib/utils/get-values";
 import { useRouter, useSearchParams } from "next/navigation";
 
 type TableRowProps = {
@@ -9,9 +8,9 @@ type TableRowProps = {
 };
 
 export default function TableRow({ item }: TableRowProps) {
-  const { folio, nombres_rsh, apellidos_rsh, rut, fecha_entrega } = item;
+  const { folio, nombres_rsh, apellidos_rsh, rut, dv, fecha_entrega } = item;
   const fecha = formatDate(fecha_entrega);
-  const formatted_rut = formatNumber(Number(rut)) + (rut && "-" + getDV(rut));
+  const formatted_rut = formatNumber(Number(rut)) + (rut && "-" + dv);
 
   const router = useRouter();
   const searchParams = useSearchParams();

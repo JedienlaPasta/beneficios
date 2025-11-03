@@ -248,8 +248,9 @@ export async function fetchEntregasForCampaignDetail(
       .input("pageSize", sql.Int, resultsPerPage).query(`
         SELECT 
           rsh.nombres_rsh, 
-          rsh.apellidos_rsh, 
+          rsh.apellidos_rsh,
           rsh.rut, 
+          rsh.dv,
           entregas.folio, 
           entregas.fecha_entrega,
           COUNT(*) OVER() AS total

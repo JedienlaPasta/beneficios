@@ -400,27 +400,16 @@ export default function CamaraComponent({
           width: imageDimensions.width,
           height: imageDimensions.height,
         });
-
-        // Add title
-        // const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-        // const titleFontSize = 18;
-        // const titleWidth = font.widthOfTextAtSize(documentName, titleFontSize);
-        // const xPosTitle = (width - titleWidth) / 2;
-        // const yPosTitle = height - margin;
-
-        // page.drawText(documentName, {
-        //   x: xPosTitle,
-        //   y: yPosTitle,
-        //   font: font,
-        //   size: titleFontSize,
-        //   color: rgb(0, 0, 0),
-        // });
       }
 
       // Serialize the PDF to bytes and trigger download
       const pdfBytes = await pdfDoc.save();
-      const blob = new Blob([pdfBytes], { type: "application/pdf" });
 
+      const ab = new ArrayBuffer(pdfBytes.byteLength);
+      const abView = new Uint8Array(ab);
+      abView.set(pdfBytes);
+
+      const blob = new Blob([ab], { type: "application/pdf" });
       return blob;
     } catch (err) {
       console.error("Error al generar el PDF:", err);
