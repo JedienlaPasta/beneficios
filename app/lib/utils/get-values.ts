@@ -1,6 +1,10 @@
 import dayjs from "dayjs";
 
-export const getDV = (rut: string) => {
+export const getDV = (rut?: string | number) => {
+  if (!rut) {
+    return null;
+  }
+  rut = rut.toString();
   let sum = 0;
   let multiplier = 2;
   for (let i = rut.length - 1; i >= 0; i--) {

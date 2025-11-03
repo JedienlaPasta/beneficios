@@ -41,6 +41,7 @@ export type EntregasCampañaDetail = {
   nombres_rsh: string;
   apellidos_rsh: string;
   rut: string;
+  dv: string;
   beneficio?: string;
   fecha_entrega: Date;
   total?: number; // total de registros

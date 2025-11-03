@@ -94,7 +94,6 @@ export async function connectToDB(): Promise<sql.ConnectionPool | null> {
   }
 }
 
-// Optional: Add a function to explicitly close the pool when needed
 export async function closePool() {
   if (pool) {
     try {
