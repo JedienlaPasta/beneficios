@@ -71,18 +71,29 @@ export default function UserDropdown({
       />
       {/* Dropdown List */}
       {isOpen && (
-        <ul className="absolute left-0 top-16 z-10 w-[100%] divide-y overflow-y-auto rounded-lg border border-gray-200 bg-white text-slate-700 shadow-lg">
+        <ul className="absolute left-0 top-16 z-10 w-[100%] divide-y overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
           {usersList && usersList.length > 0 ? (
-            usersList.map((user, index) => (
-              <li
-                key={index}
-                onClick={() => setUserEmail(user.email)}
-                className="flex h-12 w-full cursor-pointer flex-col justify-center px-4 text-sm hover:bg-sky-100"
-              >
-                <span>{user.name}</span>
-                <span className="text-xs text-slate-500">{user.email}</span>
-              </li>
-            ))
+            usersList.map((user, index) => {
+              const splitName = user.name?.split(" ") || [];
+              const iconText = splitName[0][0] + splitName[1][0];
+              return (
+                <li
+                  key={index}
+                  onClick={() => setUserEmail(user.email)}
+                  className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-2 text-sm hover:bg-slate-100/80"
+                >
+                  <div className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-xs font-medium text-white">
+                    {iconText.toUpperCase()}
+                  </div>
+                  <div className="flex flex-col justify-center">
+                    <span className="text-sm font-medium text-gray-700">
+                      {user.name}
+                    </span>
+                    <span className="text-xs text-gray-600">{user.email}</span>
+                  </div>
+                </li>
+              );
+            })
           ) : (
             <li className="flex h-12 w-full flex-col justify-center px-4 text-sm text-slate-500">
               No hay correos disponibles

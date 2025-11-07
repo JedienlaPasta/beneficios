@@ -10,6 +10,10 @@
   .animate-cspin {
     animation: spin 1500ms ease-in-out infinite;
   }
+
+  .animate-loadspin {
+    animation: spin 3000ms linear infinite;
+  }
 }
 
 @keyframes spin {

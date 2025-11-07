@@ -1,6 +1,7 @@
 "use client";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { FiSearch } from "react-icons/fi";
+import React, { useTransition } from "react";
+import { FiSearch, FiLoader } from "react-icons/fi";
 import { useDebouncedCallback } from "use-debounce";
 import { useRef } from "react";
 
@@ -14,6 +15,8 @@ export default function SearchBar({ placeholder }: SearchBarProps) {
   const { replace } = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const [isPending, startTransition] = useTransition();
+
   const handleSearch = useDebouncedCallback((query: string) => {
     const params = new URLSearchParams(searchParams);
     params.set("page", "1");
@@ -22,7 +25,11 @@ export default function SearchBar({ placeholder }: SearchBarProps) {
     } else {
       params.delete("query");
     }
-    replace(`${pathname}?${params.toString()}`, { scroll: false });
+
+    // Envolver el replace en una transición para obtener isPending
+    startTransition(() => {
+      replace(`${pathname}?${params.toString()}`, { scroll: false });
+    });
   }, 300);
 
   const handleContainerClick = () => {
@@ -35,7 +42,11 @@ export default function SearchBar({ placeholder }: SearchBarProps) {
         className="flex h-11 w-72 cursor-text items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 shadow-sm transition-all focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100"
         onClick={handleContainerClick}
       >
-        <FiSearch className="text-lg text-slate-400" />
+        {isPending ? (
+          <FiLoader className="animate-loadspin text-lg text-slate-400" />
+        ) : (
+          <FiSearch className="text-lg text-slate-400" />
+        )}
         <input
           ref={inputRef}
           type="text"
