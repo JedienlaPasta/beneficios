@@ -11,29 +11,6 @@ import CustomAntdDatePicker from "../datepicker";
 import dayjs from "dayjs";
 import UserDropdown from "./user-dropdown";
 
-const usersList = [
-  {
-    id: "1",
-    name: "Jenifer Rojas",
-    email: "tsdepartamentosocial@elquisco.cl",
-  },
-  {
-    id: "2",
-    name: "Karina Hormazabal",
-    email: "karinat.s.d.q@gmail.com",
-  },
-  {
-    id: "3",
-    name: "Patricio Carreño",
-    email: "pcarreno@temporal.com",
-  },
-  {
-    id: "4",
-    name: "Lilian Galea",
-    email: "lilian.galea.ts@gmail.com",
-  },
-];
-
 type NewModalFormProps = {
   activeCampaigns?: Campaign[];
   rut: string;
@@ -250,12 +227,11 @@ export default function NewModalFormManual({
       </div>
 
       <UserDropdown
-        placeHolder="tu@correo.com..."
-        label="Correo"
+        placeHolder="Selecciona un encargado..."
+        label="Encargado"
         name="correo"
         userEmail={correo}
         setUserEmail={setCorreo}
-        usersList={usersList}
       />
 
       <div className="max-h-[400px] overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-4 scrollbar-hide">

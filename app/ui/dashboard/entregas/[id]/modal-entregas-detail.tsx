@@ -367,6 +367,9 @@ function ModalGeneralInfoField({
       <span className="flex items-center justify-between text-xs font-medium text-slate-500/80">
         <p>{name}</p>
         {name === "Justificación" && <EditButton name="justification" />}
+        <RoleGuard allowedRoles={["Administrador"]}>
+          {name === "Encargado" && <EditButton name="supervisor" />}
+        </RoleGuard>
       </span>
       <span className="relative text-sm text-slate-700">
         {value}

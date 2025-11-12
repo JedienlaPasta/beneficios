@@ -8,6 +8,7 @@ import { compressPdfBuffer } from "../utils/pdf-compress";
 import { connectToDB } from "../utils/db-connection";
 import { logAction } from "./auditoria";
 import { formatDate, formatPhone, formatRUT } from "../utils/format";
+import { getSession } from "../session";
 
 interface CitizenData {
   telefono: string | null;
@@ -396,6 +397,97 @@ export const updateJustificationByFolio = async (
     return {
       success: false,
       message: error instanceof Error ? error.message : String(error),
+    };
+  }
+};
+
+// Actualizar encargado de entrega mediante folio
+export const updateSupervisorByFolio = async (
+  folio: string,
+  formData: FormData,
+) => {
+  const correoRaw = formData.get("supervisor");
+  const correo = typeof correoRaw === "string" ? correoRaw.trim() : "";
+
+  if (!folio || !correo) {
+    return {
+      success: false,
+      message: "Campos incompletos",
+    };
+  }
+
+  const userSession = await getSession();
+  if (!userSession?.userId) {
+    return {
+      success: false,
+      message: "Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.",
+    };
+  }
+  const userId = String(userSession?.userId);
+
+  try {
+    const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
+
+    // Verificar si el usuario tiene permisos para actualizar el encargado
+    const checkPermissionRequest = new sql.Request(pool);
+    const checkPermissionResult = await checkPermissionRequest.input(
+      "userId",
+      sql.VarChar,
+      userId,
+    ).query(`
+          SELECT 1 AS ok FROM usuarios WHERE id = @userId AND rol = 'Administrador'
+        `);
+    if (checkPermissionResult.recordset.length === 0) {
+      return {
+        success: false,
+        message: "No tienes permisos para actualizar el encargado.",
+      };
+    }
+
+    // Verificar si existe el correo del encargado
+    const correoRequest = new sql.Request(pool);
+    const correoResult = await correoRequest.input(
+      "correo",
+      sql.VarChar,
+      correo,
+    ).query(`
+          SELECT id FROM usuarios WHERE correo = @correo
+        `);
+    if (correoResult.recordset.length === 0) {
+      return {
+        success: false,
+        message: "Correo no registrado",
+      };
+    }
+    const supervisorId = String(correoResult.recordset[0].id);
+
+    // Actualizar el encargado en la tabla entregas
+    const updateUserIdRequest = new sql.Request(pool);
+    await updateUserIdRequest
+      .input("folio", sql.VarChar, folio)
+      .input("supervisorId", sql.VarChar, supervisorId).query(`
+          UPDATE entregas SET id_usuario = @supervisorId WHERE folio = @folio
+        `);
+
+    await logAction(
+      "Actualizar",
+      "actualizó el encargado de la entrega",
+      folio,
+      folio,
+    );
+    return { success: true, message: "Encargado actualizado." };
+  } catch (error) {
+    console.error("Error details:", error);
+    return {
+      success: false,
+      message: "Error al actualizar el encargado.",
     };
   }
 };
@@ -868,7 +960,7 @@ export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
   }
 };
 
-// eliminar documento mediante id
+// Eliminar documento mediante id
 export const deletePDFById = async (id: string, folio: string) => {
   try {
     const pool = await connectToDB();

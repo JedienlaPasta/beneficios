@@ -1,24 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-
-type User = {
-  id: string;
-  name: string;
-  email: string;
-};
+import { AnimatePresence, motion } from "framer-motion";
+import { usersList } from "@/app/lib/data/static-data";
 
 type UserDropdownProps = {
   label: string;
   name: string;
   userEmail: string;
   setUserEmail: (prevState: string) => void;
-  usersList?: User[];
   placeHolder?: string;
 };
 
 export default function UserDropdown({
   label,
   name,
-  usersList,
   placeHolder,
   userEmail,
   setUserEmail,
@@ -62,7 +56,7 @@ export default function UserDropdown({
         id={label}
         name={name}
         type="correo"
-        value={userEmail}
+        value={usersList?.find((user) => user.email === userEmail)?.name || ""}
         placeholder={placeHolder}
         autoComplete="off"
         readOnly
@@ -70,37 +64,57 @@ export default function UserDropdown({
         className={`h-10 w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-4 text-sm text-slate-700 shadow-sm outline-none transition-all placeholder:text-gray-400 focus-within:border-blue-500 focus:outline-none`}
       />
       {/* Dropdown List */}
-      {isOpen && (
-        <ul className="absolute left-0 top-16 z-10 w-[100%] divide-y overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
-          {usersList && usersList.length > 0 ? (
-            usersList.map((user, index) => {
-              const splitName = user.name?.split(" ") || [];
-              const iconText = splitName[0][0] + splitName[1][0];
-              return (
-                <li
-                  key={index}
-                  onClick={() => setUserEmail(user.email)}
-                  className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-2 text-sm hover:bg-slate-100/80"
-                >
-                  <div className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-xs font-medium text-white">
-                    {iconText.toUpperCase()}
-                  </div>
-                  <div className="flex flex-col justify-center">
-                    <span className="text-sm font-medium text-gray-700">
-                      {user.name}
-                    </span>
-                    <span className="text-xs text-gray-600">{user.email}</span>
-                  </div>
+      <motion.div className="relative mt-0.5 flex flex-col justify-between gap-6 overflow-hidden">
+        <AnimatePresence mode="wait">
+          {isOpen && (
+            <motion.section
+              key="supervisor"
+              initial={{ opacity: 0, y: 10, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: "auto" }}
+              exit={{ opacity: 1, y: -20, height: 0 }}
+              transition={{
+                duration: 0.4,
+                ease: "easeInOut",
+              }}
+              className="w-full rounded-xl border border-gray-200 bg-white px-2"
+              layout
+            >
+              {usersList && usersList.length > 0 ? (
+                usersList.map((user, index) => {
+                  const splitName = user.name?.split(" ") || [];
+                  const initials =
+                    (splitName[0]?.[0] ?? "") + (splitName[1]?.[0] ?? "") ||
+                    (user.name?.[0]?.toUpperCase() ?? "U");
+
+                  return (
+                    <li
+                      key={index}
+                      onClick={() => setUserEmail(user.email)}
+                      className="group flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 first:mt-2 last:mb-2 hover:bg-slate-100/80"
+                    >
+                      <div className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-xs font-semibold text-white shadow-sm">
+                        {initials.toUpperCase()}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-slate-800">
+                          {user.name}
+                        </span>
+                        <span className="text-xs text-slate-500">
+                          {user.email}
+                        </span>
+                      </div>
+                    </li>
+                  );
+                })
+              ) : (
+                <li className="flex h-12 items-center px-3 text-sm text-slate-500">
+                  No hay correos disponibles
                 </li>
-              );
-            })
-          ) : (
-            <li className="flex h-12 w-full flex-col justify-center px-4 text-sm text-slate-500">
-              No hay correos disponibles
-            </li>
+              )}
+            </motion.section>
           )}
-        </ul>
-      )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 }

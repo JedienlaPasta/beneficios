@@ -14,6 +14,7 @@ type SocialAidProps = {
     table?: string;
     detailsModal?: string;
     justification?: string;
+    supervisor?: string;
     rut?: string;
   }>;
 };
@@ -25,6 +26,7 @@ export default async function Entregas(props: SocialAidProps) {
   const table = searchParams?.table || "ciudadanos";
   const detailsModal = searchParams?.detailsModal || "";
   const justificationModal = searchParams?.justification || "";
+  const supervisorModal = searchParams?.supervisor || "";
   const rut = searchParams?.rut || "";
 
   return (
@@ -35,6 +37,7 @@ export default async function Entregas(props: SocialAidProps) {
             folio={detailsModal}
             rut={rut}
             isOnEditForJustification={justificationModal === "true"}
+            isOnEditForSupervisor={supervisorModal === "true"}
           />
         </Suspense>
       )}
