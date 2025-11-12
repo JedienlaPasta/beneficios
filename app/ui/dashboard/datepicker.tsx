@@ -14,6 +14,7 @@ type CustomAntdDatePickerProps = {
     dateString: string | string[],
   ) => void;
   setFormData?: React.Dispatch<React.SetStateAction<Campaign>>;
+  value?: dayjs.Dayjs | null;
 };
 
 export default function CustomAntdDatePicker({
@@ -23,6 +24,7 @@ export default function CustomAntdDatePicker({
   required,
   setDate,
   setFormData,
+  value,
 }: CustomAntdDatePickerProps) {
   // Separa el setData de newCampaign/updateCampaign
   const datePickerHandler = (
@@ -57,6 +59,7 @@ export default function CustomAntdDatePicker({
           placeholder={placeholder}
           onChange={datePickerHandler}
           required={required}
+          value={value ?? null}
           className={`h-10 rounded-lg border border-slate-300 px-4 text-sm text-slate-700 placeholder:text-slate-400 focus-within:!border-blue-500 hover:border-slate-400/70 focus:!border-blue-500 focus:outline-none ${inter.className}`}
         />
       </div>

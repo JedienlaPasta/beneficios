@@ -334,6 +334,7 @@ export default function NewCitizenModal({ name }: { name: string }) {
                     label="Fecha de Nacimiento"
                     placeholder="Seleccione una fecha"
                     setDate={fechaNacimientoHandler}
+                    value={fechaNacimiento ? dayjs(fechaNacimiento) : null}
                   />
                 </div>
               </motion.section>

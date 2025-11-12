@@ -68,7 +68,7 @@ export async function createRSH(formData: FormData) {
   const indigena = formData.get("indigena") as string;
   const nacionalidad = formData.get("nacionalidad") as string;
   const folio = formData.get("folio") as string;
-  const fecha_nacimiento = formData.get("fecha_nacimiento") as string;
+  const fecha_nacimiento = formData.get("fechaNacimiento") as string;
 
   const checkDV = getDV(rut);
   if (checkDV !== dv) {
