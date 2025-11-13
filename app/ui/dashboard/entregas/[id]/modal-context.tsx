@@ -4,8 +4,8 @@ import {
   fetchEntregasInfoByFolio,
 } from "@/app/lib/data/entregas";
 import ModalEntregasDetail from "./modal-entregas-detail";
-import EditJustificationModal from "./edit-justification-modal";
-import EditSupervisorModal from "./edit-supervisor-modal";
+import EditJustificationModal from "./edit-modals/edit-justification-modal";
+import EditSupervisorModal from "./edit-modals/edit-supervisor-modal";
 
 type ModalContextProps = {
   folio: string;

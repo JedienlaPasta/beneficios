@@ -3,8 +3,8 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import CloseModalButton from "../../close-modal-button";
-import { CancelButton, SubmitButton } from "../../submit-button";
+import CloseModalButton from "../../../close-modal-button";
+import { CancelButton, SubmitButton } from "../../../submit-button";
 import { updateJustificationByFolio } from "@/app/lib/actions/entregas";
 
 type Props = {

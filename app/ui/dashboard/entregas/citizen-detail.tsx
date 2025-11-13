@@ -12,12 +12,14 @@ import ChangeTramoButton from "./change-tramo-btn";
 import ChangeTramoModal from "./change-tramo-modal";
 import EditCitizenContactInfoModal from "./edit-citizen-modal";
 import EditButton from "../edit-btn";
+import EditCitizenBirthdateModal from "./[id]/update-birthdate/edit-birthdate-modal";
 
 type CitizenRecordProps = {
   rut: string;
   isNameModalOpen: boolean;
   isTramoModalOpen: boolean;
   isEditModalOpen: boolean;
+  isBirthdateModalOpen: boolean;
 };
 
 export default async function CitizenDetail({
@@ -25,9 +27,10 @@ export default async function CitizenDetail({
   isNameModalOpen,
   isTramoModalOpen,
   isEditModalOpen,
+  isBirthdateModalOpen,
 }: CitizenRecordProps) {
   const response = await fetchRSHByRUT(rut);
-  if (!response.rut) {
+  if (!response?.rut) {
     redirect("/dashboard/entregas");
   }
   const {
@@ -83,6 +86,16 @@ export default async function CitizenDetail({
           </Modal>
         </Suspense>
       )}
+      {isBirthdateModalOpen === true && (
+        <Suspense fallback={<ModalSkeleton name="editBirthdateModal" />}>
+          <Modal name="editBirthdateModal">
+            <EditCitizenBirthdateModal
+              name="editBirthdateModal"
+              citizen={response}
+            />
+          </Modal>
+        </Suspense>
+      )}
 
       <div className="items-centers relative flex flex-col justify-center">
         <div className="grid gap-4 rounded-xl md:gap-6">
@@ -117,8 +130,9 @@ export default async function CitizenDetail({
           {/* Details Grid */}
           <div className="grid auto-rows-fr gap-4 md:gap-6 xl:grid-cols-2 2xl:grid-cols-3">
             <div className="rounded-xl border border-slate-200 bg-gray-100">
-              <h2 className="flex h-14 items-center px-5 text-sm font-medium text-slate-400 lg:px-8">
+              <h2 className="flex h-14 items-center justify-between px-5 text-sm font-medium text-slate-400 lg:px-8">
                 Información General
+                <EditButton name="editBirthdateModal" />
               </h2>
               <div className="rounded-xl bg-white px-5 py-1 lg:px-8 lg:py-2">
                 <DetailRow

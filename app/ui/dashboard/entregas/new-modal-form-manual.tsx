@@ -27,7 +27,10 @@ export default function NewModalFormManual({
   const [observaciones, setObservaciones] = useState("");
   const [lastSelection, setLastSelection] = useState("");
   const [fechaEntrega, setFechaEntrega] = useState<Date | null>(null);
-  const [correo, setCorreo] = useState("");
+  const [encargado, setEncargado] = useState({
+    nombre: "",
+    correo: "",
+  });
 
   // Initialize selectedCampaigns with a lazy initializer function
   const [selectedCampaigns, setSelectedCampaigns] = useState<{
@@ -145,7 +148,7 @@ export default function NewModalFormManual({
     formData.append("observaciones", observaciones);
     formData.append("fecha_entrega", fechaEntrega?.toISOString() || "");
     formData.append("folio", folio.toString().toUpperCase());
-    formData.append("correo", correo);
+    formData.append("correo", encargado.correo);
 
     const toastId = toast.loading("Guardando...");
     setTimeout(async () => {
@@ -189,7 +192,7 @@ export default function NewModalFormManual({
 
     if (folio.trim() === "" || folio.trim().length < 7) return false;
 
-    if (correo.trim() === "") return false;
+    if (encargado.correo.trim() === "") return false;
 
     // Check if all selected campaigns have details
     const hasEmptyDetails = Object.entries(selectedCampaigns)
@@ -222,6 +225,7 @@ export default function NewModalFormManual({
           label="Fecha de Entrega"
           placeholder="Seleccione una fecha"
           setDate={fechaEntregaHandler}
+          value={fechaEntrega ? dayjs(fechaEntrega) : null}
           required
         />
       </div>
@@ -230,8 +234,8 @@ export default function NewModalFormManual({
         placeHolder="Selecciona un encargado..."
         label="Encargado"
         name="correo"
-        userEmail={correo}
-        setUserEmail={setCorreo}
+        userEmail={encargado.correo}
+        setUserEmail={(email) => setEncargado({ ...encargado, correo: email })}
       />
 
       <div className="max-h-[400px] overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-4 scrollbar-hide">

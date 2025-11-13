@@ -54,15 +54,15 @@ export default function UserDropdown({
       </label>
       <input
         id={label}
-        name={name}
-        type="correo"
+        type="text"
         value={usersList?.find((user) => user.email === userEmail)?.name || ""}
         placeholder={placeHolder}
         autoComplete="off"
         readOnly
-        required
         className={`h-10 w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-4 text-sm text-slate-700 shadow-sm outline-none transition-all placeholder:text-gray-400 focus-within:border-blue-500 focus:outline-none`}
       />
+      {/* Input oculto para enviar correo al servidor */}
+      <input type="hidden" name={name} value={userEmail} required />
       {/* Dropdown List */}
       <motion.div className="relative mt-0.5 flex flex-col justify-between gap-6 overflow-hidden">
         <AnimatePresence mode="wait">

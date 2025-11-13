@@ -17,7 +17,8 @@ type CitizenRecordProps = {
     page?: string;
     newsocialaid?: string;
     detailsModal?: string;
-    editCitizenModal: string;
+    editCitizenModal?: string;
+    editBirthdateModal?: string;
     changeNameModal?: string;
     changeTramoModal?: string;
     justification?: string;
@@ -32,6 +33,7 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
   const detailsModal = searchParams?.detailsModal || "";
   const changeNameModal = searchParams?.changeNameModal || "";
   const editCitizenModal = searchParams?.editCitizenModal || "";
+  const editBirthdateModal = searchParams?.editBirthdateModal || "";
   const changeTramoModal = searchParams?.changeTramoModal || "";
   const justificationModal = searchParams?.justification || "";
   const query = searchParams?.query || "";
@@ -71,6 +73,7 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
             isNameModalOpen={Boolean(changeNameModal)}
             isTramoModalOpen={Boolean(changeTramoModal)}
             isEditModalOpen={Boolean(editCitizenModal)}
+            isBirthdateModalOpen={Boolean(editBirthdateModal)}
           />
         </Suspense>
         <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50">

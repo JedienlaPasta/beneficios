@@ -53,7 +53,7 @@ const RSHFormSchema = z.object({
   fecha_nacimiento: z.string().optional(),
 });
 
-// Crear RSH
+// Create RSH Record
 export async function createRSH(formData: FormData) {
   const rut = formData.get("rut") as string;
   const dv = formData.get("dv") as string;
@@ -164,6 +164,7 @@ export async function createRSH(formData: FormData) {
   }
 }
 
+// Edit RSH Contact Info
 const RSHUpdateFormSchema = z.object({
   rut: z
     .string()
@@ -187,7 +188,6 @@ const RSHUpdateFormSchema = z.object({
     }),
 });
 
-// Editar RSH
 export async function updateRSH(formData: FormData) {
   const rut = formData.get("rut") as string;
   const direccion = formData.get("direccion") as string;
@@ -293,6 +293,159 @@ export async function updateRSH(formData: FormData) {
   }
 }
 
+// Edit RSH General Info
+const RSHUpdateGeneralInfoFormSchema = z.object({
+  rut: z
+    .string()
+    .min(7, { message: "RUT debe tener al menos 7 dígitos" })
+    .regex(/^\d+$/, { message: "RUT debe contener solo números" }),
+  nacionalidad: z
+    .union([z.enum(["Chilena", "Extranjera"]), z.literal("")])
+    .optional(),
+  genero: z
+    .union([z.enum(["Femenino", "Masculino"]), z.literal("")])
+    .optional(),
+  indigena: z.union([z.enum(["Si", "No", "Sí"]), z.literal("")]).optional(),
+  fecha_nacimiento: z.preprocess(
+    (v) => (typeof v === "string" && v ? new Date(v) : undefined),
+    z.date().optional(),
+  ),
+});
+
+export async function updateRSHGeneralInfo(formData: FormData) {
+  const rut = formData.get("rut") as string;
+  const nacionalidad = formData.get("nacionalidad") as string;
+  const genero = formData.get("genero") as string;
+  const indigena = formData.get("indigena") as string;
+  const fecha_nacimiento = formData.get("fecha_nacimiento") as string;
+
+  const validationResult = RSHUpdateGeneralInfoFormSchema.safeParse({
+    rut: rut.trim(),
+    nacionalidad: capitalize(nacionalidad),
+    genero: capitalize(genero),
+    indigena: capitalize(indigena),
+    fecha_nacimiento,
+  });
+
+  if (!validationResult.success) {
+    console.error("Error al validar los datos:", validationResult.error);
+
+    const errors = validationResult.error.issues;
+
+    const fieldErrors = errors.map((error) => {
+      const issuePath = error.path as PropertyKey[];
+      const field = issuePath.map(String).join(".");
+
+      if (field.includes("nacionalidad")) {
+        return "El valor de nacionalidad ingresado es incorrecto. Debe ser 'Chilena' o 'Extranjera'.";
+      }
+      if (field.includes("genero")) {
+        return "El valor de género ingresado es incorrecto. Debe ser 'Femenino' o 'Masculino'.";
+      }
+      if (field.includes("indigena")) {
+        return "El valor de indígena ingresado es incorrecto. Debe ser 'Si' o 'No'.";
+      }
+      if (field.includes("fecha_nacimiento")) {
+        return "La fecha de nacimiento ingresada es inválida o no ingresada.";
+      }
+
+      // Fallback: mensaje nativo de Zod
+      return error.message;
+    });
+
+    return {
+      success: false,
+      message: fieldErrors[0] || "Se encontraron errores de validación.",
+      errors: fieldErrors,
+    };
+  }
+
+  const formatedRut = formatRUT(rut);
+
+  try {
+    const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
+
+    const transaction = new sql.Transaction(pool);
+
+    try {
+      await transaction.begin();
+      const rshRequest = new sql.Request(transaction);
+      const rshResult = await rshRequest
+        .input("rut", sql.Int, rut)
+        .query("SELECT 1 FROM rsh WHERE rut = @rut");
+
+      if (rshResult.recordset.length === 0) {
+        return {
+          success: false,
+          message: `No se encontraron coincidencias para ${formatedRut}`,
+        };
+      }
+
+      // Normalizar valores a null si vienen vacíos
+      const nacionalidadParam =
+        validationResult.data.nacionalidad &&
+        validationResult.data.nacionalidad.trim() !== ""
+          ? validationResult.data.nacionalidad
+          : null;
+      const generoParam =
+        validationResult.data.genero &&
+        validationResult.data.genero.trim() !== ""
+          ? validationResult.data.genero
+          : null;
+      const indigenaParam =
+        validationResult.data.indigena &&
+        validationResult.data.indigena.trim() !== ""
+          ? validationResult.data.indigena
+          : null;
+
+      const updateRshRequest = new sql.Request(transaction);
+      await updateRshRequest
+        .input("rut", sql.Int, validationResult.data.rut)
+        .input("nacionalidad", sql.VarChar, nacionalidadParam)
+        .input("genero", sql.VarChar, generoParam)
+        .input("indigena", sql.VarChar, indigenaParam)
+        .input(
+          "fecha_nacimiento",
+          sql.DateTime,
+          validationResult.data.fecha_nacimiento ?? null,
+        ).query(`
+            UPDATE rsh
+            SET
+              nacionalidad   = COALESCE(@nacionalidad, nacionalidad),
+              genero         = COALESCE(@genero, genero),
+              indigena       = COALESCE(@indigena, indigena),
+              fecha_nacimiento = COALESCE(@fecha_nacimiento, fecha_nacimiento)
+            WHERE rut = @rut
+          `);
+
+      await transaction.commit();
+      await logAction("Editar", "editó el RSH", formatedRut, formatedRut);
+      revalidatePath("/dashboard/rsh");
+      return {
+        success: true,
+        message: `Registro ${formatedRut} actualizado exitosamente`,
+      };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  } catch (error) {
+    console.error(error || "Error actualizar el registro.");
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+// Update RSH Name
 const RSHUpdateNameFormSchema = z.object({
   rut: z
     .string()
