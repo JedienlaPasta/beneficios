@@ -12,7 +12,7 @@ import ChangeTramoButton from "./change-tramo-btn";
 import ChangeTramoModal from "./change-tramo-modal";
 import EditCitizenContactInfoModal from "./edit-citizen-modal";
 import EditButton from "../edit-btn";
-import EditCitizenBirthdateModal from "./[id]/update-birthdate/edit-birthdate-modal";
+import EditCitizenBirthdateModal from "./[id]/edit-modals/edit-birthdate-modal";
 
 type CitizenRecordProps = {
   rut: string;
