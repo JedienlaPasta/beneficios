@@ -18,12 +18,24 @@ const CreateCampaignFormSchema = z.object({
   fechaTermino: z.string(),
   estado: z.enum(["En curso", "Finalizado"]),
   code: z.string(),
-  stock: z
-    .string()
-    .refine((val) => !isNaN(Number(val)) && val.trim() !== "", {
-      message: "El stock debe ser un número válido",
-    })
-    .transform((str) => Number(str)),
+  stock: z.preprocess(
+    (val) => {
+      if (val === undefined || val === null) return null;
+      if (typeof val === "string") {
+        const stock = val.trim();
+        if (stock === "") return null;
+        const n = Number(stock);
+        return Number.isFinite(n) ? n : NaN;
+      }
+      return val;
+    },
+    z
+      .number({ invalid_type_error: "El stock debe ser un número válido" })
+      .finite()
+      .int()
+      .nonnegative()
+      .nullable(),
+  ),
   entregas: z.number(),
   tipoDato: z.string(),
   tramo: z.string().transform((str) => str === "true"),

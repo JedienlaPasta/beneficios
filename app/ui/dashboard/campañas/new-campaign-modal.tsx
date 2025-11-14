@@ -54,6 +54,15 @@ export default function NewCampaignModal() {
     }
   };
 
+  const handleStockChange = (
+    e: React.ChangeEvent<HTMLInputElement> | string,
+  ) => {
+    const value = typeof e === "string" ? e : e.target?.value || "";
+    if (value === "" || /^[0-9]*$/.test(value)) {
+      setStock(value);
+    }
+  };
+
   const datePickerHandler = (pickerDate: dayjs.Dayjs | null) => {
     if (pickerDate) {
       const date = pickerDate.toDate();
@@ -141,7 +150,7 @@ export default function NewCampaignModal() {
                 type="text"
                 nombre="stock"
                 value={stock}
-                setData={setStock}
+                setData={(e) => handleStockChange(e)}
               />
             </div>
             <div className="grow">
