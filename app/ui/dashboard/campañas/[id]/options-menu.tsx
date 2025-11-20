@@ -12,7 +12,6 @@ import ConfirmModal from "../../confirmation-modal";
 export default function CampaignOptionsMenu({ id }: { id: string }) {
   const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
   const [showConfirmEndModal, setShowConfirmEndModal] = useState(false);
-  // const [isDisabled, setIsDisabled] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const deleteCampaignWithId = deleteCampaign.bind(null, id);
@@ -33,7 +32,6 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
 
   const confirmDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    // setIsDisabled(true);
 
     const toastId = toast.loading("Eliminando campaña...");
     try {
@@ -59,12 +57,10 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
 
   const confirmEndCampaing = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    // setIsDisabled(true);
     toast.promise(endCampaignWithId(), {
       loading: "Terminando campaña...",
       success: async (response) => {
         setShowConfirmEndModal(false);
-        // setIsDisabled(false);
         router.refresh();
         return {
           message: response.message,
@@ -103,14 +99,14 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
       onClick={toggleModal}
       className={`relative select-none text-xl ${showConfirmDeleteModal || showConfirmEndModal ? "" : "cursor-pointer"}`}
     >
-      <HiDotsHorizontal className="borders h-7 w-7 flex-1 rounded-md bg-gray-200/75 p-1 hover:bg-gray-200" />
+      <HiDotsHorizontal className="borders size-7 flex-1 rotate-90 rounded-md bg-gray-200/75 p-1 text-slate-600 hover:bg-gray-200" />
       {modalOpen && (
         <ul className="absolute right-0 top-8 z-10 overflow-hidden text-nowrap rounded-lg border border-slate-200 bg-white p-1 text-sm transition-all">
           <li
             onClick={handleUpdateButton}
-            className={`hover:bg-blue-100/80 ${dropdownOptionStyle}`}
+            className={`hover:bg-slate-100/70 ${dropdownOptionStyle}`}
           >
-            <span className="text-blue-400s rounded-md p-1 transition-all duration-300 group-hover:bg-blue-200/80">
+            <span className="rounded-md p-1 transition-all duration-300 group-hover:bg-blue-200/80">
               <TbRefresh className="text-slate-400 group-hover:text-blue-400" />
             </span>
             {"Actualizar Datos"}
@@ -118,7 +114,7 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
           <li>
             <button
               onClick={handleDeleteButton}
-              className={`w-full hover:bg-red-100/80 ${dropdownOptionStyle}`}
+              className={`w-full hover:bg-slate-100/70 ${dropdownOptionStyle}`}
             >
               <span className="rounded-md p-1 transition-all duration-300 group-hover:bg-red-200/80">
                 <BiTrash className="text-slate-400 group-hover:text-red-400" />
@@ -129,10 +125,10 @@ export default function CampaignOptionsMenu({ id }: { id: string }) {
           <li>
             <button
               onClick={handleEndCampaingButton}
-              className={`w-full hover:bg-red-100/80 ${dropdownOptionStyle}`}
+              className={`w-full hover:bg-slate-100/70 ${dropdownOptionStyle}`}
             >
-              <span className="rounded-md p-1 transition-all duration-300 group-hover:bg-orange-200/80">
-                <GoStop className="text-slate-400 group-hover:text-orange-400" />
+              <span className="rounded-md p-1 transition-all duration-300 group-hover:bg-red-200/80">
+                <GoStop className="text-slate-400 group-hover:text-red-400" />
               </span>
               <span className="border-none text-left">Terminar Campaña</span>
             </button>

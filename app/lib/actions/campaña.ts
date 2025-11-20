@@ -24,8 +24,8 @@ const CreateCampaignFormSchema = z.object({
       if (typeof val === "string") {
         const stock = val.trim();
         if (stock === "") return null;
-        const n = Number(stock);
-        return Number.isFinite(n) ? n : NaN;
+        const number = Number(stock);
+        return Number.isFinite(number) ? number : NaN;
       }
       return val;
     },

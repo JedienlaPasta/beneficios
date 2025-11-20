@@ -2,11 +2,10 @@ import { Suspense } from "react";
 import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/campaigns-table-skeleton";
 import RSHGeneralInfo from "@/app/ui/dashboard/rsh/general-info";
 import RSHTable from "@/app/ui/dashboard/rsh/rsh-table";
-import ImportXLSXModal from "@/app/ui/dashboard/rsh/import-xlsx-modal";
 import SearchBar from "@/app/ui/dashboard/searchbar";
-import NewCitizenModal from "@/app/ui/dashboard/rsh/new-citizen-modal";
 import { Modal } from "@/app/ui/dashboard/modal";
 import ModalCitizenDetailContext from "@/app/ui/dashboard/rsh/citizen-context-modal";
+import RSHModals from "@/app/ui/dashboard/rsh/rsh-modals";
 
 type RSHProps = {
   searchParams?: Promise<{
@@ -28,21 +27,15 @@ export default async function RSH(props: RSHProps) {
 
   return (
     <div>
-      {newcitizen === "open" && (
-        <Modal name="newcitizen">
-          <NewCitizenModal name="newcitizen" />
-        </Modal>
-      )}
-      {citizen !== "" && (
+      <RSHModals newcitizen={newcitizen} importxlsx={importxlsx} />
+
+      {citizen && citizen !== "" && (
         <Modal name="citizen">
+          {/* Server Component: evita importar librerías de Node en el cliente */}
           <ModalCitizenDetailContext name="citizen" rut={citizen} />
         </Modal>
       )}
-      {importxlsx === "open" && (
-        <Modal name="importxlsx">
-          <ImportXLSXModal name="importxlsx" />
-        </Modal>
-      )}
+
       <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
         <div>
           <h2 className="text-2xl font-bold text-slate-800">

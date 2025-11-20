@@ -8,7 +8,7 @@ type RSHTableProps = {
 };
 export default async function RSHTable({ query, currentPage }: RSHTableProps) {
   const itemsPerPage = 8;
-  const { data, pages } = await fetchRSH(query, currentPage, itemsPerPage);
+  const { data, pages } = await fetchRSH(query, currentPage, itemsPerPage); // PENDING: Me falta pasar el valor de searchBy (Esto en todos los lugares donde uso fetchRSH. Tambien deberia revisar si lo voy a utilizar en alguna otra parte.)
 
   return (
     <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300/70">

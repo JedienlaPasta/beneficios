@@ -4,7 +4,7 @@ export default function EntregasStockSummary({
   entregas,
   period,
 }: {
-  entregas: number;
+  entregas: number | string;
   period: string;
 }) {
   return (

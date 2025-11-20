@@ -1,14 +1,13 @@
 import { Suspense } from "react";
 import UpdateCampaignModal from "@/app/ui/dashboard/campañas/[id]/update/update-campaign-modal";
-import CampaignDetail, {
-  CampaignDetailSkeleton,
-} from "@/app/ui/dashboard/campañas/[id]/campaign-detail";
+import CampaignDetail from "@/app/ui/dashboard/campañas/[id]/campaign-detail";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import CampaignEntregasTable from "@/app/ui/dashboard/campañas/[id]/campaign-entregas-table";
 import CampaignEntregasTableSkeleton from "@/app/ui/dashboard/campañas/[id]/table-skeleton";
 import { Modal } from "@/app/ui/dashboard/modal";
 import ModalSkeleton from "@/app/ui/modal-skeleton";
 import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/modal-context";
+import { CampaignDetailSkeleton } from "@/app/ui/dashboard/campañas/[id]/campaign-detail-skeleton";
 
 type CampaignProps = {
   searchParams?: Promise<{

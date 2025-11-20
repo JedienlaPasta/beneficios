@@ -95,7 +95,7 @@ export default function NewCampaignModal() {
     myFormData.append("nombre", campaignName);
     myFormData.append("fechaTermino", date?.toString() || "");
     myFormData.append("code", code.toString() || "");
-    myFormData.append("stock", stock.toString() || (0).toString());
+    myFormData.append("stock", stock.toString());
     myFormData.append("tipoDato", fieldType);
     myFormData.append("tramo", criteria.tramo.toString());
     myFormData.append("discapacidad", criteria.discapacidad.toString());
@@ -182,6 +182,7 @@ export default function NewCampaignModal() {
           </div>
           <CustomAntdDatePicker
             label="Término"
+            value={date ? dayjs(date) : null}
             placeholder="Seleccione una fecha"
             setDate={datePickerHandler}
           />
