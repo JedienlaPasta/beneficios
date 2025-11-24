@@ -1,5 +1,6 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
+import { startTransition } from "react";
 
 type InfoCardWrapperProps = {
   children: React.ReactNode;
@@ -19,7 +20,9 @@ export function InfoCardWrapper({
     if (disabled) return;
     const params = new URLSearchParams(searchParams);
     params.set(modal, "open");
-    router.replace("?" + params.toString());
+    startTransition(() => {
+      router.replace("?" + params.toString(), { scroll: false });
+    });
   };
 
   return (

@@ -442,7 +442,7 @@ export const updateSupervisorByFolio = async (
       sql.VarChar,
       userId,
     ).query(`
-          SELECT 1 AS ok FROM usuarios WHERE id = @userId AND rol = 'Administrador'
+          SELECT id FROM usuarios WHERE id = @userId AND rol = 'Administrador'
         `);
     if (checkPermissionResult.recordset.length === 0) {
       return {
