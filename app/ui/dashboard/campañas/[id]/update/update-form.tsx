@@ -128,13 +128,13 @@ export default function UpdateForm({ data }: { data: Campaign }) {
       <CustomAntdDatePicker
         label="Inicio"
         placeholder="Ingrese fecha de inicio"
-        defaultValue={dayjs(updateFormData.fecha_inicio)}
+        value={dayjs(updateFormData.fecha_inicio)}
         setFormData={setUpdateFormData}
       />
       <CustomAntdDatePicker
         label="Término"
         placeholder="Ingrese fecha de término"
-        defaultValue={dayjs(updateFormData.fecha_termino)}
+        value={dayjs(updateFormData.fecha_termino)}
         setFormData={setUpdateFormData}
       />
       <div className="flex flex-col gap-1">

@@ -66,46 +66,69 @@ export default async function CampaignDetail({ id }: { id: string }) {
     <div className="items-centers relative flex flex-col justify-center">
       <div className="grid gap-4 rounded-xl">
         {/* Header Section */}
-        <div className="flex flex-col rounded-xl bg-white px-6 pb-3 pt-7 shadow-sm md:px-8">
+        <div className="flex flex-col rounded-xl bg-white px-6 pb-3 pt-7 shadow-sm">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <p className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-base font-medium text-white shadow-sm">
-                {code}
-              </p>
-              <div className="flex flex-col">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-xl font-semibold tracking-tight text-slate-700">
-                    {nombre_campaña}
-                  </h1>
-                  <div
-                    className={`inline-flex items-center gap-1 rounded-md border ${colorEstado.border_color} ${colorEstado.bg} px-2 py-0.5 text-xs font-medium ${colorEstado.text_color}`}
-                  >
-                    <span
-                      className={`h-1.5 w-1.5 rounded-xl ${colorEstado.dot_bg}`}
-                    />
-                    <span
-                      className={`text-xs font-medium ${colorEstado.text_color}`}
+            <div className="w-full">
+              <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4">
+                <div className="flex w-full items-center justify-between sm:w-fit">
+                  <p className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-base font-medium text-white shadow-sm">
+                    {code}
+                  </p>
+                  <div className="block sm:hidden">
+                    <RoleGuard allowedRoles={["Administrador", "Supervisor"]}>
+                      <CampaignOptionsMenu id={id} />
+                    </RoleGuard>
+                  </div>
+                </div>
+                <div className="flex flex-col">
+                  <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                    <h1 className="text-xl font-semibold tracking-tight text-slate-700">
+                      {nombre_campaña}
+                    </h1>
+                    {/* Estado campaña */}
+                    <div
+                      className={`inline-flex items-center gap-1 rounded-md border ${colorEstado.border_color} ${colorEstado.bg} px-2 py-0.5 text-xs font-medium ${colorEstado.text_color}`}
                     >
-                      {estado}
+                      <span
+                        className={`h-1.5 w-1.5 rounded-xl ${colorEstado.dot_bg}`}
+                      />
+                      <span
+                        className={`text-xs font-medium ${colorEstado.text_color}`}
+                      >
+                        {estado}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mt-1 hidden flex-wrap items-center gap-2 sm:flex">
+                    <span className="inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-600">
+                      {tipo_dato}
+                    </span>
+                    <span className="inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-600">
+                      Inicio: {inicio}
+                    </span>
+                    <span className="inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-600">
+                      Término: {termino}
                     </span>
                   </div>
                 </div>
-                <div className="mt-1 flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-600">
-                    {tipo_dato}
-                  </span>
-                  <span className="inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-600">
-                    Inicio: {inicio}
-                  </span>
-                  <span className="inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-600">
-                    Término: {termino}
-                  </span>
-                </div>
+              </div>
+              <div className="mt-1 flex flex-wrap items-center gap-2 sm:hidden">
+                <span className="inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-600">
+                  {tipo_dato}
+                </span>
+                <span className="inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-600">
+                  Inicio: {inicio}
+                </span>
+                <span className="inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-600">
+                  Término: {termino}
+                </span>
               </div>
             </div>
-            <RoleGuard allowedRoles={["Administrador", "Supervisor"]}>
-              <CampaignOptionsMenu id={id} />
-            </RoleGuard>
+            <div className="hidden sm:block">
+              <RoleGuard allowedRoles={["Administrador", "Supervisor"]}>
+                <CampaignOptionsMenu id={id} />
+              </RoleGuard>
+            </div>
           </div>
 
           <div className="mt-4 grid items-baseline border-t border-gray-100 py-3">
@@ -155,7 +178,7 @@ export default async function CampaignDetail({ id }: { id: string }) {
             </div>
           </div>
           {/* 3rd segment */}
-          <div className="rounded-xl border border-slate-200 bg-white xl:col-span-2 2xl:col-span-1">
+          <div className="rounded-xl border border-slate-200 bg-white pb-6 xl:col-span-2 2xl:col-span-1">
             <h2 className="px-10 pb-4 pt-5 text-sm font-medium text-slate-500">
               Resumen Stock
             </h2>
