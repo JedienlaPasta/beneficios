@@ -75,10 +75,10 @@ export async function fetchRSH(
     }
 
     // Verificar disponibilidad de Full-Text Search
-    const ftsCheck = await pool
-      .request()
-      .query("SELECT FULLTEXTSERVICEPROPERTY('IsFullTextInstalled') AS ft");
-    const ftsAvailable = ftsCheck.recordset?.[0]?.ft === 1;
+    // const ftsCheck = await pool
+    //   .request()
+    //   .query("SELECT FULLTEXTSERVICEPROPERTY('IsFullTextInstalled') AS ft");
+    // const ftsAvailable = ftsCheck.recordset?.[0]?.ft === 1;
 
     const hasDigits = /\d/.test(query);
     const cleanedRut = hasDigits ? query.replace(/\D/g, "") : "";
