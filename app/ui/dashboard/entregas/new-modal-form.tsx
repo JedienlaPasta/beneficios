@@ -80,7 +80,8 @@ export default function NewModalForm({
   };
 
   const getStock = (campaign: Campaign) => {
-    if (campaign.stock === null) return 0;
+    console.log(campaign.stock);
+    if (campaign.stock === null) return "Sin límite";
     if (campaign.entregas === null) return 0;
     return campaign.stock - campaign.entregas;
   };
@@ -298,7 +299,9 @@ export default function NewModalForm({
                           : "text-slate-600"
                       }`}
                     >
-                      Stock: {getStock(campaign)}
+                      {typeof getStock(campaign) === "number"
+                        ? ` Stock: ${getStock(campaign)}`
+                        : "Sin límite"}
                     </span>
                   </div>
                 </div>
