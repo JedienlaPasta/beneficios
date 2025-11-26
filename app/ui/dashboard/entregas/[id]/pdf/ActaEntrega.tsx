@@ -15,10 +15,55 @@ Font.register({
   fonts: [
     {
       src: "https://cdn.jsdelivr.net/npm/@canvas-fonts/helvetica@1.0.4/Helvetica.ttf",
+      fontWeight: 400,
     },
     {
       src: "https://cdn.jsdelivr.net/npm/@canvas-fonts/helvetica@1.0.4/Helvetica-Bold.ttf",
-      fontWeight: "bold",
+      fontWeight: 700,
+    },
+    {
+      // Fallback: Usamos Bold para 900 porque Helvetica Black no es pública/gratuita en CDNs.
+      // Si tienes el archivo, reemplaza esta URL.
+      src: "https://cdn.jsdelivr.net/npm/@canvas-fonts/helvetica@1.0.4/Helvetica-Bold.ttf",
+      fontWeight: 900,
+    },
+  ],
+});
+
+// 2. INTER (Moderna, muy legible)
+Font.register({
+  family: "Inter",
+  fonts: [
+    {
+      src: "https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/files/inter-latin-400-normal.woff",
+      fontWeight: 400,
+    },
+    {
+      src: "https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/files/inter-latin-700-normal.woff",
+      fontWeight: 700,
+    },
+    {
+      src: "https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/files/inter-latin-900-normal.woff",
+      fontWeight: 900,
+    },
+  ],
+});
+
+// 3. GEIST (Geométrica, estilo Vercel)
+Font.register({
+  family: "Geist",
+  fonts: [
+    {
+      src: "https://cdn.jsdelivr.net/npm/@fontsource/geist-sans@5.0.3/files/geist-sans-latin-400-normal.woff",
+      fontWeight: 400,
+    },
+    {
+      src: "https://cdn.jsdelivr.net/npm/@fontsource/geist-sans@5.0.3/files/geist-sans-latin-700-normal.woff",
+      fontWeight: 700,
+    },
+    {
+      src: "https://cdn.jsdelivr.net/npm/@fontsource/geist-sans@5.0.3/files/geist-sans-latin-900-normal.woff",
+      fontWeight: 900,
     },
   ],
 });
@@ -31,8 +76,8 @@ const DIVIDER_COLOR = "#E5E7EB"; // Gris muy claro para líneas sutiles
 
 const styles = StyleSheet.create({
   page: {
-    padding: 50,
-    fontFamily: "Helvetica",
+    padding: 40,
+    fontFamily: "Geist",
     fontSize: 10,
     color: PRIMARY_COLOR,
     lineHeight: 1.5,
@@ -43,30 +88,37 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 25,
+    marginBottom: 4,
   },
   headerLeft: {
     flexDirection: "column",
   },
   titleName: {
     fontSize: 24, // Grande como "KELVIN MAI"
-    fontWeight: "bold",
+    fontWeight: "black",
     textTransform: "uppercase",
     color: "#111",
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
   titleRole: {
     fontSize: 12,
     color: ACCENT_COLOR,
     fontWeight: "bold",
-    marginTop: 12,
+    marginTop: 10,
     textTransform: "uppercase",
   },
   headerContact: {
-    marginTop: 3,
+    marginTop: 0,
     flexDirection: "row",
     fontSize: 9,
     color: SUBTEXT_COLOR,
+  },
+  headerFolio: {
+    marginTop: 0,
+    flexDirection: "row",
+    fontSize: 10,
+    fontWeight: "bold",
+    color: PRIMARY_COLOR,
   },
   // Logo circular estilo foto de perfil
   logoContainer: {
@@ -82,32 +134,39 @@ const styles = StyleSheet.create({
 
   // --- SECCIONES (Estilo "SKILLS", "EXPERIENCE") ---
   sectionContainer: {
-    marginBottom: 25,
+    marginBottom: 6,
   },
   sectionTitle: {
     fontSize: 11,
     fontWeight: "bold",
     textTransform: "uppercase",
-    color: "#18181a",
-    borderBottomWidth: 2, // La línea gruesa debajo del título
-    borderBottomColor: PRIMARY_COLOR,
     paddingBottom: 4,
-    marginBottom: 10,
-    letterSpacing: 1,
+    marginBottom: 12,
+    letterSpacing: 0.8,
+    borderRadius: 2,
+    backgroundColor: PRIMARY_COLOR,
+    color: "#fff",
+    paddingTop: 8,
+    paddingHorizontal: 8,
   },
 
   // --- GRILLA DE DATOS (Para reemplazar la tabla) ---
   infoGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
+    paddingHorizontal: 8,
   },
   infoItem: {
     width: "35%", // Dos columnas
     marginBottom: 8,
+    // borderBottomWidth: 1, // Solo para descargar la plantilla del acta vacía
+    borderBottomColor: DIVIDER_COLOR,
   },
   infoItemLarge: {
     width: "65%",
     marginBottom: 8,
+    // borderBottomWidth: 1, // Solo para descargar la plantilla del acta vacía
+    borderBottomColor: DIVIDER_COLOR,
   },
   label: {
     fontWeight: "bold",
@@ -120,36 +179,57 @@ const styles = StyleSheet.create({
   },
 
   // --- LISTA DE BENEFICIOS (Estilo "Experience Items") ---
+  kvRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    borderBottomWidth: 1,
+    borderBottomColor: DIVIDER_COLOR,
+    paddingVertical: 6,
+    marginBottom: 4,
+  },
+  kvHalf: { width: "48%", paddingRight: 8 },
+  kvFull: { width: "100%" },
+  kvLabel: { fontWeight: "bold", color: "#000", fontSize: 10, marginRight: 6 },
+  kvValue: { color: SUBTEXT_COLOR, fontSize: 10 },
   benefitItem: {
     marginBottom: 12,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: DIVIDER_COLOR,
+    paddingBottom: 6,
   },
   benefitHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "baseline",
+    // marginBottom: 4,
   },
   benefitTitle: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: "bold",
-    color: ACCENT_COLOR, // Título en color (ej: "Pañales")
+    color: PRIMARY_COLOR,
+  },
+  benefitCategory: {
+    fontSize: 9,
+    color: "#9CA3AF",
+    // fontStyle: "italic",
+    textTransform: "uppercase",
   },
   benefitMeta: {
     fontSize: 9,
     color: "#9CA3AF",
-    fontStyle: "italic",
+    // fontStyle: "italic",
   },
-  benefitDetailsList: {
-    marginLeft: 10,
-    marginTop: 2,
-  },
+  benefitDetailsList: { marginLeft: 8, marginTop: 1 },
   bulletPoint: {
     flexDirection: "row",
     alignItems: "flex-start",
+    marginBottom: 1,
   },
-  bullet: {
-    width: 10,
-    fontSize: 10,
-    color: ACCENT_COLOR,
+  bullet: { width: 10, fontSize: 10, color: ACCENT_COLOR },
+  detailText: {
+    fontSize: 9,
+    color: SUBTEXT_COLOR,
   },
 
   // --- FIRMAS Y FOOTER ---
@@ -180,15 +260,12 @@ const styles = StyleSheet.create({
 
   legalFooter: {
     position: "absolute",
-    bottom: 30,
+    bottom: 20,
     left: 40,
     right: 40,
     fontSize: 8,
     color: "#999",
     textAlign: "center",
-    borderTopWidth: 1,
-    borderTopColor: "#EEE",
-    paddingTop: 10,
   },
 });
 
@@ -202,6 +279,34 @@ export default function ActaEntregaCompleta({ data }) {
     </View>
   );
 
+  // --- NUEVO: cálculo de ordinal de entrega y condicional de beneficiario ---
+  const numeroEntrega =
+    data?.entrega?.numero ??
+    data?.numeroEntrega ??
+    (Array.isArray(data?.historialEntregasFechas)
+      ? data.historialEntregasFechas.filter((d) => {
+          const fecha = new Date(d);
+          const ahora = new Date(
+            typeof data?.profesional?.fechaISO === "string"
+              ? data.profesional.fechaISO
+              : Date.now(),
+          );
+          return fecha.getFullYear() === ahora.getFullYear();
+        }).length + 1
+      : undefined);
+
+  const ordinalEntrega =
+    typeof numeroEntrega === "number"
+      ? ["Primera", "Segunda", "Tercera"][numeroEntrega - 1] ||
+        `${numeroEntrega}ª`
+      : undefined;
+
+  const mostrarReceptor =
+    !!data?.receptor &&
+    (data?.receptor?.run && data?.beneficiario?.run
+      ? data.receptor.run !== data.beneficiario.run
+      : data?.receptor?.nombre !== data?.beneficiario?.nombre);
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -210,13 +315,17 @@ export default function ActaEntregaCompleta({ data }) {
           <View style={styles.headerLeft}>
             <Text style={styles.titleName}>ACTA DE ENTREGA</Text>
             <Text style={styles.titleRole}>Ayuda Asistencial Municipal</Text>
-
             <View style={styles.headerContact}>
-              <Text style={{ fontWeight: "bold", color: "#18181a" }}>
-                Folio: {data.folio} |{" "}
-              </Text>
-              <Text>El Quisco, Chile | </Text>
-              <Text>{data.profesional.fecha}</Text>
+              <Text>{data.profesional.fecha} </Text>
+              <Text>| El Quisco, Chile |</Text>
+              {ordinalEntrega && (
+                <Text style={{ fontWeight: "bold" }}>
+                  <Text> {`Entrega: ${ordinalEntrega} del año`}</Text>
+                </Text>
+              )}
+            </View>
+            <View style={styles.headerFolio}>
+              <Text>Folio: {data.folio}</Text>
             </View>
           </View>
 
@@ -232,135 +341,135 @@ export default function ActaEntregaCompleta({ data }) {
           </View>
         </View>
 
-        {/* === INTRODUCCIÓN (RECEPTOR) === */}
+        {/* === INTRODUCCIÓN DEL BENEFICIARIO === */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>INFORMACIÓN DEL RECEPTOR</Text>
+          <Text style={styles.sectionTitle}>Información del Beneficiario</Text>
           <View style={styles.infoGrid}>
-            <InfoItem label="Nombre" value={data.receptor.nombre} fullWidth />
-            <InfoItem label="R.U.N" value={data.receptor.run} />
+            <InfoItem
+              label="Nombre"
+              value={data.beneficiario?.nombre}
+              fullWidth
+            />
+            <InfoItem label="R.U.N" value={data.beneficiario?.run} />
             <InfoItem
               label="Domicilio"
-              value={data.receptor.domicilio}
+              value={data.beneficiario?.domicilio}
               fullWidth
             />
-            <InfoItem label="Tramo RSH" value={data.receptor.tramo} />
+            <InfoItem label="Tramo" value={data.beneficiario?.tramo} />
             <InfoItem
               label="Teléfono"
-              value={data.receptor.telefono}
+              value={data.beneficiario?.telefono}
               fullWidth
             />
-            <InfoItem label="Folio RSH" value={data.receptor.folioRSH} />
+            <InfoItem label="Folio RSH" value={data.beneficiario?.folioRSH} />
           </View>
         </View>
 
-        {/* === INTRODUCCIÓN (BENEFICIARIO) === */}
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>INFORMACIÓN DEL BENEFICIARIO</Text>
-          <View style={styles.infoGrid}>
-            <InfoItem label="Nombre" value={data.receptor.nombre} fullWidth />
-            <InfoItem label="R.U.N" value={data.receptor.run} />
-            <InfoItem
-              label="Domicilio"
-              value={data.receptor.domicilio}
-              fullWidth
-            />
-            <InfoItem label="Tramo RSH" value={data.receptor.tramo} />
-            <InfoItem
-              label="Teléfono"
-              value={data.receptor.telefono}
-              fullWidth
-            />
-            <InfoItem label="Folio RSH" value={data.receptor.folioRSH} />
+        {/* === INFORMACIÓN DEL RECEPTOR (CONDICIONAL) === */}
+        {mostrarReceptor && (
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Información del Receptor</Text>
+            <View style={styles.infoGrid}>
+              <InfoItem
+                label="Nombre"
+                value={data.receptor?.nombre}
+                fullWidth
+              />
+              <InfoItem label="R.U.N" value={data.receptor?.run} />
+              <InfoItem
+                label="Domicilio"
+                value={data.receptor?.domicilio}
+                fullWidth
+              />
+              <InfoItem label="Tramo" value={data.beneficiario?.tramo} />
+              <InfoItem
+                label="Teléfono"
+                value={data.beneficiario?.telefono}
+                fullWidth
+              />
+              <InfoItem label="Folio RSH" value={data.beneficiario?.folioRSH} />
+              {data.receptor?.fechaNacimiento && (
+                <InfoItem
+                  label="Fecha de Nacimiento"
+                  value={data.receptor.fechaNacimiento}
+                />
+              )}
+              {data.receptor?.relacion && (
+                <InfoItem
+                  label="Relación con beneficiario"
+                  value={data.receptor.relacion}
+                  fullWidth
+                />
+              )}
+            </View>
           </View>
-        </View>
+        )}
 
         {/* === DETALLE DE ENTREGA (BENEFICIOS) === */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>DETALLE DE LA ENTREGA</Text>
+          <Text style={styles.sectionTitle}>Detalle de la Entrega</Text>
 
-          {/* PAÑALES */}
-          {data.beneficios.panales && (
-            <View style={styles.benefitItem}>
-              <View style={styles.benefitHeader}>
-                <Text style={styles.benefitTitle}>Pañales</Text>
-                <Text style={styles.benefitMeta}>Insumo Médico</Text>
-              </View>
-              <View style={styles.benefitDetailsList}>
-                <View style={styles.bulletPoint}>
-                  <Text style={styles.bullet}>•</Text>
-                  <Text style={styles.value}>
-                    Cantidad entregada: {data.beneficios.panales.cantidad}{" "}
-                    unidades
-                  </Text>
+          {Array.isArray(data.beneficios) && data.beneficios.length > 0 ? (
+            data.beneficios.map((beneficio, index, array) => {
+              const isLast = index === array.length - 1;
+              const rowStyle = [
+                styles.benefitItem,
+                isLast
+                  ? { borderBottomWidth: 0, marginBottom: 4, paddingBottom: 0 }
+                  : {},
+              ];
+
+              return (
+                <View style={rowStyle} key={index}>
+                  <View style={styles.benefitHeader}>
+                    <Text style={styles.benefitTitle}>{beneficio.nombre}</Text>
+                    <Text style={styles.benefitCategory}>
+                      {beneficio.categoria || "Ayuda Social"}
+                    </Text>
+                  </View>
+
+                  <View style={styles.benefitDetailsList}>
+                    {Array.isArray(beneficio.detalles) &&
+                      beneficio.detalles.map((detalle, idx) => (
+                        <View style={styles.bulletPoint} key={idx}>
+                          <Text style={styles.bullet}>•</Text>
+                          <View
+                            style={{ flexDirection: "row", flexWrap: "wrap" }}
+                          >
+                            {typeof detalle === "object" && detalle !== null ? (
+                              <>
+                                {detalle.label ? (
+                                  <Text
+                                    style={{
+                                      fontWeight: "bold",
+                                      color: "#444",
+                                    }}
+                                  >
+                                    {String(detalle.label)}:{" "}
+                                  </Text>
+                                ) : null}
+                                <Text style={styles.value}>
+                                  {String(detalle.value)}
+                                </Text>
+                              </>
+                            ) : (
+                              <Text style={styles.value}>
+                                {String(detalle)}
+                              </Text>
+                            )}
+                          </View>
+                        </View>
+                      ))}
+                  </View>
                 </View>
-                <View style={styles.bulletPoint}>
-                  <Text style={styles.bullet}>•</Text>
-                  <Text style={styles.value}>
-                    Especificación: Talla {data.beneficios.panales.talla} (
-                    {data.beneficios.panales.adulto ? "Adulto" : "Niño"})
-                  </Text>
-                </View>
-              </View>
-            </View>
+              );
+            })
+          ) : (
+            <Text style={{ color: "#999", fontStyle: "italic" }}>
+              No se registran entregas en este folio.
+            </Text>
           )}
-
-          {/* VALE GAS */}
-          {data.beneficios.valeGas && (
-            <View style={styles.benefitItem}>
-              <View style={styles.benefitHeader}>
-                <Text style={styles.benefitTitle}>Vale de Recarga de Gas</Text>
-                <Text style={styles.benefitMeta}>Combustible</Text>
-              </View>
-              <View style={styles.benefitDetailsList}>
-                <View style={styles.bulletPoint}>
-                  <Text style={styles.bullet}>•</Text>
-                  <Text style={styles.value}>
-                    Código único: {data.beneficios.valeGas.codigo}
-                  </Text>
-                </View>
-                <View style={styles.bulletPoint}>
-                  <Text style={styles.bullet}>•</Text>
-                  <Text style={styles.value}>Capacidad: 15 Kg</Text>
-                </View>
-              </View>
-            </View>
-          )}
-
-          {/* TARJETA COMIDA */}
-          {data.beneficios.tarjetaComida && (
-            <View style={styles.benefitItem}>
-              <View style={styles.benefitHeader}>
-                <Text style={styles.benefitTitle}>Tarjeta de Alimentación</Text>
-                <Text style={styles.benefitMeta}>Subsidio</Text>
-              </View>
-              <View style={styles.benefitDetailsList}>
-                <View style={styles.bulletPoint}>
-                  <Text style={styles.bullet}>•</Text>
-                  <Text style={styles.value}>
-                    Nro. Tarjeta: {data.beneficios.tarjetaComida.codigo}
-                  </Text>
-                </View>
-              </View>
-            </View>
-          )}
-
-          {/* OTROS */}
-          {/* {data.beneficios.otros && (
-            <View style={styles.benefitItem}>
-              <View style={styles.benefitHeader}>
-                <Text style={styles.benefitTitle}>Ayuda Complementaria</Text>
-                <Text style={styles.benefitMeta}>Otros</Text>
-              </View>
-              <View style={styles.benefitDetailsList}>
-                <View style={styles.bulletPoint}>
-                  <Text style={styles.bullet}>•</Text>
-                  <Text style={styles.value}>
-                    {data.beneficios.otros.descripcion}
-                  </Text>
-                </View>
-              </View>
-            </View>
-          )} */}
 
           {/* Mensaje si no hay nada */}
           {Object.values(data.beneficios).every((v) => v === null) && (
@@ -374,9 +483,15 @@ export default function ActaEntregaCompleta({ data }) {
         {data.justificacion && (
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>
-              OBSERVACIONES / JUSTIFICACIÓN
+              Observaciones / Justificación
             </Text>
-            <Text style={{ color: SUBTEXT_COLOR, textAlign: "justify" }}>
+            <Text
+              style={{
+                color: SUBTEXT_COLOR,
+                textAlign: "justify",
+                paddingHorizontal: 8,
+              }}
+            >
               {data.justificacion}
             </Text>
           </View>
@@ -406,7 +521,7 @@ export default function ActaEntregaCompleta({ data }) {
         {/* === FOOTER LEGAL === */}
         <Text style={styles.legalFooter}>
           I. Municipalidad de El Quisco - Departamento Social - Av. Isidoro
-          Dubournais 123
+          Dubournais 413
           {"\n"}Documento generado electrónicamente el{" "}
           {new Date().toLocaleDateString()}.
         </Text>
