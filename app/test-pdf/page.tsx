@@ -27,6 +27,7 @@ export default function Page() {
     receptor: {
       nombre: "Amawa Samadhi Sophia Dharma Abarca Torres",
       run: "12.345.678-9",
+      //   run: "",
       domicilio: "Av. Isidoro Dubournais 123, El Quisco",
       tramo: "40%",
       folioRSH: "9988 7766",
@@ -41,7 +42,9 @@ export default function Page() {
       domicilio: "Av. Los Pinos 456, El Quisco",
       tramo: "40%",
       folioRSH: "9988 7766",
-      telefono: "+569 1234 5678",
+      telefono: "",
+      //   telefono: "+569 1234 5678",
+      edad: "7 años",
       fechaSolicitud: "25/11/2025",
     },
     // Ordinal de entrega del año
@@ -49,24 +52,23 @@ export default function Page() {
     beneficios: [
       {
         nombre: "Pañales",
-        categoria: "PA",
+        codigo: "PA",
         detalles: [
           { label: "Cantidad", value: "3 paquetes de 50 unidades" },
-          { label: "Talla", value: "G para Adulto" },
+          { label: "Talla", value: "G (Adulto)" },
         ],
       },
       {
         nombre: "Vale de Gas",
-        categoria: "GA",
+        codigo: "GA",
         detalles: [
           { label: "Código", value: "00962" },
-          // Puedes agregar más detalles aquí sin tocar el PDF
           { label: "Cilindro", value: "15kg" },
         ],
       },
       {
         nombre: "Tarjeta de Comida", // Ejemplo de un beneficio nuevo futuro
-        categoria: "TA",
+        codigo: "TA",
         detalles: [
           { label: "Código", value: "NN274659K" },
           //   "Posee un valor de $47.000 en compras, vence 10 días luego de la fecha de entrega.", // También soporta texto simple sin label

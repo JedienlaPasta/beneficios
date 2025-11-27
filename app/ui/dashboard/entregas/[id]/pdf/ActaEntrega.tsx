@@ -9,47 +9,7 @@ import {
   Image,
 } from "@react-pdf/renderer";
 
-// Registramos fuentes estándar
-Font.register({
-  family: "Helvetica",
-  fonts: [
-    {
-      src: "https://cdn.jsdelivr.net/npm/@canvas-fonts/helvetica@1.0.4/Helvetica.ttf",
-      fontWeight: 400,
-    },
-    {
-      src: "https://cdn.jsdelivr.net/npm/@canvas-fonts/helvetica@1.0.4/Helvetica-Bold.ttf",
-      fontWeight: 700,
-    },
-    {
-      // Fallback: Usamos Bold para 900 porque Helvetica Black no es pública/gratuita en CDNs.
-      // Si tienes el archivo, reemplaza esta URL.
-      src: "https://cdn.jsdelivr.net/npm/@canvas-fonts/helvetica@1.0.4/Helvetica-Bold.ttf",
-      fontWeight: 900,
-    },
-  ],
-});
-
-// 2. INTER (Moderna, muy legible)
-Font.register({
-  family: "Inter",
-  fonts: [
-    {
-      src: "https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/files/inter-latin-400-normal.woff",
-      fontWeight: 400,
-    },
-    {
-      src: "https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/files/inter-latin-700-normal.woff",
-      fontWeight: 700,
-    },
-    {
-      src: "https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/files/inter-latin-900-normal.woff",
-      fontWeight: 900,
-    },
-  ],
-});
-
-// 3. GEIST (Geométrica, estilo Vercel)
+// GEIST
 Font.register({
   family: "Geist",
   fonts: [
@@ -68,7 +28,7 @@ Font.register({
   ],
 });
 
-// --- PALETA DE COLORES (Estilo CV Moderno) ---
+// --- PALETA DE COLORES ---
 const PRIMARY_COLOR = "#333333"; // Texto principal (Gris oscuro casi negro)
 const ACCENT_COLOR = "#074d8f"; // Violeta/Azul (Similar al de la imagen del CV)
 const SUBTEXT_COLOR = "#666666"; // Gris medio para detalles
@@ -94,7 +54,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
   },
   titleName: {
-    fontSize: 24, // Grande como "KELVIN MAI"
+    fontSize: 24,
     fontWeight: "black",
     textTransform: "uppercase",
     color: "#111",
@@ -120,37 +80,34 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: PRIMARY_COLOR,
   },
-  // Logo circular estilo foto de perfil
+  // Logo
   logoContainer: {
     width: 80,
     height: 45,
-    // borderRadius: 35,
-    // backgroundColor: "#F3F4F6",
     alignItems: "center",
     justifyContent: "center",
     marginTop: -10.5,
-    // overflow: "hidden",
   },
 
-  // --- SECCIONES (Estilo "SKILLS", "EXPERIENCE") ---
+  // --- SECCIONES ---
   sectionContainer: {
-    marginBottom: 6,
+    marginBottom: 4,
   },
   sectionTitle: {
     fontSize: 11,
     fontWeight: "bold",
     textTransform: "uppercase",
-    paddingBottom: 4,
     marginBottom: 12,
     letterSpacing: 0.8,
     borderRadius: 2,
     backgroundColor: PRIMARY_COLOR,
     color: "#fff",
     paddingTop: 8,
+    paddingBottom: 4,
     paddingHorizontal: 8,
   },
 
-  // --- GRILLA DE DATOS (Para reemplazar la tabla) ---
+  // --- GRILLA DE DATOS ---
   infoGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -178,19 +135,7 @@ const styles = StyleSheet.create({
     color: SUBTEXT_COLOR,
   },
 
-  // --- LISTA DE BENEFICIOS (Estilo "Experience Items") ---
-  kvRow: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    borderBottomWidth: 1,
-    borderBottomColor: DIVIDER_COLOR,
-    paddingVertical: 6,
-    marginBottom: 4,
-  },
-  kvHalf: { width: "48%", paddingRight: 8 },
-  kvFull: { width: "100%" },
-  kvLabel: { fontWeight: "bold", color: "#000", fontSize: 10, marginRight: 6 },
-  kvValue: { color: SUBTEXT_COLOR, fontSize: 10 },
+  // --- LISTA DE BENEFICIOS ---
   benefitItem: {
     marginBottom: 12,
     paddingHorizontal: 8,
@@ -209,16 +154,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: PRIMARY_COLOR,
   },
-  benefitCategory: {
+  benefitCode: {
     fontSize: 9,
     color: "#9CA3AF",
-    // fontStyle: "italic",
     textTransform: "uppercase",
   },
   benefitMeta: {
     fontSize: 9,
     color: "#9CA3AF",
-    // fontStyle: "italic",
   },
   benefitDetailsList: { marginLeft: 8, marginTop: 1 },
   bulletPoint: {
@@ -234,7 +177,10 @@ const styles = StyleSheet.create({
 
   // --- FIRMAS Y FOOTER ---
   signatureSection: {
-    marginTop: 40,
+    position: "absolute",
+    bottom: 70,
+    left: 40,
+    right: 40,
     flexDirection: "row",
     justifyContent: "space-between",
   },
@@ -279,7 +225,7 @@ export default function ActaEntregaCompleta({ data }) {
     </View>
   );
 
-  // --- NUEVO: cálculo de ordinal de entrega y condicional de beneficiario ---
+  // --- Cálculo de ordinal de entrega y condicional de beneficiario ---
   const numeroEntrega =
     data?.entrega?.numero ??
     data?.numeroEntrega ??
@@ -301,11 +247,20 @@ export default function ActaEntregaCompleta({ data }) {
         `${numeroEntrega}ª`
       : undefined;
 
-  const mostrarReceptor =
-    !!data?.receptor &&
-    (data?.receptor?.run && data?.beneficiario?.run
-      ? data.receptor.run !== data.beneficiario.run
-      : data?.receptor?.nombre !== data?.beneficiario?.nombre);
+  const shouldDisplayReceptor = () => {
+    return data?.receptor?.nombre.trim() !== "" && data?.receptor?.run !== "";
+  };
+
+  //   const isBenefitsListTooLarge =
+  //     Array.isArray(data.beneficios) && data.beneficios.length > 3;
+
+  //   const shouldWrapContent = isBenefitsListTooLarge && data.receptor?.run;
+  const shouldWrapContent = () => {
+    if (data.receptor?.run) {
+      return data.beneficios.length > 3;
+    }
+    return data.beneficios.length > 4;
+  };
 
   return (
     <Document>
@@ -357,17 +312,32 @@ export default function ActaEntregaCompleta({ data }) {
               fullWidth
             />
             <InfoItem label="Tramo" value={data.beneficiario?.tramo} />
-            <InfoItem
-              label="Teléfono"
-              value={data.beneficiario?.telefono}
-              fullWidth
-            />
-            <InfoItem label="Folio RSH" value={data.beneficiario?.folioRSH} />
+            {data.beneficiario?.telefono && (
+              <InfoItem
+                label="Teléfono"
+                value={data.beneficiario?.telefono}
+                fullWidth
+              />
+            )}
+            {data.beneficiario?.telefono && data.beneficiario?.folioRSH && (
+              <InfoItem label="Folio" value={data.beneficiario?.folioRSH} />
+            )}
+            {data.beneficiario?.edad && (
+              <InfoItem
+                label="Edad"
+                value={data.beneficiario?.edad}
+                fullWidth
+              />
+            )}
+            {!data.beneficiario?.telefono && data.beneficiario?.folioRSH && (
+              <InfoItem label="Folio" value={data.beneficiario?.folioRSH} />
+            )}
+            {/* <InfoItem label="Folio" value={data.beneficiario?.folioRSH} /> */}
           </View>
         </View>
 
         {/* === INFORMACIÓN DEL RECEPTOR (CONDICIONAL) === */}
-        {mostrarReceptor && (
+        {shouldDisplayReceptor() && (
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Información del Receptor</Text>
             <View style={styles.infoGrid}>
@@ -382,13 +352,13 @@ export default function ActaEntregaCompleta({ data }) {
                 value={data.receptor?.domicilio}
                 fullWidth
               />
-              <InfoItem label="Tramo" value={data.beneficiario?.tramo} />
+              <InfoItem label="Tramo" value={data.receptor?.tramo} />
               <InfoItem
                 label="Teléfono"
-                value={data.beneficiario?.telefono}
+                value={data.receptor?.telefono}
                 fullWidth
               />
-              <InfoItem label="Folio RSH" value={data.beneficiario?.folioRSH} />
+              <InfoItem label="Folio" value={data.receptor?.folioRSH} />
               {data.receptor?.fechaNacimiento && (
                 <InfoItem
                   label="Fecha de Nacimiento"
@@ -410,70 +380,100 @@ export default function ActaEntregaCompleta({ data }) {
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Detalle de la Entrega</Text>
 
-          {Array.isArray(data.beneficios) && data.beneficios.length > 0 ? (
-            data.beneficios.map((beneficio, index, array) => {
-              const isLast = index === array.length - 1;
-              const rowStyle = [
-                styles.benefitItem,
-                isLast
-                  ? { borderBottomWidth: 0, marginBottom: 4, paddingBottom: 0 }
-                  : {},
-              ];
+          <View
+            style={[
+              shouldWrapContent()
+                ? {
+                    flexDirection: "row",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
+                    minHeight: 105,
+                  }
+                : {
+                    flexDirection: "column",
+                    minHeight: 105,
+                  },
+            ]}
+          >
+            {Array.isArray(data.beneficios) && data.beneficios.length > 0 ? (
+              data.beneficios.map((beneficio, index, array) => {
+                const columns = shouldWrapContent() ? 2 : 1;
+                const startLastRow =
+                  columns * Math.floor((array.length - 1) / columns);
+                const isInLastRow = index >= startLastRow;
 
-              return (
-                <View style={rowStyle} key={index}>
-                  <View style={styles.benefitHeader}>
-                    <Text style={styles.benefitTitle}>{beneficio.nombre}</Text>
-                    <Text style={styles.benefitCategory}>
-                      {beneficio.categoria || "Ayuda Social"}
-                    </Text>
-                  </View>
+                const rowStyle = [
+                  styles.benefitItem,
+                  { width: shouldWrapContent() ? "50%" : "100%" },
+                  isInLastRow
+                    ? {
+                        borderBottomWidth: 0,
+                        marginBottom: 4,
+                        paddingBottom: 0,
+                      }
+                    : {},
+                ];
 
-                  <View style={styles.benefitDetailsList}>
-                    {Array.isArray(beneficio.detalles) &&
-                      beneficio.detalles.map((detalle, idx) => (
-                        <View style={styles.bulletPoint} key={idx}>
-                          <Text style={styles.bullet}>•</Text>
-                          <View
-                            style={{ flexDirection: "row", flexWrap: "wrap" }}
-                          >
-                            {typeof detalle === "object" && detalle !== null ? (
-                              <>
-                                {detalle.label ? (
-                                  <Text
-                                    style={{
-                                      fontWeight: "bold",
-                                      color: "#444",
-                                    }}
-                                  >
-                                    {String(detalle.label)}:{" "}
+                return (
+                  <View style={rowStyle} key={index}>
+                    <View style={styles.benefitHeader}>
+                      <Text style={styles.benefitTitle}>
+                        {beneficio.nombre}
+                      </Text>
+                      {!shouldWrapContent() && (
+                        <Text style={styles.benefitCode}>
+                          {beneficio.codigo || "Ayuda Social"}
+                        </Text>
+                      )}
+                    </View>
+
+                    <View style={styles.benefitDetailsList}>
+                      {Array.isArray(beneficio.detalles) &&
+                        beneficio.detalles.map((detalle, idx) => (
+                          <View style={styles.bulletPoint} key={idx}>
+                            <Text style={styles.bullet}>•</Text>
+                            <View
+                              style={{ flexDirection: "row", flexWrap: "wrap" }}
+                            >
+                              {typeof detalle === "object" &&
+                              detalle !== null ? (
+                                <>
+                                  {detalle.label ? (
+                                    <Text
+                                      style={{
+                                        fontWeight: "bold",
+                                        color: "#444",
+                                      }}
+                                    >
+                                      {String(detalle.label)}:{" "}
+                                    </Text>
+                                  ) : null}
+                                  <Text style={styles.value}>
+                                    {String(detalle.value)}
                                   </Text>
-                                ) : null}
+                                </>
+                              ) : (
                                 <Text style={styles.value}>
-                                  {String(detalle.value)}
+                                  {String(detalle)}
                                 </Text>
-                              </>
-                            ) : (
-                              <Text style={styles.value}>
-                                {String(detalle)}
-                              </Text>
-                            )}
+                              )}
+                            </View>
                           </View>
-                        </View>
-                      ))}
+                        ))}
+                    </View>
                   </View>
-                </View>
-              );
-            })
-          ) : (
-            <Text style={{ color: "#999", fontStyle: "italic" }}>
-              No se registran entregas en este folio.
-            </Text>
-          )}
+                );
+              })
+            ) : (
+              <Text style={{ color: "#999" }}>
+                No se registran entregas en este folio.
+              </Text>
+            )}
+          </View>
 
           {/* Mensaje si no hay nada */}
           {Object.values(data.beneficios).every((v) => v === null) && (
-            <Text style={{ color: "#999", fontStyle: "italic" }}>
+            <Text style={{ color: "#999" }}>
               No se registran entregas en este folio.
             </Text>
           )}

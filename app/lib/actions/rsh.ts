@@ -786,29 +786,38 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
 
     const columnMapping: { [key: string]: number } = {};
     let headersProcessed = false;
+    let headerRowNumber: number | null = null;
+
+    const normalizeHeader = (h: string) =>
+      h.toString().toLowerCase().trim().replace(/\s+/g, "_");
 
     worksheet.eachRow((row, rowNumber) => {
       const values = row.values as ExcelJS.CellValue[];
 
-      if (rowNumber === 1) {
-        values.forEach((header, index) => {
-          if (header && typeof header === "string") {
-            const normalizedHeader = header
-              .toString()
-              .toLowerCase()
-              .trim()
-              .replace(/\s+/g, "_");
-
-            columnMapping[normalizedHeader] = index;
-          }
-        });
-        headersProcessed = true;
-        console.log("Headers encontrados:", Object.keys(columnMapping));
-        return;
-      }
-
+      // Detectar cabeceras buscando "fechanacimiento" (con normalización)
       if (!headersProcessed) {
-        throw new Error("No se pudieron procesar las cabeceras del archivo");
+        const hasFechaNacimientoHeader = values.some(
+          (header) =>
+            typeof header === "string" &&
+            normalizeHeader(header) === "fechanacimiento",
+        );
+
+        if (hasFechaNacimientoHeader) {
+          values.forEach((header, index) => {
+            if (header && typeof header === "string") {
+              columnMapping[normalizeHeader(header)] = index;
+            }
+          });
+          headersProcessed = true;
+          headerRowNumber = rowNumber;
+          console.log("Fila de cabeceras detectada:", headerRowNumber);
+          console.log("Headers encontrados:", Object.keys(columnMapping));
+          // Saltar la fila de cabeceras
+          return;
+        }
+
+        // Todavía no encontramos cabeceras, seguir iterando filas
+        return;
       }
 
       // Helper function to get value by header name
@@ -817,7 +826,6 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
           columnMapping[headerName.toLowerCase().replace(/\s+/g, "_")];
 
         if (columnIndex === undefined) return "";
-        // Special handling for 'dv' field - "0" is a valid value
         if (headerName === "dv") {
           return values[columnIndex] !== undefined &&
             values[columnIndex] !== null
@@ -911,6 +919,15 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
       citizens.push(citizen);
       validRows++;
     });
+
+    // Validación final: si nunca encontramos cabeceras, abortamos con mensaje claro
+    if (!headersProcessed) {
+      return {
+        success: false,
+        message:
+          "No se encontraron cabeceras en el archivo (se esperaba 'fechanacimiento' en alguna fila).",
+      };
+    }
 
     const pool = await connectToDB();
     if (!pool) {
