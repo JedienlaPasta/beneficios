@@ -3,10 +3,12 @@ import { createAndDownloadPDFByFolio } from "@/app/lib/actions/entregas";
 import { toast } from "sonner";
 import ActaEntrega from "./pdf/ActaEntrega";
 import dynamic from "next/dynamic";
+import { useMemo } from "react";
 
 type Props = {
   children?: React.ReactNode;
   folio: string;
+  enabled?: boolean; // nuevo: controlar montaje
 };
 
 // Importar PDFDownloadLink dinámicamente para evitar errores de servidor en Next.js
@@ -15,7 +17,11 @@ const PDFDownloadLink = dynamic(
   { ssr: false, loading: () => <p>Cargando módulo PDF...</p> },
 );
 
-export default function GetNewFileButton({ children, folio }: Props) {
+export default function GetNewFileButton({
+  children,
+  folio,
+  enabled = true,
+}: Props) {
   // const handleClick = async (e: React.MouseEvent) => {
   //   e.stopPropagation();
   //   const toastId = toast.loading("Generando documento...");
@@ -120,7 +126,6 @@ export default function GetNewFileButton({ children, folio }: Props) {
       fechaSolicitud: "25/11/2025",
       relacion: "Presidente Junta de Vecinos",
     },
-    // Beneficiario distinto al receptor
     beneficiario: {
       nombre: "Junta de Vecinos N°23 Los Pinos",
       run: "65.432.109-0",
@@ -169,23 +174,28 @@ export default function GetNewFileButton({ children, folio }: Props) {
     },
   };
 
+  // Mantener estable el nodo del documento entre renders de pestañas
+  const docNode = useMemo(() => <ActaEntrega data={datosPrueba} />, []);
+
+  // if (!enabled) {
+  //   return (
+  //     <button
+  //       aria-disabled
+  //       className="flex items-center gap-1 rounded-md border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600 opacity-60"
+  //     >
+  //       {children || "Nueva Acta"}
+  //     </button>
+  //   );
+  // }
+
   return (
-    <div className="flex flex-col items-end">
-      {/* <button
-        onClick={handleClick}
-        className="flex items-center gap-1 rounded-md border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600 transition-all hover:border-blue-200 hover:bg-blue-100/70 active:scale-95"
-      >
-        {children}
-      </button> */}
-      <PDFDownloadLink
-        document={<ActaEntrega data={datosPrueba} />}
-        fileName={`acta_entrega.pdf`}
-        className="flex items-center gap-1 rounded-md border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600 transition-all hover:border-blue-200 hover:bg-blue-100/70 active:scale-95"
-      >
-        {({ blob, url, loading, error }) =>
-          loading ? "Cargando..." : "Nueva Acta"
-        }
-      </PDFDownloadLink>
-    </div>
+    <PDFDownloadLink
+      key="pdf-stable" // evita residuos de reconciliación
+      document={docNode}
+      fileName={`acta_entrega.pdf`}
+      className="flex items-center gap-1 rounded-md border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600 transition-all hover:border-blue-200 hover:bg-blue-100/70 active:scale-95"
+    >
+      {({ loading }) => (loading ? "Cargando..." : children || "Nueva Acta")}
+    </PDFDownloadLink>
   );
 }

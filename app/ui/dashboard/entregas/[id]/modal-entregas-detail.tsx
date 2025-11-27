@@ -39,6 +39,7 @@ export default function ModalEntregasDetail({
 }: Props) {
   const [tab, setTab] = useState("Resumen");
   const [isModalClosing, setIsModalClosing] = useState(false);
+  const [isActaEnabled, setIsActaEnabled] = useState(true); // nuevo estado SOLO para el botón
   const [isToggleButtonDisabled, setIsToggleButtonDisabled] = useState(false);
 
   const formattedRUT = formatRUT(rut);
@@ -74,11 +75,17 @@ export default function ModalEntregasDetail({
       document.body.style.overflow = "auto";
     };
   }, []);
+
+  useEffect(() => {
+    if (isModalClosing) setIsActaEnabled(false);
+  }, [isModalClosing]);
+
   // To disable camera on overlay click
   const handleOverlayClick = async () => {
     const params = new URLSearchParams(searchParams);
     params.delete("detailsModal");
     router.replace(`?${params.toString()}`, { scroll: false });
+    setIsActaEnabled(false);
     await setIsModalClosing(true);
   };
 
@@ -140,11 +147,17 @@ export default function ModalEntregasDetail({
                 Beneficiario: <p className="text-blue-700">{formattedRUT}</p>
               </span>
             </div>
-            <CloseModalButton
-              name="detailsModal"
-              secondName="rut"
-              setIsClosing={setIsModalClosing}
-            />
+            {/* Botón de descarga SIEMPRE montado, solo se desactiva al cerrar */}
+            <div className="flex items-center gap-2">
+              <GetNewFileButton folio={folio} enabled={isActaEnabled}>
+                Nueva Acta
+              </GetNewFileButton>
+              <CloseModalButton
+                name="detailsModal"
+                secondName="rut"
+                setIsClosing={setIsModalClosing}
+              />
+            </div>
           </section>
 
           {/* Tab Navigation */}
@@ -427,7 +440,7 @@ function FilesList({
           <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
           Documentos Adjuntos
         </h3>
-        <GetNewFileButton folio={folio}>Nueva Acta</GetNewFileButton>
+        {/* Se eliminó el botón aquí para evitar desmontajes al cambiar de pestaña */}
       </div>
 
       {files.length > 0 ? (
