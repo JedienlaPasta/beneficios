@@ -98,7 +98,7 @@ export default async function CitizenDetail({
       )}
 
       <div className="items-centers relative flex flex-col justify-center">
-        <div className="grid gap-4 rounded-xl md:gap-6">
+        <div className="grid gap-4 rounded-xl">
           {/* Header Section */}
           <div className="flex flex-col items-start justify-between gap-2 rounded-xl bg-white px-3 py-4 sm:flex-row lg:px-8 lg:py-6">
             <div className="flex gap-4">
@@ -128,7 +128,7 @@ export default async function CitizenDetail({
           </div>
 
           {/* Details Grid */}
-          <div className="grid auto-rows-fr gap-4 md:gap-6 xl:grid-cols-2 2xl:grid-cols-3">
+          <div className="grid auto-rows-fr gap-4 xl:grid-cols-2 2xl:grid-cols-3">
             <div className="rounded-xl border border-slate-200 bg-gray-100">
               <h2 className="flex h-14 items-center justify-between px-5 text-sm font-medium text-slate-400 lg:px-8">
                 Información General

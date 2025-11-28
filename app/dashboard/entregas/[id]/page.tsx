@@ -66,7 +66,7 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
         <NewButton name="newsocialaid">Dar Beneficio</NewButton>
       </div>
 
-      <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
+      <div className="flex flex-col gap-4 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
         <Suspense fallback={<CitizenDetailSkeleton />}>
           <CitizenDetail
             rut={rut}

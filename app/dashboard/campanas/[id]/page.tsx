@@ -63,7 +63,7 @@ export default async function Campaign(props: CampaignProps) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
+      <div className="flex flex-col gap-4 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
         <Suspense fallback={<CampaignDetailSkeleton />}>
           <CampaignDetail id={id} />
         </Suspense>

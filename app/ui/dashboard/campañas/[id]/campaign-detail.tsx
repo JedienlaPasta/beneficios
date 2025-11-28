@@ -140,7 +140,7 @@ export default async function CampaignDetail({ id }: { id: string }) {
         </div>
 
         {/* Details Grid */}
-        <div className="mt-2 grid auto-rows-fr gap-6 xl:grid-cols-2 2xl:grid-cols-2">
+        <div className="grid auto-rows-fr gap-4 xl:grid-cols-2 2xl:grid-cols-2">
           {/* <div className="rounded-xl border border-slate-200 bg-gray-100">
             <h2 className="px-10 py-4 text-sm font-medium text-slate-400">
               Información General
@@ -178,7 +178,7 @@ export default async function CampaignDetail({ id }: { id: string }) {
             </div>
           </div>
           {/* 3rd segment */}
-          <div className="rounded-xl border border-slate-200 bg-white pb-6 xl:col-span-2 2xl:col-span-1">
+          <div className="rounded-xl border border-slate-200 bg-white pb-6">
             <h2 className="px-10 pb-4 pt-5 text-sm font-medium text-slate-500">
               Resumen Stock
             </h2>
