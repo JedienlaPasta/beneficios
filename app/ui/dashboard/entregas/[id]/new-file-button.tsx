@@ -134,13 +134,14 @@ export default function GetNewFileButton({
       folioRSH: "9988 7766",
       telefono: "+569 1234 5678",
       fechaSolicitud: "25/11/2025",
+      edad: "7 años",
     },
     // Ordinal de entrega del año
     numeroEntrega: 2,
     beneficios: [
       {
         nombre: "Pañales",
-        categoria: "PA",
+        codigo: "PA",
         detalles: [
           { label: "Cantidad", value: "3 paquetes de 50 unidades" },
           { label: "Talla", value: "G (Adulto)" },
@@ -148,7 +149,7 @@ export default function GetNewFileButton({
       },
       {
         nombre: "Vale de Gas",
-        categoria: "GA",
+        codigo: "GA",
         detalles: [
           { label: "Código", value: "00962" },
           // Puedes agregar más detalles aquí sin tocar el PDF
@@ -157,7 +158,7 @@ export default function GetNewFileButton({
       },
       {
         nombre: "Tarjeta de Comida", // Ejemplo de un beneficio nuevo futuro
-        categoria: "TA",
+        codigo: "TA",
         detalles: [
           { label: "Código", value: "NN274659K" },
           //   "Posee un valor de $47.000 en compras, vence 10 días luego de la fecha de entrega.", // También soporta texto simple sin label

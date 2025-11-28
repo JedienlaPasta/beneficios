@@ -5,34 +5,54 @@ import {
   View,
   Document,
   StyleSheet,
-  Font,
   Image,
 } from "@react-pdf/renderer";
-
-// GEIST
-Font.register({
-  family: "Geist",
-  fonts: [
-    {
-      src: "https://cdn.jsdelivr.net/npm/@fontsource/geist-sans@5.0.3/files/geist-sans-latin-400-normal.woff",
-      fontWeight: 400,
-    },
-    {
-      src: "https://cdn.jsdelivr.net/npm/@fontsource/geist-sans@5.0.3/files/geist-sans-latin-700-normal.woff",
-      fontWeight: 700,
-    },
-    {
-      src: "https://cdn.jsdelivr.net/npm/@fontsource/geist-sans@5.0.3/files/geist-sans-latin-900-normal.woff",
-      fontWeight: 900,
-    },
-  ],
-});
+import "@/app/ui/fonts";
 
 // --- PALETA DE COLORES ---
 const PRIMARY_COLOR = "#333333"; // Texto principal (Gris oscuro casi negro)
 const ACCENT_COLOR = "#074d8f"; // Violeta/Azul (Similar al de la imagen del CV)
 const SUBTEXT_COLOR = "#666666"; // Gris medio para detalles
 const DIVIDER_COLOR = "#E5E7EB"; // Gris muy claro para líneas sutiles
+
+type ActaEntregaData = {
+  folio: string;
+  receptor: {
+    nombre: string;
+    run: string;
+    domicilio: string;
+    tramo: string;
+    folioRSH: string;
+    telefono: string;
+    fechaSolicitud: string;
+    relacion: string;
+  };
+  beneficiario: {
+    nombre: string;
+    run: string;
+    edad: string;
+    domicilio: string;
+    tramo: string;
+    folioRSH: string;
+    telefono: string;
+    fechaSolicitud: string;
+  };
+  numeroEntrega: number;
+  beneficios: Beneficio[];
+  justificacion: string;
+  profesional: {
+    nombre: string;
+    cargo: string;
+    fecha: string;
+    fechaISO: string;
+  };
+};
+
+type Beneficio = {
+  nombre: string;
+  codigo: string;
+  detalles: { label: string; value: string }[];
+};
 
 const styles = StyleSheet.create({
   page: {
@@ -215,7 +235,11 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function ActaEntregaCompleta({ data }) {
+export default function ActaEntregaCompleta({
+  data,
+}: {
+  data: ActaEntregaData;
+}) {
   // Función auxiliar para no repetir código en filas simples
   const InfoItem = ({ label = "", value = "", fullWidth = false }) => (
     <View style={fullWidth ? styles.infoItemLarge : styles.infoItem}>
@@ -226,20 +250,7 @@ export default function ActaEntregaCompleta({ data }) {
   );
 
   // --- Cálculo de ordinal de entrega y condicional de beneficiario ---
-  const numeroEntrega =
-    data?.entrega?.numero ??
-    data?.numeroEntrega ??
-    (Array.isArray(data?.historialEntregasFechas)
-      ? data.historialEntregasFechas.filter((d) => {
-          const fecha = new Date(d);
-          const ahora = new Date(
-            typeof data?.profesional?.fechaISO === "string"
-              ? data.profesional.fechaISO
-              : Date.now(),
-          );
-          return fecha.getFullYear() === ahora.getFullYear();
-        }).length + 1
-      : undefined);
+  const numeroEntrega = data?.numeroEntrega ?? undefined;
 
   const ordinalEntrega =
     typeof numeroEntrega === "number"
@@ -251,10 +262,6 @@ export default function ActaEntregaCompleta({ data }) {
     return data?.receptor?.nombre.trim() !== "" && data?.receptor?.run !== "";
   };
 
-  //   const isBenefitsListTooLarge =
-  //     Array.isArray(data.beneficios) && data.beneficios.length > 3;
-
-  //   const shouldWrapContent = isBenefitsListTooLarge && data.receptor?.run;
   const shouldWrapContent = () => {
     if (data.receptor?.run) {
       return data.beneficios.length > 3;
@@ -359,12 +366,6 @@ export default function ActaEntregaCompleta({ data }) {
                 fullWidth
               />
               <InfoItem label="Folio" value={data.receptor?.folioRSH} />
-              {data.receptor?.fechaNacimiento && (
-                <InfoItem
-                  label="Fecha de Nacimiento"
-                  value={data.receptor.fechaNacimiento}
-                />
-              )}
               {data.receptor?.relacion && (
                 <InfoItem
                   label="Relación con beneficiario"
@@ -396,74 +397,83 @@ export default function ActaEntregaCompleta({ data }) {
             ]}
           >
             {Array.isArray(data.beneficios) && data.beneficios.length > 0 ? (
-              data.beneficios.map((beneficio, index, array) => {
-                const columns = shouldWrapContent() ? 2 : 1;
-                const startLastRow =
-                  columns * Math.floor((array.length - 1) / columns);
-                const isInLastRow = index >= startLastRow;
+              data.beneficios.map(
+                (
+                  beneficio: Beneficio,
+                  index: number,
+                  originalArray: Beneficio[],
+                ) => {
+                  const columns = shouldWrapContent() ? 2 : 1;
+                  const startLastRow =
+                    columns * Math.floor((originalArray.length - 1) / columns);
+                  const isInLastRow = index >= startLastRow;
 
-                const rowStyle = [
-                  styles.benefitItem,
-                  { width: shouldWrapContent() ? "50%" : "100%" },
-                  isInLastRow
-                    ? {
-                        borderBottomWidth: 0,
-                        marginBottom: 4,
-                        paddingBottom: 0,
-                      }
-                    : {},
-                ];
+                  const rowStyle = [
+                    styles.benefitItem,
+                    { width: shouldWrapContent() ? "50%" : "100%" },
+                    isInLastRow
+                      ? {
+                          borderBottomWidth: 0,
+                          marginBottom: 4,
+                          paddingBottom: 0,
+                        }
+                      : {},
+                  ];
 
-                return (
-                  <View style={rowStyle} key={index}>
-                    <View style={styles.benefitHeader}>
-                      <Text style={styles.benefitTitle}>
-                        {beneficio.nombre}
-                      </Text>
-                      {!shouldWrapContent() && (
-                        <Text style={styles.benefitCode}>
-                          {beneficio.codigo || "Ayuda Social"}
+                  return (
+                    <View style={rowStyle} key={index}>
+                      <View style={styles.benefitHeader}>
+                        <Text style={styles.benefitTitle}>
+                          {beneficio.nombre}
                         </Text>
-                      )}
-                    </View>
+                        {!shouldWrapContent() && (
+                          <Text style={styles.benefitCode}>
+                            {beneficio.codigo || "Ayuda Social"}
+                          </Text>
+                        )}
+                      </View>
 
-                    <View style={styles.benefitDetailsList}>
-                      {Array.isArray(beneficio.detalles) &&
-                        beneficio.detalles.map((detalle, idx) => (
-                          <View style={styles.bulletPoint} key={idx}>
-                            <Text style={styles.bullet}>•</Text>
-                            <View
-                              style={{ flexDirection: "row", flexWrap: "wrap" }}
-                            >
-                              {typeof detalle === "object" &&
-                              detalle !== null ? (
-                                <>
-                                  {detalle.label ? (
-                                    <Text
-                                      style={{
-                                        fontWeight: "bold",
-                                        color: "#444",
-                                      }}
-                                    >
-                                      {String(detalle.label)}:{" "}
+                      <View style={styles.benefitDetailsList}>
+                        {Array.isArray(beneficio.detalles) &&
+                          beneficio.detalles.map((detalle, idx) => (
+                            <View style={styles.bulletPoint} key={idx}>
+                              <Text style={styles.bullet}>•</Text>
+                              <View
+                                style={{
+                                  flexDirection: "row",
+                                  flexWrap: "wrap",
+                                }}
+                              >
+                                {typeof detalle === "object" &&
+                                detalle !== null ? (
+                                  <>
+                                    {detalle.label ? (
+                                      <Text
+                                        style={{
+                                          fontWeight: "bold",
+                                          color: "#444",
+                                        }}
+                                      >
+                                        {String(detalle.label)}:{" "}
+                                      </Text>
+                                    ) : null}
+                                    <Text style={styles.value}>
+                                      {String(detalle.value)}
                                     </Text>
-                                  ) : null}
+                                  </>
+                                ) : (
                                   <Text style={styles.value}>
-                                    {String(detalle.value)}
+                                    {String(detalle)}
                                   </Text>
-                                </>
-                              ) : (
-                                <Text style={styles.value}>
-                                  {String(detalle)}
-                                </Text>
-                              )}
+                                )}
+                              </View>
                             </View>
-                          </View>
-                        ))}
+                          ))}
+                      </View>
                     </View>
-                  </View>
-                );
-              })
+                  );
+                },
+              )
             ) : (
               <Text style={{ color: "#999" }}>
                 No se registran entregas en este folio.
