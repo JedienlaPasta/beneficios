@@ -5,7 +5,17 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: "50mb",
     },
-    esmExternals: "loose",
   },
+
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [{ key: "X-Content-Type-Options", value: "nosniff" }],
+      },
+    ];
+  },
+  poweredByHeader: false,
 };
-export default nextConfig;
+
+module.exports = nextConfig;
