@@ -8,14 +8,14 @@ const nextConfig = {
     esmExternals: "loose",
   },
 
-  async headers() {
-    return [
-      {
-        source: "/(.*)",
-        headers: [{ key: "X-Content-Type-Options", value: "nosniff" }],
-      },
-    ];
-  },
+  // async headers() {
+  //   return [
+  //     {
+  //       source: "/(.*)",
+  //       headers: [{ key: "X-Content-Type-Options", value: "nosniff" }],
+  //     },
+  //   ];
+  // },
   poweredByHeader: false,
 };
 
