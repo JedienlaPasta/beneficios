@@ -1,8 +1,8 @@
-"use client"; // Necesario para Next.js App Router
-
+"use client";
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
+// Reemplaza el import estático del documento por dinámico cliente
 const ActaEntregaCompleta = dynamic(
   () =>
     import("../ui/dashboard/entregas/[id]/pdf/ActaEntrega").then(

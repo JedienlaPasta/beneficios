@@ -4,7 +4,8 @@
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
 
-const ActaEntrega = dynamic(() => import("./pdf/ActaEntrega"), { ssr: false });
+// Documento PDF también dinámico en cliente
+const ActaEntrega = dynamic(() => import("./pdf/ActaEntrega").then((m) => m.default), { ssr: false });
 
 type Props = {
   children?: React.ReactNode;
