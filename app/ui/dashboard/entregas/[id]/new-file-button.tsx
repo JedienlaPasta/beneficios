@@ -1,9 +1,10 @@
 "use client";
 // import { createAndDownloadPDFByFolio } from "@/app/lib/actions/entregas";
 // import { toast } from "sonner";
-import ActaEntrega from "./pdf/ActaEntrega";
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
+
+const ActaEntrega = dynamic(() => import("./pdf/ActaEntrega"), { ssr: false });
 
 type Props = {
   children?: React.ReactNode;

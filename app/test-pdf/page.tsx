@@ -2,7 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import ActaEntregaCompleta from "../ui/dashboard/entregas/[id]/pdf/ActaEntrega";
+
+const ActaEntregaCompleta = dynamic(
+  () =>
+    import("../ui/dashboard/entregas/[id]/pdf/ActaEntrega").then(
+      (m) => m.default,
+    ),
+  { ssr: false },
+);
 
 // Importamos el PDFViewer dinámicamente para evitar errores de servidor (SSR)
 const PDFViewer = dynamic(
