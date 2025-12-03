@@ -1,5 +1,5 @@
 import { fetchActiveCampaigns } from "@/app/lib/data/campañas";
-import NewEntregaModal from "./new-modal";
+import NewEntregaModal from "./NewEntregaModal";
 import { getSession } from "@/app/lib/session";
 
 type NewEntregaModalContextProps = {

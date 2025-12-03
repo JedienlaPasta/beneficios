@@ -1,10 +1,11 @@
 "use client";
 import { Campaign } from "@/app/lib/definitions";
-import CloseModalButton from "../close-modal-button";
-import NewModalForm from "./new-modal-form";
+import CloseModalButton from "../../close-modal-button";
+import NewModalForm from "./NewModalForm";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
-import NewModalFormManual from "./new-modal-form-manual";
+import NewModalFormManual from "./NewModalFormManual";
+import NewModalFormReceiver from "./NewModalFormReceiver";
 
 type NewEntregaModalProps = {
   rut: string;
@@ -17,7 +18,7 @@ export default function NewEntregaModal({
   userId,
   activeCampaigns,
 }: NewEntregaModalProps) {
-  const tabs = ["Rápido", "Manual"];
+  const tabs = ["Rápido", "Tercero", "Manual"];
   const [tab, setTab] = useState(tabs[0]);
 
   return (
@@ -93,6 +94,26 @@ export default function NewEntregaModal({
               />
             </motion.div>
           )}
+          {tab === "Tercero" && (
+            <motion.div
+              key="tab-tercero"
+              initial={{ opacity: 0, y: 10, height: 360 }}
+              animate={{ opacity: 1, y: 0, height: "auto" }}
+              exit={{ opacity: 0, y: -10, height: 340 }}
+              transition={{
+                duration: 0.4,
+                height: { duration: 0.4 },
+                ease: "easeInOut",
+              }}
+            >
+              {/* Form 02 */}
+              <NewModalFormReceiver
+                activeCampaigns={activeCampaigns}
+                rut={rut}
+                userId={userId}
+              />
+            </motion.div>
+          )}
           {tab === "Manual" && (
             <motion.div
               key="tab-manual"
@@ -105,7 +126,7 @@ export default function NewEntregaModal({
                 ease: "easeInOut",
               }}
             >
-              {/* Form 02 */}
+              {/* Form 03 */}
               <NewModalFormManual
                 activeCampaigns={activeCampaigns}
                 rut={rut}

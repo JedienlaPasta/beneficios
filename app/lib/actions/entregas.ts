@@ -387,7 +387,7 @@ export const updateJustificationByFolio = async (
     await logAction(
       "Editar",
       "cambió la justificación de la entrega",
-      "",
+      folio,
       folio,
     );
 

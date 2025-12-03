@@ -1,12 +1,15 @@
 "use client";
-import { toast } from "sonner";
-import Input from "../campañas/new-campaign-input";
-import { SubmitButton } from "../submit-button";
-import { useState } from "react";
-import { Campaign } from "@/app/lib/definitions";
 import { createEntrega } from "@/app/lib/actions/entregas";
-import { useSearchParams, useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { Campaign } from "@/app/lib/definitions";
+import { AnimatePresence, motion } from "framer-motion";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import Input from "../../campañas/new-campaign-input";
+import { SubmitButton } from "../../submit-button";
+import CustomAntdDatePicker from "../../datepicker";
+import dayjs from "dayjs";
+import UserDropdown from "../user-dropdown";
 
 type NewModalFormProps = {
   activeCampaigns?: Campaign[];
@@ -14,44 +17,34 @@ type NewModalFormProps = {
   userId: string;
 };
 
-export default function NewModalForm({
+export default function NewModalFormManual({
   activeCampaigns,
   rut,
   userId,
 }: NewModalFormProps) {
   const router = useRouter();
+  const [folio, setFolio] = useState("");
   const [observaciones, setObservaciones] = useState("");
   const [lastSelection, setLastSelection] = useState("");
+  const [fechaEntrega, setFechaEntrega] = useState<Date | null>(null);
+  const [encargado, setEncargado] = useState({
+    nombre: "",
+    correo: "",
+  });
+
   // Initialize selectedCampaigns with a lazy initializer function
   const [selectedCampaigns, setSelectedCampaigns] = useState<{
-    [campaignId: string]: {
-      selected: boolean;
-      detail: string;
-      forAdult: boolean;
-      quantity: number;
-    };
+    [campaignId: string]: { selected: boolean; detail: string };
   }>(() => {
     if (activeCampaigns && activeCampaigns.length > 0) {
       return activeCampaigns.reduce(
         (acc, campaign) => {
           const defaultValue =
             campaign.nombre_campaña === "Tarjeta de Comida" ? "NN" : "";
-          acc[campaign.id] = {
-            selected: false,
-            detail: defaultValue,
-            forAdult: false,
-            quantity: 0,
-          };
+          acc[campaign.id] = { selected: false, detail: defaultValue };
           return acc;
         },
-        {} as {
-          [key: string]: {
-            selected: boolean;
-            detail: string;
-            forAdult: boolean;
-            quantity: number;
-          };
-        },
+        {} as { [key: string]: { selected: boolean; detail: string } },
       );
     }
     return {};
@@ -80,8 +73,7 @@ export default function NewModalForm({
   };
 
   const getStock = (campaign: Campaign) => {
-    console.log(campaign.stock);
-    if (campaign.stock === null) return "Sin límite";
+    if (campaign.stock === null) return 0;
     if (campaign.entregas === null) return 0;
     return campaign.stock - campaign.entregas;
   };
@@ -118,15 +110,8 @@ export default function NewModalForm({
     // Convert selectedCampaigns to formFields format
     const campaignsToSubmit = Object.entries(selectedCampaigns)
       .filter(
-        ([, value]: [
-          string,
-          {
-            selected: boolean;
-            detail: string;
-            forAdult: boolean;
-            quantity: number;
-          },
-        ]) => value.selected,
+        ([, value]: [string, { selected: boolean; detail: string }]) =>
+          value.selected,
       )
       .map(([id, value]) => {
         const campaign = activeCampaigns?.find(
@@ -136,8 +121,6 @@ export default function NewModalForm({
           id,
           campaignName: campaign?.nombre_campaña || "",
           detail: value.detail,
-          forAdult: value.forAdult,
-          quantity: value.quantity,
           code: campaign?.code || "",
         };
       });
@@ -163,6 +146,9 @@ export default function NewModalForm({
     formData.append("campaigns", JSON.stringify(campaignsToSubmit));
     formData.append("rut", rut.toString());
     formData.append("observaciones", observaciones);
+    formData.append("fecha_entrega", fechaEntrega?.toISOString() || "");
+    formData.append("folio", folio.toString().toUpperCase());
+    formData.append("correo", encargado.correo);
 
     const toastId = toast.loading("Guardando...");
     setTimeout(async () => {
@@ -185,7 +171,15 @@ export default function NewModalForm({
     }, 200);
   };
 
-  // Check if form is valid
+  const fechaEntregaHandler = (pickerDate: dayjs.Dayjs | null) => {
+    if (pickerDate) {
+      setFechaEntrega(pickerDate.toDate());
+    } else {
+      setFechaEntrega(null);
+    }
+  };
+
+  // Add this function to check if form is valid
   const isFormValid = () => {
     // Check if any campaigns are selected
     const selectedCount = Object.values(selectedCampaigns).filter(
@@ -194,6 +188,12 @@ export default function NewModalForm({
 
     if (selectedCount === 0) return false;
 
+    if (!fechaEntrega) return false;
+
+    if (folio.trim() === "" || folio.trim().length < 7) return false;
+
+    if (encargado.correo.trim() === "") return false;
+
     // Check if all selected campaigns have details
     const hasEmptyDetails = Object.entries(selectedCampaigns)
       .filter(
@@ -201,27 +201,8 @@ export default function NewModalForm({
           value.selected,
       )
       .some(
-        ([campaignId, value]: [
-          string,
-          { selected: boolean; detail: string },
-        ]) => {
-          const campaign = activeCampaigns?.find((c) => c.id === campaignId);
-          const detail = value.detail.trim();
-
-          // Special validation for "Tarjeta de Comida"
-          if (campaign?.nombre_campaña === "Tarjeta de Comida") {
-            const invalidValues = ["", "N", "NN"];
-            if (invalidValues.includes(detail)) {
-              return true;
-            }
-            // Regex to validate it starts with "NN" & is followed by numbers
-            const validFormat = /^NN\w+$/.test(detail);
-            return !validFormat; // Invalid if doesnt start with "NN" & is not followed by numbers
-          }
-
-          // For other campaigns, validate if it's not empty
-          return detail === "";
-        },
+        ([, value]: [string, { selected: boolean; detail: string }]) =>
+          value.detail.trim() === "",
       );
 
     return !hasEmptyDetails;
@@ -229,6 +210,34 @@ export default function NewModalForm({
 
   return (
     <form action={formAction} className="flex select-none flex-col gap-5 pt-2">
+      <div className="grid grid-cols-2 gap-2">
+        <Input
+          placeHolder="Folio..."
+          label="Folio"
+          type="text"
+          nombre="folio"
+          value={folio}
+          setData={setFolio}
+          required
+        />
+
+        <CustomAntdDatePicker
+          label="Fecha de Entrega"
+          placeholder="Seleccione una fecha"
+          setDate={fechaEntregaHandler}
+          value={fechaEntrega ? dayjs(fechaEntrega) : null}
+          required
+        />
+      </div>
+
+      <UserDropdown
+        placeHolder="Selecciona un encargado..."
+        label="Encargado"
+        name="correo"
+        userEmail={encargado.correo}
+        setUserEmail={(email) => setEncargado({ ...encargado, correo: email })}
+      />
+
       <div className="max-h-[400px] overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-4 scrollbar-hide">
         <div className="justify- mb-4 flex items-baseline justify-between">
           <h3 className="text-sm font-medium text-slate-700">
@@ -261,8 +270,8 @@ export default function NewModalForm({
                     selectedCampaigns[campaign.id]?.selected
                       ? "border-blue-500 bg-blue-500"
                       : lastSelection === campaign.id && checkValues(campaign)
-                        ? "border-rose-300 bg-white"
-                        : "border-slate-300 bg-white"
+                        ? "!border-rose-300"
+                        : "!border-slate-200"
                   }`}
                 >
                   {selectedCampaigns[campaign.id]?.selected && (
@@ -299,9 +308,7 @@ export default function NewModalForm({
                           : "text-slate-600"
                       }`}
                     >
-                      {typeof getStock(campaign) === "number"
-                        ? ` Stock: ${getStock(campaign)}`
-                        : "Sin límite"}
+                      Stock: {getStock(campaign)}
                     </span>
                   </div>
                 </div>
@@ -369,7 +376,7 @@ export default function NewModalForm({
         ></textarea>
       </div>
 
-      <div className="mt-1 flex">
+      <div className="mt-2 flex">
         <SubmitButton isDisabled={isDisabled || !isFormValid()}>
           {isLoading ? "Guardando..." : "Guardar"}
         </SubmitButton>

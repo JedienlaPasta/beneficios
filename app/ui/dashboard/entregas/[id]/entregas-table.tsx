@@ -13,7 +13,7 @@ type Props = {
 // Update the EntregasTable component to fetch its own data
 import { fetchEntregasByRUT } from "@/app/lib/data/entregas";
 import ModalSkeleton from "@/app/ui/modal-skeleton";
-import NewEntregaModalContext from "../modal-context";
+import NewEntregaModalContext from "../new-entrega-modal/NewEntregaModalContext";
 
 export default async function EntregasTable({
   rut,
