@@ -5,7 +5,10 @@ import dynamic from "next/dynamic";
 import { useMemo } from "react";
 
 // Documento PDF también dinámico en cliente
-const ActaEntrega = dynamic(() => import("./pdf/ActaEntrega").then((m) => m.default), { ssr: false });
+const ActaEntrega = dynamic(
+  () => import("./pdf/ActaEntrega").then((m) => m.default),
+  { ssr: false },
+);
 
 type Props = {
   children?: React.ReactNode;
@@ -21,8 +24,8 @@ const PDFDownloadLink = dynamic(
 
 export default function GetNewFileButton({
   children,
-  folio,
-  enabled = true,
+  // folio,
+  // enabled = true,
 }: Props) {
   // const handleClick = async (e: React.MouseEvent) => {
   //   e.stopPropagation();

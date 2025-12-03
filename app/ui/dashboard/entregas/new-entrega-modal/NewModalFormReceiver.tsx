@@ -26,7 +26,7 @@ export default function NewModalFormReceiver({
   const [direccionReceiver, setDireccionReceiver] = useState("");
   const [telefonoReceiver, setTelefonoReceiver] = useState("");
   const [observaciones, setObservaciones] = useState("");
-  const [lastSelection, setLastSelection] = useState("");
+  // const [lastSelection, setLastSelection] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Initialize selectedCampaigns with a lazy initializer function
@@ -77,7 +77,7 @@ export default function NewModalFormReceiver({
 
   const handleCheckboxChange = (campaign: Campaign) => {
     const campaignId = campaign.id;
-    setLastSelection(campaignId);
+    // setLastSelection(campaignId);
 
     if (!checkValues(campaign)) {
       setSelectedCampaigns((prev) => ({

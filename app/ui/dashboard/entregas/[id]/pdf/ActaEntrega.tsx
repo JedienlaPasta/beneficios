@@ -6,7 +6,7 @@ import {
   View,
   Document,
   StyleSheet,
-  Image,
+  Image as PDFImage,
 } from "@react-pdf/renderer";
 import "@/app/ui/fonts";
 
@@ -294,7 +294,10 @@ export default function ActaEntregaCompleta({
 
           {/* Círculo de Logo (Simulando la foto) */}
           <View style={styles.logoContainer}>
-            <Image src="/elquisco-grayscaled.png" style={{ height: "100%" }} />
+            <PDFImage
+              src="/elquisco-grayscaled.png"
+              style={{ height: "100%" }}
+            />
             <Text style={{ fontSize: 7, color: "#999", marginTop: 2 }}>
               Municipalidad
             </Text>
