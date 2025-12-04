@@ -1,32 +1,16 @@
 "use client";
+
+import { generateActaPDF } from "@/app/lib/pdf";
+
 // import { createAndDownloadPDFByFolio } from "@/app/lib/actions/entregas";
 // import { toast } from "sonner";
-import dynamic from "next/dynamic";
-import { useMemo } from "react";
-
-// Documento PDF también dinámico en cliente
-const ActaEntrega = dynamic(
-  () => import("./pdf/ActaEntrega").then((m) => m.default),
-  { ssr: false },
-);
 
 type Props = {
   children?: React.ReactNode;
   folio: string;
-  enabled?: boolean; // nuevo: controlar montaje
 };
 
-// Importar PDFDownloadLink dinámicamente para evitar errores de servidor en Next.js
-const PDFDownloadLink = dynamic(
-  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
-  { ssr: false, loading: () => <p>Cargando módulo PDF...</p> },
-);
-
-export default function GetNewFileButton({
-  children,
-  // folio,
-  // enabled = true,
-}: Props) {
+export default function GetNewFileButton({ children, folio }: Props) {
   // const handleClick = async (e: React.MouseEvent) => {
   //   e.stopPropagation();
   //   const toastId = toast.loading("Generando documento...");
@@ -180,28 +164,14 @@ export default function GetNewFileButton({
     },
   };
 
-  // Mantener estable el nodo del documento entre renders de pestañas
-  const docNode = useMemo(() => <ActaEntrega data={datosPrueba} />, []);
-
-  // if (!enabled) {
-  //   return (
-  //     <button
-  //       aria-disabled
-  //       className="flex items-center gap-1 rounded-md border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600 opacity-60"
-  //     >
-  //       {children || "Nueva Acta"}
-  //     </button>
-  //   );
-  // }
-
   return (
-    <PDFDownloadLink
-      key="pdf-stable" // evita residuos de reconciliación
-      document={docNode}
-      fileName={`acta_entrega.pdf`}
-      className="flex items-center gap-1 rounded-md border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600 transition-all hover:border-blue-200 hover:bg-blue-100/70 active:scale-95"
-    >
-      {({ loading }) => (loading ? "Cargando..." : children || "Nueva Acta")}
-    </PDFDownloadLink>
+    <div>
+      <button
+        onClick={() => generateActaPDF(datosPrueba)}
+        className="mb-4 rounded bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700"
+      >
+        Imprimir / Descargar PDF
+      </button>
+    </div>
   );
 }
