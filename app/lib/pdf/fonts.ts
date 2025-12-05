@@ -18,12 +18,17 @@ export async function registerGeistFonts(pdfMake: PdfMakeBrowser) {
   const regularUrl = "/fonts/Geist-Regular.ttf";
   const boldUrl = "/fonts/Geist-Bold.ttf";
   const italicsUrl = "/fonts/Geist-Italic.ttf"; // opcional
+  const blackUrl = "/fonts/Geist-Black.ttf";
+  const mediumUrl = "/fonts/Geist-Medium.ttf";
 
-  const [regularRes, boldRes, italicsRes] = await Promise.allSettled([
-    fetch(regularUrl),
-    fetch(boldUrl),
-    fetch(italicsUrl),
-  ]);
+  const [regularRes, boldRes, italicsRes, blackRes, mediumRes] =
+    await Promise.allSettled([
+      fetch(regularUrl),
+      fetch(boldUrl),
+      fetch(italicsUrl),
+      fetch(blackUrl),
+      fetch(mediumUrl),
+    ]);
 
   const getArrayBuffer = async (
     res: PromiseSettledResult<Response>,
@@ -34,11 +39,14 @@ export async function registerGeistFonts(pdfMake: PdfMakeBrowser) {
     return null;
   };
 
-  const [regularBuf, boldBuf, italicsBuf] = await Promise.all([
-    getArrayBuffer(regularRes),
-    getArrayBuffer(boldRes),
-    getArrayBuffer(italicsRes),
-  ]);
+  const [regularBuf, boldBuf, italicsBuf, blackBuf, mediumBuf] =
+    await Promise.all([
+      getArrayBuffer(regularRes),
+      getArrayBuffer(boldRes),
+      getArrayBuffer(italicsRes),
+      getArrayBuffer(blackRes),
+      getArrayBuffer(mediumRes),
+    ]);
 
   if (!regularBuf) {
     console.warn("No se encontró Geist-Regular.ttf en /public/fonts.");
@@ -49,6 +57,12 @@ export async function registerGeistFonts(pdfMake: PdfMakeBrowser) {
   if (boldBuf) pdfMake.vfs["Geist-Bold.ttf"] = arrayBufferToBase64(boldBuf);
   if (italicsBuf)
     pdfMake.vfs["Geist-Italic.ttf"] = arrayBufferToBase64(italicsBuf);
+  if (blackBuf) {
+    pdfMake.vfs["Geist-Black.ttf"] = arrayBufferToBase64(blackBuf);
+  }
+  if (mediumBuf) {
+    pdfMake.vfs["Geist-Medium.ttf"] = arrayBufferToBase64(mediumBuf);
+  }
 
   pdfMake.fonts = {
     ...(pdfMake.fonts || {}),
@@ -61,6 +75,14 @@ export async function registerGeistFonts(pdfMake: PdfMakeBrowser) {
         : italicsBuf
           ? "Geist-Italic.ttf"
           : "Geist-Regular.ttf",
+    },
+    GeistBlack: {
+      normal: blackBuf ? "Geist-Black.ttf" : "Geist-Regular.ttf",
+      bold: blackBuf ? "Geist-Black.ttf" : "Geist-Regular.ttf",
+    },
+    GeistMedium: {
+      normal: mediumBuf ? "Geist-Medium.ttf" : "Geist-Regular.ttf",
+      bold: mediumBuf ? "Geist-Medium.ttf" : "Geist-Regular.ttf",
     },
   };
 

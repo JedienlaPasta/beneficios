@@ -46,8 +46,18 @@ const datosPrueba = {
         { label: "Cilindro", value: "15kg" },
       ],
     },
+    {
+      nombre: "Vale de Gas",
+      codigo: "GA",
+      detalles: [
+        { label: "Código", value: "00962" },
+        { label: "Cilindro", value: "15kg" },
+      ],
+    },
   ],
-  justificacion: "Usuaria posee RSH con su hijo, está sin trabajo...",
+  // justificacion: "Usuaria posee RSH con su hijo, está sin trabajo...",
+  justificacion:
+    "Usuaria posee RSH con su hijo, está sin trabajo del mes de enero, recibió finiquito por 7 años de servicio y está con seguro de cesantía el cual termina en el mes de septiembre. Se encuentra inscrita en la OMIL y esta separada del padre de su hijo, quien paga el dividendo de su departamento. Debido a precariedad económica del momento, se hace entrega de Amipass de manera excepcional.",
 };
 
 export default function PageDevPreview() {
