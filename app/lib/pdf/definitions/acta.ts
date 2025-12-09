@@ -5,7 +5,12 @@ import type {
   TableCell,
 } from "pdfmake/interfaces";
 import type { ActaData } from "../types";
-import type { Content, ContentStack, ContentCanvas } from "pdfmake/interfaces";
+import type {
+  Content,
+  ContentStack,
+  ContentCanvas,
+  Column,
+} from "pdfmake/interfaces";
 
 const PRIMARY_COLOR = "#333333";
 const ACCENT_COLOR = "#074d8f";
@@ -120,7 +125,7 @@ export function getActaDocDefinition(
                         color: SUBTEXT_COLOR,
                       }
                     : "",
-                ],
+                ] as Column[],
               },
               {
                 text: `Folio: ${data.folio}`,
@@ -404,18 +409,18 @@ export function getActaDocDefinition(
         fontSize: 11,
         bold: true,
         color: "white",
-        margin: [4, 4, 4, 4],
+        margin: [4, 4, 4, 4] as [number, number, number, number],
         characterSpacing: 0.8,
       },
     } as StyleDictionary,
 
-    footer: (currentPage, pageCount) => ({
+    footer: (currentPage: number, pageCount: number): Content => ({
       stack: [
         // Firmas solo en la última página
         ...(currentPage === pageCount
           ? [
               {
-                margin: [0, 0, 0, 22],
+                margin: [0, 0, 0, 22] as [number, number, number, number],
                 columns: [
                   {
                     width: "*",
@@ -423,7 +428,7 @@ export function getActaDocDefinition(
                       {
                         canvas: [
                           {
-                            type: "line",
+                            type: "line" as const,
                             x1: 0,
                             y1: 0,
                             x2: 220,
@@ -432,7 +437,12 @@ export function getActaDocDefinition(
                             lineColor: "#CCCCCC",
                           },
                         ],
-                        margin: [0, 0, 0, 5],
+                        margin: [0, 0, 0, 5] as [
+                          number,
+                          number,
+                          number,
+                          number,
+                        ],
                       },
                       {
                         text: data.profesional.nombre,
@@ -447,8 +457,8 @@ export function getActaDocDefinition(
                         alignment: "center",
                         color: SUBTEXT_COLOR,
                       },
-                    ],
-                    alignment: "center",
+                    ] as Content[],
+                    alignment: "center" as const,
                   },
                   { width: 40, text: "" },
                   {
@@ -457,7 +467,7 @@ export function getActaDocDefinition(
                       {
                         canvas: [
                           {
-                            type: "line",
+                            type: "line" as const,
                             x1: 0,
                             y1: 0,
                             x2: 220,
@@ -466,7 +476,12 @@ export function getActaDocDefinition(
                             lineColor: "#CCCCCC",
                           },
                         ],
-                        margin: [0, 0, 0, 5],
+                        margin: [0, 0, 0, 5] as [
+                          number,
+                          number,
+                          number,
+                          number,
+                        ],
                       },
                       {
                         text: data.receptor?.nombre || "Sin Receptor",
@@ -481,8 +496,8 @@ export function getActaDocDefinition(
                         alignment: "center",
                         color: SUBTEXT_COLOR,
                       },
-                    ],
-                    alignment: "center",
+                    ] as Content[],
+                    alignment: "center" as const,
                   },
                 ],
               },
@@ -501,11 +516,11 @@ export function getActaDocDefinition(
           alignment: "center",
           fontSize: 8,
           color: "#999",
-          margin: [0, 2, 0, 0],
+          margin: [0, 2, 0, 0] as [number, number, number, number],
         },
       ],
       // separa el footer del borde inferior del papel
-      margin: [40, -56, 40, 20],
+      margin: [40, -56, 40, 20] as [number, number, number, number],
     }),
   };
 }
