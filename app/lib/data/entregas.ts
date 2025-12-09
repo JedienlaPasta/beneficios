@@ -8,6 +8,9 @@ import {
   EntregasFiles,
 } from "../definitions";
 import { connectToDB } from "../utils/db-connection";
+import type { ActaData } from "@/app/lib/pdf/types";
+import { formatNumber, formatPhone } from "../utils/format";
+import { getAge } from "../utils/get-values";
 
 export async function fetchEntregas(
   query: string,
@@ -306,5 +309,162 @@ export async function fetchFilesByFolio(
   } catch (error) {
     console.error("Error al obtener archivos:", error);
     return [];
+  }
+}
+
+export async function getActaDataByFolio(
+  folio: string,
+): Promise<ActaData | null> {
+  try {
+    const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {};
+    }
+
+    const entregaRequest = pool.request();
+    console.log("Folio:", folio);
+    const result = await entregaRequest.input("folio", sql.VarChar, folio)
+      .query(`
+        SELECT 
+          rsh.nombres_rsh, 
+          rsh.apellidos_rsh,
+          rsh.rut, 
+          rsh.dv,
+          rsh.direccion,
+          rsh.telefono,
+          rsh.folio as folio_rsh,
+          rsh.tramo,
+          rsh.fecha_nacimiento,
+          entregas.folio, 
+          entregas.fecha_entrega,
+          entregas.observacion,
+          entregas.id_usuario
+        FROM entregas
+        JOIN entrega ON entrega.folio = entregas.folio
+        JOIN rsh ON rsh.rut = entregas.rut
+        JOIN usuarios ON usuarios.id = entregas.id_usuario
+        WHERE
+          entregas.folio = @folio
+      `);
+
+    const row = result.recordset[0];
+    console.log(row);
+    if (!row) {
+      return {
+        folio,
+        numeroEntrega: 0,
+        profesional: {
+          nombre: "Funcionario(a)",
+          cargo: "Departamento Social",
+          fecha: "No especificada",
+        },
+        beneficiario: {
+          nombre: "",
+          run: "",
+          direccion: "",
+          telefono: "",
+        },
+        receptor: {
+          nombre: "",
+          rut: "",
+          parentezco: "No especificado",
+        },
+        beneficios: [],
+        justificacion: "",
+      };
+    }
+
+    // Consulta de beneficios (cada registro en 'entrega' asociado a una campaña)
+    const beneficioRequest = pool.request();
+    const beneficiosResult = await beneficioRequest.input(
+      "folio",
+      sql.VarChar,
+      folio,
+    ).query(`
+        SELECT 
+          e.detalle,
+          c.nombre_campaña,
+          c.code,
+          c.tipo_dato
+        FROM entrega e
+        JOIN campañas c ON c.id = e.id_campaña
+        WHERE e.folio = @folio
+      `);
+    console.log(beneficiosResult.recordset);
+
+    const funcionarioRequest = pool.request();
+    const funcionarioResult = await funcionarioRequest.input(
+      "id_usuario",
+      sql.UniqueIdentifier,
+      row.id_usuario,
+    ).query(`
+        SELECT nombre_usuario, cargo
+        FROM usuarios
+        WHERE id = @id_usuario
+      `);
+    const funcionario = funcionarioResult.recordset[0];
+    console.log(funcionario);
+
+    const beneficios = (beneficiosResult.recordset ?? []).map((b) => ({
+      nombre: b.nombre_campaña as string,
+      codigo: b.code as string,
+      detalles: [
+        b.detalle ? { label: "Detalle", value: String(b.detalle) } : null,
+      ].filter(Boolean) as { label?: string; value: string }[],
+    }));
+
+    const fechaEntrega =
+      row.fecha_entrega instanceof Date
+        ? row.fecha_entrega
+        : new Date(row.fecha_entrega);
+    const fechaStr = isNaN(fechaEntrega.getTime())
+      ? ""
+      : fechaEntrega.toLocaleDateString("es-CL", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        });
+
+    const nombreBeneficiario =
+      `${row.nombres_rsh ?? ""} ${row.apellidos_rsh ?? ""}`.trim();
+    const runBeneficiario = row.rut && row.dv ? `${row.rut}-${row.dv}` : "";
+
+    const edadBeneficiario = getAge(row.fecha_nacimiento);
+
+    const data: ActaData = {
+      folio: row.folio ?? "",
+      numeroEntrega: 1, // Ajusta si tienes este dato
+      profesional: {
+        nombre: funcionario?.nombre_usuario || "Funcionario(a)",
+        cargo: funcionario?.cargo || "Departamento Social",
+        fecha: fechaEntrega || "No especificada",
+      },
+      beneficiario: {
+        nombre: nombreBeneficiario || "Sin nombre",
+        run: runBeneficiario || "",
+        domicilio: row.direccion || "No especifica", // Completar si tienes el dato
+        tramo: row.tramo || "No especifica",
+        folioRSH: row.folio_rsh || "No especifica",
+        telefono: formatPhone(row.telefono) || "No especifica",
+        edad: edadBeneficiario || "No especifica",
+      },
+      receptor: {
+        nombre: nombreBeneficiario || "Sin Receptor",
+        run: runBeneficiario || "",
+        domicilio: "",
+        tramo: "",
+        folioRSH: "",
+        telefono: "",
+        relacion: "Beneficiario",
+      },
+      beneficios,
+      justificacion: row.observacion || "No especificada",
+    };
+
+    return data;
+  } catch (error) {
+    console.error("Error al obtener datos de la acta:", error);
+    return {};
   }
 }

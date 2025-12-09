@@ -1,6 +1,8 @@
 "use client";
+import { getPdfBlobUrl } from "@/app/lib/pdf";
 import React, { useEffect, useState } from "react";
-import { getPdfBlobUrl } from "../lib/pdf";
+import { useParams } from "next/navigation";
+import type { ActaData } from "@/app/lib/pdf/types";
 
 // Datos dummy para probar el diseño (o usa tus datos reales)
 const datosPrueba = {
@@ -62,15 +64,33 @@ const datosPrueba = {
 
 export default function PageDevPreview() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const { folio } = useParams() as { folio: string };
 
   useEffect(() => {
-    // Generar el PDF al montar el componente
     const generar = async () => {
-      const url = await getPdfBlobUrl(datosPrueba);
-      setPdfUrl(url);
+      try {
+        if (!folio) return;
+
+        // Pide los datos al servidor
+        const res = await fetch(`/api/acta/${folio}`, { cache: "no-store" });
+        if (!res.ok) {
+          throw new Error("No se pudo obtener el acta");
+        }
+        const data: ActaData = await res.json();
+        console.log(data);
+
+        // Genera el PDF en el cliente con pdfmake
+        const url = await getPdfBlobUrl(data);
+        setPdfUrl(url);
+      } catch (e) {
+        console.error(e);
+        // Opcional: fallback a datos dummy si la API falla
+        // const url = await getPdfBlobUrl(datosPrueba as ActaData);
+        // setPdfUrl(url);
+      }
     };
     generar();
-  }, []);
+  }, [folio]);
 
   return (
     <div className="flex h-screen flex-col">

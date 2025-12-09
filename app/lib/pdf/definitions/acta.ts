@@ -11,6 +11,7 @@ import type {
   ContentCanvas,
   Column,
 } from "pdfmake/interfaces";
+import { formatDate, formatNumber } from "../../utils/format";
 
 const PRIMARY_COLOR = "#333333";
 const ACCENT_COLOR = "#074d8f";
@@ -80,6 +81,8 @@ export function getActaDocDefinition(
         `${numeroEntrega}ª`
       : undefined;
 
+  console.log(data.profesional);
+  console.log(data.beneficiario);
   return {
     pageSize: "A4",
     pageMargins: [40, 30, 40, 40],
@@ -108,7 +111,7 @@ export function getActaDocDefinition(
               {
                 text: [
                   {
-                    text: `${data.profesional.fecha} `,
+                    text: `${formatDate(new Date(data.profesional?.fecha), "fullDate") ?? ""} `,
                     fontSize: 9.5,
                     color: SUBTEXT_COLOR,
                   },
@@ -181,7 +184,7 @@ export function getActaDocDefinition(
           body: [
             [
               createInfoCell("Nombre", data.beneficiario.nombre),
-              createInfoCell("R.U.N", data.beneficiario.run),
+              createInfoCell("R.U.N", formatNumber(data.beneficiario.run)),
             ],
             [
               createInfoCell("Domicilio", data.beneficiario.domicilio),
@@ -214,7 +217,7 @@ export function getActaDocDefinition(
                 body: [
                   [
                     createInfoCell("Nombre", data.receptor.nombre),
-                    createInfoCell("R.U.N", data.receptor.run),
+                    createInfoCell("R.U.N", formatNumber(data.receptor.run)),
                   ],
                   [createInfoCell("Domicilio", data.receptor.domicilio, 2), {}],
                   [createInfoCell("Teléfono", data.receptor.telefono, 2), {}],
@@ -329,79 +332,6 @@ export function getActaDocDefinition(
             } as Content,
           ]
         : []),
-
-      //   {
-      //     margin: [0, 40, 0, 0],
-      //     columns: [
-      //       {
-      //         width: "*",
-      //         stack: [
-      //           {
-      //             canvas: [
-      //               {
-      //                 type: "line",
-      //                 x1: 0,
-      //                 y1: 0,
-      //                 x2: 220,
-      //                 y2: 0,
-      //                 lineWidth: 1,
-      //                 lineColor: "#CCCCCC",
-      //               },
-      //             ],
-      //             margin: [0, 0, 0, 5],
-      //           },
-      //           {
-      //             text: data.profesional.nombre,
-      //             fontSize: 9,
-      //             bold: true,
-      //             alignment: "center",
-      //             color: PRIMARY_COLOR,
-      //           },
-      //           {
-      //             text: data.profesional.cargo,
-      //             fontSize: 8,
-      //             alignment: "center",
-      //             color: SUBTEXT_COLOR,
-      //           },
-      //         ],
-      //         alignment: "center",
-      //       },
-      //       { width: 40, text: "" },
-      //       {
-      //         width: "*",
-      //         stack: [
-      //           {
-      //             canvas: [
-      //               {
-      //                 type: "line",
-      //                 x1: 0,
-      //                 y1: 0,
-      //                 x2: 220,
-      //                 y2: 0,
-      //                 lineWidth: 1,
-      //                 lineColor: "#CCCCCC",
-      //               },
-      //             ],
-      //             margin: [0, 0, 0, 5],
-      //           },
-      //           {
-      //             text: data.receptor?.nombre || "Sin Receptor",
-      //             fontSize: 9,
-      //             bold: true,
-      //             alignment: "center",
-      //             color: PRIMARY_COLOR,
-      //           },
-      //           {
-      //             text: "Firma de conformidad y recepción",
-      //             fontSize: 8,
-      //             alignment: "center",
-      //             color: SUBTEXT_COLOR,
-      //           },
-      //         ],
-      //         alignment: "center",
-      //       },
-      //     ],
-      //   },
     ],
 
     styles: {
