@@ -13,7 +13,7 @@ export function arrayBufferToBase64(buffer: ArrayBuffer): string {
 
 // Registra las fuentes Geist en el VFS y mapea la familia "Geist"
 export async function registerGeistFonts(pdfMake: PdfMakeBrowser) {
-  if ((pdfMake as any).__geistRegistered) return;
+  if ((pdfMake as unknown as { __geistRegistered?: boolean }).__geistRegistered) return;
 
   const regularUrl = "/fonts/Geist-Regular.ttf";
   const boldUrl = "/fonts/Geist-Bold.ttf";
@@ -86,5 +86,5 @@ export async function registerGeistFonts(pdfMake: PdfMakeBrowser) {
     },
   };
 
-  (pdfMake as any).__geistRegistered = true;
+  (pdfMake as unknown as { __geistRegistered?: boolean }).__geistRegistered = true;
 }
