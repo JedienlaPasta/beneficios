@@ -1,6 +1,6 @@
 import UpdateForm from "./update-form";
 import CloseModalButton from "../../../close-modal-button";
-import { fetchCampaignById } from "@/app/lib/data/campañas";
+import { fetchCampaignById } from "@/app/lib/data/campanas";
 
 export default async function UpdateCampaignModal({ id }: { id: string }) {
   const response = await fetchCampaignById(id);

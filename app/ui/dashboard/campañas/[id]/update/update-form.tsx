@@ -5,7 +5,7 @@ import { CancelButton, SubmitButton } from "../../../submit-button";
 import { Campaign } from "@/app/lib/definitions";
 import { useState } from "react";
 import DataTypeCards from "./data-type-cards";
-import { updateCampaign } from "@/app/lib/actions/campaña";
+import { updateCampaign } from "@/app/lib/actions/campana";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import CustomAntdDatePicker from "@/app/ui/dashboard/datepicker";

@@ -1,4 +1,4 @@
-import { fetchActiveCampaigns } from "@/app/lib/data/campañas";
+import { fetchActiveCampaigns } from "@/app/lib/data/campanas";
 import { formatDate } from "@/app/lib/utils/format";
 import { FaBoxOpen } from "react-icons/fa6";
 import Link from "next/link";

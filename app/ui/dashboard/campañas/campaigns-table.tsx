@@ -1,7 +1,7 @@
 import { Campaign } from "@/app/lib/definitions";
 import Pagination from "@/app/ui/dashboard/pagination";
 import TableRow from "./table-row";
-import { fetchCampaigns } from "@/app/lib/data/campañas";
+import { fetchCampaigns } from "@/app/lib/data/campanas";
 
 type CampaignsTableProps = {
   query: string;

@@ -5,7 +5,7 @@ import { TbRefresh } from "react-icons/tb";
 import { HiDotsHorizontal } from "react-icons/hi";
 import { GoStop } from "react-icons/go";
 import { useRouter, useSearchParams } from "next/navigation";
-import { deleteCampaign, endCampaignById } from "@/app/lib/actions/campaña";
+import { deleteCampaign, endCampaignById } from "@/app/lib/actions/campana";
 import { toast } from "sonner";
 import ConfirmModal from "../../confirmation-modal";
 

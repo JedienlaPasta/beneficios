@@ -2,7 +2,7 @@ import { formatDate } from "@/app/lib/utils/format";
 import CampaignOptionsMenu from "./options-menu";
 // import DetailRow from "./detail-card"; // POR ELIMINAR SI NO LO UTILIZO
 import StaticRequirementsCard from "./static-card-requirements";
-import { fetchCampaignById } from "@/app/lib/data/campañas";
+import { fetchCampaignById } from "@/app/lib/data/campanas";
 import { redirect } from "next/navigation";
 import RoleGuard from "@/app/ui/auth/role-guard";
 // import EntregasStockSummary from "./entregas-stock-summary"; // POR ELIMINAR SI NO LO UTILIZO

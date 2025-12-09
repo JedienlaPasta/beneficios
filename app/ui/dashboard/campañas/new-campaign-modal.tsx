@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { createCampaign } from "@/app/lib/actions/campaña";
+import { createCampaign } from "@/app/lib/actions/campana";
 import Input from "@/app/ui/dashboard/campañas/new-campaign-input";
 import CampaignDropdown from "@/app/ui/dashboard/campañas/campaign-dropdown";
 import { SubmitButton } from "../submit-button";
