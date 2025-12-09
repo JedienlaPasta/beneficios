@@ -104,7 +104,7 @@ export default function GetNewFileButton({ children, folio }: Props) {
   // };
 
   const datosPrueba = {
-    folio: "2184-25-TA",
+    folio: folio,
     receptor: {
       nombre: "Amawa Samadhi Sophia Dharma Abarca Torres",
       run: "12.345.678-9",
@@ -170,7 +170,7 @@ export default function GetNewFileButton({ children, folio }: Props) {
         onClick={() => generateActaPDF(datosPrueba)}
         className="mb-4 rounded bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700"
       >
-        Imprimir / Descargar PDF
+        {children}
       </button>
     </div>
   );

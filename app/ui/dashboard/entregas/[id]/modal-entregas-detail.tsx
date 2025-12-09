@@ -39,7 +39,6 @@ export default function ModalEntregasDetail({
 }: Props) {
   const [tab, setTab] = useState("Resumen");
   const [isModalClosing, setIsModalClosing] = useState(false);
-  const [isActaEnabled, setIsActaEnabled] = useState(true); // nuevo estado SOLO para el botón
   const [isToggleButtonDisabled, setIsToggleButtonDisabled] = useState(false);
 
   const formattedRUT = formatRUT(rut);
@@ -76,16 +75,11 @@ export default function ModalEntregasDetail({
     };
   }, []);
 
-  useEffect(() => {
-    if (isModalClosing) setIsActaEnabled(false);
-  }, [isModalClosing]);
-
   // To disable camera on overlay click
   const handleOverlayClick = async () => {
     const params = new URLSearchParams(searchParams);
     params.delete("detailsModal");
     router.replace(`?${params.toString()}`, { scroll: false });
-    setIsActaEnabled(false);
     await setIsModalClosing(true);
   };
 
@@ -149,9 +143,7 @@ export default function ModalEntregasDetail({
             </div>
             {/* Botón de descarga SIEMPRE montado, solo se desactiva al cerrar */}
             <div className="flex items-center gap-2">
-              <GetNewFileButton folio={folio} enabled={isActaEnabled}>
-                Nueva Acta
-              </GetNewFileButton>
+              <GetNewFileButton folio={folio}>Nueva Acta</GetNewFileButton>
               <CloseModalButton
                 name="detailsModal"
                 secondName="rut"

@@ -14,8 +14,9 @@ export async function loadPdfMake(): Promise<PdfMakeBrowser> {
     import("pdfmake/build/vfs_fonts"),
   ]);
 
-  const pdfMakeRaw = (pdfMakeModule as any).default || pdfMakeModule;
-  const pdfFontsRaw = ((pdfFontsModule as any).default ||
+  const pdfMakeRaw =
+    (pdfMakeModule as { default?: unknown }).default ?? pdfMakeModule;
+  const pdfFontsRaw = ((pdfFontsModule as { default?: unknown }).default ??
     pdfFontsModule) as unknown as PdfFontsModule;
 
   let vfs: VfsMap | undefined;
