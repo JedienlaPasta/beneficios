@@ -81,8 +81,6 @@ export function getActaDocDefinition(
         `${numeroEntrega}ª`
       : undefined;
 
-  console.log(data.profesional);
-  console.log(data.beneficiario);
   return {
     pageSize: "A4",
     pageMargins: [40, 30, 40, 40],
@@ -262,7 +260,7 @@ export function getActaDocDefinition(
                   ],
                 },
                 {
-                  margin: [8, 4, 0, 8],
+                  margin: [8, 2, 0, 8],
                   // Cada detalle es un ContentColumns, lo tipamos como Content[]
                   stack: beneficio.detalles.map((detalle) => ({
                     columns: [

@@ -315,11 +315,41 @@ export async function fetchFilesByFolio(
 export async function getActaDataByFolio(
   folio: string,
 ): Promise<ActaData | null> {
+  const defaultValues = {
+    folio,
+    numeroEntrega: 0,
+    profesional: {
+      nombre: "Funcionario(a)",
+      cargo: "Departamento Social",
+      fecha: "No especificada",
+    },
+    beneficiario: {
+      nombre: "Sin nombre",
+      run: "Sin RUT",
+      domicilio: "No especificada",
+      tramo: "No especificado",
+      folioRSH: "No especificado",
+      telefono: "No especificado",
+      edad: "No especificado",
+    },
+    receptor: {
+      nombre: "Sin Nombre",
+      run: "Sin RUT",
+      domicilio: "No especificada",
+      tramo: "No especificado",
+      folioRSH: "No especificado",
+      telefono: "No especificado",
+      relacion: "Familiar del beneficiario",
+    },
+    beneficios: [],
+    justificacion: "",
+  };
+
   try {
     const pool = await connectToDB();
     if (!pool) {
       console.warn("No se pudo establecer una conexión a la base de datos.");
-      return {};
+      return defaultValues;
     }
 
     const entregaRequest = pool.request();
@@ -351,28 +381,7 @@ export async function getActaDataByFolio(
     const row = result.recordset[0];
     console.log(row);
     if (!row) {
-      return {
-        folio,
-        numeroEntrega: 0,
-        profesional: {
-          nombre: "Funcionario(a)",
-          cargo: "Departamento Social",
-          fecha: "No especificada",
-        },
-        beneficiario: {
-          nombre: "",
-          run: "",
-          direccion: "",
-          telefono: "",
-        },
-        receptor: {
-          nombre: "",
-          rut: "",
-          parentezco: "No especificado",
-        },
-        beneficios: [],
-        justificacion: "",
-      };
+      return defaultValues;
     }
 
     // Consulta de beneficios (cada registro en 'entrega' asociado a una campaña)
@@ -406,25 +415,24 @@ export async function getActaDataByFolio(
     const funcionario = funcionarioResult.recordset[0];
     console.log(funcionario);
 
-    const beneficios = (beneficiosResult.recordset ?? []).map((b) => ({
-      nombre: b.nombre_campaña as string,
-      codigo: b.code as string,
-      detalles: [
-        b.detalle ? { label: "Detalle", value: String(b.detalle) } : null,
-      ].filter(Boolean) as { label?: string; value: string }[],
-    }));
+    const beneficiosRows = beneficiosResult.recordset ?? [];
+
+    const beneficios: ActaData["beneficios"] = beneficiosRows.map((b: any) => {
+      const nombre = b.nombre_campaña ?? "Beneficio";
+      const codigo: string | undefined = b.code ?? undefined;
+      const value = String(b.detalle ?? "");
+      const label = b.tipo_dato ? b.tipo_dato : "Detalle";
+
+      const detalles: { label: string; value: string }[] = [{ label, value }];
+
+      // Si 'codigo' no existe, no incluimos la propiedad (es opcional en ActaData)
+      return codigo ? { nombre, codigo, detalles } : { nombre, detalles };
+    });
 
     const fechaEntrega =
       row.fecha_entrega instanceof Date
         ? row.fecha_entrega
         : new Date(row.fecha_entrega);
-    const fechaStr = isNaN(fechaEntrega.getTime())
-      ? ""
-      : fechaEntrega.toLocaleDateString("es-CL", {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        });
 
     const nombreBeneficiario =
       `${row.nombres_rsh ?? ""} ${row.apellidos_rsh ?? ""}`.trim();
@@ -450,13 +458,13 @@ export async function getActaDataByFolio(
         edad: edadBeneficiario || "No especifica",
       },
       receptor: {
-        nombre: nombreBeneficiario || "Sin Receptor",
-        run: runBeneficiario || "",
+        nombre: "Sin Receptor",
+        run: "",
         domicilio: "",
         tramo: "",
         folioRSH: "",
         telefono: "",
-        relacion: "Beneficiario",
+        relacion: "Familiar del beneficiario",
       },
       beneficios,
       justificacion: row.observacion || "No especificada",
@@ -465,6 +473,6 @@ export async function getActaDataByFolio(
     return data;
   } catch (error) {
     console.error("Error al obtener datos de la acta:", error);
-    return {};
+    return defaultValues;
   }
 }
