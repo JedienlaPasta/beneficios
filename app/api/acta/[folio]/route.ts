@@ -9,9 +9,7 @@ export async function GET(
 ) {
   try {
     const folio = await params.folio;
-    console.log(folio);
     const data = (await getActaDataByFolio(folio)) || (datosPrueba as ActaData);
-    console.log(data);
 
     if (!data) {
       return NextResponse.json({ error: "No encontrado" }, { status: 404 });
@@ -19,6 +17,7 @@ export async function GET(
 
     return NextResponse.json(data);
   } catch (err) {
+    console.log(err);
     return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }

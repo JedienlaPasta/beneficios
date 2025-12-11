@@ -1,7 +1,7 @@
 "use client";
 
-import { generateActaPDF } from "@/app/lib/pdf";
-import { datosPrueba } from "@/app/lib/pdf/datos-prueba";
+// import { generateActaPDF } from "@/app/lib/pdf";
+// import { datosPrueba } from "@/app/lib/pdf/datos-prueba";
 import { ActaData } from "@/app/lib/pdf/types";
 
 // import { createAndDownloadPDFByFolio } from "@/app/lib/actions/entregas";

@@ -9,7 +9,7 @@ import {
 } from "../definitions";
 import { connectToDB } from "../utils/db-connection";
 import type { ActaData } from "@/app/lib/pdf/types";
-import { formatNumber, formatPhone } from "../utils/format";
+import { formatPhone } from "../utils/format";
 import { getAge } from "../utils/get-values";
 
 export async function fetchEntregas(
@@ -417,17 +417,25 @@ export async function getActaDataByFolio(
 
     const beneficiosRows = beneficiosResult.recordset ?? [];
 
-    const beneficios: ActaData["beneficios"] = beneficiosRows.map((b: any) => {
-      const nombre = b.nombre_campaña ?? "Beneficio";
-      const codigo: string | undefined = b.code ?? undefined;
-      const value = String(b.detalle ?? "");
-      const label = b.tipo_dato ? b.tipo_dato : "Detalle";
+    // PENDIENTE - Revisar el type de beneficios
+    const beneficios: ActaData["beneficios"] = beneficiosRows.map(
+      (b: {
+        detalle?: unknown;
+        nombre_campaña?: string;
+        code?: string;
+        tipo_dato?: string;
+      }) => {
+        const nombre = b.nombre_campaña ?? "Beneficio";
+        const codigo: string | undefined = b.code ?? undefined;
+        const value = String(b.detalle ?? "");
+        const label = b.tipo_dato ? b.tipo_dato : "Detalle";
 
-      const detalles: { label: string; value: string }[] = [{ label, value }];
+        const detalles: { label: string; value: string }[] = [{ label, value }];
 
-      // Si 'codigo' no existe, no incluimos la propiedad (es opcional en ActaData)
-      return codigo ? { nombre, codigo, detalles } : { nombre, detalles };
-    });
+        // Si 'codigo' no existe, no incluimos la propiedad (es opcional en ActaData)
+        return codigo ? { nombre, codigo, detalles } : { nombre, detalles };
+      },
+    );
 
     const fechaEntrega =
       row.fecha_entrega instanceof Date
