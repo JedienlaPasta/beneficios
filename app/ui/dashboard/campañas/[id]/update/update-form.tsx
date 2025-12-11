@@ -19,7 +19,9 @@ export type Requirements = {
 
 export default function UpdateForm({ data }: { data: Campaign }) {
   const [addStock, setAddStock] = useState("");
-  const [fieldType, setFieldType] = useState(data.tipo_dato);
+  const [fieldType, setFieldType] = useState<string[]>(
+    data.tipo_dato ? [data.tipo_dato] : [],
+  );
   const [updateFormData, setUpdateFormData] = useState<Campaign>(data);
   const [criteria, setCriteria] = useState<Requirements>({
     tramo: Boolean(data.tramo),
@@ -67,7 +69,7 @@ export default function UpdateForm({ data }: { data: Campaign }) {
         ? updateFormData.fecha_termino.toString()
         : "",
     );
-    myFormData.append("tipoDato", fieldType);
+    myFormData.append("tipoDato", fieldType.join(","));
     myFormData.append("addStock", addStock.toString());
     myFormData.append("tramo", criteria.tramo.toString());
     myFormData.append("discapacidad", criteria.discapacidad.toString());
@@ -105,13 +107,25 @@ export default function UpdateForm({ data }: { data: Campaign }) {
       <div className="flex flex-col gap-1">
         <p className="text-xs text-slate-500">Dato Asociado</p>
         <div className="grid grid-cols-3 gap-3">
-          <DataTypeCards value={fieldType} setValue={setFieldType}>
+          <DataTypeCards
+            type="Texto"
+            values={fieldType}
+            setValues={setFieldType}
+          >
             Código
           </DataTypeCards>
-          <DataTypeCards value={fieldType} setValue={setFieldType}>
+          <DataTypeCards
+            type="Número"
+            values={fieldType}
+            setValues={setFieldType}
+          >
             Monto
           </DataTypeCards>
-          <DataTypeCards value={fieldType} setValue={setFieldType}>
+          <DataTypeCards
+            type="Texto"
+            values={fieldType}
+            setValues={setFieldType}
+          >
             Talla
           </DataTypeCards>
         </div>

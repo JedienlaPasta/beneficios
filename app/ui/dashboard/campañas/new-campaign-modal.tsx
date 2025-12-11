@@ -25,7 +25,7 @@ export default function NewCampaignModal() {
   const [date, setDate] = useState<Date | null>(null);
   const [stock, setStock] = useState("");
   const [code, setCode] = useState("");
-  const [fieldType, setFieldType] = useState("Código");
+  const [fieldType, setFieldType] = useState<string[]>(["Código"]);
   const [criteria, setCriteria] = useState<Requirements>({
     tramo: Boolean(false),
     discapacidad: Boolean(false),
@@ -44,13 +44,13 @@ export default function NewCampaignModal() {
     setCampaignName(value);
     if (value === "Tarjeta de Comida") {
       setCode("TA");
-      setFieldType("Código");
+      setFieldType(["Código"]);
     } else if (value === "Vale de Gas") {
       setCode("GA");
-      setFieldType("Código");
+      setFieldType(["Código"]);
     } else if (value === "Pañales") {
       setCode("PA");
-      setFieldType("Talla");
+      setFieldType(["Talla"]);
     }
   };
 
@@ -96,7 +96,7 @@ export default function NewCampaignModal() {
     myFormData.append("fechaTermino", date?.toString() || "");
     myFormData.append("code", code.toString() || "");
     myFormData.append("stock", stock.toString());
-    myFormData.append("tipoDato", fieldType);
+    myFormData.append("tipoDato", fieldType.join(","));
     myFormData.append("tramo", criteria.tramo.toString());
     myFormData.append("discapacidad", criteria.discapacidad.toString());
     myFormData.append("adultoMayor", criteria.adultoMayor.toString());
@@ -168,15 +168,48 @@ export default function NewCampaignModal() {
           </div>
           <div className="flex flex-col gap-1">
             <p className="text-xs text-slate-500">Dato Asociado</p>
-            <div className="grid grid-cols-3 gap-3">
-              <DataTypeCards value={fieldType} setValue={setFieldType}>
+            <div className="grid grid-cols-2 gap-3">
+              <DataTypeCards
+                type="Texto"
+                values={fieldType}
+                setValues={setFieldType}
+              >
                 Código
               </DataTypeCards>
-              <DataTypeCards value={fieldType} setValue={setFieldType}>
+              <DataTypeCards
+                type="Número"
+                values={fieldType}
+                setValues={setFieldType}
+              >
                 Monto
               </DataTypeCards>
-              <DataTypeCards value={fieldType} setValue={setFieldType}>
+              <DataTypeCards
+                type="Texto"
+                values={fieldType}
+                setValues={setFieldType}
+              >
                 Talla
+              </DataTypeCards>
+              <DataTypeCards
+                type="Número"
+                values={fieldType}
+                setValues={setFieldType}
+              >
+                Cantidad
+              </DataTypeCards>
+              <DataTypeCards
+                type="V/F"
+                values={fieldType}
+                setValues={setFieldType}
+              >
+                Adulto
+              </DataTypeCards>
+              <DataTypeCards
+                type="Texto"
+                values={fieldType}
+                setValues={setFieldType}
+              >
+                Detalle
               </DataTypeCards>
             </div>
           </div>
