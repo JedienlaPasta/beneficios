@@ -97,7 +97,7 @@ export default function CampaignDropdown({
       />
       {/* Dropdown List */}
       {isOpen && (
-        <ul className="absolute left-[-1px] top-16 z-10 max-h-[146px] w-[101%] divide-y overflow-y-auto rounded-lg border border-gray-200 bg-white text-slate-700 shadow-lg">
+        <ul className="absolute top-16 z-10 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white px-2 text-slate-700 shadow-lg">
           {campaignsList && campaignsList.length > 0 ? (
             campaignsList.map((campaign, index) => (
               <li
@@ -107,14 +107,16 @@ export default function CampaignDropdown({
                     ? setCampaign(campaign.name)
                     : handleCampaignSelection(campaign)
                 }
-                className="flex h-12 w-full cursor-pointer flex-col justify-center px-4 text-sm hover:bg-sky-100"
+                className="flex w-full cursor-pointer flex-col justify-center rounded-md px-3 py-2 text-sm first:mt-2 last:mb-2 hover:bg-slate-100/80"
               >
-                <span>{campaign.name}</span>
+                <span className="text-sm font-medium text-slate-700">
+                  {campaign.name}
+                </span>
                 <span className="text-xs text-slate-500">{campaign.type}</span>
               </li>
             ))
           ) : (
-            <li className="flex h-12 w-full flex-col justify-center px-4 text-sm text-slate-500">
+            <li className="flex w-full flex-col justify-center rounded-md px-3 py-2 text-sm text-slate-500">
               No hay campañas disponibles
             </li>
           )}
