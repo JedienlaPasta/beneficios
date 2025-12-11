@@ -35,7 +35,7 @@ export default function DataTypeCards({
         {children}
       </p>
       <p
-        className={`-mb-0.5 -mt-[3px] ml-0.5 text-[11px] tracking-wider transition-all duration-300 ${isSelected ? "text-blue-400" : "text-slate-400"}`}
+        className={`-mb-0.5 -mt-[3px] ml-0.5 text-[11px] transition-all duration-300 ${isSelected ? "text-blue-400" : "text-slate-400"}`}
       >
         {type}
       </p>
