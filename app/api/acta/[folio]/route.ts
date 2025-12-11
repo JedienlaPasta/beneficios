@@ -5,10 +5,10 @@ import { datosPrueba } from "@/app/lib/pdf/datos-prueba";
 
 export async function GET(
   _req: Request,
-  { params }: { params: { folio: string } },
+  context: { params: Promise<{ folio: string }> },
 ) {
   try {
-    const folio = await params.folio;
+    const { folio } = await context.params;
     const data = (await getActaDataByFolio(folio)) || (datosPrueba as ActaData);
 
     if (!data) {
