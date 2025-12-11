@@ -86,7 +86,7 @@ export async function fetchCampaigns(
             SELECT 
               id_campaña, 
               COUNT(*) AS total_entregas 
-            FROM entrega 
+            FROM beneficios_entregados 
             GROUP BY id_campaña
           ) ent_count ON c.id = ent_count.id_campaña
           WHERE c.nombre_campaña LIKE @query OR c.id LIKE @query

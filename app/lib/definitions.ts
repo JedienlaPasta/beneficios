@@ -62,7 +62,7 @@ export type Entregas = {
 export type EntregasTable = {
   folio: string;
   // nombre_campaña?: string;
-  detalle: string;
+  codigo_entrega: string;
   estado_documentos: string;
   nombre_usuario: string;
   fecha_entrega: Date;
@@ -80,7 +80,7 @@ export type EntregasTableByFolio = {
 // Modal Detalle Entrega
 export type EntregaByFolio = {
   id_campaña: string;
-  detalle: string;
+  codigo_entrega: string;
   nombre_campaña: string;
   tipo_dato: string;
 };

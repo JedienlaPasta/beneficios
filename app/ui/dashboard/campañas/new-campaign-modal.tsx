@@ -34,6 +34,8 @@ export default function NewCampaignModal() {
 
   const searchParams = useSearchParams();
 
+  console.log(fieldType);
+
   const closeModal = () => {
     const params = new URLSearchParams(searchParams);
     params.delete("modal", "open");
@@ -96,7 +98,7 @@ export default function NewCampaignModal() {
     myFormData.append("fechaTermino", date?.toString() || "");
     myFormData.append("code", code.toString() || "");
     myFormData.append("stock", stock.toString());
-    myFormData.append("tipoDato", fieldType.join(","));
+    myFormData.append("esquemaFormulario", fieldType.join(","));
     myFormData.append("tramo", criteria.tramo.toString());
     myFormData.append("discapacidad", criteria.discapacidad.toString());
     myFormData.append("adultoMayor", criteria.adultoMayor.toString());

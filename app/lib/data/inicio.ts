@@ -25,7 +25,7 @@ export async function fetchGeneralInfo(): Promise<GeneralInfo> {
 
     const totalEntregasResult = await request.query(`
       SELECT COUNT(*) as total_entregas
-      FROM entrega
+      FROM beneficios_entregados
     `);
 
     const totalBeneficiariosResult = await request.query(`

@@ -210,10 +210,10 @@ export async function fetchEntregasInfoByFolio(
 
     const request = pool.request();
     const result = await request.input("folio", sql.VarChar, folio).query(`
-        SELECT entrega.id_campaña, entrega.detalle, campañas.tipo_dato, campañas.nombre_campaña
-        FROM entrega
-        LEFT JOIN campañas ON entrega.id_campaña = campañas.id
-        WHERE entrega.folio = @folio
+        SELECT beneficios_entregados.id_campaña, beneficios_entregados.codigo_entrega, campañas.tipo_dato, campañas.nombre_campaña
+        FROM beneficios_entregados
+        LEFT JOIN campañas ON beneficios_entregados.id_campaña = campañas.id
+        WHERE beneficios_entregados.folio = @folio
       `);
 
     return result.recordset as EntregaByFolio[];
@@ -258,10 +258,10 @@ export async function fetchEntregasForCampaignDetail(
           entregas.fecha_entrega,
           COUNT(*) OVER() AS total
         FROM entregas
-        JOIN entrega ON entrega.folio = entregas.folio
+        JOIN beneficios_entregados ON beneficios_entregados.folio = entregas.folio
         JOIN rsh ON rsh.rut = entregas.rut
         WHERE
-          entrega.id_campaña = @id 
+          beneficios_entregados.id_campaña = @id 
           AND (
             rsh.rut LIKE @query OR
             entregas.folio LIKE @query OR
@@ -371,7 +371,7 @@ export async function getActaDataByFolio(
           entregas.observacion,
           entregas.id_usuario
         FROM entregas
-        JOIN entrega ON entrega.folio = entregas.folio
+        JOIN beneficios_entregados ON beneficios_entregados.folio = entregas.folio
         JOIN rsh ON rsh.rut = entregas.rut
         JOIN usuarios ON usuarios.id = entregas.id_usuario
         WHERE
@@ -392,13 +392,13 @@ export async function getActaDataByFolio(
       folio,
     ).query(`
         SELECT 
-          e.detalle,
+          be.codigo_entrega,
           c.nombre_campaña,
           c.code,
           c.tipo_dato
-        FROM entrega e
-        JOIN campañas c ON c.id = e.id_campaña
-        WHERE e.folio = @folio
+        FROM beneficios_entregados be
+        JOIN campañas c ON c.id = be.id_campaña
+        WHERE be.folio = @folio
       `);
     console.log(beneficiosResult.recordset);
 
@@ -420,14 +420,14 @@ export async function getActaDataByFolio(
     // PENDIENTE - Revisar el type de beneficios
     const beneficios: ActaData["beneficios"] = beneficiosRows.map(
       (b: {
-        detalle?: unknown;
+        codigo_entrega?: unknown;
         nombre_campaña?: string;
         code?: string;
         tipo_dato?: string;
       }) => {
         const nombre = b.nombre_campaña ?? "Beneficio";
         const codigo: string | undefined = b.code ?? undefined;
-        const value = String(b.detalle ?? "");
+        const value = String(b.codigo_entrega ?? "");
         const label = b.tipo_dato ? b.tipo_dato : "Detalle";
 
         const detalles: { label: string; value: string }[] = [{ label, value }];

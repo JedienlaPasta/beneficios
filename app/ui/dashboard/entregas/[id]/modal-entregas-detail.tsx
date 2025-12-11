@@ -411,7 +411,7 @@ function EntregasListItem({ item }: { item: EntregaByFolio }) {
       <div className="px-1">
         <h4 className="text-right text-xs text-slate-500">{item.tipo_dato}</h4>
         <p className="text-right text-sm font-semibold text-slate-700">
-          {item.detalle}
+          {item.codigo_entrega}
         </p>
       </div>
     </div>

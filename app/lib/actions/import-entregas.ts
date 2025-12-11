@@ -6,7 +6,7 @@ import { connectToDB } from "../utils/db-connection";
 import { capitalizeAll } from "../utils/format";
 
 interface Entrega {
-  detalle: string;
+  codigo_entrega: string;
   id_campaña: string;
 }
 
@@ -71,7 +71,7 @@ export async function importEntregas() {
       if (campaña_1 && detalle_1) {
         beneficios_entregados.push({
           id_campaña: campaña_1,
-          detalle: detalle_1,
+          codigo_entrega: detalle_1,
         });
       }
 
@@ -80,7 +80,7 @@ export async function importEntregas() {
       if (campaña_2 && detalle_2) {
         beneficios_entregados.push({
           id_campaña: campaña_2,
-          detalle: detalle_2,
+          codigo_entrega: detalle_2,
         });
       }
 
@@ -228,11 +228,11 @@ export async function importEntregas() {
           // console.log(index + ": " + beneficio.id_campaña + " - " + folio);
           const beneficioRequest = new sql.Request(transaction);
           await beneficioRequest
-            .input("detalle", sql.NVarChar, beneficio.detalle)
+            .input("codigo_entrega", sql.NVarChar, beneficio.codigo_entrega)
             .input("folio", sql.NVarChar, folio)
             .input("id_campaña", sql.NVarChar, beneficio.id_campaña).query(`
-              INSERT INTO entrega (detalle, folio, id_campaña)
-              VALUES (@detalle, @folio, @id_campaña)
+              INSERT INTO beneficios_entregados (codigo_entrega, folio, id_campaña)
+              VALUES (@codigo_entrega, @folio, @id_campaña)
             `);
 
           const updateCampaignRequest = new sql.Request(transaction);

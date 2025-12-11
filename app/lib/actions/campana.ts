@@ -37,7 +37,7 @@ const CreateCampaignFormSchema = z.object({
       .nullable(),
   ),
   entregas: z.number(),
-  tipoDato: z.string(),
+  esquemaFormulario: z.string(),
   tramo: z.string().transform((str) => str === "true"),
   discapacidad: z.string().transform((str) => str === "true"),
   adultoMayor: z.string().transform((str) => str === "true"),
@@ -55,7 +55,7 @@ const CreateCampaign = CreateCampaignFormSchema.omit({
     fechaTermino: true,
     code: true,
     stock: true,
-    tipoDato: true,
+    esquemaFormulario: true,
     tramo: true,
     discapacidad: true,
     adultoMayor: true,
@@ -68,7 +68,7 @@ export async function createCampaign(formData: FormData): Promise<FormState> {
       fechaTermino,
       code,
       stock,
-      tipoDato,
+      esquemaFormulario,
       tramo,
       discapacidad,
       adultoMayor,
@@ -77,12 +77,17 @@ export async function createCampaign(formData: FormData): Promise<FormState> {
       fechaTermino: formData.get("fechaTermino"),
       code: formData.get("code"),
       stock: formData.get("stock"),
-      tipoDato: formData.get("tipoDato"),
+      esquemaFormulario: formData.get("esquemaFormulario"),
       tramo: formData.get("tramo"),
       discapacidad: formData.get("discapacidad"),
       adultoMayor: formData.get("adultoMayor"),
     });
+    console.log(esquemaFormulario);
 
+    // return {
+    //   success: true,
+    //   message: "Campaña creada con éxito.",
+    // };
     const fechaInicio = new Date();
 
     if (!fechaTermino) {
@@ -317,9 +322,9 @@ export async function deleteCampaign(id: string) {
         sql.UniqueIdentifier,
         id,
       ).query(`
-        SELECT campañas.id, entrega.id AS entrega_id
+        SELECT campañas.id, beneficios_entregados.id AS entrega_id
         FROM campañas
-        LEFT JOIN entrega ON campañas.id = entrega.id_campaña
+        LEFT JOIN beneficios_entregados ON campañas.id = beneficios_entregados.id_campaña
         WHERE campañas.id = @id
       `);
 

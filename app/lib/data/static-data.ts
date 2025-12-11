@@ -41,3 +41,36 @@ export const usersList = [
     email: "lilian.galea.ts@gmail.com",
   },
 ];
+
+export const campaignSchemaFields = [
+  {
+    id: "1",
+    name: "Código",
+    type: "Texto",
+  },
+  {
+    id: "2",
+    name: "Talla",
+    type: "Texto",
+  },
+  {
+    id: "3",
+    name: "Cantidad",
+    type: "Número",
+  },
+  {
+    id: "4",
+    name: "Monto",
+    type: "Número",
+  },
+  {
+    id: "5",
+    name: "Adulto",
+    type: "V/F",
+  },
+  {
+    id: "6",
+    name: "Detalle",
+    type: "Texto",
+  },
+];

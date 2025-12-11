@@ -258,7 +258,7 @@ export const createEntrega = async (id: string, formData: FormData) => {
             .input("detail", sql.VarChar, detail)
             .input("folio", sql.VarChar, newFolio)
             .input("campaignId", sql.UniqueIdentifier, campaign.id).query(`
-              INSERT INTO entrega (detalle, folio, id_campaña)
+              INSERT INTO beneficios_entregados (codigo_entrega, folio, id_campaña)
               VALUES (@detail, @folio, @campaignId)
             `);
 
@@ -560,7 +560,7 @@ export const deleteEntregaByFolio = async (folio: string) => {
         sql.NVarChar,
         folio,
       ).query(`
-        SELECT id_campaña FROM entrega WHERE folio = @folio
+        SELECT id_campaña FROM beneficios_entregados WHERE folio = @folio
       `);
 
       // Update campaign counts
@@ -648,7 +648,7 @@ export const toggleDiscardEntregaByFolio = async (
         sql.NVarChar,
         folio,
       ).query(`
-        SELECT id_campaña FROM entrega WHERE folio = @folio
+        SELECT id_campaña FROM beneficios_entregados WHERE folio = @folio
       `);
 
       // Determine campaign counter based on state transition
@@ -1169,9 +1169,9 @@ export const createAndDownloadPDFByFolio = async (folio: string) => {
     // Get campaigns
     const campaignsRequest = pool.request().input("folio", sql.NVarChar, folio);
     const campaignsResult = await campaignsRequest.query(`
-    SELECT campañas.nombre_campaña as campaign_name, entrega.detalle as detail
-    FROM entrega 
-    JOIN campañas ON campañas.id = entrega.id_campaña
+    SELECT campañas.nombre_campaña as campaign_name, beneficios_entregados.codigo_entrega as detail
+    FROM beneficios_entregados 
+    JOIN campañas ON campañas.id = beneficios_entregados.id_campaña
     WHERE folio = @folio
   `);
 
