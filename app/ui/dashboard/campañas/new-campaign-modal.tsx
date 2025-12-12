@@ -31,7 +31,7 @@ type DynamicField = {
 };
 
 const PREDEFINED_LABELS = [
-  "Código / Serial",
+  "Código",
   "Monto",
   "Talla",
   "Cantidad",
@@ -53,7 +53,7 @@ export default function NewCampaignModal() {
   const [dynamicFields, setDynamicFields] = useState<DynamicField[]>([
     {
       id: 1,
-      label: "Código / Serial",
+      label: "Código",
       nombre: "codigo_entrega",
       tipo: "text",
       opciones: "",
@@ -386,7 +386,7 @@ export default function NewCampaignModal() {
                 </p>
               )}
 
-              {dynamicFields.map((field, index) => (
+              {dynamicFields.map((field) => (
                 <div
                   key={field.id}
                   className="group relative flex flex-col gap-2 rounded border border-slate-200 bg-white p-3 shadow-sm"
@@ -416,7 +416,7 @@ export default function NewCampaignModal() {
                             type="button"
                             onClick={() => {
                               // Limpiamos el valor y desactivamos modo custom
-                              updateField(field.id, "label", "Código / Serial");
+                              updateField(field.id, "label", "Código");
                               updateField(field.id, "isCustomLabel", false);
                             }}
                             className="absolute right-0 top-1/2 -translate-y-1/2 bg-transparent p-1 text-xs text-blue-400 hover:text-blue-600"

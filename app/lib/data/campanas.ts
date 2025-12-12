@@ -13,6 +13,7 @@ export async function fetchCampaignById(id: string): Promise<Campaign> {
     stock: null,
     tipo_dato: "",
     tramo: "",
+    esquema_formulario: "",
     // estado: "En curso",
     discapacidad: "",
     adulto_mayor: "",

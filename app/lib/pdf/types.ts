@@ -47,7 +47,7 @@ export interface ActaData {
     telefono: number | string;
     tramo?: string;
     folioRSH?: string;
-  };
+  } | null;
   beneficios: Array<{
     nombre: string;
     codigo?: string;

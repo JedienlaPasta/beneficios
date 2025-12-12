@@ -182,7 +182,7 @@ export default function NewCitizenModal({ name }: { name: string }) {
                   <div className="flex grow gap-3">
                     <Input
                       placeHolder="12345678"
-                      label="RUT (sin dígito ni puntos) *"
+                      label="RUT (sin dígito ni puntos)"
                       type="text"
                       pattern="[0-9]*"
                       nombre="rut"
@@ -192,7 +192,7 @@ export default function NewCitizenModal({ name }: { name: string }) {
                     />
                     <Input
                       placeHolder="K o 0-9"
-                      label="Dígito Verificador *"
+                      label="Dígito Verificador"
                       type="text"
                       nombre="dv"
                       value={dv}
@@ -205,7 +205,7 @@ export default function NewCitizenModal({ name }: { name: string }) {
                   <div className="flex grow gap-3">
                     <Input
                       placeHolder="Nombres"
-                      label="Nombres *"
+                      label="Nombres"
                       type="text"
                       nombre="nombres"
                       value={nombres}
@@ -214,7 +214,7 @@ export default function NewCitizenModal({ name }: { name: string }) {
                     />
                     <Input
                       placeHolder="Apellidos"
-                      label="Apellidos *"
+                      label="Apellidos"
                       type="text"
                       nombre="apellidos"
                       value={apellidos}
@@ -225,7 +225,7 @@ export default function NewCitizenModal({ name }: { name: string }) {
 
                   <Input
                     placeHolder="Dirección completa"
-                    label="Dirección *"
+                    label="Dirección"
                     type="text"
                     nombre="direccion"
                     value={direccion}
@@ -236,7 +236,7 @@ export default function NewCitizenModal({ name }: { name: string }) {
                   <div className="flex grow gap-3">
                     <Input
                       placeHolder="40-100"
-                      label="Tramo RSH *"
+                      label="Tramo RSH"
                       type="text"
                       pattern="[0-9]*"
                       nombre="tramo"
@@ -246,7 +246,7 @@ export default function NewCitizenModal({ name }: { name: string }) {
                     />
                     <Input
                       placeHolder="Número de folio"
-                      label="Folio *"
+                      label="Folio"
                       type="text"
                       pattern="[0-9]*"
                       nombre="folio"

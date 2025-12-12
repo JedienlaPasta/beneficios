@@ -103,8 +103,7 @@ export const createEntrega = async (
     return { success: false, message: "Debe seleccionar al menos una campaña" };
   }
 
-  // 1. Definir SIGLA para el Folio (Usa el item.code que viene del frontend)
-  let folioCodeSigla =
+  let folioCode =
     campaigns.length > 1 ? "DO" : campaigns[0].code?.substring(0, 2) || "DO";
   let newFolio = "";
 
@@ -150,7 +149,7 @@ export const createEntrega = async (
       spRequest.input("p_observacion", sql.NVarChar, observaciones || "");
       spRequest.input("p_id_usuario", sql.UniqueIdentifier, userIdFromSession);
       spRequest.input("p_current_year", sql.Int, currentYearTwoDigits);
-      spRequest.input("p_code", sql.VarChar, folioCodeSigla); // Aquí va "PA", "GA", etc.
+      spRequest.input("p_code", sql.VarChar, folioCode); // Aquí va "PA", "GA", etc.
       spRequest.output("p_new_folio_output", sql.VarChar);
 
       const spResult = await spRequest.execute("dbo.GenerateAndInsertEntrega");

@@ -412,7 +412,10 @@ export function getActaDocDefinition(
                         ],
                       },
                       {
-                        text: data.receptor?.nombre || "Sin Receptor",
+                        text:
+                          data.receptor?.nombre ||
+                          data.beneficiario?.nombre ||
+                          "Sin Receptor",
                         fontSize: 9,
                         bold: true,
                         alignment: "center",

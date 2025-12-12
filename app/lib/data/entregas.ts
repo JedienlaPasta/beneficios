@@ -323,7 +323,8 @@ export async function fetchFilesByFolio(
 export async function getActaDataByFolio(
   folio: string,
 ): Promise<ActaData | null> {
-  const defaultValues = {
+  // Valores por defecto
+  const defaultValues: ActaData = {
     folio,
     numeroEntrega: 0,
     profesional: {
@@ -333,66 +334,71 @@ export async function getActaDataByFolio(
     },
     beneficiario: {
       nombre: "Sin nombre",
-      run: "Sin RUT",
-      domicilio: "No especificada",
-      tramo: "No especificado",
-      folioRSH: "No especificado",
-      telefono: "No especificado",
-      edad: "No especificado",
+      run: "",
+      domicilio: "",
+      tramo: "",
+      folioRSH: "",
+      telefono: "",
+      edad: "",
     },
-    receptor: {
-      nombre: "Sin Nombre",
-      run: "Sin RUT",
-      domicilio: "No especificada",
-      tramo: "No especificado",
-      folioRSH: "No especificado",
-      telefono: "No especificado",
-      relacion: "Familiar del beneficiario",
-    },
+    receptor: null,
     beneficios: [],
     justificacion: "",
   };
 
   try {
     const pool = await connectToDB();
-    if (!pool) {
-      console.warn("No se pudo establecer una conexión a la base de datos.");
-      return defaultValues;
-    }
+    if (!pool) return defaultValues;
 
+    // 1. Obtener Datos Principales (Entrega + Beneficiario + Usuario)
     const entregaRequest = pool.request();
-    console.log("Folio:", folio);
     const result = await entregaRequest.input("folio", sql.VarChar, folio)
       .query(`
-        SELECT 
-          rsh.nombres_rsh, 
-          rsh.apellidos_rsh,
-          rsh.rut, 
-          rsh.dv,
-          rsh.direccion,
-          rsh.telefono,
-          rsh.folio as folio_rsh,
-          rsh.tramo,
-          rsh.fecha_nacimiento,
-          entregas.folio, 
-          entregas.fecha_entrega,
-          entregas.observacion,
-          entregas.id_usuario
-        FROM entregas
-        JOIN beneficios_entregados ON beneficios_entregados.folio = entregas.folio
-        JOIN rsh ON rsh.rut = entregas.rut
-        JOIN usuarios ON usuarios.id = entregas.id_usuario
-        WHERE
-          entregas.folio = @folio
-      `);
+      SELECT 
+        rsh.nombres_rsh,
+        rsh.apellidos_rsh,
+        rsh.rut,
+        rsh.dv,
+        COALESCE(NULLIF(LTRIM(RTRIM(rm.direccion_mod)), ''), rsh.direccion) AS direccion,
+        COALESCE(NULLIF(LTRIM(RTRIM(rm.telefono_mod)), ''), rsh.telefono) AS telefono,
+        rsh.folio AS folio_rsh,
+        rsh.tramo,
+        rsh.fecha_nacimiento,
+        e.folio,
+        e.fecha_entrega,
+        e.observacion,
+        e.id_usuario,
+        u.nombre_usuario,
+        u.cargo
+      FROM entregas e
+      JOIN rsh ON rsh.rut = e.rut
+      LEFT JOIN rsh_mods rm ON rm.rut = rsh.rut
+      JOIN usuarios u ON u.id = e.id_usuario
+      WHERE e.folio = @folio
+    `);
 
     const row = result.recordset[0];
-    console.log(row);
-    if (!row) {
-      return defaultValues;
-    }
+    if (!row) return defaultValues;
 
-    // Consulta de beneficios (cada registro en 'entrega' asociado a una campaña)
+    // 2. Obtener Datos del Receptor (Si existe)
+    // Buscamos en entregas_receptores y unimos con la tabla receptores
+    const receptorRequest = pool.request();
+    const receptorResult = await receptorRequest.input(
+      "folio",
+      sql.VarChar,
+      folio,
+    ).query(`
+        SELECT 
+            r.nombres, r.apellidos, r.rut, r.dv, 
+            r.direccion, r.telefono, 
+            er.parentesco
+        FROM entregas_receptores er
+        JOIN receptores r ON r.id = er.id_receptor
+        WHERE er.folio_entrega = @folio
+    `);
+    const receptorRow = receptorResult.recordset[0];
+
+    // 3. Obtener Beneficios y sus Detalles JSON
     const beneficioRequest = pool.request();
     const beneficiosResult = await beneficioRequest.input(
       "folio",
@@ -400,95 +406,106 @@ export async function getActaDataByFolio(
       folio,
     ).query(`
         SELECT 
-          be.codigo_entrega,
+          be.codigo_entrega, -- Código físico destacado
+          be.campos_adicionales, -- JSON con respuestas
           c.nombre_campaña,
-          c.code,
-          c.tipo_dato
+          c.code, -- Sigla de la campaña
+          c.esquema_formulario -- JSON con labels bonitos
         FROM beneficios_entregados be
         JOIN campañas c ON c.id = be.id_campaña
         WHERE be.folio = @folio
       `);
-    console.log(beneficiosResult.recordset);
 
-    const funcionarioRequest = pool.request();
-    const funcionarioResult = await funcionarioRequest.input(
-      "id_usuario",
-      sql.UniqueIdentifier,
-      row.id_usuario,
-    ).query(`
-        SELECT nombre_usuario, cargo
-        FROM usuarios
-        WHERE id = @id_usuario
-      `);
-    const funcionario = funcionarioResult.recordset[0];
-    console.log(funcionario);
+    // --- PROCESAMIENTO DE DATOS ---
 
-    const beneficiosRows = beneficiosResult.recordset ?? [];
+    // A. Procesar Beneficios
+    const beneficios: ActaData["beneficios"] = beneficiosResult.recordset.map(
+      (b: any) => {
+        const nombre = b.nombre_campaña || "Beneficio";
+        const codigo = b.code;
 
-    // PENDIENTE - Revisar el type de beneficios
-    const beneficios: ActaData["beneficios"] = beneficiosRows.map(
-      (b: {
-        codigo_entrega?: unknown;
-        nombre_campaña?: string;
-        code?: string;
-        tipo_dato?: string;
-      }) => {
-        const nombre = b.nombre_campaña ?? "Beneficio";
-        const codigo: string | undefined = b.code ?? undefined;
-        const value = String(b.codigo_entrega ?? "");
-        const label = b.tipo_dato ? b.tipo_dato : "Detalle";
+        // Parsear JSONs
+        let respuestas: Record<string, any> = {};
+        let esquema: { nombre: string; label: string }[] = [];
+        try {
+          respuestas = b.campos_adicionales
+            ? JSON.parse(b.campos_adicionales)
+            : {};
+          esquema = b.esquema_formulario
+            ? JSON.parse(b.esquema_formulario)
+            : [];
+        } catch (e) {
+          console.error("Error parseando JSON acta", e);
+        }
 
-        const detalles: { label: string; value: string }[] = [{ label, value }];
+        // Construir array de detalles "Label: Valor"
+        const detalles: { label: string; value: string }[] = [];
 
-        // Si 'codigo' no existe, no incluimos la propiedad (es opcional en ActaData)
-        return codigo ? { nombre, codigo, detalles } : { nombre, detalles };
+        // 1. Agregar el código físico si existe (Prioridad alta)
+        if (b.codigo_entrega) {
+          detalles.push({
+            label: "Código",
+            value: String(b.codigo_entrega),
+          });
+        }
+
+        // 2. Agregar el resto de campos dinámicos
+        Object.entries(respuestas).forEach(([key, val]) => {
+          // Saltamos el código si ya lo pusimos o si es la sigla interna
+          if (key === "codigo_entrega" || key === "code") return;
+
+          // Buscar label bonito en el esquema
+          const schemaField = esquema.find((f) => f.nombre === key);
+          const label = schemaField
+            ? schemaField.label
+            : key.replace(/_/g, " "); // Fallback
+
+          detalles.push({ label: label, value: String(val) });
+        });
+
+        return { nombre, codigo, detalles };
       },
     );
 
-    const fechaEntrega =
-      row.fecha_entrega instanceof Date
-        ? row.fecha_entrega
-        : new Date(row.fecha_entrega);
-
-    const nombreBeneficiario =
-      `${row.nombres_rsh ?? ""} ${row.apellidos_rsh ?? ""}`.trim();
-    const runBeneficiario = row.rut && row.dv ? `${row.rut}-${row.dv}` : "";
-
-    const edadBeneficiario = getAge(row.fecha_nacimiento);
-
-    const data: ActaData = {
-      folio: row.folio ?? "",
-      numeroEntrega: 1, // Ajusta si tienes este dato
-      profesional: {
-        nombre: funcionario?.nombre_usuario || "Funcionario(a)",
-        cargo: funcionario?.cargo || "Departamento Social",
-        fecha: fechaEntrega || "No especificada",
-      },
-      beneficiario: {
-        nombre: nombreBeneficiario || "Sin nombre",
-        run: runBeneficiario || "",
-        domicilio: row.direccion || "No especifica", // Completar si tienes el dato
-        tramo: row.tramo || "No especifica",
-        folioRSH: row.folio_rsh || "No especifica",
-        telefono: formatPhone(row.telefono) || "No especifica",
-        edad: edadBeneficiario || "No especifica",
-      },
-      receptor: {
-        nombre: "Sin Receptor",
-        run: "",
-        domicilio: "",
+    // B. Procesar Receptor
+    let receptorData = null;
+    if (receptorRow) {
+      receptorData = {
+        nombre: `${receptorRow.nombres} ${receptorRow.apellidos}`.trim(),
+        run: `${receptorRow.rut}-${receptorRow.dv}`,
+        domicilio: receptorRow.direccion || "No informada",
+        telefono: formatPhone(receptorRow.telefono) || "No informado",
+        relacion: receptorRow.parentesco || "No informada",
+        // Campos no usados en PDF pero requeridos por tipo
         tramo: "",
         folioRSH: "",
-        telefono: "",
-        relacion: "Familiar del beneficiario",
-      },
-      beneficios,
-      justificacion: row.observacion || "No especificada",
-    };
+      };
+    }
 
-    return data;
+    // C. Armar Objeto Final
+    return {
+      folio: row.folio,
+      numeroEntrega: 1, // Lógica pendiente si la tienes
+      profesional: {
+        nombre: row.nombre_usuario || "Funcionario",
+        cargo: row.cargo || "Departamento Social",
+        fecha: row.fecha_entrega,
+      },
+      beneficiario: {
+        nombre: `${row.nombres_rsh} ${row.apellidos_rsh}`.trim(),
+        run: `${row.rut}-${row.dv}`,
+        domicilio: row.direccion || "No especifica",
+        tramo: row.tramo ? `${row.tramo}%` : "N/A",
+        folioRSH: row.folio_rsh || "N/A",
+        telefono: formatPhone(row.telefono) || "N/A",
+        edad: getAge(row.fecha_nacimiento) || "N/A",
+      },
+      receptor: receptorData, // Puede ser null
+      beneficios,
+      justificacion: row.observacion || "",
+    };
   } catch (error) {
-    console.error("Error al obtener datos de la acta:", error);
+    console.error("Error al obtener datos acta:", error);
     return defaultValues;
   }
 }

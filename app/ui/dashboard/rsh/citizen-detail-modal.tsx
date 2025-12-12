@@ -255,7 +255,7 @@ function UpdateForm({ citizen }: UpdateFormProps) {
             <div className="flex flex-col gap-5 pt-2">
               <Input
                 placeHolder="Dirección completa"
-                label="Dirección *"
+                label="Dirección"
                 type="text"
                 nombre="direccion"
                 value={direccion}

@@ -374,7 +374,7 @@ export default function NewModalFormReceiver({
         ref={scrollRef}
         className="scrollbar-gutter-stable mt-2 max-h-[380px] overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-4"
       >
-        <div className="sticky top-0 z-10 mb-3 flex items-baseline justify-between border-b border-slate-200 bg-slate-50 pb-2">
+        <div className="z-10 mb-3 flex items-baseline justify-between border-b border-slate-200 bg-slate-50 pb-2">
           <h3 className="text-sm font-medium text-slate-700">
             Beneficios seleccionados
           </h3>
