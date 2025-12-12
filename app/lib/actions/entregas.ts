@@ -103,7 +103,7 @@ export const createEntrega = async (
     return { success: false, message: "Debe seleccionar al menos una campaña" };
   }
 
-  let folioCode =
+  const folioCode =
     campaigns.length > 1 ? "DO" : campaigns[0].code?.substring(0, 2) || "DO";
   let newFolio = "";
 

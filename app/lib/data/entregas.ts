@@ -320,10 +320,54 @@ export async function fetchFilesByFolio(
   }
 }
 
+// Acta de Entregas
+
+interface MainDataRow {
+  nombres_rsh: string;
+  apellidos_rsh: string;
+  rut: number;
+  dv: string;
+  direccion: string;
+  telefono: string;
+  folio_rsh: number;
+  tramo: number;
+  fecha_nacimiento: Date;
+  folio: string;
+  fecha_entrega: Date;
+  observacion: string;
+  id_usuario: string;
+  nombre_usuario: string;
+  cargo: string;
+}
+
+interface ReceptorRow {
+  nombres: string;
+  apellidos: string;
+  rut: number;
+  dv: string;
+  direccion: string;
+  telefono: string;
+  parentesco: string;
+}
+
+interface BeneficioRow {
+  codigo_entrega: string | null;
+  campos_adicionales: string | null; // Viene como JSON string
+  nombre_campaña: string;
+  code: string;
+  esquema_formulario: string | null; // Viene como JSON string
+}
+
+// Tipo auxiliar para el JSON de configuración
+interface SchemaField {
+  nombre: string;
+  label: string;
+}
+
 export async function getActaDataByFolio(
   folio: string,
 ): Promise<ActaData | null> {
-  // Valores por defecto
+  // Valores por defecto seguros
   const defaultValues: ActaData = {
     folio,
     numeroEntrega: 0,
@@ -350,11 +394,11 @@ export async function getActaDataByFolio(
     const pool = await connectToDB();
     if (!pool) return defaultValues;
 
-    // 1. Obtener Datos Principales (Entrega + Beneficiario + Usuario)
+    // --- CONSULTA 1: DATOS PRINCIPALES ---
     const entregaRequest = pool.request();
     const result = await entregaRequest.input("folio", sql.VarChar, folio)
-      .query(`
-      SELECT 
+      .query<MainDataRow>(`
+        SELECT 
         rsh.nombres_rsh,
         rsh.apellidos_rsh,
         rsh.rut,
@@ -380,14 +424,13 @@ export async function getActaDataByFolio(
     const row = result.recordset[0];
     if (!row) return defaultValues;
 
-    // 2. Obtener Datos del Receptor (Si existe)
-    // Buscamos en entregas_receptores y unimos con la tabla receptores
+    // --- CONSULTA 2: RECEPTOR ---
     const receptorRequest = pool.request();
     const receptorResult = await receptorRequest.input(
       "folio",
       sql.VarChar,
       folio,
-    ).query(`
+    ).query<ReceptorRow>(`
         SELECT 
             r.nombres, r.apellidos, r.rut, r.dv, 
             r.direccion, r.telefono, 
@@ -396,69 +439,74 @@ export async function getActaDataByFolio(
         JOIN receptores r ON r.id = er.id_receptor
         WHERE er.folio_entrega = @folio
     `);
+
+    // Aquí TypeScript ya sabe que receptorRow es de tipo ReceptorRow o undefined
     const receptorRow = receptorResult.recordset[0];
 
-    // 3. Obtener Beneficios y sus Detalles JSON
+    // --- CONSULTA 3: BENEFICIOS ---
     const beneficioRequest = pool.request();
     const beneficiosResult = await beneficioRequest.input(
       "folio",
       sql.VarChar,
       folio,
-    ).query(`
+    ).query<BeneficioRow>(`
         SELECT 
-          be.codigo_entrega, -- Código físico destacado
-          be.campos_adicionales, -- JSON con respuestas
+          be.codigo_entrega,
+          be.campos_adicionales,
           c.nombre_campaña,
-          c.code, -- Sigla de la campaña
-          c.esquema_formulario -- JSON con labels bonitos
+          c.code,
+          c.esquema_formulario
         FROM beneficios_entregados be
         JOIN campañas c ON c.id = be.id_campaña
         WHERE be.folio = @folio
       `);
 
-    // --- PROCESAMIENTO DE DATOS ---
+    // --- PROCESAMIENTO ---
 
     // A. Procesar Beneficios
     const beneficios: ActaData["beneficios"] = beneficiosResult.recordset.map(
-      (b: any) => {
+      (b) => {
         const nombre = b.nombre_campaña || "Beneficio";
         const codigo = b.code;
 
-        // Parsear JSONs
-        let respuestas: Record<string, any> = {};
-        let esquema: { nombre: string; label: string }[] = [];
+        // Tipado seguro para los JSONs
+        let respuestas: Record<string, string | number | boolean | null> = {};
+        let esquema: SchemaField[] = [];
+
         try {
-          respuestas = b.campos_adicionales
-            ? JSON.parse(b.campos_adicionales)
-            : {};
-          esquema = b.esquema_formulario
-            ? JSON.parse(b.esquema_formulario)
-            : [];
+          if (b.campos_adicionales) {
+            respuestas = JSON.parse(b.campos_adicionales) as Record<
+              string,
+              string | number | boolean | null
+            >;
+          }
+          if (b.esquema_formulario) {
+            esquema = JSON.parse(b.esquema_formulario) as SchemaField[];
+          }
         } catch (e) {
           console.error("Error parseando JSON acta", e);
         }
 
-        // Construir array de detalles "Label: Valor"
         const detalles: { label: string; value: string }[] = [];
 
-        // 1. Agregar el código físico si existe (Prioridad alta)
+        // 1. Agregar código físico (Prioridad)
         if (b.codigo_entrega) {
           detalles.push({
-            label: "Código",
+            label: "Código / Serial",
             value: String(b.codigo_entrega),
           });
         }
 
-        // 2. Agregar el resto de campos dinámicos
+        // 2. Mapear campos dinámicos
         Object.entries(respuestas).forEach(([key, val]) => {
-          // Saltamos el código si ya lo pusimos o si es la sigla interna
+          // Ignorar llaves técnicas o duplicadas
           if (key === "codigo_entrega" || key === "code") return;
 
-          // Buscar label bonito en el esquema
+          // Buscar el label bonito
           const schemaField = esquema.find((f) => f.nombre === key);
           const label = schemaField
             ? schemaField.label
-            : key.replace(/_/g, " "); // Fallback
+            : key.replace(/_/g, " ");
 
           detalles.push({ label: label, value: String(val) });
         });
@@ -476,31 +524,30 @@ export async function getActaDataByFolio(
         domicilio: receptorRow.direccion || "No informada",
         telefono: formatPhone(receptorRow.telefono) || "No informado",
         relacion: receptorRow.parentesco || "No informada",
-        // Campos no usados en PDF pero requeridos por tipo
         tramo: "",
         folioRSH: "",
       };
     }
 
-    // C. Armar Objeto Final
+    // C. Retornar Objeto Final
     return {
       folio: row.folio,
-      numeroEntrega: 1, // Lógica pendiente si la tienes
+      numeroEntrega: 1,
       profesional: {
         nombre: row.nombre_usuario || "Funcionario",
         cargo: row.cargo || "Departamento Social",
-        fecha: row.fecha_entrega,
+        fecha: String(row.fecha_entrega),
       },
       beneficiario: {
         nombre: `${row.nombres_rsh} ${row.apellidos_rsh}`.trim(),
         run: `${row.rut}-${row.dv}`,
         domicilio: row.direccion || "No especifica",
         tramo: row.tramo ? `${row.tramo}%` : "N/A",
-        folioRSH: row.folio_rsh || "N/A",
+        folioRSH: row.folio_rsh ? String(row.folio_rsh) : "N/A",
         telefono: formatPhone(row.telefono) || "N/A",
-        edad: getAge(row.fecha_nacimiento) || "N/A",
+        edad: String(getAge(String(row.fecha_nacimiento))) || "N/A",
       },
-      receptor: receptorData, // Puede ser null
+      receptor: receptorData,
       beneficios,
       justificacion: row.observacion || "",
     };

@@ -8,6 +8,11 @@ import { createEntrega } from "@/app/lib/actions/entregas";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
+// --- TIPOS DE DATOS ---
+
+// Tipo seguro para los valores de los inputs
+type FormValue = string | number | boolean | undefined | null;
+
 type DynamicFieldSchema = {
   nombre: string;
   label: string;
@@ -32,11 +37,11 @@ export default function NewModalForm({
   const [observaciones, setObservaciones] = useState("");
   const [lastSelection, setLastSelection] = useState("");
 
-  // ESTADO ACTUALIZADO: Ahora guardamos un objeto 'answers' dinámico
+  // ESTADO ACTUALIZADO: Type safe
   const [selectedCampaigns, setSelectedCampaigns] = useState<{
     [campaignId: string]: {
       selected: boolean;
-      answers: Record<string, any>; // Ej: { talla: "M", cantidad: 2 }
+      answers: Record<string, FormValue>; // Reemplazado 'any' por 'FormValue'
     };
   }>(() => {
     if (activeCampaigns && activeCampaigns.length > 0) {
@@ -44,12 +49,15 @@ export default function NewModalForm({
         (acc, campaign) => {
           acc[campaign.id] = {
             selected: false,
-            answers: {}, // Inicialmente vacío
+            answers: {},
           };
           return acc;
         },
         {} as {
-          [key: string]: { selected: boolean; answers: Record<string, any> };
+          [key: string]: {
+            selected: boolean;
+            answers: Record<string, FormValue>;
+          }; // Reemplazado 'any'
         },
       );
     }
@@ -64,11 +72,9 @@ export default function NewModalForm({
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
-  // Button handlers
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
-  // Update this line to use the userId prop directly
   const createEntregaWithId = createEntrega.bind(null, userId);
 
   const checkValues = (campaign: Campaign) => {
@@ -99,11 +105,11 @@ export default function NewModalForm({
     }
   };
 
-  // NUEVA FUNCIÓN: Maneja cambios en campos dinámicos específicos
+  // FUNCIÓN TIPADA: value ahora es FormValue en lugar de any
   const handleFieldChange = (
     campaignId: string,
     fieldName: string,
-    value: any,
+    value: FormValue,
   ) => {
     setSelectedCampaigns((prev) => ({
       ...prev,
@@ -117,15 +123,12 @@ export default function NewModalForm({
     }));
   };
 
-  // VALIDACIÓN DINÁMICA
   const isFormValid = () => {
-    // 1. Al menos una seleccionada
     const selectedEntries = Object.entries(selectedCampaigns).filter(
       ([, val]) => val.selected,
     );
     if (selectedEntries.length === 0) return false;
 
-    // 2. Validar campos requeridos dinámicos
     return selectedEntries.every(([campaignId, data]) => {
       const campaign = activeCampaigns?.find((c) => c.id === campaignId);
       if (!campaign) return false;
@@ -135,13 +138,11 @@ export default function NewModalForm({
         schema = JSON.parse(campaign.esquema_formulario || "[]");
       } catch {
         return true;
-      } // Si falla el esquema, asumimos válido (o inválido según prefieras)
+      }
 
-      // Verificar que cada campo requerido tenga valor en 'answers'
       return schema.every((field) => {
         if (!field.requerido) return true;
         const value = data.answers[field.nombre];
-        // Chequeo simple: no null, no undefined, no string vacío
         return (
           value !== null && value !== undefined && String(value).trim() !== ""
         );
@@ -153,25 +154,20 @@ export default function NewModalForm({
     setIsLoading(true);
     setIsDisabled(true);
 
-    // Preparar datos para el Server Action
     const campaignsToSubmit = Object.entries(selectedCampaigns)
       .filter(([, value]) => value.selected)
       .map(([id, value]) => {
         const campaign = activeCampaigns?.find((c) => c.id === id);
 
-        // Separamos el 'codigo_entrega' (si existe en los inputs dinámicos) del resto del JSON
         const answers = { ...value.answers };
-        const codigoEntrega = answers["codigo_entrega"] || ""; // Buscamos si hay un campo con este slug
-
-        // El resto se va al JSON de campos adicionales
-        // (Opcional: puedes borrar codigo_entrega de answers si no quieres duplicarlo en el JSON)
+        // Casting seguro a string o cadena vacía si es otro tipo
+        const codigoEntrega = String(answers["codigo_entrega"] || "");
 
         return {
           id,
           campaignName: campaign?.nombre_campaña || "",
-          // EL CAMBIO CLAVE: Enviamos el objeto completo stringified
           campos_adicionales: JSON.stringify(answers),
-          code: codigoEntrega || campaign?.code || "", // Prioridad al input manual, luego al default
+          code: codigoEntrega || campaign?.code || "",
         };
       });
 
@@ -182,7 +178,6 @@ export default function NewModalForm({
       return;
     }
 
-    // Ya validamos con isFormValid, pero doble chequeo de seguridad
     if (!isFormValid()) {
       toast.error("Complete todos los campos obligatorios");
       setIsLoading(false);
@@ -215,48 +210,6 @@ export default function NewModalForm({
     }, 200);
   };
 
-  // Check if form is valid
-  // const isFormValid = () => {
-  //   // Check if any campaigns are selected
-  //   const selectedCount = Object.values(selectedCampaigns).filter(
-  //     (v) => v.selected,
-  //   ).length;
-
-  //   if (selectedCount === 0) return false;
-
-  //   // Check if all selected campaigns have details
-  //   const hasEmptyDetails = Object.entries(selectedCampaigns)
-  //     .filter(
-  //       ([, value]: [string, { selected: boolean; detail: string }]) =>
-  //         value.selected,
-  //     )
-  //     .some(
-  //       ([campaignId, value]: [
-  //         string,
-  //         { selected: boolean; detail: string },
-  //       ]) => {
-  //         const campaign = activeCampaigns?.find((c) => c.id === campaignId);
-  //         const detail = value.detail.trim();
-
-  //         // Special validation for "Tarjeta de Comida"
-  //         if (campaign?.nombre_campaña === "Tarjeta de Comida") {
-  //           const invalidValues = ["", "N", "NN"];
-  //           if (invalidValues.includes(detail)) {
-  //             return true;
-  //           }
-  //           // Regex to validate it starts with "NN" & is followed by numbers
-  //           const validFormat = /^NN\w+$/.test(detail);
-  //           return !validFormat; // Invalid if doesnt start with "NN" & is not followed by numbers
-  //         }
-
-  //         // For other campaigns, validate if it's not empty
-  //         return detail === "";
-  //       },
-  //     );
-
-  //   return !hasEmptyDetails;
-  // };
-
   return (
     <form action={formAction} className="flex select-none flex-col gap-5 pt-2">
       <div className="max-h-[400px] overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-4 scrollbar-hide">
@@ -286,7 +239,6 @@ export default function NewModalForm({
                 className="flex cursor-pointer items-start gap-3 p-3"
                 onClick={() => handleCheckboxChange(campaign)}
               >
-                {/* Checkbox visual */}
                 <div
                   className={`flex h-5 w-5 items-center justify-center rounded-md border ${
                     selectedCampaigns[campaign.id]?.selected
@@ -312,7 +264,6 @@ export default function NewModalForm({
                   )}
                 </div>
 
-                {/* Info Campaña */}
                 <div className="flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <label
@@ -339,7 +290,6 @@ export default function NewModalForm({
                 </div>
               </div>
 
-              {/* ÁREA DESPLEGABLE DINÁMICA */}
               <AnimatePresence>
                 {selectedCampaigns[campaign.id]?.selected && (
                   <motion.div
@@ -350,7 +300,6 @@ export default function NewModalForm({
                     className="overflow-hidden"
                   >
                     <div className="border-t border-slate-100 bg-slate-50 p-4">
-                      {/* AQUÍ ESTÁ LA MAGIA: Renderizamos los campos según el JSON */}
                       <DynamicFieldsRenderer
                         schemaString={campaign.esquema_formulario || "[]"}
                         values={selectedCampaigns[campaign.id]?.answers}
@@ -398,15 +347,15 @@ export default function NewModalForm({
   );
 }
 
-// --- SUB-COMPONENTE PARA RENDERIZAR CAMPOS DINÁMICOS ---
+// --- SUB-COMPONENTE CON TYPES CORREGIDOS ---
 const DynamicFieldsRenderer = ({
   schemaString,
   values,
   onChange,
 }: {
   schemaString: string;
-  values: Record<string, any>;
-  onChange: (fieldName: string, value: any) => void;
+  values: Record<string, FormValue>; // Reemplazado 'any'
+  onChange: (fieldName: string, value: FormValue) => void; // Reemplazado 'any'
 }) => {
   let schema: DynamicFieldSchema[] = [];
   try {
@@ -441,7 +390,7 @@ const DynamicFieldsRenderer = ({
                 </label>
                 <select
                   className="w-full border-b border-slate-200 bg-transparent py-1.5 text-sm text-slate-700 outline-none focus:border-blue-500"
-                  value={values[field.nombre] || ""}
+                  value={String(values[field.nombre] || "")} // Asegurar string para el value
                   onChange={(e) => onChange(field.nombre, e.target.value)}
                 >
                   <option value="" disabled>
@@ -457,10 +406,10 @@ const DynamicFieldsRenderer = ({
             ) : (
               <Input
                 placeHolder={`Ingrese ${field.label.toLowerCase()}...`}
-                label={field.label} // Usamos el label real configurado
-                type={field.tipo === "number" ? "number" : "text"} // Mapeo simple de tipos
+                label={field.label}
+                type={field.tipo === "number" ? "number" : "text"}
                 nombre={field.nombre}
-                value={values[field.nombre] || ""}
+                value={String(values[field.nombre] || "")} // Asegurar string
                 setData={(val) => onChange(field.nombre, val)}
                 required={field.requerido}
               />

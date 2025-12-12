@@ -130,7 +130,7 @@ export default function NewEntregaModal({
               <NewModalFormManual
                 activeCampaigns={activeCampaigns}
                 rut={rut}
-                userId={userId}
+                // userId={userId}
               />
             </motion.div>
           )}

@@ -1,8 +1,8 @@
 "use client";
-import { createEntregaManual } from "@/app/lib/actions/entregas"; // <--- OJO: Importamos la acción manual
+import { createEntregaManual } from "@/app/lib/actions/entregas";
 import { Campaign } from "@/app/lib/definitions";
 import { AnimatePresence, motion } from "framer-motion";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation"; // Router sí se usa para refresh
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import Input from "../../campañas/new-campaign-input";
@@ -12,6 +12,8 @@ import dayjs from "dayjs";
 import UserDropdown from "../user-dropdown";
 
 // --- TIPOS ---
+type FormValue = string | number | boolean | null | undefined;
+
 type DynamicFieldSchema = {
   nombre: string;
   label: string;
@@ -23,7 +25,7 @@ type DynamicFieldSchema = {
 type NewModalFormProps = {
   activeCampaigns?: Campaign[];
   rut: string;
-  userId: string;
+  // userId eliminado porque no se usa en este form específico
 };
 
 // --- SUB-COMPONENTE RENDERIZADOR ---
@@ -33,13 +35,14 @@ const DynamicFieldsRenderer = ({
   onChange,
 }: {
   schemaString: string;
-  values: Record<string, any>;
-  onChange: (fieldName: string, value: any) => void;
+  values: Record<string, FormValue>; // Fix: Usamos FormValue en vez de any
+  onChange: (fieldName: string, value: FormValue) => void;
 }) => {
   let schema: DynamicFieldSchema[] = [];
   try {
     schema = JSON.parse(schemaString || "[]");
-  } catch (e) {
+  } catch {
+    // Fix: Removido 'e' unused
     return <p className="text-xs text-red-500">Error en esquema</p>;
   }
 
@@ -60,7 +63,7 @@ const DynamicFieldsRenderer = ({
               </label>
               <select
                 className="w-full border-b border-slate-200 bg-transparent py-1.5 text-sm text-slate-700 outline-none focus:border-blue-500"
-                value={values[field.nombre] || ""}
+                value={String(values[field.nombre] || "")} // Aseguramos string
                 onChange={(e) => onChange(field.nombre, e.target.value)}
               >
                 <option value="" disabled>
@@ -79,7 +82,7 @@ const DynamicFieldsRenderer = ({
               label={field.label}
               type={field.tipo === "number" ? "number" : "text"}
               nombre={field.nombre}
-              value={values[field.nombre] || ""}
+              value={String(values[field.nombre] || "")} // Aseguramos string
               setData={(val) => onChange(field.nombre, val)}
               required={field.requerido}
             />
@@ -90,10 +93,10 @@ const DynamicFieldsRenderer = ({
   );
 };
 
+// --- COMPONENTE PRINCIPAL ---
 export default function NewModalFormManual({
   activeCampaigns,
   rut,
-  userId,
 }: NewModalFormProps) {
   const router = useRouter();
 
@@ -103,14 +106,14 @@ export default function NewModalFormManual({
   const [encargado, setEncargado] = useState({ nombre: "", correo: "" });
 
   const [observaciones, setObservaciones] = useState("");
-  const [lastSelection, setLastSelection] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Estado de Campañas (Dinámico)
+  // Fix: Tipado explícito para 'answers'
   const [selectedCampaigns, setSelectedCampaigns] = useState<{
     [campaignId: string]: {
       selected: boolean;
-      answers: Record<string, any>;
+      answers: Record<string, FormValue>;
     };
   }>(() => {
     if (activeCampaigns && activeCampaigns.length > 0) {
@@ -120,7 +123,10 @@ export default function NewModalFormManual({
           return acc;
         },
         {} as {
-          [key: string]: { selected: boolean; answers: Record<string, any> };
+          [key: string]: {
+            selected: boolean;
+            answers: Record<string, FormValue>;
+          };
         },
       );
     }
@@ -154,7 +160,7 @@ export default function NewModalFormManual({
   // Handlers
   const handleCheckboxChange = (campaign: Campaign) => {
     const campaignId = campaign.id;
-    setLastSelection(campaignId);
+    // Fix: Removido setLastSelection (unused)
     if (!checkValues(campaign)) {
       setSelectedCampaigns((prev) => ({
         ...prev,
@@ -166,10 +172,11 @@ export default function NewModalFormManual({
     }
   };
 
+  // Fix: value ahora es FormValue
   const handleFieldChange = (
     campaignId: string,
     fieldName: string,
-    value: any,
+    value: FormValue,
   ) => {
     setSelectedCampaigns((prev) => ({
       ...prev,
@@ -190,18 +197,15 @@ export default function NewModalFormManual({
 
   // Validación
   const isFormValid = () => {
-    // 1. Datos Manuales Básicos
     if (!fechaEntrega) return false;
-    if (folio.trim().length < 2) return false; // Ajusta largo mínimo según necesidad
+    if (folio.trim().length < 2) return false;
     if (encargado.correo.trim() === "") return false;
 
-    // 2. Campañas Seleccionadas
     const selectedEntries = Object.entries(selectedCampaigns).filter(
       ([, v]) => v.selected,
     );
     if (selectedEntries.length === 0) return false;
 
-    // 3. Validación Dinámica
     return selectedEntries.every(([campaignId, data]) => {
       const campaign = activeCampaigns?.find((c) => c.id === campaignId);
       if (!campaign) return false;
@@ -234,12 +238,12 @@ export default function NewModalFormManual({
         const campaign = activeCampaigns?.find((c) => c.id === id);
 
         const answers = { ...value.answers };
-        const codigoEntrega = answers["codigo_entrega"] || "";
+        const codigoEntrega = String(answers["codigo_entrega"] || ""); // Aseguramos string
 
         return {
           id,
           campaignName: campaign?.nombre_campaña || "",
-          campos_adicionales: JSON.stringify(answers), // JSON String
+          campos_adicionales: JSON.stringify(answers),
           code: codigoEntrega || campaign?.code || "",
         };
       });
@@ -254,7 +258,6 @@ export default function NewModalFormManual({
     formData.append("campaigns", JSON.stringify(campaignsToSubmit));
     formData.append("rut", rut.toString());
     formData.append("observaciones", observaciones);
-    // Datos Manuales
     formData.append("fecha_entrega", fechaEntrega?.toISOString() || "");
     formData.append("folio", folio.toString().toUpperCase());
     formData.append("correo_encargado", encargado.correo);
@@ -262,7 +265,6 @@ export default function NewModalFormManual({
     const toastId = toast.loading("Registrando entrega manual...");
 
     try {
-      // Llamamos al Server Action Manual
       const response = await createEntregaManual(formData);
       if (!response.success) throw new Error(response.message);
 
@@ -285,7 +287,7 @@ export default function NewModalFormManual({
       <div className="grid grid-cols-2 gap-2">
         <Input
           placeHolder="Ej: 2024-001"
-          label="Folio *"
+          label="Folio"
           type="text"
           nombre="folio"
           value={folio}

@@ -337,7 +337,6 @@ export default function ModalEntregasDetail({
   );
 }
 
-// ... ModalGeneralInfoField se mantiene igual ...
 interface ModalGeneralInfoFieldProps {
   name: string;
   children: string | Date;
@@ -375,42 +374,43 @@ function ModalGeneralInfoField({
   );
 }
 
-// --- ITEM DE LISTA ACTUALIZADO Y CORREGIDO ---
+// --- ITEM DE LISTA ACTUALIZADO Y TIPADO SEGURO ---
 function EntregasListItem({ item }: { item: EntregaByFolio }) {
-  // 1. Parseamos los campos adicionales (Respuestas)
-  let details: Record<string, any> = {};
+  // Definimos el tipo posible para los valores del JSON
+  type DetailValue = string | number | boolean | null;
+
+  // 1. Parsear Respuestas (Campos Adicionales) con Type Safety
+  let details: Record<string, DetailValue> = {};
   try {
-    details = item.campos_adicionales
-      ? JSON.parse(item.campos_adicionales)
-      : {};
+    if (item.campos_adicionales) {
+      details = JSON.parse(item.campos_adicionales) as Record<
+        string,
+        DetailValue
+      >;
+    }
   } catch (e) {
     console.error("Error parsing details", e);
   }
 
-  // 2. Parseamos el esquema original (Para recuperar los Labels con acentos)
-  // Definimos el tipo básico del esquema aquí o lo importamos
+  // 2. Parsear Esquema (Para obtener los labels bonitos)
   type SchemaField = { nombre: string; label: string };
   let schema: SchemaField[] = [];
   try {
-    schema = item.esquema_formulario ? JSON.parse(item.esquema_formulario) : [];
+    if (item.esquema_formulario) {
+      schema = JSON.parse(item.esquema_formulario) as SchemaField[];
+    }
   } catch (e) {
     console.error("Error parsing schema", e);
   }
 
-  // Función helper para encontrar el Label correcto
+  // Función para obtener el Label correcto
   const getLabel = (key: string) => {
-    // Buscamos el campo en el esquema que tenga este 'nombre' (slug)
     const field = schema.find((f) => f.nombre === key);
-
-    // Si existe, retornamos el label original ("Código", "Observación")
-    if (field) return field.label;
-
-    // Fallback: Si no se encuentra (ej: datos antiguos), formateamos la key
-    return key.replace(/_/g, " ");
+    return field ? field.label : key.replace(/_/g, " ");
   };
 
   return (
-    <div className="flex items-center justify-between gap-4 rounded-lg border border-gray-200/80 bg-gray-50 px-3 py-2.5 transition-colors hover:bg-gray-100/80">
+    <div className="flex items-start justify-between gap-4 rounded-lg border border-gray-200/80 bg-gray-50 px-3 py-2.5 transition-colors hover:bg-gray-100/80">
       <div className="flex items-center gap-3">
         <Link
           className="group flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm transition-all hover:bg-blue-100 hover:shadow"
@@ -424,23 +424,23 @@ function EntregasListItem({ item }: { item: EntregaByFolio }) {
             {item.nombre_campaña}
           </h3>
           <p className="w-full max-w-[150px] overflow-hidden text-ellipsis text-nowrap text-xs text-slate-400">
-            {item.code ? `Código Campaña: ${item.code}` : "Campaña General"}
+            {item.code ? `Campaña: ${item.code}` : "Campaña General"}
           </p>
         </div>
       </div>
 
       <div className="flex flex-col items-end justify-center gap-0.5 text-right">
-        {/* Mostramos el código principal destacado si existe */}
-        {/* {item.codigo_entrega && (
+        {/* Mostramos el código físico de entrega (ID/Serial) destacado si existe */}
+        {item.codigo_entrega && (
           <p className="mb-0.5 text-sm font-bold text-blue-600">
             {item.codigo_entrega}
           </p>
-        )} */}
+        )}
 
-        {/* Renderizamos los detalles dinámicos usando el Label correcto */}
+        {/* Detalles dinámicos iterados */}
         {Object.entries(details).map(([key, value]) => {
-          // Omitimos el código si ya lo mostramos arriba
-          if (key === "codigo_entrega") return null;
+          // Omitimos el campo 'codigo_entrega' del detalle si ya lo mostramos arriba
+          if (key === "codigo_entrega" || key === "code") return null;
 
           return (
             <p key={key} className="text-xs text-slate-500">

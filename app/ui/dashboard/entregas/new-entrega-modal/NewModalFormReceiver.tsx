@@ -9,6 +9,8 @@ import Input from "../../campañas/new-campaign-input";
 import { SubmitButton } from "../../submit-button";
 
 // --- TIPOS ---
+type FormValue = string | number | boolean | null | undefined;
+
 type DynamicFieldSchema = {
   nombre: string;
   label: string;
@@ -30,13 +32,13 @@ const DynamicFieldsRenderer = ({
   onChange,
 }: {
   schemaString: string;
-  values: Record<string, any>;
-  onChange: (fieldName: string, value: any) => void;
+  values: Record<string, FormValue>; // Fix: Usamos FormValue en vez de any
+  onChange: (fieldName: string, value: FormValue) => void;
 }) => {
   let schema: DynamicFieldSchema[] = [];
   try {
     schema = JSON.parse(schemaString || "[]");
-  } catch (e) {
+  } catch {
     return <p className="text-xs text-red-500">Error en esquema</p>;
   }
 
@@ -57,7 +59,7 @@ const DynamicFieldsRenderer = ({
               </label>
               <select
                 className="w-full border-b border-slate-200 bg-transparent py-1.5 text-sm text-slate-700 outline-none focus:border-blue-500"
-                value={values[field.nombre] || ""}
+                value={String(values[field.nombre] || "")} // Aseguramos string
                 onChange={(e) => onChange(field.nombre, e.target.value)}
               >
                 <option value="" disabled>
@@ -76,7 +78,7 @@ const DynamicFieldsRenderer = ({
               label={field.label}
               type={field.tipo === "number" ? "number" : "text"}
               nombre={field.nombre}
-              value={values[field.nombre] || ""}
+              value={String(values[field.nombre] || "")} // Aseguramos string
               setData={(val) => onChange(field.nombre, val)}
               required={field.requerido}
             />
@@ -100,17 +102,18 @@ export default function NewModalFormReceiver({
   const [nombresReceiver, setNombresReceiver] = useState("");
   const [apellidosReceiver, setApellidosReceiver] = useState("");
   const [telefonoReceiver, setTelefonoReceiver] = useState("");
-  const [direccionReceiver, setDireccionReceiver] = useState(""); // Agregado
-  const [parentesco, setParentesco] = useState(""); // Agregado
+  const [direccionReceiver, setDireccionReceiver] = useState("");
+  const [parentesco, setParentesco] = useState("");
 
   const [observaciones, setObservaciones] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Estado de Campañas (Dinámico)
+  // Fix: Tipado explícito para 'answers'
   const [selectedCampaigns, setSelectedCampaigns] = useState<{
     [campaignId: string]: {
       selected: boolean;
-      answers: Record<string, any>;
+      answers: Record<string, FormValue>;
     };
   }>(() => {
     if (activeCampaigns && activeCampaigns.length > 0) {
@@ -120,7 +123,10 @@ export default function NewModalFormReceiver({
           return acc;
         },
         {} as {
-          [key: string]: { selected: boolean; answers: Record<string, any> };
+          [key: string]: {
+            selected: boolean;
+            answers: Record<string, FormValue>;
+          };
         },
       );
     }
@@ -167,10 +173,11 @@ export default function NewModalFormReceiver({
     }
   };
 
+  // Fix: value ahora es FormValue
   const handleFieldChange = (
     campaignId: string,
     fieldName: string,
-    value: any,
+    value: FormValue,
   ) => {
     setSelectedCampaigns((prev) => ({
       ...prev,
@@ -212,8 +219,8 @@ export default function NewModalFormReceiver({
     if (nombresReceiver.trim() === "") return false;
     if (apellidosReceiver.trim() === "") return false;
     if (telefonoReceiver.trim() === "") return false;
-    if (direccionReceiver.trim() === "") return false; // Direccion es obligatoria
-    if (parentesco.trim() === "") return false; // Parentesco es obligatorio
+    if (direccionReceiver.trim() === "") return false;
+    if (parentesco.trim() === "") return false;
 
     // 3. Validar Campos Dinámicos
     return selectedEntries.every(([campaignId, data]) => {
@@ -247,14 +254,13 @@ export default function NewModalFormReceiver({
       .map(([id, value]) => {
         const campaign = activeCampaigns?.find((c) => c.id === id);
 
-        // Separamos respuestas
         const answers = { ...value.answers };
-        const codigoEntrega = answers["codigo_entrega"] || "";
+        const codigoEntrega = String(answers["codigo_entrega"] || ""); // Aseguramos string
 
         return {
           id,
           campaignName: campaign?.nombre_campaña || "",
-          campos_adicionales: JSON.stringify(answers), // Enviamos JSON string
+          campos_adicionales: JSON.stringify(answers),
           code: codigoEntrega || campaign?.code || "",
         };
       });
@@ -354,7 +360,7 @@ export default function NewModalFormReceiver({
         placeHolder="Av. Principal 123..."
         label="Dirección"
         type="text"
-        nombre="direccion_receptor"
+        nombre="direccion_receiver"
         value={direccionReceiver}
         setData={setDireccionReceiver}
         required
@@ -369,12 +375,12 @@ export default function NewModalFormReceiver({
         required
       />
 
-      {/* SECCIÓN CAMPAÑAS (Visualmente igual que en el otro form) */}
+      {/* SECCIÓN CAMPAÑAS */}
       <div
         ref={scrollRef}
         className="scrollbar-gutter-stable mt-2 max-h-[380px] overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-4"
       >
-        <div className="z-10 mb-3 flex items-baseline justify-between border-b border-slate-200 bg-slate-50 pb-2">
+        <div className="sticky top-0 z-10 mb-3 flex items-baseline justify-between border-b border-slate-200 bg-slate-50 pb-2">
           <h3 className="text-sm font-medium text-slate-700">
             Beneficios seleccionados
           </h3>
