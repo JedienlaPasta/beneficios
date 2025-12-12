@@ -198,7 +198,7 @@ export async function fetchEntregasGeneralInfoByFolio(
   }
 }
 
-export async function fetchEntregasInfoByFolio(
+export async function fetchBeneficiosEntregadosByFolio(
   folio: string,
 ): Promise<EntregaByFolio[]> {
   try {
@@ -209,11 +209,19 @@ export async function fetchEntregasInfoByFolio(
     }
 
     const request = pool.request();
+
+    // Actualizamos la Query para traer los JSONs
     const result = await request.input("folio", sql.VarChar, folio).query(`
-        SELECT beneficios_entregados.id_campaña, beneficios_entregados.codigo_entrega, campañas.tipo_dato, campañas.nombre_campaña
-        FROM beneficios_entregados
-        LEFT JOIN campañas ON beneficios_entregados.id_campaña = campañas.id
-        WHERE beneficios_entregados.folio = @folio
+        SELECT 
+            be.id_campaña, 
+            be.codigo_entrega, 
+            be.campos_adicionales, -- Aquí vienen las respuestas (Talla: M, etc.)
+            c.nombre_campaña,
+            c.esquema_formulario,  -- Aquí viene la configuración (Label: "Talla", etc.)
+            c.code                 -- El código corto de la campaña (ej: "PA")
+        FROM beneficios_entregados be
+        LEFT JOIN campañas c ON be.id_campaña = c.id
+        WHERE be.folio = @folio
       `);
 
     return result.recordset as EntregaByFolio[];

@@ -29,6 +29,7 @@ export type Campaign = {
   stock: number | null;
   tipo_dato: string;
   tramo: string;
+  esquema_formulario: string;
   // estado: "En curso" | "Finalizado";
   discapacidad: string;
   adulto_mayor: string;
@@ -80,9 +81,13 @@ export type EntregasTableByFolio = {
 // Modal Detalle Entrega
 export type EntregaByFolio = {
   id_campaña: string;
-  codigo_entrega: string;
   nombre_campaña: string;
-  tipo_dato: string;
+  codigo_entrega: string | null; // Puede ser null ahora
+
+  // Nuevos campos (vienen como string JSON desde SQL Server)
+  campos_adicionales: string | null;
+  esquema_formulario: string | null;
+  code: string;
 };
 
 export type EntregasFiles = {

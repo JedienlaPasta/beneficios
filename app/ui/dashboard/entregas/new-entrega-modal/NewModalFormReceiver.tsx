@@ -8,40 +8,120 @@ import { toast } from "sonner";
 import Input from "../../campañas/new-campaign-input";
 import { SubmitButton } from "../../submit-button";
 
+// --- TIPOS ---
+type DynamicFieldSchema = {
+  nombre: string;
+  label: string;
+  tipo: "text" | "number" | "select" | "boolean";
+  opciones?: string[];
+  requerido: boolean;
+};
+
 type NewModalFormProps = {
   activeCampaigns?: Campaign[];
   rut: string;
   userId: string;
 };
 
+// --- SUB-COMPONENTE RENDERIZADOR ---
+const DynamicFieldsRenderer = ({
+  schemaString,
+  values,
+  onChange,
+}: {
+  schemaString: string;
+  values: Record<string, any>;
+  onChange: (fieldName: string, value: any) => void;
+}) => {
+  let schema: DynamicFieldSchema[] = [];
+  try {
+    schema = JSON.parse(schemaString || "[]");
+  } catch (e) {
+    return <p className="text-xs text-red-500">Error en esquema</p>;
+  }
+
+  if (schema.length === 0) {
+    return (
+      <p className="text-xs italic text-slate-400">Sin datos adicionales.</p>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-3">
+      {schema.map((field) => (
+        <div key={field.nombre}>
+          {field.tipo === "select" ? (
+            <div className="flex flex-col gap-1">
+              <label className="ml-1 text-[10px] font-bold uppercase text-slate-400">
+                {field.label} {field.requerido && "*"}
+              </label>
+              <select
+                className="w-full border-b border-slate-200 bg-transparent py-1.5 text-sm text-slate-700 outline-none focus:border-blue-500"
+                value={values[field.nombre] || ""}
+                onChange={(e) => onChange(field.nombre, e.target.value)}
+              >
+                <option value="" disabled>
+                  Seleccione...
+                </option>
+                {field.opciones?.map((op) => (
+                  <option key={op} value={op}>
+                    {op}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <Input
+              placeHolder={`Ingrese ${field.label.toLowerCase()}...`}
+              label={field.label}
+              type={field.tipo === "number" ? "number" : "text"}
+              nombre={field.nombre}
+              value={values[field.nombre] || ""}
+              setData={(val) => onChange(field.nombre, val)}
+              required={field.requerido}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// --- COMPONENTE PRINCIPAL ---
 export default function NewModalFormReceiver({
   activeCampaigns,
   rut,
   userId,
 }: NewModalFormProps) {
   const router = useRouter();
+
+  // Estados del Receptor
   const [rutReceiver, setRutReceiver] = useState("");
   const [nombresReceiver, setNombresReceiver] = useState("");
   const [apellidosReceiver, setApellidosReceiver] = useState("");
-  const [direccionReceiver, setDireccionReceiver] = useState("");
   const [telefonoReceiver, setTelefonoReceiver] = useState("");
+  const [direccionReceiver, setDireccionReceiver] = useState(""); // Agregado
+  const [parentesco, setParentesco] = useState(""); // Agregado
+
   const [observaciones, setObservaciones] = useState("");
-  // const [lastSelection, setLastSelection] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Initialize selectedCampaigns with a lazy initializer function
+  // Estado de Campañas (Dinámico)
   const [selectedCampaigns, setSelectedCampaigns] = useState<{
-    [campaignId: string]: { selected: boolean; detail: string };
+    [campaignId: string]: {
+      selected: boolean;
+      answers: Record<string, any>;
+    };
   }>(() => {
     if (activeCampaigns && activeCampaigns.length > 0) {
       return activeCampaigns.reduce(
         (acc, campaign) => {
-          const defaultValue =
-            campaign.nombre_campaña === "Tarjeta de Comida" ? "NN" : "";
-          acc[campaign.id] = { selected: false, detail: defaultValue };
+          acc[campaign.id] = { selected: false, answers: {} };
           return acc;
         },
-        {} as { [key: string]: { selected: boolean; detail: string } },
+        {} as {
+          [key: string]: { selected: boolean; answers: Record<string, any> };
+        },
       );
     }
     return {};
@@ -55,16 +135,14 @@ export default function NewModalFormReceiver({
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
-  // Button handlers
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
-  // Update this line to use the userId prop directly
   const createEntregaWithId = createEntrega.bind(null, userId);
 
+  // Helpers de Stock
   const checkValues = (campaign: Campaign) => {
-    if (campaign.stock === null) return;
-    if (campaign.entregas === null) return;
+    if (campaign.stock === null || campaign.entregas === null) return false;
     if (campaign.stock - campaign.entregas < 1) return true;
     return false;
   };
@@ -75,10 +153,9 @@ export default function NewModalFormReceiver({
     return campaign.stock - campaign.entregas;
   };
 
+  // Handlers
   const handleCheckboxChange = (campaign: Campaign) => {
     const campaignId = campaign.id;
-    // setLastSelection(campaignId);
-
     if (!checkValues(campaign)) {
       setSelectedCampaigns((prev) => ({
         ...prev,
@@ -90,131 +167,134 @@ export default function NewModalFormReceiver({
     }
   };
 
-  const handleDetailChange = (campaignId: string, value: string) => {
+  const handleFieldChange = (
+    campaignId: string,
+    fieldName: string,
+    value: any,
+  ) => {
     setSelectedCampaigns((prev) => ({
       ...prev,
       [campaignId]: {
         ...prev[campaignId],
-        detail: value,
+        answers: {
+          ...prev[campaignId].answers,
+          [fieldName]: value,
+        },
       },
     }));
   };
 
+  // Formateo RUT
+  const formatRutLive = (input: string) => {
+    const cleaned = input.replace(/[^0-9kK]/g, "").toUpperCase();
+    if (!cleaned) return { display: "", rutDigits: "" };
+    const maybeDv = cleaned.slice(-1);
+    const hasDv = cleaned.length > 1 && /[0-9K]/.test(maybeDv);
+    const rutDigits = hasDv ? cleaned.slice(0, -1) : cleaned;
+    const withDots = rutDigits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    const display = hasDv ? `${withDots}-${maybeDv}` : withDots;
+    return { display, rutDigits };
+  };
+
+  const countRutDigits = (formatted: string) =>
+    formatted.replace(/[^0-9kK]/g, "").length;
+
+  // Validación
+  const isFormValid = () => {
+    // 1. Validar Campañas seleccionadas
+    const selectedEntries = Object.entries(selectedCampaigns).filter(
+      ([, v]) => v.selected,
+    );
+    if (selectedEntries.length === 0) return false;
+
+    // 2. Validar Datos Receptor
+    if (countRutDigits(rutReceiver) < 8) return false;
+    if (nombresReceiver.trim() === "") return false;
+    if (apellidosReceiver.trim() === "") return false;
+    if (telefonoReceiver.trim() === "") return false;
+    if (direccionReceiver.trim() === "") return false; // Direccion es obligatoria
+    if (parentesco.trim() === "") return false; // Parentesco es obligatorio
+
+    // 3. Validar Campos Dinámicos
+    return selectedEntries.every(([campaignId, data]) => {
+      const campaign = activeCampaigns?.find((c) => c.id === campaignId);
+      if (!campaign) return false;
+
+      let schema: DynamicFieldSchema[] = [];
+      try {
+        schema = JSON.parse(campaign.esquema_formulario || "[]");
+      } catch {
+        return true;
+      }
+
+      return schema.every((field) => {
+        if (!field.requerido) return true;
+        const value = data.answers[field.nombre];
+        return (
+          value !== null && value !== undefined && String(value).trim() !== ""
+        );
+      });
+    });
+  };
+
+  // Submit Action
   const formAction = async (formData: FormData) => {
     setIsLoading(true);
     setIsDisabled(true);
 
-    // Convert selectedCampaigns to formFields format
     const campaignsToSubmit = Object.entries(selectedCampaigns)
-      .filter(
-        ([, value]: [string, { selected: boolean; detail: string }]) =>
-          value.selected,
-      )
+      .filter(([, value]) => value.selected)
       .map(([id, value]) => {
-        const campaign = activeCampaigns?.find(
-          (campaign) => campaign.id === id,
-        );
+        const campaign = activeCampaigns?.find((c) => c.id === id);
+
+        // Separamos respuestas
+        const answers = { ...value.answers };
+        const codigoEntrega = answers["codigo_entrega"] || "";
+
         return {
           id,
           campaignName: campaign?.nombre_campaña || "",
-          detail: value.detail,
-          code: campaign?.code || "",
+          campos_adicionales: JSON.stringify(answers), // Enviamos JSON string
+          code: codigoEntrega || campaign?.code || "",
         };
       });
 
-    if (campaignsToSubmit.length === 0) {
-      toast.error("Debe seleccionar al menos una campaña");
+    if (!isFormValid()) {
+      toast.error("Complete todos los campos requeridos");
       setIsLoading(false);
       setIsDisabled(false);
       return;
     }
 
-    for (const campaign of campaignsToSubmit) {
-      if (campaign.detail.toString().trim() === "") {
-        toast.error(
-          `Debe ingresar un detalle para la campaña "${campaign.campaignName}"`,
-        );
-        setIsLoading(false);
-        setIsDisabled(false);
-        return;
-      }
-    }
-
     formData.append("campaigns", JSON.stringify(campaignsToSubmit));
     formData.append("rut", rut.toString());
     formData.append("observaciones", observaciones);
+
+    // Datos del Receptor
     formData.append("rut_receptor", rutReceiver.toString().toUpperCase());
     formData.append("nombres_receptor", nombresReceiver.toString());
     formData.append("apellidos_receptor", apellidosReceiver.toString());
+    formData.append("telefono_receptor", telefonoReceiver.toString());
     formData.append("direccion_receptor", direccionReceiver.toString());
+    formData.append("parentesco_receptor", parentesco.toString());
 
     const toastId = toast.loading("Guardando...");
-    setTimeout(async () => {
-      try {
-        const response = await createEntregaWithId(formData);
-        if (!response.success) {
-          throw new Error(response.message);
-        }
-        toast.success(response.message, { id: toastId });
-        closeModal();
-        router.refresh();
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Error al crear la entrega";
-        toast.error(message, { id: toastId });
-        setIsDisabled(false);
-      } finally {
-        setIsLoading(false);
-      }
-    }, 200);
-  };
 
-  // Formateo de RUT en vivo
-  const formatRutLive = (input: string) => {
-    const cleaned = input.replace(/[^0-9kK]/g, "").toUpperCase();
-    if (!cleaned) return { display: "", rutDigits: "", dv: "" };
+    try {
+      const response = await createEntregaWithId(formData);
+      if (!response.success) throw new Error(response.message);
 
-    const maybeDv = cleaned.slice(-1);
-    const hasDv = cleaned.length > 1 && /[0-9K]/.test(maybeDv);
-    const rutDigits = hasDv ? cleaned.slice(0, -1) : cleaned;
-
-    const withDots = rutDigits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    const display = hasDv ? `${withDots}-${maybeDv}` : withDots;
-
-    return { display, rutDigits };
-  };
-
-  const countRutDigits = (formatted: string) =>
-    formatted.replace(/[^0-9]/g, "").length;
-
-  // Add this function to check if form is valid
-  const isFormValid = () => {
-    // Check if any campaigns are selected
-    const selectedCount = Object.values(selectedCampaigns).filter(
-      (v) => v.selected,
-    ).length;
-
-    if (selectedCount === 0) return false;
-
-    // Validar cantidad de dígitos del RUT (sin contar puntos/guion)
-    if (countRutDigits(rutReceiver) < 7) return false;
-
-    if (nombresReceiver.trim() === "") return false;
-    if (apellidosReceiver.trim() === "") return false;
-    if (direccionReceiver.trim() === "") return false;
-
-    // Check if all selected campaigns have details
-    const hasEmptyDetails = Object.entries(selectedCampaigns)
-      .filter(
-        ([, value]: [string, { selected: boolean; detail: string }]) =>
-          value.selected,
-      )
-      .some(
-        ([, value]: [string, { selected: boolean; detail: string }]) =>
-          value.detail.trim() === "",
-      );
-
-    return !hasEmptyDetails;
+      toast.success(response.message, { id: toastId });
+      closeModal();
+      router.refresh();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Error al crear la entrega";
+      toast.error(message, { id: toastId });
+    } finally {
+      setIsLoading(false);
+      setIsDisabled(false);
+    }
   };
 
   return (
@@ -222,11 +302,13 @@ export default function NewModalFormReceiver({
       action={formAction}
       className="flex select-none flex-col justify-center gap-3 px-0.5 pt-2"
     >
+      {/* SECCIÓN DATOS RECEPTOR */}
       <h4 className="text-sm font-medium text-slate-700">Datos del receptor</h4>
+
       <div className="grid grid-cols-2 gap-2">
         <Input
-          placeHolder="12345678..."
-          label="RUT *"
+          placeHolder="12345678-9"
+          label="RUT"
           type="text"
           nombre="rut_receiver"
           value={rutReceiver}
@@ -238,7 +320,7 @@ export default function NewModalFormReceiver({
         />
         <Input
           placeHolder="+569 1234 5678"
-          label="Teléfono *"
+          label="Teléfono"
           type="text"
           nombre="telefono_receiver"
           value={telefonoReceiver}
@@ -249,8 +331,8 @@ export default function NewModalFormReceiver({
 
       <div className="grid grid-cols-2 gap-2">
         <Input
-          placeHolder="Juan Martínez..."
-          label="Nombres *"
+          placeHolder="Juan Andrés..."
+          label="Nombres"
           type="text"
           nombre="nombres_receiver"
           value={nombresReceiver}
@@ -258,8 +340,8 @@ export default function NewModalFormReceiver({
           required
         />
         <Input
-          placeHolder="Gonzalez Figueroa..."
-          label="Apellidos *"
+          placeHolder="Pérez González..."
+          label="Apellidos"
           type="text"
           nombre="apellidos_receiver"
           value={apellidosReceiver}
@@ -269,18 +351,28 @@ export default function NewModalFormReceiver({
       </div>
 
       <Input
-        placeHolder="Dirección completa..."
-        label="Dirección *"
+        placeHolder="Av. Principal 123..."
+        label="Dirección"
         type="text"
-        nombre="direccion_receiver"
+        nombre="direccion_receptor"
         value={direccionReceiver}
         setData={setDireccionReceiver}
         required
       />
+      <Input
+        placeHolder="Ej: Familiar, Tutor Legal..."
+        label="Parentesco / Relación"
+        type="text"
+        nombre="parentesco_receptor"
+        value={parentesco}
+        setData={setParentesco}
+        required
+      />
 
+      {/* SECCIÓN CAMPAÑAS (Visualmente igual que en el otro form) */}
       <div
         ref={scrollRef}
-        className="scrollbar-gutter-stable mt-2 max-h-[420px] overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-4"
+        className="scrollbar-gutter-stable mt-2 max-h-[380px] overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-4"
       >
         <div className="sticky top-0 z-10 mb-3 flex items-baseline justify-between border-b border-slate-200 bg-slate-50 pb-2">
           <h3 className="text-sm font-medium text-slate-700">
@@ -302,7 +394,7 @@ export default function NewModalFormReceiver({
                 key={campaign.id}
                 className={`overflow-hidden rounded-lg border bg-white shadow-sm transition-all hover:border-slate-300 ${
                   isSelected
-                    ? "sring-2 !border-blue-300 ring-blue-200"
+                    ? "!border-blue-300 ring-2 ring-blue-200"
                     : isOutOfStock
                       ? "!border-rose-300"
                       : "!border-slate-200"
@@ -340,19 +432,12 @@ export default function NewModalFormReceiver({
                   <div className="flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <label
-                        htmlFor={`campaign-${campaign.id}`}
-                        className={`cursor-pointer text-sm font-medium ${
-                          isOutOfStock ? "text-rose-400" : "text-slate-700"
-                        }`}
+                        className={`cursor-pointer text-sm font-medium ${isOutOfStock ? "text-rose-400" : "text-slate-700"}`}
                       >
                         {campaign.nombre_campaña}
                       </label>
                       <span
-                        className={`rounded-full border px-2 py-0.5 text-xs ${
-                          isOutOfStock
-                            ? "border-rose-300 bg-rose-50 text-rose-500"
-                            : "border-gray-200 bg-gray-50 text-gray-600"
-                        }`}
+                        className={`rounded-full border px-2 py-0.5 text-xs ${isOutOfStock ? "border-rose-300 bg-rose-50 text-rose-500" : "border-gray-200 bg-gray-50 text-gray-600"}`}
                       >
                         Stock: {getStock(campaign)}
                       </span>
@@ -366,27 +451,20 @@ export default function NewModalFormReceiver({
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{
-                        duration: 0.3,
-                        ease: "easeInOut",
-                        opacity: { duration: 0.2 },
-                      }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
                       className="overflow-hidden"
                       onAnimationStart={() => {
-                        // Force scrollbar recalculation durante la animación
-                        const container = scrollRef.current;
-                        if (container)
-                          container.scrollTop = container.scrollTop;
+                        if (scrollRef.current)
+                          scrollRef.current.scrollTop =
+                            scrollRef.current.scrollTop;
                       }}
                     >
                       <div className="border-t border-slate-100 bg-slate-50 p-3">
-                        <Input
-                          placeHolder={`Ingrese ${campaign.tipo_dato.toLowerCase()}...`}
-                          type="text"
-                          nombre={`detail-${campaign.id}`}
-                          value={selectedCampaigns[campaign.id]?.detail || ""}
-                          setData={(value) =>
-                            handleDetailChange(campaign.id, value)
+                        <DynamicFieldsRenderer
+                          schemaString={campaign.esquema_formulario || "[]"}
+                          values={selectedCampaigns[campaign.id]?.answers}
+                          onChange={(fieldName, val) =>
+                            handleFieldChange(campaign.id, fieldName, val)
                           }
                         />
                       </div>
@@ -406,22 +484,22 @@ export default function NewModalFormReceiver({
       </div>
 
       <div className="flex grow flex-col gap-1">
-        <label htmlFor={observaciones} className="text-xs text-slate-500">
+        <label htmlFor="observaciones" className="text-xs text-slate-500">
           Justificación
         </label>
         <textarea
           name="observaciones"
           id="observaciones"
-          rows={4}
+          rows={3}
           maxLength={390}
           value={observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
           placeholder="Justificación..."
-          className="min-h-[120px] w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500"
+          className="min-h-[80px] w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500"
         ></textarea>
       </div>
 
-      <div className="mt-3 flex">
+      <div className="mt-2 flex">
         <SubmitButton isDisabled={isDisabled || !isFormValid()}>
           {isLoading ? "Guardando..." : "Guardar"}
         </SubmitButton>

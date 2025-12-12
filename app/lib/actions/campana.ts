@@ -13,11 +13,17 @@ import { capitalizeAll } from "../utils/format";
 // Crear Campaña ========================================================================
 const CreateCampaignFormSchema = z.object({
   id: z.string(),
-  nombre: z.string().min(3, { message: "Nombre es requerido" }),
+  nombre: z
+    .string()
+    .min(3, { message: "El nombre es requerido (mínimo 3 letras)" }),
   fechaInicio: z.string(),
-  fechaTermino: z.string(),
+  fechaTermino: z
+    .string()
+    .refine((date) => new Date(date).toString() !== "Invalid Date", {
+      message: "Fecha de término inválida",
+    }),
   estado: z.enum(["En curso", "Finalizado"]),
-  code: z.string(),
+  code: z.string().min(2, { message: "El código es requerido" }),
   stock: z.preprocess(
     (val) => {
       if (val === undefined || val === null) return null;
@@ -37,7 +43,9 @@ const CreateCampaignFormSchema = z.object({
       .nullable(),
   ),
   entregas: z.number(),
-  esquemaFormulario: z.string(),
+  esquemaFormulario: z
+    .string()
+    .min(1, { message: "La configuración del formulario es requerida" }),
   tramo: z.string().transform((str) => str === "true"),
   discapacidad: z.string().transform((str) => str === "true"),
   adultoMayor: z.string().transform((str) => str === "true"),
@@ -63,6 +71,22 @@ const CreateCampaign = CreateCampaignFormSchema.omit({
 // Add return type to the server action
 export async function createCampaign(formData: FormData): Promise<FormState> {
   try {
+    const parsedData = CreateCampaign.safeParse({
+      nombre: formData.get("nombre"),
+      fechaTermino: formData.get("fechaTermino"),
+      code: formData.get("code"),
+      stock: formData.get("stock"),
+      esquemaFormulario: formData.get("esquema_formulario"), // OJO: Asegúrate que el name en el formData sea este
+      tramo: formData.get("tramo"),
+      discapacidad: formData.get("discapacidad"),
+      adultoMayor: formData.get("adultoMayor"),
+    });
+
+    if (!parsedData.success) {
+      console.error("Error de validación:", parsedData.error.flatten());
+      return { success: false, message: "Datos inválidos. Revise los campos." };
+    }
+
     const {
       nombre,
       fechaTermino,
@@ -72,29 +96,12 @@ export async function createCampaign(formData: FormData): Promise<FormState> {
       tramo,
       discapacidad,
       adultoMayor,
-    } = CreateCampaign?.parse({
-      nombre: formData.get("nombre"),
-      fechaTermino: formData.get("fechaTermino"),
-      code: formData.get("code"),
-      stock: formData.get("stock"),
-      esquemaFormulario: formData.get("esquemaFormulario"),
-      tramo: formData.get("tramo"),
-      discapacidad: formData.get("discapacidad"),
-      adultoMayor: formData.get("adultoMayor"),
-    });
+    } = parsedData.data;
     console.log(esquemaFormulario);
 
-    // return {
-    //   success: true,
-    //   message: "Campaña creada con éxito.",
-    // };
     const fechaInicio = new Date();
 
-    if (!fechaTermino) {
-      throw new Error("Campos incompletos.");
-    }
-
-    if (new Date(fechaTermino) < fechaInicio) {
+    if (new Date(fechaTermino!) < fechaInicio) {
       throw new Error(
         "La fecha de término no puede ser menor a la fecha de inicio.",
       );
@@ -111,50 +118,43 @@ export async function createCampaign(formData: FormData): Promise<FormState> {
     }
 
     const request = pool.request();
-    const result = await request.input("nombre", sql.VarChar, nombre).query(`
-        SELECT *,
-          CASE 
-            WHEN campañas.fecha_inicio > GETUTCDATE() THEN 'Pendiente'
-            WHEN campañas.fecha_inicio <= GETUTCDATE() AND campañas.fecha_termino >= GETUTCDATE() THEN 'En Curso'
-            ELSE 'Finalizado'
-          END AS estado
-        FROM campañas
-        WHERE nombre_campaña = @nombre
+    const checkResult = await request.input("nombre_check", sql.VarChar, nombre)
+      .query(`
+        SELECT TOP 1 1 
+        FROM campañas 
+        WHERE nombre_campaña = @nombre_check 
+        AND (
+            fecha_inicio > GETUTCDATE() 
+            OR (fecha_inicio <= GETUTCDATE() AND fecha_termino >= GETUTCDATE())
+        )
       `);
 
-    // Verificar que no hayan campañas activas con el mismo nombre
-    const campañas = result.recordset;
-    for (const campaña of campañas) {
-      if (campaña.estado !== "Finalizado")
-        throw new Error("Ya existe una campaña activa con este nombre.");
+    if (checkResult.recordset.length > 0) {
+      throw new Error("Ya existe una campaña activa con este nombre.");
     }
 
-    const entregas = 0;
+    const entregasIniciales = 0;
 
     // Modified query to return the inserted ID
     const insertResult = await request
       .input("nombre_campaña", sql.VarChar, nombre)
-      .input(
-        "fechaTermino",
-        sql.DateTime,
-        new Date(new Date(fechaTermino).toISOString()),
-      )
-      .input("code", sql.VarChar, code.toUpperCase())
+      .input("fechaTermino", sql.DateTime2, new Date(fechaTermino!)) // DateTime2 es más preciso
+      .input("code", sql.VarChar, code!.toUpperCase())
       .input("stock", sql.Int, stock)
-      .input("tipoDato", sql.VarChar, tipoDato)
-      .input("entregas", sql.Int, entregas)
+      .input("esquemaFormulario", sql.NVarChar(sql.MAX), esquemaFormulario)
+      .input("entregas", sql.Int, entregasIniciales)
       .input("tramo", sql.Bit, tramo)
       .input("discapacidad", sql.Bit, discapacidad)
       .input("adultoMayor", sql.Bit, adultoMayor).query(`
-        INSERT INTO campañas (nombre_campaña, fecha_inicio, fecha_termino, code, stock, tipo_dato, entregas, tramo, discapacidad, adulto_mayor)
+        INSERT INTO campañas (nombre_campaña, fecha_inicio, fecha_termino, code, stock, esquema_formulario, entregas, tramo, discapacidad, adulto_mayor)
         OUTPUT INSERTED.id
-        VALUES (@nombre_campaña, GETUTCDATE(), @fechaTermino, @code, @stock, @tipoDato, @entregas, @tramo, @discapacidad, @adultoMayor)
+        VALUES (@nombre_campaña, GETUTCDATE(), @fechaTermino, @code, @stock, @esquemaFormulario, @entregas, @tramo, @discapacidad, @adultoMayor)
         `);
 
     // Get the ID from the result
     const newCampaignId = insertResult.recordset[0].id;
 
-    await logAction("Crear", "creó la campaña", nombre, newCampaignId);
+    await logAction("Crear", "creó la campaña", nombre!, newCampaignId);
     revalidatePath("/dashboard/campanas");
     return { success: true, message: "Campaña creada exitosamente." };
   } catch (error) {

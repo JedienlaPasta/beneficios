@@ -26,7 +26,7 @@ type Props = {
   rut: string;
   folio: string;
   entregas: EntregasTableByFolio;
-  entrega: EntregaByFolio[];
+  beneficiosEntregados: EntregaByFolio[];
   files: EntregasFiles[];
 };
 
@@ -34,7 +34,7 @@ export default function ModalEntregasDetail({
   rut,
   folio,
   entregas,
-  entrega,
+  beneficiosEntregados,
   files,
 }: Props) {
   const [tab, setTab] = useState("Resumen");
@@ -75,7 +75,6 @@ export default function ModalEntregasDetail({
     };
   }, []);
 
-  // To disable camera on overlay click
   const handleOverlayClick = async () => {
     const params = new URLSearchParams(searchParams);
     params.delete("detailsModal");
@@ -141,7 +140,6 @@ export default function ModalEntregasDetail({
                 Beneficiario: <p className="text-blue-700">{formattedRUT}</p>
               </span>
             </div>
-            {/* Botón de descarga SIEMPRE montado, solo se desactiva al cerrar */}
             <div className="flex items-center gap-2">
               <GetNewFileButton folio={folio}>Nueva Acta</GetNewFileButton>
               <CloseModalButton
@@ -195,14 +193,14 @@ export default function ModalEntregasDetail({
             </button>
           </section>
 
-          {/* Content with Framer Motion transitions */}
+          {/* Content */}
           <motion.div
             id="content-container"
             className="scrollbar-hidex relative min-h-[8rem] overflow-y-auto"
           >
             <AnimatePresence mode="wait">
               {tab === "Resumen" ? (
-                // Detail ==============================================================
+                // Resumen ==============================================================
                 <motion.div
                   key="resumen"
                   initial={{ opacity: 0, y: 10, height: 460 }}
@@ -246,7 +244,8 @@ export default function ModalEntregasDetail({
                       <h3 className="flex items-center gap-2 text-sm font-medium text-slate-600">
                         <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
                         Beneficios Recibidos{" "}
-                        {entrega.length > 3 && "(" + entrega.length + ")"}
+                        {beneficiosEntregados.length > 3 &&
+                          "(" + beneficiosEntregados.length + ")"}
                       </h3>
                       <span className="flex items-center gap-2">
                         <RoleGuard
@@ -264,10 +263,10 @@ export default function ModalEntregasDetail({
                         </RoleGuard>
                       </span>
                     </div>
-                    <div className="flex max-h-[206px] flex-col gap-2.5 overflow-y-auto">
-                      {entrega.map((item) => (
+                    <div className="flex max-h-[206px] flex-col gap-2.5 overflow-y-auto pr-1 scrollbar-hide">
+                      {beneficiosEntregados.map((item, index) => (
                         <EntregasListItem
-                          key={item.nombre_campaña}
+                          key={`${item.id_campaña}-${index}`}
                           item={item}
                         />
                       ))}
@@ -278,7 +277,7 @@ export default function ModalEntregasDetail({
                   <FilesList folio={folio} files={files} />
                 </motion.div>
               ) : tab === "Importar" ? (
-                // Import ==============================================================
+                // Importar ==============================================================
                 <motion.div
                   key="importar"
                   initial={{ opacity: 0, y: 10, height: 440 }}
@@ -291,15 +290,12 @@ export default function ModalEntregasDetail({
                   layout
                   className="flex flex-col gap-5"
                 >
-                  {/* Files List */}
                   <FilesList folio={folio} files={files} />
-
-                  {/* Import Form */}
                   <div className="border-t border-gray-100"></div>
                   <ModalImportForm folio={folio} savedFiles={files.length} />
                 </motion.div>
               ) : tab === "Capturar" ? (
-                // Capture =============================================================
+                // Capturar =============================================================
                 <motion.div
                   key="capturar"
                   initial={{ opacity: 0, y: 10, height: 440 }}
@@ -324,17 +320,7 @@ export default function ModalEntregasDetail({
                   layout
                   className="flex flex-col gap-5"
                 >
-                  {/* Aquí puedes agregar el componente de captura de fotos */}
                   <div className="flex flex-col items-start justify-center">
-                    {/* Información adicional */}
-                    {/* <div className="mb-3 flex w-full items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-600/80 sm:p-4">
-                      <FaCircleInfo className="shrink-0" size={16} />
-                      <p>
-                        Asegúrate de permitir el acceso a la cámara cuando se
-                        solicite.
-                      </p>
-                    </div> */}
-
                     <Camara
                       folio={folio}
                       isActive={tab === "Capturar" && !isModalClosing}
@@ -351,6 +337,7 @@ export default function ModalEntregasDetail({
   );
 }
 
+// ... ModalGeneralInfoField se mantiene igual ...
 interface ModalGeneralInfoFieldProps {
   name: string;
   children: string | Date;
@@ -388,7 +375,40 @@ function ModalGeneralInfoField({
   );
 }
 
+// --- ITEM DE LISTA ACTUALIZADO Y CORREGIDO ---
 function EntregasListItem({ item }: { item: EntregaByFolio }) {
+  // 1. Parseamos los campos adicionales (Respuestas)
+  let details: Record<string, any> = {};
+  try {
+    details = item.campos_adicionales
+      ? JSON.parse(item.campos_adicionales)
+      : {};
+  } catch (e) {
+    console.error("Error parsing details", e);
+  }
+
+  // 2. Parseamos el esquema original (Para recuperar los Labels con acentos)
+  // Definimos el tipo básico del esquema aquí o lo importamos
+  type SchemaField = { nombre: string; label: string };
+  let schema: SchemaField[] = [];
+  try {
+    schema = item.esquema_formulario ? JSON.parse(item.esquema_formulario) : [];
+  } catch (e) {
+    console.error("Error parsing schema", e);
+  }
+
+  // Función helper para encontrar el Label correcto
+  const getLabel = (key: string) => {
+    // Buscamos el campo en el esquema que tenga este 'nombre' (slug)
+    const field = schema.find((f) => f.nombre === key);
+
+    // Si existe, retornamos el label original ("Código", "Observación")
+    if (field) return field.label;
+
+    // Fallback: Si no se encuentra (ej: datos antiguos), formateamos la key
+    return key.replace(/_/g, " ");
+  };
+
   return (
     <div className="flex items-center justify-between gap-4 rounded-lg border border-gray-200/80 bg-gray-50 px-3 py-2.5 transition-colors hover:bg-gray-100/80">
       <div className="flex items-center gap-3">
@@ -403,16 +423,34 @@ function EntregasListItem({ item }: { item: EntregaByFolio }) {
           <h3 className="text-sm font-semibold text-slate-700">
             {item.nombre_campaña}
           </h3>
-          <p className="w-full max-w-[180px] overflow-hidden text-ellipsis text-nowrap text-xs text-slate-500">
-            {item.id_campaña}
+          <p className="w-full max-w-[150px] overflow-hidden text-ellipsis text-nowrap text-xs text-slate-400">
+            {item.code ? `Código Campaña: ${item.code}` : "Campaña General"}
           </p>
         </div>
       </div>
-      <div className="px-1">
-        <h4 className="text-right text-xs text-slate-500">{item.tipo_dato}</h4>
-        <p className="text-right text-sm font-semibold text-slate-700">
-          {item.codigo_entrega}
-        </p>
+
+      <div className="flex flex-col items-end justify-center gap-0.5 text-right">
+        {/* Mostramos el código principal destacado si existe */}
+        {/* {item.codigo_entrega && (
+          <p className="mb-0.5 text-sm font-bold text-blue-600">
+            {item.codigo_entrega}
+          </p>
+        )} */}
+
+        {/* Renderizamos los detalles dinámicos usando el Label correcto */}
+        {Object.entries(details).map(([key, value]) => {
+          // Omitimos el código si ya lo mostramos arriba
+          if (key === "codigo_entrega") return null;
+
+          return (
+            <p key={key} className="text-xs text-slate-500">
+              <span className="font-medium capitalize text-slate-600">
+                {getLabel(key)}:
+              </span>{" "}
+              {String(value)}
+            </p>
+          );
+        })}
       </div>
     </div>
   );
@@ -432,7 +470,6 @@ function FilesList({
           <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
           Documentos Adjuntos
         </h3>
-        {/* Se eliminó el botón aquí para evitar desmontajes al cambiar de pestaña */}
       </div>
 
       {files.length > 0 ? (

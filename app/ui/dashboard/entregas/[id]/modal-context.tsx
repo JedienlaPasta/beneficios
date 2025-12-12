@@ -1,7 +1,7 @@
 import {
   fetchFilesByFolio,
   fetchEntregasGeneralInfoByFolio,
-  fetchEntregasInfoByFolio,
+  fetchBeneficiosEntregadosByFolio,
 } from "@/app/lib/data/entregas";
 import ModalEntregasDetail from "./modal-entregas-detail";
 import EditJustificationModal from "./edit-modals/edit-justification-modal";
@@ -20,14 +20,15 @@ export default async function ModalEntregasDetailContext({
   isOnEditForJustification,
   isOnEditForSupervisor,
 }: ModalContextProps) {
-  const [entregasResponse, entregaResponse, filesResponse] = await Promise.all([
-    fetchEntregasGeneralInfoByFolio(folio),
-    fetchEntregasInfoByFolio(folio),
-    fetchFilesByFolio(folio),
-  ]);
+  const [entregasResponse, beneficiosEntregadosResponse, filesResponse] =
+    await Promise.all([
+      fetchEntregasGeneralInfoByFolio(folio),
+      fetchBeneficiosEntregadosByFolio(folio),
+      fetchFilesByFolio(folio),
+    ]);
 
   const entregas = entregasResponse;
-  const entrega = entregaResponse;
+  const beneficiosEntregados = beneficiosEntregadosResponse;
   const files = filesResponse;
 
   if (isOnEditForJustification) {
@@ -53,7 +54,7 @@ export default async function ModalEntregasDetailContext({
       rut={rut}
       folio={folio}
       entregas={entregas}
-      entrega={entrega}
+      beneficiosEntregados={beneficiosEntregados}
       files={files}
     />
   );

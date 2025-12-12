@@ -1,9 +1,9 @@
 "use client";
-import { createEntrega } from "@/app/lib/actions/entregas";
+import { createEntregaManual } from "@/app/lib/actions/entregas"; // <--- OJO: Importamos la acción manual
 import { Campaign } from "@/app/lib/definitions";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import Input from "../../campañas/new-campaign-input";
 import { SubmitButton } from "../../submit-button";
@@ -11,10 +11,83 @@ import CustomAntdDatePicker from "../../datepicker";
 import dayjs from "dayjs";
 import UserDropdown from "../user-dropdown";
 
+// --- TIPOS ---
+type DynamicFieldSchema = {
+  nombre: string;
+  label: string;
+  tipo: "text" | "number" | "select" | "boolean";
+  opciones?: string[];
+  requerido: boolean;
+};
+
 type NewModalFormProps = {
   activeCampaigns?: Campaign[];
   rut: string;
   userId: string;
+};
+
+// --- SUB-COMPONENTE RENDERIZADOR ---
+const DynamicFieldsRenderer = ({
+  schemaString,
+  values,
+  onChange,
+}: {
+  schemaString: string;
+  values: Record<string, any>;
+  onChange: (fieldName: string, value: any) => void;
+}) => {
+  let schema: DynamicFieldSchema[] = [];
+  try {
+    schema = JSON.parse(schemaString || "[]");
+  } catch (e) {
+    return <p className="text-xs text-red-500">Error en esquema</p>;
+  }
+
+  if (schema.length === 0) {
+    return (
+      <p className="text-xs italic text-slate-400">Sin datos adicionales.</p>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      {schema.map((field) => (
+        <div key={field.nombre} className="col-span-1">
+          {field.tipo === "select" ? (
+            <div className="flex flex-col gap-1">
+              <label className="ml-1 text-[10px] font-bold uppercase text-slate-400">
+                {field.label} {field.requerido && "*"}
+              </label>
+              <select
+                className="w-full border-b border-slate-200 bg-transparent py-1.5 text-sm text-slate-700 outline-none focus:border-blue-500"
+                value={values[field.nombre] || ""}
+                onChange={(e) => onChange(field.nombre, e.target.value)}
+              >
+                <option value="" disabled>
+                  Seleccione...
+                </option>
+                {field.opciones?.map((op) => (
+                  <option key={op} value={op}>
+                    {op}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <Input
+              placeHolder={`Ingrese ${field.label.toLowerCase()}...`}
+              label={field.label}
+              type={field.tipo === "number" ? "number" : "text"}
+              nombre={field.nombre}
+              value={values[field.nombre] || ""}
+              setData={(val) => onChange(field.nombre, val)}
+              required={field.requerido}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  );
 };
 
 export default function NewModalFormManual({
@@ -23,28 +96,32 @@ export default function NewModalFormManual({
   userId,
 }: NewModalFormProps) {
   const router = useRouter();
+
+  // Estados propios de Manual
   const [folio, setFolio] = useState("");
+  const [fechaEntrega, setFechaEntrega] = useState<Date | null>(null);
+  const [encargado, setEncargado] = useState({ nombre: "", correo: "" });
+
   const [observaciones, setObservaciones] = useState("");
   const [lastSelection, setLastSelection] = useState("");
-  const [fechaEntrega, setFechaEntrega] = useState<Date | null>(null);
-  const [encargado, setEncargado] = useState({
-    nombre: "",
-    correo: "",
-  });
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Initialize selectedCampaigns with a lazy initializer function
+  // Estado de Campañas (Dinámico)
   const [selectedCampaigns, setSelectedCampaigns] = useState<{
-    [campaignId: string]: { selected: boolean; detail: string };
+    [campaignId: string]: {
+      selected: boolean;
+      answers: Record<string, any>;
+    };
   }>(() => {
     if (activeCampaigns && activeCampaigns.length > 0) {
       return activeCampaigns.reduce(
         (acc, campaign) => {
-          const defaultValue =
-            campaign.nombre_campaña === "Tarjeta de Comida" ? "NN" : "";
-          acc[campaign.id] = { selected: false, detail: defaultValue };
+          acc[campaign.id] = { selected: false, answers: {} };
           return acc;
         },
-        {} as { [key: string]: { selected: boolean; detail: string } },
+        {} as {
+          [key: string]: { selected: boolean; answers: Record<string, any> };
+        },
       );
     }
     return {};
@@ -58,16 +135,12 @@ export default function NewModalFormManual({
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
-  // Button handlers
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
-  // Update this line to use the userId prop directly
-  const createEntregaWithId = createEntrega.bind(null, userId);
-
+  // Helpers
   const checkValues = (campaign: Campaign) => {
-    if (campaign.stock === null) return;
-    if (campaign.entregas === null) return;
+    if (campaign.stock === null || campaign.entregas === null) return false;
     if (campaign.stock - campaign.entregas < 1) return true;
     return false;
   };
@@ -78,10 +151,10 @@ export default function NewModalFormManual({
     return campaign.stock - campaign.entregas;
   };
 
+  // Handlers
   const handleCheckboxChange = (campaign: Campaign) => {
     const campaignId = campaign.id;
     setLastSelection(campaignId);
-
     if (!checkValues(campaign)) {
       setSelectedCampaigns((prev) => ({
         ...prev,
@@ -93,137 +166,135 @@ export default function NewModalFormManual({
     }
   };
 
-  const handleDetailChange = (campaignId: string, value: string) => {
+  const handleFieldChange = (
+    campaignId: string,
+    fieldName: string,
+    value: any,
+  ) => {
     setSelectedCampaigns((prev) => ({
       ...prev,
       [campaignId]: {
         ...prev[campaignId],
-        detail: value,
+        answers: {
+          ...prev[campaignId].answers,
+          [fieldName]: value,
+        },
       },
     }));
   };
 
+  const fechaEntregaHandler = (pickerDate: dayjs.Dayjs | null) => {
+    if (pickerDate) setFechaEntrega(pickerDate.toDate());
+    else setFechaEntrega(null);
+  };
+
+  // Validación
+  const isFormValid = () => {
+    // 1. Datos Manuales Básicos
+    if (!fechaEntrega) return false;
+    if (folio.trim().length < 2) return false; // Ajusta largo mínimo según necesidad
+    if (encargado.correo.trim() === "") return false;
+
+    // 2. Campañas Seleccionadas
+    const selectedEntries = Object.entries(selectedCampaigns).filter(
+      ([, v]) => v.selected,
+    );
+    if (selectedEntries.length === 0) return false;
+
+    // 3. Validación Dinámica
+    return selectedEntries.every(([campaignId, data]) => {
+      const campaign = activeCampaigns?.find((c) => c.id === campaignId);
+      if (!campaign) return false;
+
+      let schema: DynamicFieldSchema[] = [];
+      try {
+        schema = JSON.parse(campaign.esquema_formulario || "[]");
+      } catch {
+        return true;
+      }
+
+      return schema.every((field) => {
+        if (!field.requerido) return true;
+        const value = data.answers[field.nombre];
+        return (
+          value !== null && value !== undefined && String(value).trim() !== ""
+        );
+      });
+    });
+  };
+
+  // Submit Action
   const formAction = async (formData: FormData) => {
     setIsLoading(true);
     setIsDisabled(true);
 
-    // Convert selectedCampaigns to formFields format
     const campaignsToSubmit = Object.entries(selectedCampaigns)
-      .filter(
-        ([, value]: [string, { selected: boolean; detail: string }]) =>
-          value.selected,
-      )
+      .filter(([, value]) => value.selected)
       .map(([id, value]) => {
-        const campaign = activeCampaigns?.find(
-          (campaign) => campaign.id === id,
-        );
+        const campaign = activeCampaigns?.find((c) => c.id === id);
+
+        const answers = { ...value.answers };
+        const codigoEntrega = answers["codigo_entrega"] || "";
+
         return {
           id,
           campaignName: campaign?.nombre_campaña || "",
-          detail: value.detail,
-          code: campaign?.code || "",
+          campos_adicionales: JSON.stringify(answers), // JSON String
+          code: codigoEntrega || campaign?.code || "",
         };
       });
 
-    if (campaignsToSubmit.length === 0) {
-      toast.error("Debe seleccionar al menos una campaña");
+    if (!isFormValid()) {
+      toast.error("Complete todos los campos requeridos");
       setIsLoading(false);
       setIsDisabled(false);
       return;
     }
 
-    for (const campaign of campaignsToSubmit) {
-      if (campaign.detail.toString().trim() === "") {
-        toast.error(
-          `Debe ingresar un detalle para la campaña "${campaign.campaignName}"`,
-        );
-        setIsLoading(false);
-        setIsDisabled(false);
-        return;
-      }
-    }
-
     formData.append("campaigns", JSON.stringify(campaignsToSubmit));
     formData.append("rut", rut.toString());
     formData.append("observaciones", observaciones);
+    // Datos Manuales
     formData.append("fecha_entrega", fechaEntrega?.toISOString() || "");
     formData.append("folio", folio.toString().toUpperCase());
-    formData.append("correo", encargado.correo);
+    formData.append("correo_encargado", encargado.correo);
 
-    const toastId = toast.loading("Guardando...");
-    setTimeout(async () => {
-      try {
-        const response = await createEntregaWithId(formData);
-        if (!response.success) {
-          throw new Error(response.message);
-        }
-        toast.success(response.message, { id: toastId });
-        closeModal();
-        router.refresh();
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Error al crear la entrega";
-        toast.error(message, { id: toastId });
-        setIsDisabled(false);
-      } finally {
-        setIsLoading(false);
-      }
-    }, 200);
-  };
+    const toastId = toast.loading("Registrando entrega manual...");
 
-  const fechaEntregaHandler = (pickerDate: dayjs.Dayjs | null) => {
-    if (pickerDate) {
-      setFechaEntrega(pickerDate.toDate());
-    } else {
-      setFechaEntrega(null);
+    try {
+      // Llamamos al Server Action Manual
+      const response = await createEntregaManual(formData);
+      if (!response.success) throw new Error(response.message);
+
+      toast.success(response.message, { id: toastId });
+      closeModal();
+      router.refresh();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Error al registrar entrega";
+      toast.error(message, { id: toastId });
+    } finally {
+      setIsLoading(false);
+      setIsDisabled(false);
     }
-  };
-
-  // Add this function to check if form is valid
-  const isFormValid = () => {
-    // Check if any campaigns are selected
-    const selectedCount = Object.values(selectedCampaigns).filter(
-      (v) => v.selected,
-    ).length;
-
-    if (selectedCount === 0) return false;
-
-    if (!fechaEntrega) return false;
-
-    if (folio.trim() === "" || folio.trim().length < 7) return false;
-
-    if (encargado.correo.trim() === "") return false;
-
-    // Check if all selected campaigns have details
-    const hasEmptyDetails = Object.entries(selectedCampaigns)
-      .filter(
-        ([, value]: [string, { selected: boolean; detail: string }]) =>
-          value.selected,
-      )
-      .some(
-        ([, value]: [string, { selected: boolean; detail: string }]) =>
-          value.detail.trim() === "",
-      );
-
-    return !hasEmptyDetails;
   };
 
   return (
     <form action={formAction} className="flex select-none flex-col gap-5 pt-2">
+      {/* Datos Manuales */}
       <div className="grid grid-cols-2 gap-2">
         <Input
-          placeHolder="Folio..."
-          label="Folio"
+          placeHolder="Ej: 2024-001"
+          label="Folio *"
           type="text"
           nombre="folio"
           value={folio}
           setData={setFolio}
           required
         />
-
         <CustomAntdDatePicker
-          label="Fecha de Entrega"
-          placeholder="Seleccione una fecha"
+          label="Fecha de Entrega *"
+          placeholder="Seleccione fecha"
           setDate={fechaEntregaHandler}
           value={fechaEntrega ? dayjs(fechaEntrega) : null}
           required
@@ -231,17 +302,21 @@ export default function NewModalFormManual({
       </div>
 
       <UserDropdown
-        placeHolder="Selecciona un encargado..."
-        label="Encargado"
+        placeHolder="Selecciona quien entregó..."
+        label="Funcionario Encargado *"
         name="correo"
         userEmail={encargado.correo}
         setUserEmail={(email) => setEncargado({ ...encargado, correo: email })}
       />
 
-      <div className="max-h-[400px] overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-4 scrollbar-hide">
-        <div className="justify- mb-4 flex items-baseline justify-between">
+      {/* Listado de Campañas (Dinámico) */}
+      <div
+        ref={scrollRef}
+        className="scrollbar-gutter-stable max-h-[380px] overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-4"
+      >
+        <div className="sticky top-0 z-10 mb-3 flex items-baseline justify-between border-b border-slate-200 bg-slate-50 pb-2">
           <h3 className="text-sm font-medium text-slate-700">
-            Beneficios seleccionados:
+            Beneficios entregados
           </h3>
           <div className="text-xs text-slate-500">
             {Object.values(selectedCampaigns).filter((v) => v.selected).length}{" "}
@@ -250,106 +325,94 @@ export default function NewModalFormManual({
         </div>
 
         <div className="space-y-3">
-          {activeCampaigns?.map((campaign) => (
-            <div
-              key={campaign.id}
-              className={`overflow-hidden rounded-lg border bg-white shadow-sm transition-all hover:border-slate-300 ${
-                selectedCampaigns[campaign.id]?.selected
-                  ? "!border-blue-300 ring-blue-300"
-                  : lastSelection === campaign.id && checkValues(campaign)
-                    ? "!border-rose-300"
-                    : "!border-slate-200"
-              }`}
-            >
+          {activeCampaigns?.map((campaign) => {
+            const isSelected = !!selectedCampaigns[campaign.id]?.selected;
+            const isOutOfStock = !!checkValues(campaign);
+
+            return (
               <div
-                className="flex cursor-pointer items-start gap-3 p-3"
-                onClick={() => handleCheckboxChange(campaign)}
+                key={campaign.id}
+                className={`overflow-hidden rounded-lg border bg-white shadow-sm transition-all hover:border-slate-300 ${
+                  isSelected
+                    ? "!border-blue-300 ring-2 ring-blue-200"
+                    : isOutOfStock
+                      ? "!border-rose-300"
+                      : "!border-slate-200"
+                }`}
               >
                 <div
-                  className={`flex h-5 w-5 items-center justify-center rounded-md border ${
-                    selectedCampaigns[campaign.id]?.selected
-                      ? "border-blue-500 bg-blue-500"
-                      : lastSelection === campaign.id && checkValues(campaign)
-                        ? "!border-rose-300"
-                        : "!border-slate-200"
-                  }`}
+                  className="flex cursor-pointer items-start gap-3 p-3"
+                  onClick={() => handleCheckboxChange(campaign)}
                 >
-                  {selectedCampaigns[campaign.id]?.selected && (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-3.5 w-3.5 text-white"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <label
-                      htmlFor={`campaign-${campaign.id}`}
-                      className={`cursor-pointer text-sm font-medium ${
-                        lastSelection === campaign.id && checkValues(campaign)
-                          ? "text-rose-500"
-                          : "text-slate-700"
-                      }`}
-                    >
-                      {campaign.nombre_campaña}
-                    </label>
-                    <span
-                      className={`rounded-full bg-slate-100 px-2 py-0.5 text-xs ${
-                        lastSelection === campaign.id && checkValues(campaign)
-                          ? "text-rose-500"
-                          : "text-slate-600"
-                      }`}
-                    >
-                      Stock: {getStock(campaign)}
-                    </span>
+                  <div
+                    className={`flex h-5 w-5 items-center justify-center rounded-md border ${
+                      isSelected
+                        ? "border-blue-500 bg-blue-500"
+                        : isOutOfStock
+                          ? "!border-rose-300"
+                          : "!border-slate-200"
+                    }`}
+                  >
+                    {isSelected && (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-3.5 w-3.5 text-white"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <label
+                        className={`cursor-pointer text-sm font-medium ${isOutOfStock ? "text-rose-400" : "text-slate-700"}`}
+                      >
+                        {campaign.nombre_campaña}
+                      </label>
+                      <span
+                        className={`rounded-full border px-2 py-0.5 text-xs ${isOutOfStock ? "border-rose-300 bg-rose-50 text-rose-500" : "border-gray-200 bg-gray-50 text-gray-600"}`}
+                      >
+                        Stock: {getStock(campaign)}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <AnimatePresence>
-                {selectedCampaigns[campaign.id]?.selected && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{
-                      duration: 0.3,
-                      ease: "easeInOut",
-                      opacity: { duration: 0.2 },
-                    }}
-                    className="overflow-hidden"
-                    onAnimationStart={() => {
-                      // Force scrollbar recalculation during animation
-                      const container = document.querySelector(
-                        ".scrollbar-gutter-stable",
-                      );
-                      if (container) container.scrollTop = container.scrollTop;
-                    }}
-                  >
-                    <div className="border-t border-slate-100 bg-slate-50 p-3">
-                      <Input
-                        placeHolder={`Ingrese ${campaign.tipo_dato.toLowerCase()}...`}
-                        type="text"
-                        nombre={`detail-${campaign.id}`}
-                        value={selectedCampaigns[campaign.id]?.detail || ""}
-                        setData={(value) =>
-                          handleDetailChange(campaign.id, value)
-                        }
-                      />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
+                <AnimatePresence>
+                  {isSelected && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                      onAnimationStart={() => {
+                        if (scrollRef.current)
+                          scrollRef.current.scrollTop =
+                            scrollRef.current.scrollTop;
+                      }}
+                    >
+                      <div className="border-t border-slate-100 bg-slate-50 p-3">
+                        <DynamicFieldsRenderer
+                          schemaString={campaign.esquema_formulario || "[]"}
+                          values={selectedCampaigns[campaign.id]?.answers}
+                          onChange={(fieldName, val) =>
+                            handleFieldChange(campaign.id, fieldName, val)
+                          }
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
 
           {(!activeCampaigns || activeCampaigns.length === 0) && (
             <div className="flex h-24 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500">
@@ -360,19 +423,18 @@ export default function NewModalFormManual({
       </div>
 
       <div className="flex grow flex-col gap-1">
-        <label htmlFor={observaciones} className="text-xs text-slate-500">
+        <label htmlFor="observaciones" className="text-xs text-slate-500">
           Justificación
         </label>
         <textarea
           name="observaciones"
           id="observaciones"
-          // cols={30}
-          rows={4}
+          rows={3}
           maxLength={390}
           value={observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
           placeholder="Justificación..."
-          className="w-full rounded-lg border border-slate-300 bg-transparent bg-white px-4 py-2 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus-within:border-blue-500"
+          className="min-h-[80px] w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500"
         ></textarea>
       </div>
 

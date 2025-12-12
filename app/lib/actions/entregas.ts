@@ -1,5 +1,5 @@
 "use server";
-import sql, { MSSQLError } from "mssql";
+import sql from "mssql";
 import { z } from "zod";
 import { PDFDocument } from "pdf-lib";
 import fs from "fs";
@@ -9,6 +9,7 @@ import { connectToDB } from "../utils/db-connection";
 import { logAction } from "./auditoria";
 import { formatDate, formatPhone, formatRUT } from "../utils/format";
 import { getSession } from "../session";
+import { revalidatePath } from "next/cache";
 
 interface CitizenData {
   telefono: string | null;
@@ -45,302 +46,362 @@ interface UserData {
   contraseña: string;
 }
 
-// Crear Entrega
+// Crear Entrega Rapida y para Tercero
 const CreateEntregaFormSchema = z.object({
   rut: z.string().min(1, { message: "RUT es requerido" }),
   observaciones: z.string().optional(),
-  campaigns: z.string(
-    z.object({
-      id: z.string(),
-      campaignName: z.string(),
-      detail: z.string(),
-      forAdult: z.boolean().optional(),
-      quantity: z.number().optional(),
-      code: z.string().length(2),
-    }),
-  ),
-  folio: z
-    .string()
-    .min(7, { message: "Folio debe tener al menos 7 caracteres" })
-    .optional(),
-  fecha_entrega: z.string().optional(),
-  correo: z.string().email({ message: "Correo no válido" }).optional(),
+  // Validación de Campañas adaptada a la nueva estructura JSON
+  campaigns: z.string().transform((str) => {
+    try {
+      const parsed = JSON.parse(str);
+      const itemSchema = z.object({
+        id: z.string(),
+        campaignName: z.string(),
+        campos_adicionales: z.string(), // El JSON string generado por el frontend
+        code: z.string().optional(), // Código rápido (ej: N° Vale)
+      });
+      return z.array(itemSchema).parse(parsed);
+    } catch {
+      return [];
+    }
+  }),
+  // Campos opcionales del Receptor (Tercero)
+  rut_receptor: z.string().optional(),
+  nombres_receptor: z.string().optional(),
+  apellidos_receptor: z.string().optional(),
+  telefono_receptor: z.string().optional(),
+  direccion_receptor: z.string().optional(),
+  parentesco_receptor: z.string().optional(),
 });
 
-const CreateEntrega = CreateEntregaFormSchema;
+export const createEntrega = async (
+  userIdFromSession: string,
+  formData: FormData,
+) => {
+  const result = CreateEntregaFormSchema.safeParse(
+    Object.fromEntries(formData),
+  );
 
-export const createEntrega = async (id: string, formData: FormData) => {
-  const result = CreateEntrega.safeParse(Object.fromEntries(formData));
   if (!result.success) {
-    return {
-      success: false,
-      message: result.error.issues[0].message,
-    };
-  }
-  const rut = formData.get("rut");
-  const folio = formData.get("folio");
-  const correo = formData.get("correo");
-  const observaciones = formData.get("observaciones");
-  const fecha_entrega = formData.get("fecha_entrega");
-  const campaigns = JSON.parse(formData.get("campaigns") as string);
-
-  if (!rut || campaigns.length === 0) {
-    return {
-      success: false,
-      message: "Campos incompletos",
-    };
+    console.error("Error validación Zod:", result.error);
+    return { success: false, message: "Datos de entrada inválidos." };
   }
 
-  let code;
-  if (campaigns.length > 1) code = "DO";
-  else code = campaigns[0].code;
+  const {
+    rut,
+    campaigns,
+    observaciones,
+    rut_receptor,
+    nombres_receptor,
+    apellidos_receptor,
+    telefono_receptor,
+    direccion_receptor,
+    parentesco_receptor,
+  } = result.data;
 
-  let newFolio: string = "";
+  if (campaigns.length === 0) {
+    return { success: false, message: "Debe seleccionar al menos una campaña" };
+  }
+
+  // 1. Definir SIGLA para el Folio (Usa el item.code que viene del frontend)
+  let folioCodeSigla =
+    campaigns.length > 1 ? "DO" : campaigns[0].code?.substring(0, 2) || "DO";
+  let newFolio = "";
 
   try {
     const pool = await connectToDB();
-    if (!pool) {
-      console.warn("No se pudo establecer una conexión a la base de datos.");
+    if (!pool)
       return {
         success: false,
-        message: "No se pudo establecer una conexión a la base de datos.",
+        message: "Error de conexión a la base de datos.",
       };
-    }
 
-    let transaction: sql.Transaction | undefined;
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin(sql.ISOLATION_LEVEL.SERIALIZABLE);
+
     try {
-      transaction = new sql.Transaction(pool);
-      await transaction.begin(sql.ISOLATION_LEVEL.SERIALIZABLE);
+      // 2. Verificar Duplicidad Diaria
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999);
 
-      // Verificar que no ha recibido entregas por hoy
-      let targetDate: Date;
-      if (fecha_entrega && fecha_entrega.toString().trim() !== "") {
-        targetDate = new Date(fecha_entrega as string);
-        // Verificar si la fecha es válida
-        if (isNaN(targetDate.getTime())) {
-          targetDate = new Date(); // Usar fecha actual si la fecha proporcionada es inválida
-        }
-      } else {
-        targetDate = new Date(); // Usar fecha actual si no se proporciona fecha
-      }
-
-      const startDate = new Date(targetDate);
-      startDate.setHours(0, 0, 0, 0);
-      const endDate = new Date(targetDate);
-      endDate.setHours(23, 59, 59, 999);
       const dailyCheckRequest = new sql.Request(transaction);
       const dailyCheckResult = await dailyCheckRequest
         .input("rut", sql.Int, rut)
-        .input("startDate", sql.DateTime, startDate)
-        .input("endDate", sql.DateTime, endDate).query(`
-          SELECT COUNT(*) as count FROM entregas
-          WHERE rut = @rut AND fecha_entrega >= @startDate AND fecha_entrega <= @endDate AND estado_documentos <> 'Anulado'
+        .input("startDate", sql.DateTime, startOfDay)
+        .input("endDate", sql.DateTime, endOfDay).query(`
+          SELECT COUNT(*) as count 
+          FROM entregas
+          WHERE rut = @rut 
+            AND fecha_entrega BETWEEN @startDate AND @endDate 
+            AND estado_documentos <> 'Anulado'
         `);
-      const count = dailyCheckResult.recordset[0].count;
-      if (count > 0) {
-        await transaction.rollback();
-        return {
-          success: false,
-          message: `${fecha_entrega ? "No se pueden asignar más beneficios a esta persona en la fecha seleccionada." : "No se pueden asignar más beneficios a esta persona por hoy."}`,
-        };
+
+      if (dailyCheckResult.recordset[0].count > 0) {
+        throw new Error("Esta persona ya recibió un beneficio el día de hoy.");
       }
 
-      let userId: string;
+      // 3. Generar Folio Automático (Usando la SIGLA correcta)
+      const currentYearTwoDigits = new Date().getFullYear() % 100;
 
-      if (correo) {
-        const correoRequest = new sql.Request(transaction);
-        const correoResult = await correoRequest.input(
-          "correo",
-          sql.VarChar,
-          correo,
-        ).query(`
-          SELECT id FROM usuarios WHERE correo = @correo
-        `);
-        if (correoResult.recordset.length === 0) {
-          return {
-            success: false,
-            message: "Correo no registrado",
-          };
-        }
-        userId = correoResult.recordset[0].id;
-      } else {
-        userId = id;
-      }
+      const spRequest = new sql.Request(transaction);
+      spRequest.input("p_rut", sql.Int, rut);
+      spRequest.input("p_observacion", sql.NVarChar, observaciones || "");
+      spRequest.input("p_id_usuario", sql.UniqueIdentifier, userIdFromSession);
+      spRequest.input("p_current_year", sql.Int, currentYearTwoDigits);
+      spRequest.input("p_code", sql.VarChar, folioCodeSigla); // Aquí va "PA", "GA", etc.
+      spRequest.output("p_new_folio_output", sql.VarChar);
 
-      // Use provided folio or generate a new one
-      if (folio) {
-        // Manual insert path
-        const checkFolioRequest = new sql.Request(transaction);
-        const checkFolioResult = await checkFolioRequest.input(
-          "folio",
-          sql.VarChar,
-          String(folio).trim(),
-        ).query(`
-          SELECT folio FROM entregas WHERE folio = @folio
-        `);
-        if (checkFolioResult.recordset.length > 0) {
-          await transaction.rollback();
-          return {
-            success: false,
-            message: "Este Folio ya se encuentra registrado",
-          };
-        }
+      const spResult = await spRequest.execute("dbo.GenerateAndInsertEntrega");
+      newFolio = spResult.output.p_new_folio_output;
 
-        let fechaEntregaConHora;
-        if (fecha_entrega) {
-          const fecha = new Date(fecha_entrega as string);
-          fecha.setHours(18, 0, 0, 0);
-          fechaEntregaConHora = fecha;
+      if (!newFolio) throw new Error("No se pudo generar el folio.");
+
+      // 4. Lógica de Receptor (Terceros)
+      if (rut_receptor && rut_receptor.length > 5) {
+        const cleanRut = rut_receptor
+          .replace(/\./g, "")
+          .replace(/-/g, "")
+          .toUpperCase();
+        const dvReceptor = cleanRut.slice(-1);
+        const numRutReceptor = parseInt(cleanRut.slice(0, -1));
+
+        const checkReceptorReq = new sql.Request(transaction);
+        const existingReceptor = await checkReceptorReq
+          .input("rut", sql.Int, numRutReceptor)
+          .query("SELECT id FROM receptores WHERE rut = @rut");
+
+        let idReceptor: number;
+
+        if (existingReceptor.recordset.length > 0) {
+          idReceptor = existingReceptor.recordset[0].id;
         } else {
-          const hoy = new Date();
-          hoy.setHours(18, 0, 0, 0);
-          fechaEntregaConHora = hoy;
+          const createReceptorReq = new sql.Request(transaction);
+          const insertReceptor = await createReceptorReq
+            .input("rut", sql.Int, numRutReceptor)
+            .input("dv", sql.Char(1), dvReceptor)
+            .input("nombres", sql.VarChar(50), nombres_receptor)
+            .input("apellidos", sql.VarChar(50), apellidos_receptor)
+            .input("telefono", sql.VarChar(20), telefono_receptor)
+            .input("direccion", sql.VarChar(100), direccion_receptor).query(`
+              INSERT INTO receptores (rut, dv, nombres, apellidos, telefono, direccion)
+              OUTPUT INSERTED.id
+              VALUES (@rut, @dv, @nombres, @apellidos, @telefono, @direccion)
+            `);
+          idReceptor = insertReceptor.recordset[0].id;
         }
 
-        const upperCaseFolio = String(folio).toUpperCase().trim();
+        const linkReceptorReq = new sql.Request(transaction);
+        await linkReceptorReq
+          .input("folio", sql.VarChar(50), newFolio)
+          .input("id_receptor", sql.Int, idReceptor)
+          .input(
+            "parentesco",
+            sql.VarChar(200),
+            parentesco_receptor || "No informado",
+          ).query(`
+            INSERT INTO entregas_receptores (folio_entrega, id_receptor, parentesco)
+            VALUES (@folio, @id_receptor, @parentesco)
+          `);
+      }
 
-        const entregaRequest = new sql.Request(transaction);
-        await entregaRequest
-          .input("folio", sql.VarChar, upperCaseFolio)
-          .input("observacion", sql.VarChar, String(observaciones).trim())
-          .input("fecha_entrega", sql.DateTime, fechaEntregaConHora)
-          .input("rut", sql.Int, rut)
-          .input("id_usuario", sql.UniqueIdentifier, userId).query(`
-            INSERT INTO entregas (folio, observacion, fecha_entrega, rut, id_usuario)
-            VALUES (
-              @folio,
-              @observacion,
-              @fecha_entrega,
-              @rut,
-              @id_usuario
-            )
+      // 5. Insertar Detalles (AQUÍ ESTÁ LA CORRECCIÓN)
+      for (const item of campaigns) {
+        // A. Parsear el JSON para extraer el código físico real
+        let realCodigoEntrega: string | null = null;
+        try {
+          const data = JSON.parse(item.campos_adicionales);
+          // Buscamos si existe la clave "codigo_serial" en el JSON
+          if (data && data.codigo_serial) {
+            realCodigoEntrega = String(data.codigo_serial).toUpperCase();
+          }
+        } catch (e) {
+          console.error("Error parseando JSON en server action", e);
+        }
+
+        const insertItemReq = new sql.Request(transaction);
+        await insertItemReq
+          .input("folio", sql.VarChar(50), newFolio)
+          .input("id_campana", sql.UniqueIdentifier, item.id)
+          // CORRECCIÓN: Usamos el código extraído del JSON, no la sigla de la campaña
+          .input("codigo_entrega", sql.VarChar(100), realCodigoEntrega)
+          .input(
+            "campos_adicionales",
+            sql.NVarChar(sql.MAX),
+            item.campos_adicionales,
+          ).query(`
+            INSERT INTO beneficios_entregados (folio, id_campaña, codigo_entrega, campos_adicionales)
+            VALUES (@folio, @id_campana, @codigo_entrega, @campos_adicionales)
           `);
 
-        newFolio = folio ? folio.toString().trim() : "";
-      } else {
-        // Generate a folio using MSSQL functions (auto)
-        const currentYearFull = new Date().getFullYear();
-        const currentYearTwoDigits = currentYearFull % 100;
-
-        const spRequest = new sql.Request(transaction);
-        spRequest.input("p_rut", sql.Int, rut);
-        spRequest.input(
-          "p_observacion",
-          sql.NVarChar,
-          String(observaciones).trim(),
-        );
-        spRequest.input("p_id_usuario", sql.UniqueIdentifier, userId);
-        spRequest.input("p_current_year", sql.Int, currentYearTwoDigits);
-        spRequest.input("p_code", sql.VarChar, String(code).trim());
-        spRequest.output("p_new_folio_output", sql.VarChar);
-
-        const spResult = await spRequest.execute(
-          "dbo.GenerateAndInsertEntrega",
-        );
-        newFolio = spResult.output.p_new_folio_output;
-
-        if (!newFolio) {
-          throw new Error("No se pudo generar el folio automáticamente");
-        }
+        // Descontar Stock
+        const updateStockReq = new sql.Request(transaction);
+        await updateStockReq
+          .input("id", sql.UniqueIdentifier, item.id)
+          .query(`UPDATE campañas SET entregas = entregas + 1 WHERE id = @id`);
       }
 
-      // Insert campaign details and update campaign counts
-      if (campaigns.length > 0) {
-        for (const campaign of campaigns) {
-          const detail =
-            typeof campaign.detail === "string"
-              ? campaign.detail.toUpperCase().trim()
-              : String(campaign.detail).trim();
-
-          // Insert into entrega
-          const insertEntregaCampaignRequest = new sql.Request(transaction);
-          await insertEntregaCampaignRequest
-            .input("detail", sql.VarChar, detail)
-            .input("folio", sql.VarChar, newFolio)
-            .input("campaignId", sql.UniqueIdentifier, campaign.id).query(`
-              INSERT INTO beneficios_entregados (codigo_entrega, folio, id_campaña)
-              VALUES (@detail, @folio, @campaignId)
-            `);
-
-          const updateCampaignRequest = new sql.Request(transaction);
-          await updateCampaignRequest.input(
-            "campaignId",
-            sql.UniqueIdentifier,
-            campaign.id,
-          ).query(`
-              UPDATE campañas 
-              SET entregas = ISNULL(entregas, 0) + 1
-              WHERE id = @campaignId
-            `);
-        }
-      }
-
-      // Commit the transaction
       await transaction.commit();
-      console.log("Transaction committed successfully.");
-      await logAction("Crear", "registró una nueva entrega", "", newFolio);
-      return { success: true, message: "Entrega recibida" };
-    } catch (error) {
-      if (transaction) {
-        await transaction.rollback();
-        console.error("Transaction rolled back due to error.");
-      }
-      console.error("Transaction error details:", error);
+      await logAction(
+        "Crear",
+        "realizó una entrega rápida",
+        `Folio: ${newFolio}`,
+        userIdFromSession,
+      );
+      revalidatePath("/dashboard/entregas");
 
-      // Define the expected error structure
-      interface SQLServerError {
-        originalError: {
-          info: {
-            number: number;
-          };
-        };
-      }
-
-      // Type guard function - completely type-safe without any 'any' types
-      function isSQLServerError(error: unknown): error is SQLServerError {
-        return (
-          error !== null &&
-          typeof error === "object" &&
-          "originalError" in error &&
-          error.originalError !== null &&
-          typeof error.originalError === "object" &&
-          "info" in error.originalError &&
-          error.originalError.info !== null &&
-          typeof error.originalError.info === "object" &&
-          "number" in error.originalError.info &&
-          typeof error.originalError.info.number === "number"
-        );
-      }
-
-      // Then use it in your error handling:
-      if (error instanceof MSSQLError) {
-        if (
-          isSQLServerError(error) &&
-          error.originalError.info.number === 1205
-        ) {
-          // Deadlock victim error
-          return {
-            success: false,
-            message:
-              "Error de concurrencia: Se detectó un conflicto. Por favor, inténtelo de nuevo.",
-          };
-        }
-        return {
-          success: false,
-          message: `Error en la base de datos: ${error.message}`,
-        };
-      }
       return {
-        success: false,
-        message: error instanceof Error ? error.message : String(error),
+        success: true,
+        message: `Entrega registrada exitosamente. Folio: ${newFolio}`,
       };
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
     }
   } catch (error) {
-    console.error("Database connection error:", error);
-    return {
-      success: false,
-      message: "No se pudo conectar a la base de datos.",
-    };
+    console.error("Error en createEntrega:", error);
+
+    // Manejo de errores SQL específicos (ej: Deadlock)
+    const sqlErrNumber = (
+      error as { originalError?: { info?: { number?: number } } }
+    ).originalError?.info?.number;
+    if (sqlErrNumber === 1205) {
+      return {
+        success: false,
+        message: "Conflicto de concurrencia. Intente nuevamente.",
+      };
+    }
+
+    const msg =
+      error instanceof Error
+        ? error.message
+        : "Error desconocido al procesar la entrega.";
+    return { success: false, message: msg };
+  }
+};
+
+// Entrega Manual
+const CreateEntregaManualSchema = z.object({
+  rut: z.string().min(1),
+  observaciones: z.string().optional(),
+  folio: z.string().min(2, { message: "Folio es requerido" }),
+  fecha_entrega: z.string().min(1, { message: "Fecha es requerida" }),
+  correo_encargado: z.string().email(),
+  campaigns: z.string().transform((str) => {
+    try {
+      return JSON.parse(str);
+    } catch {
+      return [];
+    }
+  }),
+});
+
+export const createEntregaManual = async (formData: FormData) => {
+  const result = CreateEntregaManualSchema.safeParse(
+    Object.fromEntries(formData),
+  );
+
+  if (!result.success) {
+    return { success: false, message: "Datos inválidos en entrega manual." };
+  }
+
+  const {
+    rut,
+    campaigns,
+    observaciones,
+    folio,
+    fecha_entrega,
+    correo_encargado,
+  } = result.data;
+
+  try {
+    const pool = await connectToDB();
+    if (!pool)
+      return { success: false, message: "Sin conexión a base de datos." };
+
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin(sql.ISOLATION_LEVEL.SERIALIZABLE);
+
+    try {
+      // 1. Obtener ID del Usuario Encargado (por correo)
+      const userReq = new sql.Request(transaction);
+      const userRes = await userReq
+        .input("correo", sql.VarChar, correo_encargado)
+        .query("SELECT id FROM usuarios WHERE correo = @correo");
+
+      if (userRes.recordset.length === 0) {
+        throw new Error("El correo del funcionario no está registrado.");
+      }
+      const userId = userRes.recordset[0].id;
+
+      // 2. Verificar que el Folio NO exista
+      const checkFolioReq = new sql.Request(transaction);
+      const checkFolioRes = await checkFolioReq
+        .input("folio", sql.VarChar, folio)
+        .query("SELECT folio FROM entregas WHERE folio = @folio");
+
+      if (checkFolioRes.recordset.length > 0) {
+        throw new Error("Este Folio ya existe en el sistema.");
+      }
+
+      // 3. Insertar en Tabla Entregas (Manual)
+      const insertEntregaReq = new sql.Request(transaction);
+      await insertEntregaReq
+        .input("folio", sql.VarChar(50), folio.toUpperCase())
+        .input("observacion", sql.NVarChar, observaciones || "")
+        .input("fecha_entrega", sql.DateTime, new Date(fecha_entrega)) // Usamos la fecha manual
+        .input("rut", sql.Int, rut)
+        .input("id_usuario", sql.UniqueIdentifier, userId).query(`
+          INSERT INTO entregas (folio, observacion, fecha_entrega, rut, id_usuario)
+          VALUES (@folio, @observacion, @fecha_entrega, @rut, @id_usuario)
+        `);
+
+      // 4. Insertar Beneficios e Impactar Stock
+      for (const item of campaigns) {
+        const insertItemReq = new sql.Request(transaction);
+        await insertItemReq
+          .input("folio", sql.VarChar(50), folio.toUpperCase())
+          .input("id_campana", sql.UniqueIdentifier, item.id)
+          .input("codigo_entrega", sql.VarChar(100), item.code || null)
+          .input(
+            "campos_adicionales",
+            sql.NVarChar(sql.MAX),
+            item.campos_adicionales,
+          ) // JSON
+          .query(`
+            INSERT INTO beneficios_entregados (folio, id_campaña, codigo_entrega, campos_adicionales)
+            VALUES (@folio, @id_campana, @codigo_entrega, @campos_adicionales)
+          `);
+
+        const updateStockReq = new sql.Request(transaction);
+        await updateStockReq.input("id", sql.UniqueIdentifier, item.id).query(`
+            UPDATE campañas SET entregas = entregas + 1 WHERE id = @id
+        `);
+      }
+
+      await transaction.commit();
+
+      await logAction(
+        "Crear",
+        "registró entrega manual",
+        `Folio: ${folio}`,
+        folio,
+      );
+      revalidatePath("/dashboard/entregas");
+
+      return {
+        success: true,
+        message: "Entrega manual registrada correctamente.",
+      };
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
+    }
+  } catch (error) {
+    console.error("Error en createEntregaManual:", error);
+    const msg = error instanceof Error ? error.message : "Error desconocido.";
+    return { success: false, message: msg };
   }
 };
 
