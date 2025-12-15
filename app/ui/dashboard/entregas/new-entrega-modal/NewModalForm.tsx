@@ -160,14 +160,12 @@ export default function NewModalForm({
         const campaign = activeCampaigns?.find((c) => c.id === id);
 
         const answers = { ...value.answers };
-        // Casting seguro a string o cadena vacía si es otro tipo
-        const codigoEntrega = String(answers["codigo_entrega"] || "");
 
         return {
           id,
           campaignName: campaign?.nombre_campaña || "",
           campos_adicionales: JSON.stringify(answers),
-          code: codigoEntrega || campaign?.code || "",
+          code: campaign?.code || "",
         };
       });
 
