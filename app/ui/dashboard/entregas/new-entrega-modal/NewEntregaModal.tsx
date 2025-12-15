@@ -22,7 +22,7 @@ export default function NewEntregaModal({
   const [tab, setTab] = useState(tabs[0]);
 
   return (
-    <div className="flex max-h-full w-[32rem] max-w-full shrink-0 flex-col gap-2 overflow-hidden rounded-xl bg-white p-8 shadow-xl">
+    <div className="max-h-fulls flex w-[32rem] max-w-full shrink-0 flex-col gap-2 overflow-hidden rounded-xl bg-white p-8 shadow-xl">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
