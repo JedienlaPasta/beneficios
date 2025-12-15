@@ -150,7 +150,10 @@ export default function NewModalFormReceiver({
                 defaultAnswers[field.nombre] = 1;
               }
             });
-          } catch (e) {}
+          } catch (e) {
+            console.error("Error al parsear el esquema de la campaña:", e);
+            toast.error("Error al parsear el esquema de la campaña");
+          }
 
           acc[campaign.id] = {
             selected: false,
@@ -200,6 +203,7 @@ export default function NewModalFormReceiver({
         toast.warning(response.message || "Persona no encontrada en registros");
       }
     } catch (error) {
+      console.error("Error al buscar datos:", error);
       toast.error("Error al buscar datos");
     } finally {
       setIsSearching(false);
