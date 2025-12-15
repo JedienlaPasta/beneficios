@@ -1240,3 +1240,69 @@ export async function importXLSXFile(formData: FormData): Promise<FormState> {
     };
   }
 }
+
+export async function getReceiverByRut(rutString: string) {
+  try {
+    const pool = await connectToDB();
+    if (!pool) return { success: false, message: "Error de conexión" };
+
+    // Limpieza de RUT
+    const cleanRut = rutString
+      .replace(/\./g, "")
+      .replace(/-/g, "")
+      .toUpperCase();
+    const rutBody = parseInt(cleanRut.slice(0, -1));
+
+    if (isNaN(rutBody)) return { success: false, message: "RUT inválido" };
+
+    const request = pool.request();
+    request.input("rut", sql.Int, rutBody);
+
+    // 1. Buscar en RECEPTORES (Terceros ya registrados)
+    const resultReceptores = await request.query(`
+      SELECT nombres, apellidos, telefono, direccion
+      FROM receptores
+      WHERE rut = @rut
+    `);
+
+    if (resultReceptores.recordset.length > 0) {
+      const row = resultReceptores.recordset[0];
+      return {
+        success: true,
+        source: "receptor",
+        data: {
+          nombres: row.nombres,
+          apellidos: row.apellidos,
+          telefono: row.telefono || "",
+          direccion: row.direccion || "",
+        },
+      };
+    }
+
+    // 2. Buscar en RSH (Registro Social de Hogares)
+    const resultRSH = await request.query(`
+      SELECT nombres_rsh, apellidos_rsh, telefono, direccion
+      FROM rsh
+      WHERE rut = @rut
+    `);
+
+    if (resultRSH.recordset.length > 0) {
+      const row = resultRSH.recordset[0];
+      return {
+        success: true,
+        source: "rsh",
+        data: {
+          nombres: row.nombres_rsh,
+          apellidos: row.apellidos_rsh,
+          telefono: row.telefono || "",
+          direccion: row.direccion || "",
+        },
+      };
+    }
+
+    return { success: false, message: "RUT no encontrado." };
+  } catch (error) {
+    console.error("Error buscando receptor:", error);
+    return { success: false, message: "Error del servidor." };
+  }
+}

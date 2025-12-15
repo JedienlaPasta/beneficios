@@ -1,5 +1,6 @@
 "use client";
 import { createEntrega } from "@/app/lib/actions/entregas";
+import { getReceiverByRut } from "@/app/lib/actions/rsh"; // <--- IMPORTA TU NUEVA ACCIÓN
 import { Campaign } from "@/app/lib/definitions";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -7,6 +8,8 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import Input from "../../campañas/new-campaign-input";
 import { SubmitButton } from "../../submit-button";
+import { MdAutorenew } from "react-icons/md";
+import { capitalize, capitalizeAll } from "@/app/lib/utils/format";
 
 // --- TIPOS ---
 type FormValue = string | number | boolean | null | undefined;
@@ -32,7 +35,7 @@ const DynamicFieldsRenderer = ({
   onChange,
 }: {
   schemaString: string;
-  values: Record<string, FormValue>; // Fix: Usamos FormValue en vez de any
+  values: Record<string, FormValue>;
   onChange: (fieldName: string, value: FormValue) => void;
 }) => {
   let schema: DynamicFieldSchema[] = [];
@@ -59,7 +62,7 @@ const DynamicFieldsRenderer = ({
               </label>
               <select
                 className="w-full border-b border-slate-200 bg-transparent py-1.5 text-sm text-slate-700 outline-none focus:border-blue-500"
-                value={String(values[field.nombre] || "")} // Aseguramos string
+                value={String(values[field.nombre] || "")}
                 onChange={(e) => onChange(field.nombre, e.target.value)}
               >
                 <option value="" disabled>
@@ -78,7 +81,7 @@ const DynamicFieldsRenderer = ({
               label={field.label}
               type={field.tipo === "number" ? "number" : "text"}
               nombre={field.nombre}
-              value={String(values[field.nombre] || "")} // Aseguramos string
+              value={String(values[field.nombre] || "")}
               setData={(val) => onChange(field.nombre, val)}
               required={field.requerido}
             />
@@ -108,8 +111,12 @@ export default function NewModalFormReceiver({
   const [observaciones, setObservaciones] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Estados de UI
+  const [isSearching, setIsSearching] = useState(false); // Estado para el spinner
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
+
   // Estado de Campañas (Dinámico)
-  // Fix: Tipado explícito para 'answers'
   const [selectedCampaigns, setSelectedCampaigns] = useState<{
     [campaignId: string]: {
       selected: boolean;
@@ -119,7 +126,25 @@ export default function NewModalFormReceiver({
     if (activeCampaigns && activeCampaigns.length > 0) {
       return activeCampaigns.reduce(
         (acc, campaign) => {
-          acc[campaign.id] = { selected: false, answers: {} };
+          const defaultAnswers: Record<string, FormValue> = {};
+
+          try {
+            const schema = JSON.parse(campaign.esquema_formulario || "[]");
+            schema.forEach((field: any) => {
+              // Si el campo es cantidad, valor por defecto 1
+              if (
+                field.nombre === "cantidad" ||
+                field.label.toLowerCase() === "cantidad"
+              ) {
+                defaultAnswers[field.nombre] = 1;
+              }
+            });
+          } catch (e) {}
+
+          acc[campaign.id] = {
+            selected: false,
+            answers: defaultAnswers,
+          };
           return acc;
         },
         {} as {
@@ -141,10 +166,34 @@ export default function NewModalFormReceiver({
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDisabled, setIsDisabled] = useState(false);
-
   const createEntregaWithId = createEntrega.bind(null, userId);
+
+  // --- LÓGICA DE BÚSQUEDA ---
+  const handleSearchReceiver = async () => {
+    if (!rutReceiver || rutReceiver.length < 8) {
+      toast.error("Ingrese un RUT válido para buscar");
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const response = await getReceiverByRut(rutReceiver);
+
+      if (response.success && response.data) {
+        setNombresReceiver(response.data.nombres);
+        setApellidosReceiver(response.data.apellidos);
+        setTelefonoReceiver(response.data.telefono);
+        setDireccionReceiver(response.data.direccion);
+        toast.success("Datos encontrados y cargados");
+      } else {
+        toast.warning(response.message || "Persona no encontrada en registros");
+      }
+    } catch (error) {
+      toast.error("Error al buscar datos");
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   // Helpers de Stock
   const checkValues = (campaign: Campaign) => {
@@ -173,7 +222,6 @@ export default function NewModalFormReceiver({
     }
   };
 
-  // Fix: value ahora es FormValue
   const handleFieldChange = (
     campaignId: string,
     fieldName: string,
@@ -208,21 +256,18 @@ export default function NewModalFormReceiver({
 
   // Validación
   const isFormValid = () => {
-    // 1. Validar Campañas seleccionadas
     const selectedEntries = Object.entries(selectedCampaigns).filter(
       ([, v]) => v.selected,
     );
     if (selectedEntries.length === 0) return false;
 
-    // 2. Validar Datos Receptor
     if (countRutDigits(rutReceiver) < 8) return false;
     if (nombresReceiver.trim() === "") return false;
     if (apellidosReceiver.trim() === "") return false;
-    if (telefonoReceiver.trim() === "") return false;
-    if (direccionReceiver.trim() === "") return false;
+    // if (telefonoReceiver.trim() === "") return false;
+    // if (direccionReceiver.trim() === "") return false;
     if (parentesco.trim() === "") return false;
 
-    // 3. Validar Campos Dinámicos
     return selectedEntries.every(([campaignId, data]) => {
       const campaign = activeCampaigns?.find((c) => c.id === campaignId);
       if (!campaign) return false;
@@ -253,9 +298,8 @@ export default function NewModalFormReceiver({
       .filter(([, value]) => value.selected)
       .map(([id, value]) => {
         const campaign = activeCampaigns?.find((c) => c.id === id);
-
         const answers = { ...value.answers };
-        const codigoEntrega = String(answers["codigo_entrega"] || ""); // Aseguramos string
+        const codigoEntrega = String(answers["codigo_entrega"] || "");
 
         return {
           id,
@@ -276,13 +320,18 @@ export default function NewModalFormReceiver({
     formData.append("rut", rut.toString());
     formData.append("observaciones", observaciones);
 
-    // Datos del Receptor
     formData.append("rut_receptor", rutReceiver.toString().toUpperCase());
-    formData.append("nombres_receptor", nombresReceiver.toString());
-    formData.append("apellidos_receptor", apellidosReceiver.toString());
+    formData.append(
+      "nombres_receptor",
+      capitalizeAll(nombresReceiver.toString()),
+    );
+    formData.append(
+      "apellidos_receptor",
+      capitalizeAll(apellidosReceiver.toString()),
+    );
     formData.append("telefono_receptor", telefonoReceiver.toString());
     formData.append("direccion_receptor", direccionReceiver.toString());
-    formData.append("parentesco_receptor", parentesco.toString());
+    formData.append("parentesco_receptor", capitalize(parentesco.toString()));
 
     const toastId = toast.loading("Guardando...");
 
@@ -309,7 +358,22 @@ export default function NewModalFormReceiver({
       className="flex select-none flex-col justify-center gap-3 px-0.5 pt-2"
     >
       {/* SECCIÓN DATOS RECEPTOR */}
-      <h4 className="text-sm font-medium text-slate-700">Datos del receptor</h4>
+      <div className="flex items-center gap-2">
+        <h4 className="text-sm font-medium text-slate-700">
+          Datos del receptor
+        </h4>
+        <button
+          type="button"
+          onClick={handleSearchReceiver}
+          disabled={isSearching}
+          className="rounded-full p-1 hover:bg-slate-100 disabled:opacity-50"
+          title="Buscar datos por RUT"
+        >
+          <MdAutorenew
+            className={`h-5 w-5 text-blue-600 transition-all ${isSearching ? "animate-loadspin" : ""}`}
+          />
+        </button>
+      </div>
 
       <div className="grid grid-cols-2 gap-2">
         <Input
@@ -331,7 +395,6 @@ export default function NewModalFormReceiver({
           nombre="telefono_receiver"
           value={telefonoReceiver}
           setData={setTelefonoReceiver}
-          required
         />
       </div>
 
@@ -363,7 +426,6 @@ export default function NewModalFormReceiver({
         nombre="direccion_receiver"
         value={direccionReceiver}
         setData={setDireccionReceiver}
-        required
       />
       <Input
         placeHolder="Ej: Familiar, Tutor Legal..."
@@ -410,6 +472,7 @@ export default function NewModalFormReceiver({
                   className="flex cursor-pointer items-start gap-3 p-3"
                   onClick={() => handleCheckboxChange(campaign)}
                 >
+                  {/* Checkbox Visual */}
                   <div
                     className={`flex h-5 w-5 items-center justify-center rounded-md border ${
                       isSelected
