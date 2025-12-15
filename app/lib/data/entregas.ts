@@ -489,20 +489,17 @@ export async function getActaDataByFolio(
 
         const detalles: { label: string; value: string }[] = [];
 
-        // 1. Agregar código físico (Prioridad)
-        if (b.codigo_entrega) {
-          detalles.push({
-            label: "Código / Serial",
-            value: String(b.codigo_entrega),
-          });
-        }
+        // (Codigo entregas viejas) ELIMINAR EVENTUALMENTE UNA VEZ CONFIRMADA LA MIGRACION DE DATOS A NUEVA
+        // if (b.codigo_entrega) {
+        //   detalles.push({
+        //     label: "Código / Serial",
+        //     value: String(b.codigo_entrega),
+        //   });
+        // }
 
-        // 2. Mapear campos dinámicos
+        // Mapear campos dinámicos
         Object.entries(respuestas).forEach(([key, val]) => {
-          // Ignorar llaves técnicas o duplicadas
-          if (key === "codigo_entrega" || key === "code") return;
-
-          // Buscar el label bonito
+          // Buscar el label
           const schemaField = esquema.find((f) => f.nombre === key);
           const label = schemaField
             ? schemaField.label
@@ -541,7 +538,7 @@ export async function getActaDataByFolio(
       beneficiario: {
         nombre: `${row.nombres_rsh} ${row.apellidos_rsh}`.trim(),
         run: `${row.rut}-${row.dv}`,
-        domicilio: row.direccion || "No especifica",
+        domicilio: row.direccion || "No especificada",
         tramo: row.tramo ? `${row.tramo}%` : "N/A",
         folioRSH: row.folio_rsh ? String(row.folio_rsh) : "N/A",
         telefono: formatPhone(row.telefono) || "N/A",

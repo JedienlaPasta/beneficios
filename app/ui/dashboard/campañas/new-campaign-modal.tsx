@@ -128,17 +128,9 @@ export default function NewCampaignModal() {
       setDynamicFields([
         {
           id: Date.now(),
-          label: "Código Tarjeta",
+          label: "Código",
           nombre: "codigo_entrega",
           tipo: "text",
-          opciones: "",
-          requerido: true,
-        },
-        {
-          id: Date.now() + 1,
-          label: "Monto",
-          nombre: "monto",
-          tipo: "number",
           opciones: "",
           requerido: true,
         },
@@ -152,14 +144,6 @@ export default function NewCampaignModal() {
           nombre: "codigo_entrega",
           tipo: "text",
           opciones: "",
-          requerido: true,
-        },
-        {
-          id: Date.now() + 1,
-          label: "Empresa",
-          nombre: "empresa",
-          tipo: "select",
-          opciones: "Lipigas, Abastible, Gasco",
           requerido: true,
         },
       ]);
@@ -197,7 +181,7 @@ export default function NewCampaignModal() {
       setDynamicFields([
         {
           id: Date.now(),
-          label: "Código / Detalle",
+          label: "Código",
           nombre: "codigo_entrega",
           tipo: "text",
           opciones: "",

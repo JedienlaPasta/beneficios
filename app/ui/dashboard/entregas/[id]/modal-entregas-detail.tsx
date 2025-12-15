@@ -431,17 +431,14 @@ function EntregasListItem({ item }: { item: EntregaByFolio }) {
 
       <div className="flex flex-col items-end justify-center gap-0.5 text-right">
         {/* Mostramos el código físico de entrega (ID/Serial) destacado si existe */}
-        {item.codigo_entrega && (
+        {/* {item.codigo_entrega && (
           <p className="mb-0.5 text-sm font-bold text-blue-600">
             {item.codigo_entrega}
           </p>
-        )}
+        )} */}
 
         {/* Detalles dinámicos iterados */}
         {Object.entries(details).map(([key, value]) => {
-          // Omitimos el campo 'codigo_entrega' del detalle si ya lo mostramos arriba
-          if (key === "codigo_entrega" || key === "code") return null;
-
           return (
             <p key={key} className="text-xs text-slate-500">
               <span className="font-medium capitalize text-slate-600">

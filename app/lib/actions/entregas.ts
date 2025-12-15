@@ -105,6 +105,7 @@ export const createEntrega = async (
 
   const folioCode =
     campaigns.length > 1 ? "DO" : campaigns[0].code?.substring(0, 2) || "DO";
+  // console.log(campaigns[0]);
   let newFolio = "";
 
   try {
@@ -205,15 +206,18 @@ export const createEntrega = async (
           `);
       }
 
-      // 5. Insertar Detalles (AQUÍ ESTÁ LA CORRECCIÓN)
+      // 5. Insertar Detalles de Campañas (Beneficios Entregados)
       for (const item of campaigns) {
-        // A. Parsear el JSON para extraer el código físico real
+        // Parsear el JSON para extraer el código físico real
         let realCodigoEntrega: string | null = null;
+        let finalJsonString = item.campos_adicionales; // JSON final a guardar
         try {
           const data = JSON.parse(item.campos_adicionales);
           // Buscamos si existe la clave "codigo_serial" en el JSON
-          if (data && data.codigo_serial) {
-            realCodigoEntrega = String(data.codigo_serial).toUpperCase();
+          if (data && data.codigo_entrega) {
+            realCodigoEntrega = String(data.codigo_entrega).toUpperCase();
+            data.codigo_entrega = realCodigoEntrega;
+            finalJsonString = JSON.stringify(data);
           }
         } catch (e) {
           console.error("Error parseando JSON en server action", e);
@@ -223,13 +227,9 @@ export const createEntrega = async (
         await insertItemReq
           .input("folio", sql.VarChar(50), newFolio)
           .input("id_campana", sql.UniqueIdentifier, item.id)
-          // CORRECCIÓN: Usamos el código extraído del JSON, no la sigla de la campaña
           .input("codigo_entrega", sql.VarChar(100), realCodigoEntrega)
-          .input(
-            "campos_adicionales",
-            sql.NVarChar(sql.MAX),
-            item.campos_adicionales,
-          ).query(`
+          .input("campos_adicionales", sql.NVarChar(sql.MAX), finalJsonString)
+          .query(`
             INSERT INTO beneficios_entregados (folio, id_campaña, codigo_entrega, campos_adicionales)
             VALUES (@folio, @id_campana, @codigo_entrega, @campos_adicionales)
           `);
