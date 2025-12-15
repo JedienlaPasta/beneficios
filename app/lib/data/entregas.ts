@@ -518,15 +518,17 @@ export async function getActaDataByFolio(
       receptorData = {
         nombre: `${receptorRow.nombres} ${receptorRow.apellidos}`.trim(),
         run: `${receptorRow.rut}-${receptorRow.dv}`,
-        domicilio: receptorRow.direccion || "No informada",
-        telefono: formatPhone(receptorRow.telefono) || "No informado",
-        relacion: receptorRow.parentesco || "No informada",
+        domicilio: receptorRow.direccion || "No especificado",
+        telefono: formatPhone(receptorRow.telefono) || "No especificado",
+        relacion: receptorRow.parentesco || "No especificada",
         tramo: "",
         folioRSH: "",
       };
     }
 
     // C. Retornar Objeto Final
+    const ageNum = getAge(String(row.fecha_nacimiento));
+    const edadVal = Number.isFinite(ageNum) ? ageNum : undefined;
     return {
       folio: row.folio,
       numeroEntrega: 1,
@@ -538,15 +540,15 @@ export async function getActaDataByFolio(
       beneficiario: {
         nombre: `${row.nombres_rsh} ${row.apellidos_rsh}`.trim(),
         run: `${row.rut}-${row.dv}`,
-        domicilio: row.direccion || "No especificada",
-        tramo: row.tramo ? `${row.tramo}%` : "N/A",
-        folioRSH: row.folio_rsh ? String(row.folio_rsh) : "N/A",
-        telefono: formatPhone(row.telefono) || "N/A",
-        edad: String(getAge(String(row.fecha_nacimiento))) || "N/A",
+        domicilio: row.direccion || "No especificado",
+        tramo: row.tramo ? `${row.tramo}%` : "No especificado",
+        folioRSH: row.folio_rsh ? String(row.folio_rsh) : "No especificado",
+        telefono: formatPhone(row.telefono) || "No especificado",
+        edad: edadVal,
       },
       receptor: receptorData,
       beneficios,
-      justificacion: row.observacion || "",
+      justificacion: row.observacion || "Sin observaciones.",
     };
   } catch (error) {
     console.error("Error al obtener datos acta:", error);

@@ -192,8 +192,8 @@ export function getActaDocDefinition(
               createInfoCell("Teléfono", data.beneficiario.telefono),
               createInfoCell("Folio", data.beneficiario.folioRSH),
             ],
-            ...(data.beneficiario.edad
-              ? [[createInfoCell("Edad", data.beneficiario.edad), ""]]
+            ...(data.beneficiario?.edad
+              ? [[createInfoCell("Edad", data.beneficiario?.edad), ""]]
               : []),
           ],
         },

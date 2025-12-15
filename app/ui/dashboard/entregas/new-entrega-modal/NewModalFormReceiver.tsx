@@ -10,6 +10,17 @@ import Input from "../../campañas/new-campaign-input";
 import { SubmitButton } from "../../submit-button";
 import { MdAutorenew } from "react-icons/md";
 import { capitalize, capitalizeAll } from "@/app/lib/utils/format";
+import ComboboxInput from "./ComboboxInput";
+
+const OPCIONES_PARENTESCO = [
+  "Mamá",
+  "Papá",
+  "Abuelo",
+  "Abuela",
+  "Tutor Legal",
+  "Hermano",
+  "Hermana",
+];
 
 // --- TIPOS ---
 type FormValue = string | number | boolean | null | undefined;
@@ -330,7 +341,10 @@ export default function NewModalFormReceiver({
       capitalizeAll(apellidosReceiver.toString()),
     );
     formData.append("telefono_receptor", telefonoReceiver.toString());
-    formData.append("direccion_receptor", direccionReceiver.toString());
+    formData.append(
+      "direccion_receptor",
+      capitalizeAll(direccionReceiver.toString()),
+    );
     formData.append("parentesco_receptor", capitalize(parentesco.toString()));
 
     const toastId = toast.loading("Guardando...");
@@ -427,7 +441,7 @@ export default function NewModalFormReceiver({
         value={direccionReceiver}
         setData={setDireccionReceiver}
       />
-      <Input
+      {/* <Input
         placeHolder="Ej: Familiar, Tutor Legal..."
         label="Parentesco / Relación"
         type="text"
@@ -435,6 +449,15 @@ export default function NewModalFormReceiver({
         value={parentesco}
         setData={setParentesco}
         required
+      /> */}
+      <ComboboxInput
+        label="Parentesco / Relación"
+        placeholder="Seleccione o escriba..."
+        value={parentesco}
+        onChange={setParentesco}
+        options={OPCIONES_PARENTESCO}
+        required
+        name="parentesco_receptor"
       />
 
       {/* SECCIÓN CAMPAÑAS */}

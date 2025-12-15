@@ -142,6 +142,60 @@ export const createEntrega = async (
         throw new Error("Esta persona ya recibió un beneficio el día de hoy.");
       }
 
+      // 2.5. VALIDACIÓN TEMPORAL: Edad para Regalo de Navidad (< 13 años)
+      const hasChristmasCampaign = campaigns.some((c) =>
+        c.campaignName.toLowerCase().includes("regalo de navidad"),
+      );
+
+      if (hasChristmasCampaign) {
+        const rshRequest = new sql.Request(transaction);
+        const rshResult = await rshRequest.input("rut", sql.Int, rut).query(`
+             SELECT fecha_nacimiento FROM rsh WHERE rut = @rut
+        `);
+
+        if (rshResult.recordset.length > 0) {
+          const fechaNacimiento = rshResult.recordset[0].fecha_nacimiento;
+
+          if (fechaNacimiento) {
+            const birthDate = new Date(fechaNacimiento);
+            const today = new Date();
+
+            // Cálculo preciso de edad
+            let age = today.getFullYear() - birthDate.getUTCFullYear();
+            const m = today.getMonth() - birthDate.getUTCMonth();
+            if (
+              m < 0 ||
+              (m === 0 && today.getDate() < birthDate.getUTCDate())
+            ) {
+              age--;
+            }
+
+            console.log("Validación Edad:", {
+              nacimientoUTC: birthDate.toISOString(),
+              diaNacimientoRecuperado: birthDate.getUTCDate(),
+              diaHoy: today.getDate(),
+              edadCalculada: age,
+            });
+
+            // Validar: Debe ser menor de 13 (0 a 12 años)
+            // Si tiene 13 o más, lanzamos error.
+            if (age >= 13) {
+              throw new Error(
+                `El beneficiario tiene ${age} años. La campaña "Regalo de Navidad" es exclusiva para menores de 13 años.`,
+              );
+            }
+          } else {
+            throw new Error(
+              "El beneficiario no tiene fecha de nacimiento registrada en RSH para validar la edad.",
+            );
+          }
+        } else {
+          throw new Error(
+            "Beneficiario no encontrado en RSH para validar edad.",
+          );
+        }
+      }
+
       // 3. Generar Folio Automático (Usando la SIGLA correcta)
       const currentYearTwoDigits = new Date().getFullYear() % 100;
 
@@ -183,8 +237,16 @@ export const createEntrega = async (
             .input("dv", sql.Char(1), dvReceptor)
             .input("nombres", sql.VarChar(50), nombres_receptor)
             .input("apellidos", sql.VarChar(50), apellidos_receptor)
-            .input("telefono", sql.VarChar(20), telefono_receptor)
-            .input("direccion", sql.VarChar(100), direccion_receptor).query(`
+            .input(
+              "telefono",
+              sql.VarChar(20),
+              telefono_receptor ? telefono_receptor : null,
+            )
+            .input(
+              "direccion",
+              sql.VarChar(100),
+              direccion_receptor ? direccion_receptor : null,
+            ).query(`
               INSERT INTO receptores (rut, dv, nombres, apellidos, telefono, direccion)
               OUTPUT INSERTED.id
               VALUES (@rut, @dv, @nombres, @apellidos, @telefono, @direccion)

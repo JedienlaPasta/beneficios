@@ -10,7 +10,12 @@ import DeleteRSHButton from "./delete-rsh-button";
 import { SubmitButton } from "../submit-button";
 import Input from "../campañas/new-campaign-input";
 import { useRouter, useSearchParams } from "next/navigation";
-import { updateRSH } from "@/app/lib/actions/rsh";
+import {
+  updateRSH,
+  updateRSHGeneralInfo,
+  updateRSHName,
+  updateTramo,
+} from "@/app/lib/actions/rsh";
 import { toast } from "sonner";
 
 type ModalProps = {
@@ -21,12 +26,16 @@ type ModalProps = {
 export default function CitizenDetailModal({ citizen }: ModalProps) {
   const [tab, setTab] = useState("Personal");
   const tabs = ["Personal", "Adicional"];
+  const editTabs = ["Nombre", "General", "Tramo", "Contacto"];
   const { rut, folio } = citizen;
 
   const [isEditing, setIsEditing] = useState(false);
   const toggleEditForm = () => {
-    setIsEditing((prev) => !prev);
-    setTab("Personal");
+    setIsEditing((prev) => {
+      const next = !prev;
+      setTab(next ? "Nombre" : "Personal");
+      return next;
+    });
   };
 
   return (
@@ -96,16 +105,26 @@ export default function CitizenDetailModal({ citizen }: ModalProps) {
                 duration: 0.3,
               }}
             >
-              <button
-                className={`relative px-4 py-2 text-sm font-medium text-blue-600 outline-none transition-colors`}
-              >
-                {"Contacto"}
-                <motion.span
-                  layoutId="tab-underline"
-                  className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600"
-                  transition={{ duration: 0.2 }}
-                />
-              </button>
+              {editTabs.map((currentTab, index) => (
+                <button
+                  key={index}
+                  onClick={() => setTab(currentTab)}
+                  className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors ${
+                    currentTab === tab
+                      ? "text-blue-600"
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  {currentTab}
+                  {currentTab === tab && (
+                    <motion.span
+                      layoutId="tab-underline"
+                      className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600"
+                      transition={{ duration: 0.2 }}
+                    />
+                  )}
+                </button>
+              ))}
             </motion.span>
           )}
         </AnimatePresence>
@@ -115,7 +134,13 @@ export default function CitizenDetailModal({ citizen }: ModalProps) {
         <h3 className="flex items-center gap-3 py-2 text-sm font-medium text-slate-600">
           <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
           {isEditing
-            ? "Información de Contacto"
+            ? tab === "Nombre"
+              ? "Nombre"
+              : tab === "General"
+                ? "Información General"
+                : tab === "Tramo"
+                  ? "Tramo"
+                  : "Información de Contacto"
             : tab === "Personal"
               ? "Información Personal"
               : "Información Adicional"}
@@ -139,7 +164,15 @@ export default function CitizenDetailModal({ citizen }: ModalProps) {
               exit={{ opacity: 0, y: -10, height: 220 }}
               transition={{ duration: 0.4 }}
             >
-              <UpdateForm citizen={citizen} />
+              {tab === "Nombre" ? (
+                <UpdateNameForm citizen={citizen} />
+              ) : tab === "General" ? (
+                <UpdateGeneralForm citizen={citizen} />
+              ) : tab === "Tramo" ? (
+                <UpdateTramoForm citizen={citizen} />
+              ) : (
+                <UpdateForm citizen={citizen} />
+              )}
             </motion.div>
           ) : (
             <motion.div
@@ -301,6 +334,250 @@ function UpdateForm({ citizen }: UpdateFormProps) {
           </SubmitButton>
         </div>
       </motion.div>
+    </form>
+  );
+}
+
+function UpdateNameForm({ citizen }: UpdateFormProps) {
+  const [nombres, setNombres] = useState(citizen?.nombres_rsh || "");
+  const [apellidos, setApellidos] = useState(citizen?.apellidos_rsh || "");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const closeModal = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete("citizen");
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setIsDisabled(true);
+    const myFormData = new FormData();
+    myFormData.append("rut", String(citizen.rut));
+    myFormData.append("nombres_rsh", nombres);
+    myFormData.append("apellidos_rsh", apellidos);
+    const toastId = toast.loading("Guardando...");
+    try {
+      const response = await updateRSHName(myFormData);
+      if (!response.success) throw new Error(response.message);
+      toast.success(response.message, { id: toastId });
+      closeModal();
+      router.refresh();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Error al actualizar";
+      toast.error(message, { id: toastId });
+      setIsDisabled(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const isFormValid = () =>
+    nombres.trim().length >= 3 && apellidos.trim().length >= 3;
+  return (
+    <form onSubmit={handleSubmit} className="overflow-y-auto scrollbar-hide">
+      <div className="flex flex-col gap-5 pt-2">
+        <Input
+          placeHolder="Nombres"
+          label="Nombres"
+          type="text"
+          nombre="nombres_rsh"
+          value={nombres}
+          setData={setNombres}
+          required
+        />
+        <Input
+          placeHolder="Apellidos"
+          label="Apellidos"
+          type="text"
+          nombre="apellidos_rsh"
+          value={apellidos}
+          setData={setApellidos}
+          required
+        />
+      </div>
+      <div className="z-10 mt-6 flex">
+        <SubmitButton isDisabled={isDisabled || !isFormValid()}>
+          {isLoading ? "Guardando..." : "Guardar"}
+        </SubmitButton>
+      </div>
+    </form>
+  );
+}
+
+function UpdateGeneralForm({ citizen }: UpdateFormProps) {
+  const [nacionalidad, setNacionalidad] = useState(citizen?.nacionalidad || "");
+  const [genero, setGenero] = useState(citizen?.genero || "");
+  const [indigena, setIndigena] = useState(citizen?.indigena || "");
+  const [fechaNacimiento, setFechaNacimiento] = useState(
+    citizen?.fecha_nacimiento
+      ? new Date(citizen.fecha_nacimiento).toISOString().slice(0, 10)
+      : "",
+  );
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const closeModal = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete("citizen");
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setIsDisabled(true);
+    const myFormData = new FormData();
+    myFormData.append("rut", String(citizen.rut));
+    myFormData.append("nacionalidad", nacionalidad);
+    myFormData.append("genero", genero);
+    myFormData.append("indigena", indigena);
+    myFormData.append("fecha_nacimiento", fechaNacimiento);
+    const toastId = toast.loading("Guardando...");
+    try {
+      const response = await updateRSHGeneralInfo(myFormData);
+      if (!response.success) throw new Error(response.message);
+      toast.success(response.message, { id: toastId });
+      closeModal();
+      router.refresh();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Error al actualizar";
+      toast.error(message, { id: toastId });
+      setIsDisabled(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  return (
+    <form onSubmit={handleSubmit} className="overflow-y-auto scrollbar-hide">
+      <div className="grid grid-cols-2 gap-4 pt-2">
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-slate-500">
+            Nacionalidad
+          </label>
+          <select
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+            value={nacionalidad}
+            onChange={(e) => setNacionalidad(e.target.value)}
+          >
+            <option value="">Sin cambio</option>
+            <option value="Chilena">Chilena</option>
+            <option value="Extranjera">Extranjera</option>
+          </select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-slate-500">Género</label>
+          <select
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+            value={genero}
+            onChange={(e) => setGenero(e.target.value)}
+          >
+            <option value="">Sin cambio</option>
+            <option value="Femenino">Femenino</option>
+            <option value="Masculino">Masculino</option>
+          </select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-slate-500">
+            Pueblo Indígena
+          </label>
+          <select
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+            value={indigena}
+            onChange={(e) => setIndigena(e.target.value)}
+          >
+            <option value="">Sin cambio</option>
+            <option value="Si">Si</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-slate-500">
+            Fecha de Nacimiento
+          </label>
+          <input
+            type="date"
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+            value={fechaNacimiento}
+            onChange={(e) => setFechaNacimiento(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="z-10 mt-6 flex">
+        <SubmitButton isDisabled={isDisabled}>
+          {isLoading ? "Guardando..." : "Guardar"}
+        </SubmitButton>
+      </div>
+    </form>
+  );
+}
+
+function UpdateTramoForm({ citizen }: UpdateFormProps) {
+  const [tramo, setTramo] = useState(
+    citizen?.tramo ? String(citizen.tramo) : "",
+  );
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const closeModal = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete("citizen");
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setIsDisabled(true);
+    const myFormData = new FormData();
+    myFormData.append("rut", String(citizen.rut));
+    myFormData.append("tramo", tramo);
+    const toastId = toast.loading("Guardando...");
+    try {
+      const response = await updateTramo(myFormData);
+      if (!response.success) throw new Error(response.message);
+      toast.success(response.message, { id: toastId });
+      closeModal();
+      router.refresh();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Error al actualizar";
+      toast.error(message, { id: toastId });
+      setIsDisabled(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const isFormValid = () => tramo.trim() !== "";
+  return (
+    <form onSubmit={handleSubmit} className="overflow-y-auto scrollbar-hide">
+      <div className="flex flex-col gap-5 pt-2">
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-slate-500">Tramo</label>
+          <select
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+            value={tramo}
+            onChange={(e) => setTramo(e.target.value)}
+          >
+            <option value="">Seleccione</option>
+            <option value="40">40</option>
+            <option value="50">50</option>
+            <option value="60">60</option>
+            <option value="70">70</option>
+            <option value="80">80</option>
+            <option value="90">90</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
+      <div className="z-10 mt-6 flex">
+        <SubmitButton isDisabled={isDisabled || !isFormValid()}>
+          {isLoading ? "Guardando..." : "Guardar"}
+        </SubmitButton>
+      </div>
     </form>
   );
 }
