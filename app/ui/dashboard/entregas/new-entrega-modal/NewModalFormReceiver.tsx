@@ -141,7 +141,7 @@ export default function NewModalFormReceiver({
 
           try {
             const schema = JSON.parse(campaign.esquema_formulario || "[]");
-            schema.forEach((field: any) => {
+            schema.forEach((field: DynamicFieldSchema) => {
               // Si el campo es cantidad, valor por defecto 1
               if (
                 field.nombre === "cantidad" ||
@@ -207,10 +207,9 @@ export default function NewModalFormReceiver({
   };
 
   // Helpers de Stock
-  const checkValues = (campaign: Campaign) => {
+  const checkValues = (campaign: Campaign): boolean => {
     if (campaign.stock === null || campaign.entregas === null) return false;
-    if (campaign.stock - campaign.entregas < 1) return true;
-    return false;
+    return campaign.stock - campaign.entregas < 1;
   };
 
   const getStock = (campaign: Campaign) => {
