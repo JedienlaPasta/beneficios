@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import NewModalFormManual from "./NewModalFormManual";
 import NewModalFormReceiver from "./NewModalFormReceiver";
+import RoleGuard from "@/app/ui/auth/role-guard";
 
 type NewEntregaModalProps = {
   rut: string;
@@ -114,26 +115,28 @@ export default function NewEntregaModal({
               />
             </motion.div>
           )}
-          {tab === "Manual" && (
-            <motion.div
-              key="tab-manual"
-              initial={{ opacity: 0, y: 10, height: 360 }}
-              animate={{ opacity: 1, y: 0, height: "auto" }}
-              exit={{ opacity: 0, y: -10, height: 340 }}
-              transition={{
-                duration: 0.4,
-                height: { duration: 0.4 },
-                ease: "easeInOut",
-              }}
-            >
-              {/* Form 03 */}
-              <NewModalFormManual
-                activeCampaigns={activeCampaigns}
-                rut={rut}
-                // userId={userId}
-              />
-            </motion.div>
-          )}
+          <RoleGuard allowedRoles={["Administrador"]}>
+            {tab === "Manual" && (
+              <motion.div
+                key="tab-manual"
+                initial={{ opacity: 0, y: 10, height: 360 }}
+                animate={{ opacity: 1, y: 0, height: "auto" }}
+                exit={{ opacity: 0, y: -10, height: 340 }}
+                transition={{
+                  duration: 0.4,
+                  height: { duration: 0.4 },
+                  ease: "easeInOut",
+                }}
+              >
+                {/* Form 03 */}
+                <NewModalFormManual
+                  activeCampaigns={activeCampaigns}
+                  rut={rut}
+                  // userId={userId}
+                />
+              </motion.div>
+            )}
+          </RoleGuard>
         </AnimatePresence>
       </motion.div>
     </div>
