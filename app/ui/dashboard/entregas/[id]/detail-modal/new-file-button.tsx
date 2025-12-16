@@ -19,7 +19,7 @@ export default function GetNewFileButton({ folio }: Props) {
       if (!res.ok) throw new Error("No se pudo obtener el acta");
       const data: ActaData = await res.json();
 
-      const { getPdfBlobUrl } = await import("../../../../lib/pdf");
+      const { getPdfBlobUrl } = await import("../../../../../lib/pdf");
       const blobUrl = await getPdfBlobUrl(data);
 
       if (!blobUrl) {
@@ -46,7 +46,7 @@ export default function GetNewFileButton({ folio }: Props) {
 
   return (
     <button
-      className="flex items-center gap-1 rounded-md border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600 transition-all hover:border-blue-200 hover:bg-blue-100/70 active:scale-95"
+      className="flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-800 px-3 py-1 text-sm font-medium text-white transition-all hover:border-blue-700 hover:bg-blue-700 active:scale-95"
       disabled={isLoading}
       onClick={onClick}
     >
@@ -57,7 +57,7 @@ export default function GetNewFileButton({ folio }: Props) {
           Generando...
         </>
       ) : (
-        "Entrega PDF"
+        "Acta PDF"
       )}
     </button>
   );

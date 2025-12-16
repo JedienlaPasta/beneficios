@@ -1,6 +1,6 @@
 "use client";
 import { RiCloseCircleFill } from "react-icons/ri";
-import { SubmitButton } from "../../submit-button";
+import { SubmitButton } from "../../../submit-button";
 import pdf from "@/public/pdf.svg";
 import { toast } from "sonner";
 import { useState } from "react";

@@ -5,7 +5,7 @@ import RSHTable from "@/app/ui/dashboard/entregas/rsh-table";
 import SelectSearch from "@/app/ui/dashboard/entregas/select-search";
 import EntregasTable from "@/app/ui/dashboard/entregas/entregas-table";
 import ModalSkeleton from "@/app/ui/modal-skeleton";
-import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/modal-context";
+import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/detail-modal/modal-context";
 
 type SocialAidProps = {
   searchParams?: Promise<{

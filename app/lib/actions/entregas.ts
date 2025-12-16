@@ -104,8 +104,11 @@ export const createEntrega = async (
     return { success: false, message: "Debe seleccionar al menos una campaña" };
   }
 
-  if (rut && rut.length > 5) {
-    const cleanRut = rut.replace(/\./g, "").replace(/-/g, "").toUpperCase();
+  if (rut_receptor && rut_receptor.length > 5) {
+    const cleanRut = rut_receptor
+      .replace(/\./g, "")
+      .replace(/-/g, "")
+      .toUpperCase();
     const dvReceptor = cleanRut.slice(-1);
     const numRutReceptor = parseInt(cleanRut.slice(0, -1));
     const checkDV = getDV(numRutReceptor);

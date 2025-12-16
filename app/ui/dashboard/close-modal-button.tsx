@@ -29,7 +29,7 @@ export default function CloseModalButton({
 
   return (
     <RiCloseLine
-      className="cursor-pointer text-xl text-slate-400 hover:text-slate-600"
+      className="size-6 cursor-pointer text-xl text-slate-500/90 hover:text-slate-700/80"
       onClick={closeModal}
     />
   );

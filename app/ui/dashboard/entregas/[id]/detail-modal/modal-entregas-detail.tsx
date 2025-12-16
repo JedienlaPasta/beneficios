@@ -1,6 +1,5 @@
 "use client";
-import ModalImportForm from "./modal-import-form";
-import CloseModalButton from "../../close-modal-button";
+import CloseModalButton from "../../../close-modal-button";
 import { FaBoxOpen } from "react-icons/fa6";
 import {
   EntregaByFolio,
@@ -10,17 +9,18 @@ import {
 import Link from "next/link";
 import { Files } from "./files";
 import { formatDate, formatRUT, formatTime } from "@/app/lib/utils/format";
-import GetNewFileButton from "./new-file-button";
-import DeleteEntregasButton from "./delete-button";
 import RoleGuard from "@/app/ui/auth/role-guard";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import Camara from "./modal-camera";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toggleEntregaStatus } from "@/app/lib/actions/entregas";
 import { toast } from "sonner";
-import DiscardEntregasButton from "./discard_button";
-import EditButton from "../../edit-btn";
+import EditButton from "../../../edit-btn";
+import { getRshName } from "@/app/lib/actions/rsh";
+import CamaraComponent from "./modal-camera";
+import GetNewFileButton from "./new-file-button";
+import ModalImportForm from "./modal-import-form";
+import DetailsModalOptionsMenu from "./modal-options-menu";
 
 type Props = {
   rut: string;
@@ -48,13 +48,48 @@ export default function ModalEntregasDetail({
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const [rshName, setRshName] = useState<string>("");
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchName = async () => {
+      try {
+        const response = await getRshName(rut);
+        // getRshName retorna el objeto directo de la DB { nombres_rsh, apellidos_rsh }
+        if (
+          response &&
+          typeof response === "object" &&
+          "nombres_rsh" in response
+        ) {
+          const { nombres_rsh, apellidos_rsh } = response as {
+            nombres_rsh: string;
+            apellidos_rsh: string;
+          };
+
+          if (isMounted) {
+            // Formateamos para mostrar Primer Nombre + Primer Apellido
+            setRshName(`${nombres_rsh} ${apellidos_rsh}`);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching RSH name", error);
+      }
+    };
+
+    if (rut) fetchName();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [rut]);
+
   let stateColor;
   if (estado_documentos === "Anulado") {
-    stateColor = "bg-red-100 text-red-600";
+    stateColor = "bg-rose-100/60 text-rose-600 ring-rose-100";
   } else if (estado_documentos === "En Curso") {
-    stateColor = "bg-amber-100/60 text-amber-500/90";
+    stateColor = "bg-amber-100/60 text-amber-500/90 ring-amber-100";
   } else if (estado_documentos === "Finalizado") {
-    stateColor = "bg-emerald-100 text-emerald-600";
+    stateColor = "bg-emerald-100/60 text-emerald-600 ring-emerald-100";
   }
 
   const handleTabChange = async (newTab: string) => {
@@ -109,94 +144,118 @@ export default function ModalEntregasDetail({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden">
+    <div className="fixed inset-0 z-50 overflow-x-hidden">
       <div
-        className="fixed inset-0 bg-gray-900/50"
+        className="fixed inset-0 bg-gray-900/40 transition-opacity"
         onClick={handleOverlayClick}
       />
-      <div className={`relative z-10 mx-auto w-[95%] sm:w-fit`}>
+      <div className="relative z-10 mx-auto w-full sm:my-10 sm:max-w-[38rem]">
         <span onClick={handleOverlayClick} className="absolute inset-0 -z-10" />
         <motion.div
           layout
           layoutRoot
           transition={{ layout: { duration: 0.25 } }}
-          className="scrollbar-hidex max-h-fulls flex w-[100%] shrink-0 flex-col gap-4 overflow-hidden rounded-xl bg-white p-6 shadow-xl transition-all duration-500 sm:w-[34rem] md:p-8"
+          className="max-h-[85vh]s w-full shrink-0 overflow-hidden bg-white p-4 shadow-xl ring-1 ring-slate-200/70 transition-all duration-500 scrollbar-hide sm:rounded-3xl sm:bg-gray-50 sm:p-6 md:p-8"
         >
-          {/* Header */}
-          <section className="flex items-center justify-between">
-            <div className="flex flex-col gap-0.5">
-              <span className="text-xs font-medium text-slate-500">Folio</span>
-              <div className="flex items-center gap-3">
-                <h2 className="text-xl font-bold text-slate-700">#{folio}</h2>
+          {/* Header & Hero Section */}
+          <div className="mb-3 flex flex-col gap-4">
+            {/* Top Bar: Breadcrumb & Actions */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-slate-500">
+                <span className="font-medium text-slate-600">
+                  Detalle de Entrega
+                </span>
+                <span className="text-slate-300">/</span>
+                <span className="font-bold text-slate-700">#{folio}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <RoleGuard allowedRoles={["Administrador", "Supervisor"]}>
+                  <DetailsModalOptionsMenu
+                    folio={folio}
+                    estadoDocs={estado_documentos}
+                  />
+                </RoleGuard>
+                <div className="mx-1 h-4 w-px bg-slate-300"></div>
+                <CloseModalButton
+                  name="detailsModal"
+                  secondName="rut"
+                  setIsClosing={setIsModalClosing}
+                />
+              </div>
+            </div>
+
+            {/* Beneficiario Card */}
+            <Link
+              href={`/dashboard/entregas/${rut}`}
+              className="relative flex flex-col gap-4 overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:shadow-md sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="relative flex items-center gap-4">
+                <div className="flex flex-col">
+                  <h2 className="font-bold leading-tight text-slate-800 sm:text-lg">
+                    {rshName || (
+                      <span className="animate-pulse rounded bg-slate-200 text-transparent">
+                        Cargando Nombre...
+                      </span>
+                    )}
+                  </h2>
+                  <div className="mt-1 flex items-center gap-3 text-xs font-medium text-slate-500">
+                    <span className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-slate-500">
+                      RUT:{" "}
+                      <p className="font-medium text-slate-700">
+                        {formattedRUT}
+                      </p>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Status Action */}
+              <div className="flex items-center gap-2 pl-2 sm:pl-0">
+                <p className="text-xs text-slate-400">Estado</p>
                 <button
                   onClick={handleEntregaStatus}
                   disabled={isToggleButtonDisabled}
-                  className={`flex items-center gap-2 rounded-md px-2.5 py-0.5 ${stateColor}`}
+                  className={`group flex items-center gap-2 rounded-full py-1 pl-2 pr-3 text-xs font-medium ring-1 ring-inset transition-all hover:ring-2 active:scale-95 disabled:opacity-70 ${stateColor} ${
+                    isToggleButtonDisabled
+                      ? "cursor-not-allowed"
+                      : "cursor-pointer"
+                  }`}
                 >
-                  <p className="text-xs font-medium">{estado_documentos}</p>
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-75"></span>
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-current"></span>
+                  </span>
+                  {estado_documentos}
                 </button>
               </div>
-              <span className="flex gap-1 text-xs text-slate-500">
-                Beneficiario: <p className="text-blue-700">{formattedRUT}</p>
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <GetNewFileButton folio={folio} />
-              <CloseModalButton
-                name="detailsModal"
-                secondName="rut"
-                setIsClosing={setIsModalClosing}
-              />
-            </div>
-          </section>
+            </Link>
+          </div>
 
           {/* Tab Navigation */}
-          <section className="flex border-b border-gray-200">
-            <button
-              onClick={() => handleTabChange("Resumen")}
-              className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors ${
-                tab === "Resumen"
-                  ? "text-blue-600"
-                  : "text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              Resumen
-              {tab === "Resumen" && (
-                <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600"></span>
-              )}
-            </button>
-            <button
-              onClick={() => handleTabChange("Importar")}
-              className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors ${
-                tab === "Importar"
-                  ? "text-blue-600"
-                  : "text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              Importar
-              {tab === "Importar" && (
-                <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600"></span>
-              )}
-            </button>
-            <button
-              onClick={() => handleTabChange("Capturar")}
-              className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors ${
-                tab === "Capturar"
-                  ? "text-blue-600"
-                  : "text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              Capturar
-              {tab === "Capturar" && (
-                <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600"></span>
-              )}
-            </button>
-          </section>
+          <nav className="mx-0.5 mt-2 flex border-b border-slate-200/80">
+            {["Resumen", "Importar", "Capturar"].map((name) => (
+              <button
+                key={name}
+                onClick={() => handleTabChange(name)}
+                aria-selected={tab === name}
+                className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 ${
+                  tab === name
+                    ? "text-blue-600"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                {name}
+                {tab === name && (
+                  <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600" />
+                )}
+              </button>
+            ))}
+          </nav>
 
           {/* Content */}
           <motion.div
             id="content-container"
-            className="scrollbar-hidex relative min-h-[8rem] overflow-hidden"
+            className="scrollbar-hides relative min-h-[8rem] overflow-hidden pt-4"
           >
             <AnimatePresence mode="wait">
               {tab === "Resumen" ? (
@@ -211,27 +270,27 @@ export default function ModalEntregasDetail({
                     height: { duration: 0.4 },
                   }}
                   layout
-                  className="flex flex-col gap-4"
+                  className="flex flex-col gap-3"
                 >
                   {/* General Info */}
                   <section className="">
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-1">
                       <ModalGeneralInfoField
                         name="Encargado"
-                        className="rounded-lg border border-gray-200/80 bg-gray-50/70 px-4 py-2"
+                        className="rounded-lg border border-slate-200/80 bg-white/80 px-3.5 py-2.5"
                       >
                         {nombre_usuario}
                       </ModalGeneralInfoField>
                       <ModalGeneralInfoField
                         name="Fecha de Entrega"
-                        className="rounded-lg border border-gray-200/80 bg-gray-50/70 px-4 py-2"
+                        className="rounded-lg border border-slate-200/80 bg-white/80 px-3.5 py-2.5"
                       >
                         {fecha_entrega ? fecha_entrega : ""}
                       </ModalGeneralInfoField>
                       <ModalGeneralInfoField
                         span="col-span-2"
                         name="Justificación"
-                        className="rounded-lg border border-gray-200/80 bg-gray-50/70 px-4 py-2"
+                        className="rounded-lg border border-slate-200/80 bg-white/80 px-3.5 py-2.5"
                       >
                         {observacion || "No especificada"}
                       </ModalGeneralInfoField>
@@ -239,31 +298,14 @@ export default function ModalEntregasDetail({
                   </section>
 
                   {/* Entregas List */}
-                  <section className="flex flex-col gap-4">
+                  <section className="flex flex-col gap-3">
                     <div className="flex items-center justify-between">
-                      <h3 className="flex items-center gap-2 text-sm font-medium text-slate-600">
-                        <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-                        Beneficios Recibidos{" "}
-                        {beneficiosEntregados.length > 3 &&
-                          "(" + beneficiosEntregados.length + ")"}
+                      <h3 className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                        <span className="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
+                        Beneficios Recibidos
                       </h3>
-                      <span className="flex items-center gap-2">
-                        <RoleGuard
-                          allowedRoles={["Administrador", "Supervisor"]}
-                        >
-                          <DeleteEntregasButton folio={folio} />
-                        </RoleGuard>
-                        <RoleGuard
-                          allowedRoles={["Administrador", "Supervisor"]}
-                        >
-                          <DiscardEntregasButton
-                            folio={folio}
-                            estadoDocumentos={estado_documentos}
-                          />
-                        </RoleGuard>
-                      </span>
                     </div>
-                    <div className="flex flex-col gap-2.5 overflow-y-auto pr-1 scrollbar-hide">
+                    <div className="scrollbar-hides flex flex-col gap-1">
                       {beneficiosEntregados.map((item, index) => (
                         <EntregasListItem
                           key={`${item.id_campaña}-${index}`}
@@ -321,7 +363,7 @@ export default function ModalEntregasDetail({
                   className="flex flex-col gap-5"
                 >
                   <div className="flex flex-col items-start justify-center">
-                    <Camara
+                    <CamaraComponent
                       folio={folio}
                       isActive={tab === "Capturar" && !isModalClosing}
                       setTab={setTab}
@@ -362,7 +404,7 @@ function ModalGeneralInfoField({
           {name === "Encargado" && <EditButton name="supervisor" />}
         </RoleGuard>
       </span>
-      <span className="relative text-sm text-slate-700">
+      <span className="relative text-[13px] text-slate-700 sm:text-sm">
         {value}
         {typeof children === "object" && (
           <p className="absolute left-[calc(100%+7px)] top-0 rounded bg-slate-200/60 px-2 py-0.5 text-xs text-slate-500">
@@ -374,7 +416,6 @@ function ModalGeneralInfoField({
   );
 }
 
-// --- ITEM DE LISTA ACTUALIZADO Y TIPADO SEGURO ---
 function EntregasListItem({ item }: { item: EntregaByFolio }) {
   // Definimos el tipo posible para los valores del JSON
   type DetailValue = string | number | boolean | null;
@@ -392,7 +433,7 @@ function EntregasListItem({ item }: { item: EntregaByFolio }) {
     console.error("Error parsing details", e);
   }
 
-  // 2. Parsear Esquema (Para obtener los labels bonitos)
+  // 2. Parsear Esquema (Para obtener los labels)
   type SchemaField = { nombre: string; label: string };
   let schema: SchemaField[] = [];
   try {
@@ -403,17 +444,16 @@ function EntregasListItem({ item }: { item: EntregaByFolio }) {
     console.error("Error parsing schema", e);
   }
 
-  // Función para obtener el Label correcto
   const getLabel = (key: string) => {
     const field = schema.find((f) => f.nombre === key);
     return field ? field.label : key.replace(/_/g, " ");
   };
 
   return (
-    <div className="flex items-start justify-between gap-4 rounded-lg border border-gray-200/80 bg-gray-50 px-3 py-2.5 transition-colors hover:bg-gray-100/80">
+    <div className="group flex items-start justify-between gap-4 rounded-lg border border-slate-200/80 bg-white/80 px-3 py-2.5 transition-colors hover:shadow-sm">
       <div className="flex items-center gap-3">
         <Link
-          className="group flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm transition-all hover:bg-blue-100 hover:shadow"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm ring-1 ring-slate-200/70 transition-all hover:bg-blue-100"
           href={`/dashboard/campanas/${item.id_campaña}`}
         >
           <FaBoxOpen className="h-5 w-5 text-slate-700 transition-all group-hover:text-blue-500" />
@@ -430,24 +470,15 @@ function EntregasListItem({ item }: { item: EntregaByFolio }) {
       </div>
 
       <div className="flex flex-col items-end justify-center gap-0.5 text-right">
-        {/* Mostramos el código físico de entrega (ID/Serial) destacado si existe */}
-        {/* {item.codigo_entrega && (
-          <p className="mb-0.5 text-sm font-bold text-blue-600">
-            {item.codigo_entrega}
-          </p>
-        )} */}
-
         {/* Detalles dinámicos iterados */}
-        {Object.entries(details).map(([key, value]) => {
-          return (
-            <p key={key} className="text-xs text-slate-500">
-              <span className="font-medium capitalize text-slate-600">
-                {getLabel(key)}:
-              </span>{" "}
-              {String(value)}
-            </p>
-          );
-        })}
+        {Object.entries(details).map(([key, value]) => (
+          <p key={key} className="text-xs text-slate-500">
+            <span className="font-medium capitalize text-slate-700">
+              {getLabel(key)}:
+            </span>{" "}
+            {String(value)}
+          </p>
+        ))}
       </div>
     </div>
   );
@@ -461,16 +492,17 @@ function FilesList({
   files: EntregasFiles[];
 }) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <h3 className="flex items-center gap-2 text-sm font-medium text-slate-600">
-          <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+        <h3 className="flex items-center gap-2 text-sm font-medium text-slate-700">
+          <span className="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
           Documentos Adjuntos
         </h3>
+        <GetNewFileButton folio={folio} />
       </div>
 
       {files.length > 0 ? (
-        <div className="grid grid-cols-1 gap-3 rounded-xl border border-gray-200/80 bg-gray-50/70 p-4 shadow-sm sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-sm sm:grid-cols-2">
           {files.map((item: EntregasFiles, index) => (
             <Files key={index} item={item} folio={folio} />
           ))}

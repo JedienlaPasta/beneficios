@@ -1321,3 +1321,28 @@ export async function getReceiverByRut(rutString: string) {
     return { success: false, message: "Error del servidor." };
   }
 }
+
+export async function getRshName(rutString: string) {
+  try {
+    const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return {
+        success: false,
+        message: "No se pudo establecer una conexión a la base de datos.",
+      };
+    }
+
+    const request = pool.request();
+    const result = await request.input("rut", sql.Int, rutString).query(`
+      SELECT nombres_rsh, apellidos_rsh
+      FROM rsh
+      WHERE rut = @rut
+    `);
+
+    return result.recordset[0];
+  } catch (error) {
+    console.error("Error buscando nombre en RSH:", error);
+    return { success: false, message: "Error del servidor." };
+  }
+}

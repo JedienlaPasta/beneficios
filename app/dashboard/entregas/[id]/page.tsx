@@ -6,7 +6,7 @@ import CitizenDetail, {
 import NewButton from "@/app/ui/dashboard/new-button";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import EntregasTable from "@/app/ui/dashboard/entregas/[id]/entregas-table";
-import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/modal-context";
+import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/detail-modal/modal-context";
 import ModalSkeleton from "@/app/ui/modal-skeleton";
 import { formatRUT } from "@/app/lib/utils/format";
 // import { Spinner } from "@/app/ui/dashboard/loaders";

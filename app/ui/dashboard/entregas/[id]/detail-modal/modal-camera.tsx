@@ -6,7 +6,7 @@ import { PDFDocument } from "pdf-lib";
 import { uploadPDFByFolio } from "@/app/lib/actions/entregas";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
-import FileNameDropdown from "./file-name-dropdown";
+import FileNameDropdown from "./../file-name-dropdown";
 
 const filesList = [
   {

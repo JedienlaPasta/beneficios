@@ -6,7 +6,7 @@ import CampaignEntregasTable from "@/app/ui/dashboard/campañas/[id]/campaign-en
 import CampaignEntregasTableSkeleton from "@/app/ui/dashboard/campañas/[id]/table-skeleton";
 import { Modal } from "@/app/ui/dashboard/modal";
 import ModalSkeleton from "@/app/ui/modal-skeleton";
-import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/modal-context";
+import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/detail-modal/modal-context";
 import { CampaignDetailSkeleton } from "@/app/ui/dashboard/campañas/[id]/campaign-detail-skeleton";
 
 type CampaignProps = {
