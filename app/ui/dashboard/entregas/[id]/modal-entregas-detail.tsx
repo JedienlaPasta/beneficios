@@ -141,7 +141,7 @@ export default function ModalEntregasDetail({
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <GetNewFileButton folio={folio}>Nueva Acta</GetNewFileButton>
+              <GetNewFileButton folio={folio} />
               <CloseModalButton
                 name="detailsModal"
                 secondName="rut"

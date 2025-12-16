@@ -10,6 +10,7 @@ import { logAction } from "./auditoria";
 import { formatDate, formatPhone, formatRUT } from "../utils/format";
 import { getSession } from "../session";
 import { revalidatePath } from "next/cache";
+import { getDV } from "../utils/get-values";
 
 interface CitizenData {
   telefono: string | null;
@@ -103,9 +104,21 @@ export const createEntrega = async (
     return { success: false, message: "Debe seleccionar al menos una campaña" };
   }
 
+  if (rut && rut.length > 5) {
+    const cleanRut = rut.replace(/\./g, "").replace(/-/g, "").toUpperCase();
+    const dvReceptor = cleanRut.slice(-1);
+    const numRutReceptor = parseInt(cleanRut.slice(0, -1));
+    const checkDV = getDV(numRutReceptor);
+    if (checkDV !== dvReceptor) {
+      return {
+        success: false,
+        message: "El DV no coincide con el RUT",
+      };
+    }
+  }
+
   const folioCode =
     campaigns.length > 1 ? "DO" : campaigns[0].code?.substring(0, 2) || "DO";
-  // console.log(campaigns[0]);
   let newFolio = "";
 
   try {

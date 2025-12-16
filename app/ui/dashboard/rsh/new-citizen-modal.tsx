@@ -17,7 +17,7 @@ export type FormState = {
 
 export default function NewCitizenModal({ name }: { name: string }) {
   const [rut, setRut] = useState("");
-  const [dv, setDv] = useState("");
+  // const [dv, setDv] = useState("");
   const [nombres, setNombres] = useState("");
   const [apellidos, setApellidos] = useState("");
   const [direccion, setDireccion] = useState("");
@@ -62,7 +62,7 @@ export default function NewCitizenModal({ name }: { name: string }) {
     const myFormData = new FormData();
 
     myFormData.append("rut", rut);
-    myFormData.append("dv", dv);
+    // myFormData.append("dv", dv);
     myFormData.append("nombres_rsh", nombres);
     myFormData.append("apellidos_rsh", apellidos);
     myFormData.append("direccion", direccion);
@@ -95,15 +95,28 @@ export default function NewCitizenModal({ name }: { name: string }) {
     }
   };
 
+  // Formateo RUT
+  const formatRutLive = (input: string) => {
+    const cleaned = input.replace(/[^0-9kK]/g, "").toUpperCase();
+    if (!cleaned) return { display: "", rutDigits: "" };
+    const maybeDv = cleaned.slice(-1);
+    const hasDv = cleaned.length > 1 && /[0-9K]/.test(maybeDv);
+    const rutDigits = hasDv ? cleaned.slice(0, -1) : cleaned;
+    const withDots = rutDigits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    const display = hasDv ? `${withDots}-${maybeDv}` : withDots;
+    return { display, rutDigits };
+  };
+
   const isFormValid = () => {
     return (
       rut.trim() !== "" &&
-      dv.trim() !== "" &&
+      // dv.trim() !== "" &&
       nombres.trim() !== "" &&
       apellidos.trim() !== "" &&
       direccion.trim() !== "" &&
       tramo.trim() !== "" &&
-      folio.trim() !== ""
+      folio.trim() !== "" &&
+      fechaNacimiento !== null
     );
   };
 
@@ -181,6 +194,19 @@ export default function NewCitizenModal({ name }: { name: string }) {
                 <div className="flex flex-col gap-5 pt-2">
                   <div className="flex grow gap-3">
                     <Input
+                      placeHolder="12345678-9"
+                      label="RUT"
+                      type="text"
+                      // pattern="[0-9]*"
+                      nombre="rut"
+                      value={rut}
+                      setData={(raw) => {
+                        const { display } = formatRutLive(raw);
+                        setRut(display);
+                      }}
+                      required
+                    />
+                    {/* <Input
                       placeHolder="12345678"
                       label="RUT (sin dígito ni puntos)"
                       type="text"
@@ -189,8 +215,8 @@ export default function NewCitizenModal({ name }: { name: string }) {
                       value={rut}
                       setData={setRut}
                       required
-                    />
-                    <Input
+                    /> */}
+                    {/* <Input
                       placeHolder="K o 0-9"
                       label="Dígito Verificador"
                       type="text"
@@ -199,7 +225,7 @@ export default function NewCitizenModal({ name }: { name: string }) {
                       setData={setDv}
                       maxLength={1}
                       required
-                    />
+                    /> */}
                   </div>
 
                   <div className="flex grow gap-3">
@@ -255,6 +281,14 @@ export default function NewCitizenModal({ name }: { name: string }) {
                       required
                     />
                   </div>
+
+                  <CustomAntdDatePicker
+                    label="Fecha de Nacimiento"
+                    placeholder="Seleccione una fecha"
+                    setDate={fechaNacimientoHandler}
+                    value={fechaNacimiento ? dayjs(fechaNacimiento) : null}
+                    required
+                  />
                 </div>
               </motion.section>
             )}
@@ -328,13 +362,6 @@ export default function NewCitizenModal({ name }: { name: string }) {
                     nombre="nacionalidad"
                     value={nacionalidad}
                     setData={setNacionalidad}
-                  />
-
-                  <CustomAntdDatePicker
-                    label="Fecha de Nacimiento"
-                    placeholder="Seleccione una fecha"
-                    setDate={fechaNacimientoHandler}
-                    value={fechaNacimiento ? dayjs(fechaNacimiento) : null}
                   />
                 </div>
               </motion.section>

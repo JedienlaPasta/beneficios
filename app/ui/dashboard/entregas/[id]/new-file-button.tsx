@@ -9,7 +9,7 @@ type Props = {
   folio: string;
 };
 
-export default function GetNewFileButton({ children, folio }: Props) {
+export default function GetNewFileButton({ folio }: Props) {
   const [isLoading, setIsLoading] = useState(false);
 
   const onClick = async () => {

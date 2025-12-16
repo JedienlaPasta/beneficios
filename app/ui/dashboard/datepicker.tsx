@@ -51,7 +51,14 @@ export default function CustomAntdDatePicker({
       }}
     >
       <div className="flex flex-col gap-1">
-        <label className="text-xs text-slate-500">{label}</label>
+        <label htmlFor={label} className="text-xs text-slate-500">
+          {label}
+          {required ? (
+            <span className="text-red-500"> *</span>
+          ) : (
+            <span className="text-slate-400"> (opcional)</span>
+          )}
+        </label>
         <DatePicker
           allowClear={false}
           format={"DD/MM/YYYY"}

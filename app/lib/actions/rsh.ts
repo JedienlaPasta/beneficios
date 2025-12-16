@@ -11,11 +11,9 @@ import { getDV } from "../utils/get-values";
 
 const RSHFormSchema = z.object({
   // Required fields
-  rut: z
-    .string()
-    .min(7, { message: "RUT debe tener al menos 7 dígitos" })
-    .regex(/^\d+$/, { message: "RUT debe contener solo números" }),
-  dv: z.string().length(1, { message: "DV es obligatorio" }),
+  rut: z.string().min(7, { message: "RUT debe tener al menos 7 dígitos" }),
+  // .regex(/^\d+$/, { message: "RUT debe contener solo números" }),
+  // dv: z.string().length(1, { message: "DV es obligatorio" }),
   nombres_rsh: z
     .string()
     .min(3, { message: "Nombres deben tener al menos 3 caracteres" }),
@@ -56,7 +54,7 @@ const RSHFormSchema = z.object({
 // Create RSH Record
 export async function createRSH(formData: FormData) {
   const rut = formData.get("rut") as string;
-  const dv = formData.get("dv") as string;
+  // const dv = formData.get("dv") as string;
   const nombresRSH = formData.get("nombres_rsh") as string;
   const apellidosRSH = formData.get("apellidos_rsh") as string;
   const direccion = formData.get("direccion") as string;
@@ -70,7 +68,16 @@ export async function createRSH(formData: FormData) {
   const folio = formData.get("folio") as string;
   const fecha_nacimiento = formData.get("fechaNacimiento") as string;
 
-  const checkDV = getDV(rut);
+  let dv;
+  let numRut;
+
+  if (rut && rut.length > 5) {
+    const cleanRut = rut.replace(/\./g, "").replace(/-/g, "").toUpperCase();
+    dv = cleanRut.slice(-1);
+    numRut = parseInt(cleanRut.slice(0, -1));
+  }
+
+  const checkDV = getDV(numRut);
   if (checkDV !== dv) {
     return {
       success: false,
@@ -80,7 +87,7 @@ export async function createRSH(formData: FormData) {
 
   const validationResult = RSHFormSchema.safeParse({
     rut: rut.trim(),
-    dv: dv.trim(),
+    // dv: dv.trim(),
     nombres_rsh: capitalizeAll(nombresRSH),
     apellidos_rsh: capitalizeAll(apellidosRSH),
     direccion: capitalizeAll(direccion),
@@ -118,7 +125,7 @@ export async function createRSH(formData: FormData) {
 
     // Check if rut already exists
     const rshResult = await request
-      .input("userRut", sql.Int, rut)
+      .input("userRut", sql.Int, numRut)
       .query("SELECT 1 FROM rsh WHERE rut = @userRut");
 
     if (rshResult.recordset.length > 0) {
@@ -126,8 +133,8 @@ export async function createRSH(formData: FormData) {
     }
 
     await request
-      .input("rut", sql.Int, validationResult.data.rut)
-      .input("dv", sql.VarChar, validationResult.data.dv)
+      .input("rut", sql.Int, numRut)
+      .input("dv", sql.VarChar, dv)
       .input("nombres_rsh", sql.VarChar, validationResult.data.nombres_rsh)
       .input("apellidos_rsh", sql.VarChar, validationResult.data.apellidos_rsh)
       .input("direccion", sql.VarChar, validationResult.data.direccion)
@@ -148,12 +155,12 @@ export async function createRSH(formData: FormData) {
         VALUES (@rut, @dv, @nombres_rsh, @apellidos_rsh, @direccion, @sector, @telefono, @correo, @tramo, @genero, @indigena, @nacionalidad, @folio, @fecha_nacimiento)
         `);
 
-    const formatedRut = formatRUT(rut);
-    await logAction("Crear", "creó el RSH", formatedRut);
+    // const formatedRut = formatRUT(rut);
+    await logAction("Crear", "creó el RSH", rut);
     revalidatePath("/dashboard/rsh");
     return {
       success: true,
-      message: `Registro ${formatedRut} creado exitosamente`,
+      message: `Registro ${rut} creado exitosamente`,
     };
   } catch (error) {
     console.error(error || "Error al crear el registro.");
@@ -1251,12 +1258,20 @@ export async function getReceiverByRut(rutString: string) {
       .replace(/\./g, "")
       .replace(/-/g, "")
       .toUpperCase();
-    const rutBody = parseInt(cleanRut.slice(0, -1));
+    const dv = cleanRut.slice(-1);
+    const numRut = parseInt(cleanRut.slice(0, -1));
 
-    if (isNaN(rutBody)) return { success: false, message: "RUT inválido" };
+    if (isNaN(numRut)) return { success: false, message: "RUT inválido" };
+    const checkDV = getDV(numRut);
+    if (checkDV !== dv) {
+      return {
+        success: false,
+        message: "El DV no coincide con el RUT",
+      };
+    }
 
     const request = pool.request();
-    request.input("rut", sql.Int, rutBody);
+    request.input("rut", sql.Int, numRut);
 
     // 1. Buscar en RECEPTORES (Terceros ya registrados)
     const resultReceptores = await request.query(`
