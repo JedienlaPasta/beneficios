@@ -50,8 +50,13 @@ export default function ComboboxInput({
 
   return (
     <div className="relative flex flex-col gap-1" ref={wrapperRef}>
-      <label className="text-xs text-slate-500">
-        {label} {required && "*"}
+      <label htmlFor={label} className="text-xs text-slate-500">
+        {label}
+        {required ? (
+          <span className="text-red-500"> *</span>
+        ) : (
+          <span className="text-slate-400"> (opcional)</span>
+        )}
       </label>
 
       <div className="relative">
