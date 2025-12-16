@@ -109,18 +109,18 @@ export default function ModalEntregasDetail({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden">
       <div
         className="fixed inset-0 bg-gray-900/50"
         onClick={handleOverlayClick}
       />
-      <div className={`relative z-10 mx-auto h-[90%] w-[95%] sm:w-fit`}>
+      <div className={`relative z-10 mx-auto w-[95%] sm:w-fit`}>
         <span onClick={handleOverlayClick} className="absolute inset-0 -z-10" />
         <motion.div
           layout
           layoutRoot
           transition={{ layout: { duration: 0.25 } }}
-          className="scrollbar-hidex flex max-h-full w-[100%] shrink-0 flex-col gap-4 overflow-hidden rounded-xl bg-white p-6 shadow-xl transition-all duration-500 sm:w-[34rem] md:p-8"
+          className="scrollbar-hidex max-h-fulls flex w-[100%] shrink-0 flex-col gap-4 overflow-hidden rounded-xl bg-white p-6 shadow-xl transition-all duration-500 sm:w-[34rem] md:p-8"
         >
           {/* Header */}
           <section className="flex items-center justify-between">
@@ -196,7 +196,7 @@ export default function ModalEntregasDetail({
           {/* Content */}
           <motion.div
             id="content-container"
-            className="scrollbar-hidex relative min-h-[8rem] overflow-y-auto"
+            className="scrollbar-hidex relative min-h-[8rem] overflow-hidden"
           >
             <AnimatePresence mode="wait">
               {tab === "Resumen" ? (
@@ -263,7 +263,7 @@ export default function ModalEntregasDetail({
                         </RoleGuard>
                       </span>
                     </div>
-                    <div className="flex max-h-[206px] flex-col gap-2.5 overflow-y-auto pr-1 scrollbar-hide">
+                    <div className="flex flex-col gap-2.5 overflow-y-auto pr-1 scrollbar-hide">
                       {beneficiosEntregados.map((item, index) => (
                         <EntregasListItem
                           key={`${item.id_campaña}-${index}`}
