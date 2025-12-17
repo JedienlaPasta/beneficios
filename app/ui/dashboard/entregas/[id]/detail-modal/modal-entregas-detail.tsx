@@ -232,10 +232,14 @@ export default function ModalEntregasDetail({
           </div>
 
           {/* Tab Navigation */}
-          <nav className="mx-0.5 mt-2 flex border-b border-slate-200/80">
+          <nav
+            className="mx-0.5 mt-2 flex border-b border-slate-200/80"
+            role="tablist"
+          >
             {["Resumen", "Importar", "Capturar"].map((name) => (
               <button
                 key={name}
+                role="tab"
                 onClick={() => handleTabChange(name)}
                 aria-selected={tab === name}
                 className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 ${
