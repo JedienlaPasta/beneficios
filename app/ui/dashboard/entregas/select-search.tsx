@@ -9,6 +9,7 @@ export default function SelectSearch() {
   const handleClick = (name: string) => {
     const params = new URLSearchParams(searchParams);
     params.set("table", name);
+    params.set("page", "1");
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 

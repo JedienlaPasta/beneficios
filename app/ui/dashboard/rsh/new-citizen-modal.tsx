@@ -173,7 +173,7 @@ export default function NewCitizenModal({ name }: { name: string }) {
         </AnimatePresence>
       </section>
 
-      <form onSubmit={handleSubmit} className="overflow-y-auto scrollbar-hide">
+      <form onSubmit={handleSubmit}>
         <motion.div className="relative grid min-h-[6rem] gap-6">
           <AnimatePresence mode="wait">
             {tab === "Obligatorio" && (

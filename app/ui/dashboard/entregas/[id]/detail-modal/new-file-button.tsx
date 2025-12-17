@@ -46,14 +46,14 @@ export default function GetNewFileButton({ folio }: Props) {
 
   return (
     <button
-      className="flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-800 px-3 py-1 text-sm font-medium text-white transition-all hover:border-blue-700 hover:bg-blue-700 active:scale-95"
+      className="flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-800 px-3 py-1 text-sm font-medium text-white transition-all hover:border-slate-900 hover:bg-slate-900 active:scale-95"
       disabled={isLoading}
       onClick={onClick}
     >
       {/* {children} */}
       {isLoading ? (
         <>
-          <div className="mr-1 size-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
+          <div className="mr-1 size-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
           Generando...
         </>
       ) : (

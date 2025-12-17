@@ -117,7 +117,7 @@ export default function DetailsModalOptionsMenu({
   };
 
   const dropdownOptionStyle =
-    "pl-2 pr-6 py-2 divide-y flex items-center gap-2 cursor-pointer rounded-md group transition-all duration-300 text-sm text-gray-600";
+    "pl-2 pr-6 py-2 divide-y flex font-medium items-center gap-2 cursor-pointer rounded-md group transition-all duration-300 text-sm text-gray-500";
 
   // Controladores del dropdown vvvv
   useEffect(() => {

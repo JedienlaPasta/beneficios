@@ -16,6 +16,7 @@ export async function fetchEntregas(
   query: string,
   currentPage: number,
   resultsPerPage: number,
+  filters: { status?: string[]; userId?: string } = {},
 ): Promise<{ data: Entregas[]; pages: number }> {
   try {
     const pool = await connectToDB();
@@ -24,70 +25,134 @@ export async function fetchEntregas(
       return { data: [], pages: 0 };
     }
 
+    // 1. Preparación de variables
+    const offset = (currentPage - 1) * resultsPerPage;
     const hasDigits = /\d/.test(query);
     const cleanedRut = hasDigits ? query.replace(/\D/g, "") : "";
-    const offset = (currentPage - 1) * resultsPerPage;
 
     const queryWithoutPercent = query.replace(/%/g, "");
     const searchTerms = queryWithoutPercent
       .split(" ")
       .filter((term) => term.trim().length > 0);
 
-    // Step 1: Get total count first (optimized)
-    const countRequest = pool.request();
-    const countResult = await countRequest
-      .input("query", sql.VarChar, `%${query}%`)
-      .input("cleanedRut", sql.VarChar, `%${cleanedRut}%`).query(`
-        SELECT COUNT(*) as total
-        FROM entregas
-        JOIN rsh ON entregas.rut = rsh.rut
-        WHERE
-          ${hasDigits ? "concat (entregas.rut, rsh.dv) LIKE @cleanedRut OR" : ""}
-          entregas.folio LIKE @query OR
-          rsh.folio LIKE @query OR
-          rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR 
-          rsh.apellidos_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR 
-          concat(rsh.nombres_rsh,' ', rsh.apellidos_rsh) COLLATE Modern_Spanish_CI_AI LIKE @query
-      `);
+    // 2. Construcción dinámica del WHERE (Centralizada)
+    // Esto evita repetir la lógica en el Count y en el Select
+    const whereClauses: string[] = [];
 
-    const total: number = countResult.recordset[0].total;
+    // Filtro de Estado (Seguro mediante Allowlist)
+    if (filters.status && filters.status.length > 0) {
+      const allowedStatuses = ["En Curso", "Finalizado", "Anulado"];
+      const validStatuses = filters.status.filter((s) =>
+        allowedStatuses.includes(s),
+      );
 
-    // Step 2: Get paginated data (optimized with ROW_NUMBER)
-    const dataRequest = pool.request();
-    const result = await dataRequest
-      .input("query", sql.VarChar, `%${query}%`)
-      .input("cleanedRut", sql.VarChar, `%${cleanedRut}%`)
-      .input("startRow", sql.Int, offset + 1)
-      .input("endRow", sql.Int, offset + resultsPerPage).query(`
-        SELECT * FROM (
-          SELECT 
-            entregas.folio, entregas.fecha_entrega, entregas.estado_documentos, 
-            entregas.rut, rsh.dv, rsh.nombres_rsh, rsh.apellidos_rsh,
-            ROW_NUMBER() OVER (ORDER BY entregas.fecha_entrega DESC) AS RowNum
-          FROM entregas
-          JOIN rsh ON entregas.rut = rsh.rut
-          WHERE
-            ${hasDigits ? "concat (entregas.rut, rsh.dv) LIKE @cleanedRut OR" : ""}
-            entregas.folio LIKE @query OR
-            rsh.folio LIKE @query OR
-            rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR 
-            rsh.apellidos_rsh COLLATE Modern_Spanish_CI_AI LIKE @query OR 
-            concat(rsh.nombres_rsh,' ', rsh.apellidos_rsh) COLLATE Modern_Spanish_CI_AI LIKE @query
-            ${
-              searchTerms.length > 1
-                ? `OR (
-              ${searchTerms
-                .map(
-                  (term) =>
-                    `(rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE '%${term}%' OR rsh.apellidos_rsh COLLATE Modern_Spanish_CI_AI LIKE '%${term}%')`,
-                )
-                .join(" AND ")}
-            )`
-                : ""
-            }
-        ) AS NumberedResults
-        WHERE RowNum BETWEEN @startRow AND @endRow
-      `);
+      if (validStatuses.length > 0) {
+        // SQL Server no soporta arrays nativos en parameters fácilmente sin tipos tabla,
+        // la inyección de strings aquí es segura porque filtramos con allowedStatuses.
+        const statusList = validStatuses.map((s) => `'${s}'`).join(",");
+        whereClauses.push(`entregas.estado_documentos IN (${statusList})`);
+      }
+    }
+
+    // Filtro de Usuario
+    if (filters.userId) {
+      whereClauses.push(`entregas.id_usuario = @userId`);
+    }
+
+    // Filtro de Búsqueda (Texto y RUT)
+    if (query) {
+      const searchConditions: string[] = [];
+
+      // Búsqueda por RUT (Si hay dígitos)
+      if (hasDigits) {
+        searchConditions.push(`concat(entregas.rut, rsh.dv) LIKE @cleanedRut`);
+      }
+
+      // Búsqueda General
+      searchConditions.push(`entregas.folio LIKE @query`);
+      searchConditions.push(`rsh.folio LIKE @query`);
+
+      // Búsqueda por Nombres (Optimizada visualmente)
+      // Nota: COLLATE en tiempo de ejecución es lento, idealmente la columna ya debería tener ese collation
+      const nameCollate = `COLLATE Modern_Spanish_CI_AI`;
+      searchConditions.push(`rsh.nombres_rsh ${nameCollate} LIKE @query`);
+      searchConditions.push(`rsh.apellidos_rsh ${nameCollate} LIKE @query`);
+      searchConditions.push(
+        `concat(rsh.nombres_rsh,' ', rsh.apellidos_rsh) ${nameCollate} LIKE @query`,
+      );
+
+      // Búsqueda Multitérmino (Compleja)
+      if (searchTerms.length > 1) {
+        const multiTermCondition = searchTerms
+          .map(
+            (_, index) =>
+              `(rsh.nombres_rsh ${nameCollate} LIKE @term${index} OR rsh.apellidos_rsh ${nameCollate} LIKE @term${index})`,
+          )
+          .join(" AND ");
+        searchConditions.push(`(${multiTermCondition})`);
+      }
+
+      // Unimos todas las condiciones de búsqueda con OR y las envolvemos en paréntesis
+      whereClauses.push(`(${searchConditions.join(" OR ")})`);
+    }
+
+    // Unir todas las cláusulas WHERE con AND
+    const whereSql =
+      whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
+
+    // 3. Función auxiliar para inyectar parámetros (DRY)
+    const bindParams = (req: any) => {
+      if (filters.userId)
+        req.input("userId", sql.UniqueIdentifier, filters.userId);
+      if (query) {
+        req.input("query", sql.VarChar, `%${query}%`);
+        req.input("cleanedRut", sql.VarChar, `%${cleanedRut}%`);
+        searchTerms.forEach((term, index) => {
+          req.input(`term${index}`, sql.VarChar, `%${term}%`);
+        });
+      }
+      return req;
+    };
+
+    // 4. Ejecución de Consultas
+
+    // QUERY 1: Total Count
+    const countRequest = bindParams(pool.request());
+    const countResult = await countRequest.query(`
+      SELECT COUNT(*) as total
+      FROM entregas
+      JOIN rsh ON entregas.rut = rsh.rut
+      ${whereSql}
+    `);
+
+    const total = countResult.recordset[0].total;
+
+    // Si no hay resultados, retornamos rápido para ahorrar la segunda consulta
+    if (total === 0) return { data: [], pages: 0 };
+
+    // QUERY 2: Data Paginada (Usando OFFSET FETCH de SQL Server 2012+)
+    const dataRequest = bindParams(pool.request());
+
+    // Agregamos parámetros de paginación
+    dataRequest.input("offset", sql.Int, offset);
+    dataRequest.input("limit", sql.Int, resultsPerPage);
+
+    const result = await dataRequest.query(`
+      SELECT 
+        entregas.folio, 
+        entregas.fecha_entrega, 
+        entregas.estado_documentos, 
+        entregas.rut, 
+        rsh.dv, 
+        rsh.nombres_rsh, 
+        rsh.apellidos_rsh
+      FROM entregas
+      JOIN rsh ON entregas.rut = rsh.rut
+      ${whereSql}
+      ORDER BY entregas.fecha_entrega DESC
+      OFFSET @offset ROWS
+      FETCH NEXT @limit ROWS ONLY
+    `);
 
     const pages = Math.ceil(total / resultsPerPage);
     return { data: result.recordset as Entregas[], pages };

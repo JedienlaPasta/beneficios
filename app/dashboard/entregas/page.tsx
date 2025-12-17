@@ -1,4 +1,3 @@
-import CampaignsTableSkeleton from "@/app/ui/dashboard/campañas/campaigns-table-skeleton";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import { Suspense } from "react";
 import RSHTable from "@/app/ui/dashboard/entregas/rsh-table";
@@ -6,6 +5,10 @@ import SelectSearch from "@/app/ui/dashboard/entregas/select-search";
 import EntregasTable from "@/app/ui/dashboard/entregas/entregas-table";
 import ModalSkeleton from "@/app/ui/modal-skeleton";
 import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/detail-modal/modal-context";
+import EntregasFilter from "@/app/ui/dashboard/entregas/EntregasFilter";
+
+import { getSession } from "@/app/lib/session";
+import EntregasTableSkeleton from "@/app/ui/dashboard/entregas/EntregasTableSkeleton";
 
 type SocialAidProps = {
   searchParams?: Promise<{
@@ -16,6 +19,8 @@ type SocialAidProps = {
     justification?: string;
     supervisor?: string;
     rut?: string;
+    status?: string;
+    user?: string;
   }>;
 };
 
@@ -28,6 +33,11 @@ export default async function Entregas(props: SocialAidProps) {
   const justificationModal = searchParams?.justification || "";
   const supervisorModal = searchParams?.supervisor || "";
   const rut = searchParams?.rut || "";
+  const status = searchParams?.status || "";
+  const userFilter = searchParams?.user || "me";
+
+  const session = await getSession();
+  const currentUserId = session?.userId ? String(session.userId) : "";
 
   return (
     <div className="flex flex-col gap-6">
@@ -59,14 +69,26 @@ export default async function Entregas(props: SocialAidProps) {
           <div className="flex flex-wrap items-center justify-between gap-4 px-5 pt-4 md:px-8 3xl:w-[96rem] 3xl:self-center">
             <h2 className="text-lg font-semibold text-slate-800">
               {table === "entregas"
-                ? "Lista de Entregas"
-                : "Lista de Ciudadanos"}
+                ? "Entregas Registradas"
+                : "Ciudadanos Registrados"}
             </h2>
-            <SearchBar placeholder="Buscar..." />
+            <div className="flex items-center gap-2">
+              {table === "entregas" && <EntregasFilter />}
+              <SearchBar placeholder="Buscar..." />
+            </div>
           </div>
-          <Suspense key={table} fallback={<CampaignsTableSkeleton />}>
+          <Suspense
+            key={table + status + userFilter + currentPage}
+            fallback={<EntregasTableSkeleton />}
+          >
             {table === "entregas" ? (
-              <EntregasTable query={query} currentPage={currentPage} />
+              <EntregasTable
+                query={query}
+                currentPage={currentPage}
+                status={status}
+                userFilter={userFilter}
+                currentUserId={currentUserId}
+              />
             ) : (
               <RSHTable query={query} currentPage={currentPage} />
             )}

@@ -5,13 +5,24 @@ import { fetchEntregas } from "@/app/lib/data/entregas";
 type EntregasProps = {
   query: string;
   currentPage: number;
+  status?: string;
+  userFilter?: string;
+  currentUserId?: string;
 };
 
 export default async function EntregasTable({
   query,
   currentPage,
+  status,
+  userFilter,
+  currentUserId,
 }: EntregasProps) {
-  const { data, pages } = await fetchEntregas(query, currentPage, 9);
+  const filters = {
+    status: status ? status.split(",") : undefined,
+    userId: userFilter === "me" ? currentUserId : undefined,
+  };
+
+  const { data, pages } = await fetchEntregas(query, currentPage, 9, filters);
 
   return (
     <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300/70">
