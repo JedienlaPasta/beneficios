@@ -79,10 +79,8 @@ export default function EntregasFilter() {
     <div className="relative" ref={containerRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
-          hasFilters
-            ? "border-blue-200 bg-blue-50 text-blue-600"
-            : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+        className={`flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium transition-colors hover:border-blue-200 ${
+          hasFilters ? "text-blue-600" : "text-slate-600"
         }`}
       >
         <Filter className="h-4 w-4" />
