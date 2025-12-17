@@ -101,7 +101,7 @@ export async function fetchEntregas(
       whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
 
     // 3. Función auxiliar para inyectar parámetros (DRY)
-    const bindParams = (req: any) => {
+    const bindParams = (req: sql.Request) => {
       if (filters.userId)
         req.input("userId", sql.UniqueIdentifier, filters.userId);
       if (query) {
