@@ -295,7 +295,7 @@ export default function NewModalFormManual({
           required
         />
         <CustomAntdDatePicker
-          label="Fecha de Entrega *"
+          label="Fecha de Entrega"
           placeholder="Seleccione fecha"
           setDate={fechaEntregaHandler}
           value={fechaEntrega ? dayjs(fechaEntrega) : null}
@@ -305,10 +305,11 @@ export default function NewModalFormManual({
 
       <UserDropdown
         placeHolder="Selecciona quien entregó..."
-        label="Funcionario Encargado *"
+        label="Funcionario Encargado"
         name="correo"
         userEmail={encargado.correo}
         setUserEmail={(email) => setEncargado({ ...encargado, correo: email })}
+        required
       />
 
       {/* Listado de Campañas (Dinámico) */}
@@ -427,6 +428,7 @@ export default function NewModalFormManual({
       <div className="flex grow flex-col gap-1">
         <label htmlFor="observaciones" className="text-xs text-slate-500">
           Justificación
+          <span className="text-slate-400"> (opcional)</span>
         </label>
         <textarea
           name="observaciones"
@@ -435,7 +437,7 @@ export default function NewModalFormManual({
           maxLength={390}
           value={observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
-          placeholder="Justificación..."
+          placeholder="Se realiza esta entrega a causa de..."
           className="min-h-[80px] w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500"
         ></textarea>
       </div>

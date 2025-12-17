@@ -323,6 +323,7 @@ export default function NewModalForm({
       <div className="flex grow flex-col gap-1">
         <label htmlFor="observaciones" className="text-xs text-slate-500">
           Justificación
+          <span className="text-slate-400"> (opcional)</span>
         </label>
         <textarea
           name="observaciones"
@@ -331,7 +332,7 @@ export default function NewModalForm({
           maxLength={390}
           value={observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
-          placeholder="Justificación..."
+          placeholder="Se realiza esta entrega a causa de..."
           className="w-full rounded-lg border border-slate-300 bg-transparent bg-white px-4 py-2 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus-within:border-blue-500"
         ></textarea>
       </div>

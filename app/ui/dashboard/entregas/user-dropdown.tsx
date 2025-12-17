@@ -8,6 +8,7 @@ type UserDropdownProps = {
   userEmail: string;
   setUserEmail: (prevState: string) => void;
   placeHolder?: string;
+  required?: boolean;
 };
 
 export default function UserDropdown({
@@ -16,6 +17,7 @@ export default function UserDropdown({
   placeHolder,
   userEmail,
   setUserEmail,
+  required = false,
 }: UserDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -51,6 +53,11 @@ export default function UserDropdown({
     >
       <label htmlFor={label} className="text-xs text-slate-500">
         {label}
+        {required ? (
+          <span className="text-red-500"> *</span>
+        ) : (
+          <span className="text-slate-400"> (opcional)</span>
+        )}
       </label>
       <input
         id={label}

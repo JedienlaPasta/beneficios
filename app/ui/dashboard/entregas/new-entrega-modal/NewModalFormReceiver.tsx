@@ -444,15 +444,7 @@ export default function NewModalFormReceiver({
         value={direccionReceiver}
         setData={setDireccionReceiver}
       />
-      {/* <Input
-        placeHolder="Ej: Familiar, Tutor Legal..."
-        label="Parentesco / Relación"
-        type="text"
-        nombre="parentesco_receptor"
-        value={parentesco}
-        setData={setParentesco}
-        required
-      /> */}
+
       <ComboboxInput
         label="Parentesco / Relación"
         placeholder="Seleccione o escriba..."
@@ -466,9 +458,9 @@ export default function NewModalFormReceiver({
       {/* SECCIÓN CAMPAÑAS */}
       <div
         ref={scrollRef}
-        className="scrollbar-gutter-stable mt-2 max-h-[380px] overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-4"
+        className="mt-2 rounded-lg border border-slate-200 bg-slate-50 p-4"
       >
-        <div className="sticky top-0 z-10 mb-3 flex items-baseline justify-between border-b border-slate-200 bg-slate-50 pb-2">
+        <div className="mb-3 flex items-baseline justify-between border-b border-slate-200 bg-slate-50 pb-2">
           <h3 className="text-sm font-medium text-slate-700">
             Beneficios seleccionados
           </h3>
@@ -581,6 +573,7 @@ export default function NewModalFormReceiver({
       <div className="flex grow flex-col gap-1">
         <label htmlFor="observaciones" className="text-xs text-slate-500">
           Justificación
+          <span className="text-slate-400"> (opcional)</span>
         </label>
         <textarea
           name="observaciones"
@@ -589,7 +582,7 @@ export default function NewModalFormReceiver({
           maxLength={390}
           value={observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
-          placeholder="Justificación..."
+          placeholder="Se realiza esta entrega a causa de..."
           className="min-h-[80px] w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500"
         ></textarea>
       </div>
