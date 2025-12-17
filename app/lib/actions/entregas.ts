@@ -100,6 +100,8 @@ export const createEntrega = async (
     parentesco_receptor,
   } = result.data;
 
+  let logComment = "";
+
   if (campaigns.length === 0) {
     return { success: false, message: "Debe seleccionar al menos una campaña" };
   }
@@ -230,6 +232,7 @@ export const createEntrega = async (
 
       // 4. Lógica de Receptor (Terceros)
       if (rut_receptor && rut_receptor.length > 5) {
+        logComment = "realizó una entrega a tercero";
         const cleanRut = rut_receptor
           .replace(/\./g, "")
           .replace(/-/g, "")
@@ -322,7 +325,7 @@ export const createEntrega = async (
       await transaction.commit();
       await logAction(
         "Crear",
-        "realizó una entrega rápida",
+        logComment !== "" ? logComment : "realizó una entrega rápida",
         `Folio: ${newFolio}`,
         userIdFromSession,
       );
