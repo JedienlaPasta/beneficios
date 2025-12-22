@@ -185,19 +185,19 @@ export default function ModalEntregasDetail({
             </div>
 
             {/* Beneficiario Card */}
-            <Link
-              href={`/dashboard/entregas/${rut}`}
-              className="relative flex flex-col gap-4 overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:shadow-md sm:flex-row sm:items-center sm:justify-between"
-            >
+            <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all sm:flex-row sm:items-center sm:justify-between">
               <div className="relative flex items-center gap-4">
                 <div className="flex flex-col">
-                  <h2 className="font-bold leading-tight text-slate-800 sm:text-lg">
+                  <Link
+                    href={`/dashboard/entregas/${rut}`}
+                    className="font-bold leading-tight text-slate-800 hover:cursor-pointer hover:underline sm:text-lg"
+                  >
                     {rshName || (
                       <span className="animate-pulse rounded bg-slate-200 text-transparent">
                         Cargando Nombre...
                       </span>
                     )}
-                  </h2>
+                  </Link>
                   <div className="mt-1 flex items-center gap-3 text-xs font-medium text-slate-500">
                     <span className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-slate-500">
                       RUT:{" "}
@@ -228,7 +228,7 @@ export default function ModalEntregasDetail({
                   {estado_documentos}
                 </button>
               </div>
-            </Link>
+            </div>
           </div>
 
           {/* Tab Navigation */}

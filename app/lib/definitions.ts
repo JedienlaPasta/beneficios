@@ -56,6 +56,7 @@ export type Entregas = {
   rut: number | null;
   nombres_rsh: string;
   apellidos_rsh: string;
+  cantidad_documentos?: number;
   total?: number; // total de registros
   pages?: number; // total de paginas
 };

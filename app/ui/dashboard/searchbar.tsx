@@ -37,25 +37,23 @@ export default function SearchBar({ placeholder }: SearchBarProps) {
   };
 
   return (
-    <div className="relative">
-      <div
-        className="flex h-11 w-72 cursor-text items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 shadow-sm transition-all focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100"
-        onClick={handleContainerClick}
-      >
-        {isPending ? (
-          <FiLoader className="animate-loadspin text-lg text-slate-400" />
-        ) : (
-          <FiSearch className="text-lg text-slate-400" />
-        )}
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder={placeholder}
-          onChange={(e) => handleSearch(e.target.value)}
-          defaultValue={searchParams.get("query")?.toString()}
-          className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
-        />
-      </div>
+    <div
+      className="flex h-11 min-w-52 flex-1 cursor-text items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 shadow-sm transition-all focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100"
+      onClick={handleContainerClick}
+    >
+      {isPending ? (
+        <FiLoader className="animate-loadspin text-lg text-slate-400" />
+      ) : (
+        <FiSearch className="text-lg text-slate-400" />
+      )}
+      <input
+        ref={inputRef}
+        type="text"
+        placeholder={placeholder}
+        onChange={(e) => handleSearch(e.target.value)}
+        defaultValue={searchParams.get("query")?.toString()}
+        className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
+      />
     </div>
   );
 }

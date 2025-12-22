@@ -145,7 +145,8 @@ export async function fetchEntregas(
         entregas.rut, 
         rsh.dv, 
         rsh.nombres_rsh, 
-        rsh.apellidos_rsh
+        rsh.apellidos_rsh,
+        (SELECT COUNT(*) FROM documentos WHERE documentos.folio = entregas.folio) AS cantidad_documentos
       FROM entregas
       JOIN rsh ON entregas.rut = rsh.rut
       ${whereSql}

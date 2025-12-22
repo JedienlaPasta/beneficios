@@ -31,11 +31,12 @@ export default async function EntregasTable({
           <thead className="border-y border-slate-200/80 bg-slate-50 text-xs uppercase tracking-wider text-slate-600/70">
             <tr className="grid grid-cols-26 items-center gap-8 px-5 text-left md:px-8">
               <th className="col-span-4 py-4 font-normal">RUT</th>
-              <th className="col-span-9 py-4 font-normal">Nombre</th>
-              <th className="col-span-5 py-4 font-normal">Folio</th>
-              <th className="col-span-4 py-4 font-normal">Documentos</th>
+              <th className="col-span-6 py-4 font-normal">Nombre</th>
+              <th className="col-span-4 py-4 text-right font-normal">Folio</th>
+              <th className="col-span-4 py-4 text-right font-normal">Docs</th>
+              <th className="col-span-4 py-4 font-normal">Estado</th>
               <th className="col-span-4 py-4 text-right font-normal">
-                Entrega
+                Entregado
               </th>
             </tr>
           </thead>

@@ -8,25 +8,6 @@ import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import FileNameDropdown from "./../file-name-dropdown";
 
-const filesList = [
-  {
-    id: "1",
-    name: "Acta de Entrega",
-  },
-  {
-    id: "2",
-    name: "Cedula",
-  },
-  {
-    id: "3",
-    name: "Entregas",
-  },
-  {
-    id: "4",
-    name: "Otro",
-  },
-];
-
 const fileModeList = [
   {
     id: "1",
@@ -35,6 +16,29 @@ const fileModeList = [
   {
     id: "2",
     name: "Página Completa",
+  },
+];
+
+const filesList = [
+  {
+    id: "1",
+    name: "Acta de Entrega",
+    defaultMode: fileModeList[1].name,
+  },
+  {
+    id: "2",
+    name: "Cedula",
+    defaultMode: fileModeList[0].name,
+  },
+  {
+    id: "3",
+    name: "Entregas",
+    defaultMode: fileModeList[0].name,
+  },
+  {
+    id: "4",
+    name: "Otro",
+    defaultMode: fileModeList[0].name,
   },
 ];
 
@@ -471,33 +475,23 @@ export default function CamaraComponent({
           {/* Document Configuration */}
           <div className="space-y-4">
             <h3 className="flex items-center gap-2 text-sm font-medium text-slate-600">
-              <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
               Configuración del Documento
             </h3>
 
             <div className="grid gap-4 sm:grid-cols-2">
               {/* Document Name Input */}
-              {/* <div>
-                <label className="mb-2 block text-sm font-medium text-slate-600">
-                  Nombre del Documento
-                </label>
-                <input
-                  type="text"
-                  value={documentName}
-                  onChange={(e) => setDocumentName(e.target.value)}
-                  placeholder="Ingresa el nombre del documento"
-                  className="h-10 w-full rounded-lg border border-gray-300 px-3.5 text-sm text-slate-700 outline-none focus:border-blue-500"
-                />
-              </div> */}
               <FileNameDropdown
                 placeHolder="Nombre archivo..."
                 label="Nombre del Documento"
                 name="nombre_documento"
                 value={documentName}
                 setValue={setDocumentName}
+                setMode={setPdfMode}
                 valuesList={filesList}
               />
 
+              {/* PDF Mode Selection */}
               <FileNameDropdown
                 placeHolder="Modo pdf..."
                 label="Modo de PDF"
@@ -506,21 +500,6 @@ export default function CamaraComponent({
                 setValue={setPdfMode}
                 valuesList={fileModeList}
               />
-
-              {/* PDF Mode Selection */}
-              {/* <div>
-                <label className="mb-1 block text-xs text-slate-500">
-                  Modo de PDF
-                </label>
-                <select
-                  value={pdfMode}
-                  onChange={(e) => setPdfMode(e.target.value as PDFMode)}
-                  className="h-10 w-full rounded-lg border border-gray-300 px-3.5 text-sm text-slate-700 outline-none focus:border-blue-500"
-                >
-                  <option value="smallDocument">Documento Pequeño</option>
-                  <option value="fullPage">Página Completa</option>
-                </select>
-              </div> */}
             </div>
           </div>
 
@@ -528,7 +507,7 @@ export default function CamaraComponent({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="flex items-center gap-2 text-sm font-medium text-slate-600">
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
                 Vista Cámara
               </h3>
               {cameras.length > 1 && (
@@ -585,7 +564,7 @@ export default function CamaraComponent({
               <button
                 onClick={takePhoto}
                 disabled={isLoading || isCameraLoading}
-                className="flex h-10 grow items-center justify-center rounded-lg bg-blue-500 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-600 active:scale-95 disabled:bg-blue-300"
+                className="flex h-10 grow items-center justify-center gap-2 rounded-lg bg-blue-500 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-600 active:scale-95 disabled:bg-blue-300"
               >
                 {isLoading ? (
                   <>
@@ -602,7 +581,7 @@ export default function CamaraComponent({
           {/* Photo Preview */}
           <div className="space-y-4">
             <h3 className="flex items-center gap-2 text-sm font-medium text-slate-600">
-              <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
               Imagen Capturada
             </h3>
             <div>
@@ -643,7 +622,7 @@ export default function CamaraComponent({
                     <button
                       onClick={viewPdf}
                       disabled={isLoading}
-                      className="flex h-10 items-center justify-center rounded-lg border border-blue-500 text-sm font-medium text-blue-500 transition-all duration-200 hover:bg-blue-50 active:scale-95 disabled:border-blue-300 disabled:text-blue-300"
+                      className="flex h-10 items-center justify-center gap-2 rounded-lg border border-blue-500 text-sm font-medium text-blue-500 transition-all duration-200 hover:bg-blue-50 active:scale-95 disabled:border-blue-300 disabled:text-blue-300"
                     >
                       {isLoading ? (
                         <>
@@ -657,7 +636,7 @@ export default function CamaraComponent({
                     <button
                       onClick={uploadPdf}
                       disabled={isLoading}
-                      className="flex h-10 items-center justify-center rounded-lg bg-emerald-500 text-sm font-medium text-white transition-all duration-200 hover:bg-emerald-600 active:scale-95 disabled:bg-emerald-600/50"
+                      className="flex h-10 items-center justify-center gap-2 rounded-lg bg-emerald-500 text-sm font-medium text-white transition-all duration-200 hover:bg-emerald-600 active:scale-95 disabled:bg-emerald-600/50"
                     >
                       {isLoading ? (
                         <>

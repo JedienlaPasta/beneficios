@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 type File = {
   id: string;
   name: string;
+  defaultMode?: string;
 };
 
 type FileDropdownProps = {
@@ -10,6 +11,7 @@ type FileDropdownProps = {
   name: string;
   value: string;
   setValue: (prevState: string) => void;
+  setMode?: (prevState: string) => void;
   valuesList?: File[];
   placeHolder?: string;
 };
@@ -21,6 +23,7 @@ export default function FileDropdown({
   placeHolder,
   value,
   setValue,
+  setMode,
 }: FileDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -47,6 +50,11 @@ export default function FileDropdown({
       document.removeEventListener("click", cerrarDropdown);
     };
   }, []);
+
+  const handleListSelection = (file: File) => {
+    setValue(file.name);
+    setMode?.(file.defaultMode || "");
+  };
 
   return (
     <div
@@ -75,7 +83,7 @@ export default function FileDropdown({
             valuesList.map((file, index) => (
               <li
                 key={index}
-                onClick={() => setValue(file.name)}
+                onClick={() => handleListSelection(file)}
                 className="flex h-12 w-full cursor-pointer flex-col justify-center px-4 text-sm hover:bg-sky-100"
               >
                 <span>{file.name}</span>

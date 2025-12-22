@@ -72,7 +72,8 @@ export default async function Entregas(props: SocialAidProps) {
                 ? "Entregas Registradas"
                 : "Ciudadanos Registrados"}
             </h2>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex flex-col gap-2 sm:flex-row sm:items-center"> */}
+            <div className="flex flex-wrap items-center gap-2">
               {table === "entregas" && <EntregasFilter />}
               <SearchBar placeholder="Buscar..." />
             </div>

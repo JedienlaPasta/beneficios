@@ -84,7 +84,7 @@ export default function EntregasFilter() {
         }`}
       >
         <Filter className="h-4 w-4" />
-        Filtrar
+        <span className="hidden min-[500px]:block">Filtrar</span>
         {hasFilters && (
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">
             {(userFilter ? 1 : 0) + currentStatuses.length}
@@ -93,7 +93,7 @@ export default function EntregasFilter() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border border-slate-200 bg-white p-2 shadow-lg ring-1 ring-black ring-opacity-5">
+        <div className="absolute left-0 top-full z-50 mt-2 w-56 rounded-lg border border-slate-200 bg-white p-2 shadow-lg ring-1 ring-black ring-opacity-5">
           <div className="mb-2 px-2 py-1 text-xs font-semibold uppercase text-slate-400">
             Filtros
           </div>
