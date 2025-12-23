@@ -42,11 +42,11 @@ export function UsersTable({ users }: { users: UserData[] }) {
     "whitespace-nowrap  py-5 text-left text-xs font-normal uppercase tracking-wide";
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-md shadow-slate-300/70">
+    <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300/70">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[60rem] border-collapse divide-y divide-slate-200 text-sm">
-          <thead className="text-slate-600/70">
-            <tr className="grid grid-cols-26 gap-8 bg-slate-50 px-6 pt-2">
+        <table className="w-full min-w-[44rem] border-collapse">
+          <thead className="border-y border-slate-200/80 bg-slate-50 text-xs uppercase tracking-wider text-slate-600/70">
+            <tr className="grid min-w-[1000px] grid-cols-26 items-center gap-4 px-5 text-left md:px-6">
               <th scope="col" className={`${thStyle} col-span-5`}>
                 Nombre
               </th>
@@ -67,22 +67,28 @@ export function UsersTable({ users }: { users: UserData[] }) {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200/70 bg-white">
+          <tbody className="divide-y divide-slate-200/80 bg-white">
             {users.map((user) => (
               <tr
                 key={user.id}
-                className="group grid grid-cols-26 items-center gap-8 text-nowrap px-6 text-sm transition-colors hover:bg-slate-200/50"
+                className="group grid min-w-[1000px] grid-cols-26 gap-4 text-nowrap px-5 text-sm transition-colors hover:bg-slate-50/80 md:px-6"
               >
-                <td className="col-span-5 whitespace-nowrap py-4 font-medium text-slate-700">
-                  {user.nombre_usuario}
+                <td className="col-span-5 self-center py-4">
+                  <p className="overflow-hidden text-ellipsis whitespace-nowrap font-medium text-slate-700">
+                    {user.nombre_usuario}
+                  </p>
                 </td>
-                <td className="col-span-6 whitespace-nowrap py-4 text-slate-500">
-                  {user.correo}
+                <td className="col-span-6 self-center py-4">
+                  <p className="overflow-hidden text-ellipsis whitespace-nowrap text-slate-500">
+                    {user.correo}
+                  </p>
                 </td>
-                <td className="col-span-5 whitespace-nowrap py-4 text-slate-500">
-                  {user.cargo}
+                <td className="col-span-5 self-center py-4">
+                  <p className="overflow-hidden text-ellipsis whitespace-nowrap text-slate-500">
+                    {user.cargo}
+                  </p>
                 </td>
-                <td className="col-span-3 whitespace-nowrap py-4">
+                <td className="col-span-3 self-center whitespace-nowrap py-4">
                   <span
                     className={`inline-flex rounded-md px-3 py-1 text-xs font-medium ${
                       user.rol === "Administrador"
@@ -95,7 +101,7 @@ export function UsersTable({ users }: { users: UserData[] }) {
                     {user.rol}
                   </span>
                 </td>
-                <td className="col-span-3 whitespace-nowrap py-4">
+                <td className="col-span-3 self-center whitespace-nowrap py-4">
                   <span
                     className={`inline-flex rounded-md px-3 py-1 text-xs font-medium ${
                       user.estado === "Habilitado"
@@ -106,7 +112,7 @@ export function UsersTable({ users }: { users: UserData[] }) {
                     {user.estado}
                   </span>
                 </td>
-                <td className="col-span-4 whitespace-nowrap text-right">
+                <td className="col-span-4 self-center whitespace-nowrap text-right">
                   <div className="flex justify-end space-x-2">
                     <button
                       onClick={() => setEditingUser(user)}

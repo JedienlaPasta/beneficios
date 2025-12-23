@@ -9,6 +9,7 @@ import EntregasFilter from "@/app/ui/dashboard/entregas/EntregasFilter";
 
 import { getSession } from "@/app/lib/session";
 import EntregasTableSkeleton from "@/app/ui/dashboard/entregas/EntregasTableSkeleton";
+import { Package2, Users } from "lucide-react";
 
 type SocialAidProps = {
   searchParams?: Promise<{
@@ -66,12 +67,34 @@ export default async function Entregas(props: SocialAidProps) {
       {/* Citizens Table */}
       <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
         <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50">
-          <div className="flex flex-wrap items-center justify-between gap-4 px-5 pt-4 md:px-8 3xl:w-[96rem] 3xl:self-center">
-            <h2 className="text-lg font-semibold text-slate-800">
-              {table === "entregas"
-                ? "Entregas Registradas"
-                : "Ciudadanos Registrados"}
-            </h2>
+          <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-4 md:px-6 3xl:w-[96rem] 3xl:self-center">
+            <div className="flex items-center gap-2.5">
+              <div
+                className={`flex h-10 w-10 items-center justify-center rounded-xl shadow-sm ring-1 ring-inset ${
+                  table === "entregas"
+                    ? "bg-blue-50 text-blue-600 ring-blue-700/10"
+                    : "bg-emerald-50 text-emerald-600 ring-emerald-700/10"
+                }`}
+              >
+                {table === "entregas" ? (
+                  <Package2 className="h-5 w-5" />
+                ) : (
+                  <Users className="h-5 w-5" />
+                )}
+              </div>
+              <div>
+                <h2 className="text-lg font-bold tracking-tight text-slate-800">
+                  {table === "entregas"
+                    ? "Entregas Registradas"
+                    : "Ciudadanos Registrados"}
+                </h2>
+                <p className="-mt-0.5 text-xs font-medium text-slate-500">
+                  {table === "entregas"
+                    ? "Historial completo de beneficios"
+                    : "Base de datos del Registro Social"}
+                </p>
+              </div>
+            </div>
             {/* <div className="flex flex-col gap-2 sm:flex-row sm:items-center"> */}
             <div className="flex flex-wrap items-center gap-2">
               {table === "entregas" && <EntregasFilter />}

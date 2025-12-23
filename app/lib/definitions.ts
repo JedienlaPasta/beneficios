@@ -54,6 +54,7 @@ export type Entregas = {
   fecha_entrega: Date | null;
   estado_documentos: string;
   rut: number | null;
+  dv: string | null;
   nombres_rsh: string;
   apellidos_rsh: string;
   cantidad_documentos?: number;
@@ -68,6 +69,7 @@ export type EntregasTable = {
   estado_documentos: string;
   nombre_usuario: string;
   fecha_entrega: Date;
+  cantidad_documentos?: number;
 };
 
 // Modal Detalle Entregas

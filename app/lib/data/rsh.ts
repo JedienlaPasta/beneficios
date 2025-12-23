@@ -61,7 +61,6 @@ export async function fetchRSH(
     | "sector"
     | "folio" = "todos",
 ): Promise<{ data: RSH[]; pages: number }> {
-  console.log(searchBy);
   const flattenQuery = query.replace(/[.]/g, "");
   if (flattenQuery.length === 8) query = flattenQuery.slice(0, 7);
   if (flattenQuery.length === 9) query = flattenQuery.slice(0, 8);

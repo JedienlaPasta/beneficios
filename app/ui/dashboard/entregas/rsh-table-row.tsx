@@ -1,7 +1,7 @@
 "use client";
 import {
   formatDate,
-  formatRUT,
+  formatNumber,
   formatToTimePassed,
 } from "@/app/lib/utils/format";
 import { useRouter } from "next/navigation";
@@ -24,7 +24,7 @@ export default function RSHTableRow({
 }) {
   const {
     rut,
-    // dv,
+    dv,
     nombres_rsh,
     apellidos_rsh,
     direccion,
@@ -35,7 +35,7 @@ export default function RSHTableRow({
     ultima_entrega,
   } = item;
   const router = useRouter();
-  const formattedRut = rut ? formatRUT(rut) : "";
+  const formattedRut = rut ? formatNumber(rut) + (dv ? "-" + dv : "") : "";
 
   const handleClick = () => {
     if (!rut) return;
@@ -44,63 +44,59 @@ export default function RSHTableRow({
 
   const verifiedTramo = tramo !== null ? tramo : 0;
 
+  let tramoColor = "";
+  if (verifiedTramo <= 40) {
+    tramoColor = "bg-indigo-50 text-indigo-600 ring-indigo-600/5";
+  } else {
+    tramoColor = "bg-slate-50 text-slate-600 ring-slate-700/5";
+  }
+
   return (
-    <tr className="grid grid-cols-26 gap-9 text-nowrap px-5 text-sm tabular-nums transition-colors hover:bg-slate-50 md:px-8">
-      <td className="group col-span-4 flex items-center py-3.5 text-slate-600">
-        <p onClick={handleClick} className="cursor-pointer hover:underline">
+    <tr className="group grid min-w-[1000px] grid-cols-26 gap-4 text-nowrap px-5 text-sm transition-colors hover:bg-slate-50/80 md:px-6">
+      {/* RUT */}
+      <td className="col-span-4 flex items-center py-4">
+        <p
+          onClick={handleClick}
+          className="cursor-pointer text-[13px] tabular-nums text-slate-500 transition-colors hover:text-blue-600 hover:underline"
+        >
           {formattedRut}
         </p>
       </td>
-      <td className="col-span-6 py-3.5 text-slate-600">
-        <div
-          onClick={handleClick}
-          className="w-fit cursor-pointer hover:underline"
-        >
-          {nombres_rsh}
-          <p className="mt-0.5 text-xs text-slate-500/90">{apellidos_rsh}</p>
+      {/* Nombre */}
+      <td className="col-span-7 py-4">
+        <div onClick={handleClick} className="cursor-pointer hover:underline">
+          <p className="overflow-hidden text-ellipsis whitespace-nowrap font-medium text-slate-600/90">
+            {nombres_rsh}
+          </p>
+          <p className="text-xs text-slate-500/90">{apellidos_rsh}</p>
         </div>
       </td>
-      <td className="col-span-8 py-3.5 text-left text-slate-600">
-        {direccion_mod ? direccion_mod : direccion}
-        <p className="mt-1 text-xs text-slate-500/90">
+      {/* Direccion */}
+      <td className="col-span-8 py-4">
+        <p className="overflow-hidden text-ellipsis whitespace-nowrap font-medium text-slate-600/90">
+          {direccion_mod ? direccion_mod : direccion}
+        </p>
+        <p className="text-xs text-slate-500/90">
           {sector_mod ? sector_mod : sector}
         </p>
       </td>
-      <td className="col-span-4 flex flex-col justify-center py-3.5">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-blue-500">
-              {verifiedTramo}%
-            </span>
-            <span className="text-xs text-slate-500">
-              {verifiedTramo <= 40
-                ? "Bajo"
-                : verifiedTramo <= 60
-                  ? "Medio bajo"
-                  : verifiedTramo <= 80
-                    ? "Medio alto"
-                    : "Alto"}
-            </span>
-          </div>
-          <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
-            {/* Progress bar */}
-            <div
-              className="absolute top-0 h-full bg-gradient-to-r from-blue-500 to-blue-400"
-              style={{
-                width: `${verifiedTramo}%`,
-              }}
-            >
-              {/* Indicator line */}
-              <div className="absolute right-0 top-0 h-full w-0.5 bg-slate-500/30"></div>
-            </div>
-          </div>
+      {/* Tramo */}
+      <td className="col-span-3 flex flex-col justify-center py-4">
+        <div className="flex items-center justify-center">
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-black ring-1 ring-inset ${tramoColor}`}
+          >
+            {verifiedTramo}%
+          </span>
         </div>
       </td>
-      <td className="col-span-4 flex flex-col items-end justify-center py-3.5 text-right">
+
+      {/* Última Entrega */}
+      <td className="col-span-4 flex flex-col items-end justify-center py-4 text-right">
         {ultima_entrega ? (
-          <div className="text-slate-600">
+          <div className="text-[13px] text-slate-600">
             {formatDate(ultima_entrega)}
-            <p className="text-xs font-normal text-slate-400">
+            <p className="text-xs text-slate-400">
               {formatToTimePassed(ultima_entrega)}
             </p>
           </div>

@@ -193,6 +193,7 @@ export async function fetchEntregasByRUT(
           entregas.fecha_entrega, 
           entregas.estado_documentos, 
           usuarios.nombre_usuario,
+          (SELECT COUNT(*) FROM documentos WHERE documentos.folio = entregas.folio) AS cantidad_documentos,
           ${countQuery}
         FROM entregas WITH (INDEX(IX_entregas_rut_folio))
         LEFT JOIN usuarios ON entregas.id_usuario = usuarios.id

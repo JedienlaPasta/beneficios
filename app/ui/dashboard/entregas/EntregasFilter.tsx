@@ -79,14 +79,14 @@ export default function EntregasFilter() {
     <div className="relative" ref={containerRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium transition-colors hover:border-blue-200 ${
+        className={`flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:border-blue-200 ${
           hasFilters ? "text-blue-600" : "text-slate-600"
         }`}
       >
         <Filter className="h-4 w-4" />
-        <span className="hidden min-[500px]:block">Filtrar</span>
+        {/* <span className="hidden min-[500px]:block">Filtrar</span> */}
         {hasFilters && (
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">
+          <span className="flex h-5 w-5 items-center justify-center rounded-md bg-blue-100 text-xs font-bold text-blue-600">
             {(userFilter ? 1 : 0) + currentStatuses.length}
           </span>
         )}

@@ -31,8 +31,8 @@ export default function TableRow({
 
   const colorEstado =
     estado === "En curso"
-      ? "bg-emerald-100 text-emerald-600"
-      : "bg-slate-100/80 text-slate-500";
+      ? "bg-emerald-100/70 text-emerald-600 ring-emerald-600/5"
+      : "bg-slate-100/70 text-slate-600 ring-slate-700/5";
 
   const copyToClipboard = async (text: string) => {
     await navigator.clipboard.writeText(text);
@@ -44,16 +44,17 @@ export default function TableRow({
   };
 
   return (
-    <tr className="grid grid-cols-26 gap-9 text-nowrap px-5 text-sm tabular-nums transition-colors hover:bg-slate-50 md:px-8">
-      <td className="group col-span-5 flex min-h-12 items-center py-5 text-slate-600">
+    <tr className="group grid min-w-[1000px] grid-cols-26 gap-4 text-nowrap px-5 text-sm transition-colors hover:bg-slate-50/80 md:px-6">
+      {/* ID */}
+      <td className="col-span-5 flex items-center py-4">
         <div className="relative flex items-center gap-2">
           <div
             onClick={handleClick}
-            className="max-w-[160px] cursor-pointer truncate hover:underline"
+            className="max-w-[160px] cursor-pointer truncate text-[13px] tabular-nums text-slate-500 transition-colors hover:text-blue-600 hover:underline"
           >
             {id}
           </div>
-          <div className="absolute left-[110%] hidden rounded p-[3px] hover:bg-slate-200 group-hover:block">
+          <div className="absolute left-[110%] hidden rounded p-[3px] hover:bg-slate-200/70 sm:group-hover:block">
             <TbCopy
               onClick={(e) => {
                 e.stopPropagation();
@@ -64,29 +65,34 @@ export default function TableRow({
           </div>
         </div>
       </td>
+      {/* Nombre de la campaña */}
       <td className="col-span-7 flex items-center py-4">
         <p
           onClick={handleClick}
-          className="cursor-pointer text-slate-600 hover:underline"
+          className="cursor-pointer font-medium text-slate-600 hover:underline"
         >
           {nombre_campaña}
         </p>
       </td>
-      <td className="col-span-3 flex items-center gap-3 py-4 text-left text-slate-700/90">
+      {/* Entregas */}
+      <td className="col-span-3 flex items-center gap-3 py-4 text-left text-slate-600">
         <FiBox className="col-span-1 flex w-fit justify-start" />
         {entregas ? entregas : 0}
       </td>
-      <td className="col-span-3 flex items-center justify-center py-4 text-slate-600">
+      {/* Estado */}
+      <td className="col-span-3 flex items-center justify-center py-4">
         <span
-          className={`rounded-md px-3 py-1 text-xs font-medium ${colorEstado}`}
+          className={`rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset ${colorEstado}`}
         >
           {estado}
         </span>
       </td>
-      <td className="col-span-4 flex items-center justify-end py-4 text-right text-slate-600">
+      {/* Fecha de inicio */}
+      <td className="col-span-4 flex items-center justify-end py-4 text-right text-[13px] tabular-nums text-slate-600">
         {inicio}
       </td>
-      <td className="col-span-4 flex items-center justify-end py-4 text-right text-slate-600">
+      {/* Fecha de término */}
+      <td className="col-span-4 flex items-center justify-end py-4 text-right text-[13px] tabular-nums text-slate-600">
         {termino}
       </td>
     </tr>

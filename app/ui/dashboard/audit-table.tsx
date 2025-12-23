@@ -76,14 +76,12 @@ export default function AuditTable({
   }
 
   return (
-    <div className="overflow-hidden rounded-b-xl bg-white">
+    <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300/70">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[44rem] border-collapse select-none">
-          <thead className="border-y border-slate-200/70 bg-slate-50 text-xs font-medium tracking-wider text-slate-600/70">
-            <tr className="grid grid-cols-26 items-center gap-8 px-6">
-              <th className="col-span-8 py-4 text-left font-normal">
-                ACTIVIDAD
-              </th>
+        <table className="w-full min-w-[44rem] border-collapse">
+          <thead className="border-y border-slate-200/80 bg-slate-50 text-xs uppercase tracking-wider text-slate-600/70">
+            <tr className="grid min-w-[1000px] grid-cols-26 items-center gap-4 px-5 text-left md:px-6">
+              <th className="col-span-8 py-4 font-normal">ACTIVIDAD</th>
               <th className="col-span-12 py-4 text-right font-normal">
                 ID REGISTRO MODIFICADO
               </th>
@@ -94,10 +92,11 @@ export default function AuditTable({
             {logs.map((log, index) => (
               <tr
                 key={String(log.id_registro_mod) + index}
-                className="grid cursor-pointer grid-cols-26 items-center gap-8 text-nowrap px-6 text-sm tabular-nums transition-colors hover:bg-slate-200/50"
+                className="group grid min-w-[1000px] grid-cols-26 gap-4 text-nowrap px-5 text-sm transition-colors hover:bg-slate-50/80 md:px-6"
                 onClick={() => setSelectedLog(log)}
               >
-                <td className="col-span-12 flex items-center gap-3 py-5">
+                {/* Actividad */}
+                <td className="col-span-12 flex items-center gap-3 py-4 text-[13px]">
                   <span
                     className={`rounded-xl p-1 text-lg ${getActivityStyle(log.accion).color}`}
                   >
@@ -115,16 +114,18 @@ export default function AuditTable({
                     </span>
                   </div>
                 </td>
-                <td className="col-span-8 overflow-hidden text-ellipsis py-4 text-right text-slate-500">
-                  <span className="">
+                {/* Registro Modificado */}
+                <td className="col-span-8 self-center overflow-hidden text-ellipsis py-4 text-right">
+                  <span className="text-xs tabular-nums text-slate-600">
                     {log.id_registro_mod || "No disponible"}
                   </span>
                 </td>
-                <td className="col-span-6 text-right text-slate-600">
-                  <div className="text-slate-600">
+                {/* Fecha Modificacion */}
+                <td className="col-span-6 py-4 text-right">
+                  <div className="text-[13px] text-slate-600">
                     {formatDate(new Date(log.fecha))}
                   </div>
-                  <div className="text-xs text-slate-500/80">
+                  <div className="text-xs text-slate-400">
                     {formatTime(new Date(log.fecha))}
                   </div>
                 </td>

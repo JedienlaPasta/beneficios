@@ -2,9 +2,16 @@
 import { EntregasTable } from "@/app/lib/definitions";
 import { useRouter, useSearchParams } from "next/navigation";
 import { formatDate, formatTime } from "@/app/lib/utils/format";
+import { FileText } from "lucide-react";
 
 export default function TableRow({ item }: { item: EntregasTable }) {
-  const { folio, fecha_entrega, nombre_usuario, estado_documentos } = item;
+  const {
+    folio,
+    fecha_entrega,
+    nombre_usuario,
+    estado_documentos,
+    cantidad_documentos,
+  } = item;
   const fecha = formatDate(fecha_entrega);
   const hora = formatTime(fecha_entrega);
   const router = useRouter();
@@ -18,38 +25,55 @@ export default function TableRow({ item }: { item: EntregasTable }) {
 
   let stateColor;
   if (estado_documentos === "Anulado") {
-    stateColor = "bg-red-100 text-red-600";
+    stateColor = "bg-red-100/70 text-red-600 ring-red-600/5";
   } else if (estado_documentos === "En Curso") {
-    stateColor = "bg-amber-100/60 text-amber-500/90";
+    stateColor = "bg-purple-100/70 text-purple-600 ring-purple-600/5";
   } else if (estado_documentos === "Finalizado") {
-    stateColor = "bg-emerald-100 text-emerald-600";
+    stateColor = "bg-emerald-100/70 text-emerald-600 ring-emerald-600/5";
   }
 
   return (
-    <tr className="grid grid-cols-26 gap-8 text-nowrap px-5 text-sm tabular-nums transition-colors hover:bg-slate-200/50 md:px-8">
-      <td className="col-span-7 flex min-h-12 items-center">
+    <tr className="group grid min-w-[1000px] grid-cols-26 gap-4 text-nowrap px-5 text-sm transition-colors hover:bg-slate-50/80 md:px-6">
+      {/* Folio */}
+      <td className="col-span-6 self-center py-4">
         <p
           onClick={handleClick}
-          className="cursor-pointer text-slate-600 hover:underline"
+          className="cursor-pointer text-[13px] tabular-nums text-slate-500 transition-colors hover:text-blue-600 hover:underline"
         >
           {folio}
         </p>
       </td>
-      <td className="col-span-10 flex items-center py-3 text-slate-600">
-        {nombre_usuario}
+      {/* Encargado */}
+      <td className="col-span-9 self-center py-4">
+        <p className="overflow-hidden text-ellipsis whitespace-nowrap font-medium text-slate-600/90">
+          {nombre_usuario}
+        </p>
       </td>
-      <td className="col-span-5 flex h-11 min-h-11 items-center self-center text-slate-600">
+      {/* Documentos */}
+      <td className="col-span-4 flex items-center justify-end py-4">
         <div
-          className={`rounded-md px-3 py-1 text-xs font-medium ${stateColor}`}
+          className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset transition-colors ${
+            (cantidad_documentos || 0) >= 4
+              ? "bg-emerald-100/70 text-emerald-600 ring-emerald-600/5"
+              : "bg-slate-100/70 text-slate-600 ring-slate-700/5"
+          }`}
+        >
+          <FileText className="h-3.5 w-3.5" />
+          <span className="tabular-nums">{cantidad_documentos || 0}/4</span>
+        </div>
+      </td>
+      {/* Estado */}
+      <td className="col-span-3 flex items-center justify-start py-4">
+        <div
+          className={`rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset ${stateColor}`}
         >
           <p className="z-10">{estado_documentos}</p>
         </div>
       </td>
-      <td className="col-span-4 flex items-center justify-end py-3 text-right text-slate-600">
-        <div>
-          <p>{fecha}</p>
-          <p className="text-xs text-slate-500">{hora}</p>
-        </div>
+      {/* Entrega */}
+      <td className="col-span-4 flex flex-col items-end py-4 text-right">
+        <p className="text-[13px] text-slate-600">{fecha}</p>
+        <p className="text-xs text-slate-400">{hora}</p>
       </td>
     </tr>
   );

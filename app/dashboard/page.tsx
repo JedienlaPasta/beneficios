@@ -1,5 +1,5 @@
 import GeneralInfoCards from "@/app/ui/dashboard/inicio/general-info-cards";
-import Buscar from "@/app/ui/dashboard/searchbar";
+import SearchBar from "@/app/ui/dashboard/searchbar";
 import { Suspense } from "react";
 import PageHeader from "../ui/dashboard/page-header";
 import { ActiveCampaignsSkeleton } from "../ui/dashboard/campañas/active-campaigns";
@@ -9,6 +9,7 @@ import { getUserData } from "../lib/data/usuario";
 import { AuditLogsTable } from "../ui/dashboard/inicio/audit-table-logs";
 import AuditTableSkeleton from "../ui/dashboard/inicio/audit-table-skeleton";
 import HeatMap from "../ui/dashboard/inicio/heatmap";
+import { Coffee } from "lucide-react";
 
 type HomeProps = {
   searchParams?: Promise<{
@@ -54,11 +55,23 @@ export default async function Home(props: HomeProps) {
         </Suspense>
 
         <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50 shadow-md shadow-slate-300/70">
-          <div className="flex flex-wrap items-center justify-between gap-4 px-10 pt-4 3xl:w-[96rem] 3xl:self-center">
-            <h2 className="text-lg font-semibold text-slate-800">
-              Tus Actividades
-            </h2>
-            <Buscar placeholder="Buscar..." />
+          <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-4 md:px-6 3xl:w-[96rem] 3xl:self-center">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 shadow-sm ring-1 ring-inset ring-blue-700/10">
+                <Coffee className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold tracking-tight text-slate-800">
+                  Mis Actividades
+                </h2>
+                <p className="-mt-0.5 text-xs font-medium text-slate-500">
+                  Historial personal de actividades
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <SearchBar placeholder="Buscar..." />
+            </div>
           </div>
           <Suspense fallback={<AuditTableSkeleton />}>
             <AuditLogsTable query={query} currentPage={currentPage} />

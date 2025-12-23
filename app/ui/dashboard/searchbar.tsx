@@ -38,7 +38,7 @@ export default function SearchBar({ placeholder }: SearchBarProps) {
 
   return (
     <div
-      className="flex h-11 min-w-52 flex-1 cursor-text items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 shadow-sm transition-all focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100"
+      className="flex h-10 min-w-52 flex-1 cursor-text items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 shadow-sm transition-all focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100"
       onClick={handleContainerClick}
     >
       {isPending ? (

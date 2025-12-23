@@ -23,14 +23,14 @@ export default async function CampaignEntregasTable({
   return (
     <div className="overflow-hidden rounded-b-xl bg-white shadow-md shadow-slate-300/70">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[44rem]">
-          <thead className="border-y border-gray-200/80 bg-slate-50 text-left text-xs font-medium uppercase tracking-wider text-slate-600/70">
-            <tr className="grid grid-cols-26 gap-8 px-5 md:px-8">
+        <table className="w-full min-w-[44rem] border-collapse">
+          <thead className="border-y border-slate-200/80 bg-slate-50 text-xs uppercase tracking-wider text-slate-600/70">
+            <tr className="grid min-w-[1000px] grid-cols-26 items-center gap-4 px-5 text-left md:px-6">
               <th className="col-span-5 py-4 text-left font-normal">Folio</th>
               <th className="col-span-13 py-4 font-normal">Beneficiario</th>
               <th className="col-span-4 py-4 text-right font-normal">RUT</th>
               <th className="col-span-4 py-4 text-right font-normal">
-                Entrega
+                Entregado
               </th>
             </tr>
           </thead>

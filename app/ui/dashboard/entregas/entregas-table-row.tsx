@@ -2,7 +2,7 @@
 import { Entregas } from "@/app/lib/definitions";
 import {
   formatDate,
-  formatRUT,
+  formatNumber,
   formatToTimePassed,
 } from "@/app/lib/utils/format";
 import { FileText } from "lucide-react";
@@ -15,6 +15,7 @@ type EntregasProps = {
 export default function EntregasTableRow({ item }: EntregasProps) {
   const {
     rut,
+    dv,
     folio,
     estado_documentos,
     cantidad_documentos,
@@ -34,19 +35,21 @@ export default function EntregasTableRow({ item }: EntregasProps) {
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
-  const formattedRut = rut ? formatRUT(rut) : "";
+  const formattedRut = rut ? formatNumber(rut) + (dv ? "-" + dv : "") : "";
 
   let stateColor;
   if (estado_documentos === "Anulado") {
-    stateColor = "bg-red-100 text-red-600 ring-red-600/20";
+    stateColor = "bg-red-100/70 text-red-600 ring-red-600/5";
   } else if (estado_documentos === "En Curso") {
-    stateColor = "bg-amber-100/60 text-amber-500/90 ring-amber-600/20";
+    stateColor = "bg-purple-100/70 text-purple-600 ring-purple-600/5";
+    // } else if (estado_documentos === "En Curso") {
+    //   stateColor = "bg-amber-100/60 text-amber-500/90 ring-amber-600/20";
   } else if (estado_documentos === "Finalizado") {
-    stateColor = "bg-emerald-100 text-emerald-700 ring-emerald-600/20";
+    stateColor = "bg-emerald-100/70 text-emerald-600 ring-emerald-600/5";
   }
 
   return (
-    <tr className="group grid min-w-[1000px] grid-cols-26 gap-4 text-nowrap px-5 text-sm transition-colors hover:bg-slate-50/80 md:px-8">
+    <tr className="group grid min-w-[1000px] grid-cols-26 gap-4 text-nowrap px-5 text-sm transition-colors hover:bg-slate-50/80 md:px-6">
       {/* RUT */}
       <td className="col-span-4 flex items-center py-4">
         <p
@@ -57,9 +60,11 @@ export default function EntregasTableRow({ item }: EntregasProps) {
         </p>
       </td>
       {/* Nombre */}
-      <td className="col-span-7 shrink-0 py-4">
+      <td className="col-span-7 py-4">
         <div onClick={handleClick} className="cursor-pointer hover:underline">
-          <p className="font-semibold text-slate-600">{nombres_rsh}</p>
+          <p className="overflow-hidden text-ellipsis whitespace-nowrap font-medium text-slate-600/90">
+            {nombres_rsh}
+          </p>
           <p className="text-xs text-slate-500/90">{apellidos_rsh}</p>
         </div>
       </td>
@@ -67,7 +72,7 @@ export default function EntregasTableRow({ item }: EntregasProps) {
       <td className="col-span-4 flex items-center justify-end py-4">
         <p
           onClick={handleClick}
-          className="font-monos cursor-pointer text-[13px] tabular-nums text-slate-500 transition-colors hover:text-blue-600 hover:underline"
+          className="cursor-pointer text-[13px] tabular-nums text-slate-500 transition-colors hover:text-blue-600 hover:underline"
         >
           {folio}
         </p>
@@ -77,8 +82,8 @@ export default function EntregasTableRow({ item }: EntregasProps) {
         <div
           className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset transition-colors ${
             (cantidad_documentos || 0) >= 4
-              ? "bg-emerald-100 text-emerald-700 ring-emerald-700/20"
-              : "bg-slate-100 text-slate-600 ring-slate-700/10"
+              ? "bg-emerald-100/70 text-emerald-600 ring-emerald-600/5"
+              : "bg-slate-100/70 text-slate-600 ring-slate-700/5"
           }`}
         >
           <FileText className="h-3.5 w-3.5" />

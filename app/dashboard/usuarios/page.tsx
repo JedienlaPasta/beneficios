@@ -3,6 +3,7 @@ import PageHeader from "@/app/ui/dashboard/page-header";
 import { UserTableSkeleton } from "@/app/ui/dashboard/usuarios/skeletons";
 import { CreateUserButton } from "@/app/ui/dashboard/usuarios/create-user-button";
 import UsersTableWrapper from "@/app/ui/dashboard/usuarios/users-table-wrapper";
+import { Coffee } from "lucide-react";
 
 export default async function UsersPage() {
   return (
@@ -14,7 +15,22 @@ export default async function UsersPage() {
         <CreateUserButton />
       </PageHeader>
 
-      <div className="flex flex-col gap-6 rounded-xl 3xl:w-[96rem] 3xl:justify-self-center">
+      <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50 shadow-md shadow-slate-300/70">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-4 md:px-6 3xl:w-[96rem] 3xl:self-center">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 shadow-sm ring-1 ring-inset ring-blue-700/10">
+              <Coffee className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold tracking-tight text-slate-800">
+                Actividades
+              </h2>
+              <p className="-mt-0.5 text-xs font-medium text-slate-500">
+                Historial completo de actividades
+              </p>
+            </div>
+          </div>
+        </div>
         <Suspense fallback={<UserTableSkeleton />}>
           <UsersTableWrapper />
         </Suspense>
