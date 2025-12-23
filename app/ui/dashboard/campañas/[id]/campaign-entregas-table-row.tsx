@@ -10,7 +10,7 @@ type TableRowProps = {
 export default function TableRow({ item }: TableRowProps) {
   const { folio, nombres_rsh, apellidos_rsh, rut, dv, fecha_entrega } = item;
   const fecha = formatDate(fecha_entrega);
-  const formattedRut = formatNumber(Number(rut)) + (rut && "-" + dv);
+  const formattedRut = rut ? formatNumber(rut) + (dv ? "-" + dv : "") : "";
 
   const router = useRouter();
   const searchParams = useSearchParams();

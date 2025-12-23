@@ -1,4 +1,4 @@
-import { formatPhone, formatRUT } from "@/app/lib/utils/format";
+import { formatNumber, formatPhone, formatRUT } from "@/app/lib/utils/format";
 import DetailRow from "../campañas/[id]/detail-card";
 import { redirect } from "next/navigation";
 import { fetchRSHByRUT } from "@/app/lib/data/rsh";
@@ -34,6 +34,7 @@ export default async function CitizenDetail({
     redirect("/dashboard/entregas");
   }
   const {
+    dv,
     nombres_rsh,
     apellidos_rsh,
     direccion,
@@ -49,7 +50,7 @@ export default async function CitizenDetail({
     nacionalidad,
   } = response;
 
-  const formattedRut = formatRUT(rut);
+  const formattedRut = rut ? formatNumber(rut) + (dv ? "-" + dv : "") : "";
   const descripcion = nombres_rsh[0] + apellidos_rsh[0];
 
   const age = fecha_nacimiento

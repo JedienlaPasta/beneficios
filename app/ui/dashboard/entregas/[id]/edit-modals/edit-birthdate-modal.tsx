@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { RSH } from "@/app/lib/definitions";
 import CloseModalButton from "../../../close-modal-button";
-import { formatRUT } from "@/app/lib/utils/format";
+import { formatNumber } from "@/app/lib/utils/format";
 import CustomAntdDatePicker from "../../../datepicker";
 import dayjs from "dayjs";
 
@@ -21,7 +21,9 @@ export default function EditCitizenBirthdateModal({
   name,
   citizen,
 }: ModalProps) {
-  const { rut, folio } = citizen;
+  const { rut, dv, folio } = citizen;
+
+  const formattedRut = rut ? formatNumber(rut) + (dv ? "-" + dv : "") : "";
 
   return (
     <motion.div
@@ -39,7 +41,7 @@ export default function EditCitizenBirthdateModal({
             <h2 className="text-xl font-bold text-slate-700">#{folio}</h2>
           </div>
           <span className="flex gap-1 text-xs text-slate-500">
-            RUT: <p className="text-blue-700">{rut ? formatRUT(rut) : ""}</p>
+            RUT: <p className="text-blue-700">{formattedRut}</p>
           </span>
         </div>
         <CloseModalButton name={name} />
