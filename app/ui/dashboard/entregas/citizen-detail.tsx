@@ -1,4 +1,4 @@
-import { formatNumber, formatPhone, formatRUT } from "@/app/lib/utils/format";
+import { formatNumber, formatPhone } from "@/app/lib/utils/format";
 import DetailRow from "../campañas/[id]/detail-card";
 import { redirect } from "next/navigation";
 import { fetchRSHByRUT } from "@/app/lib/data/rsh";
