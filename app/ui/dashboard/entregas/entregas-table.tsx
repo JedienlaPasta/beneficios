@@ -29,12 +29,14 @@ export default async function EntregasTable({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[44rem] border-collapse">
           <thead className="border-y border-slate-200/80 bg-slate-50 text-xs uppercase tracking-wider text-slate-600/70">
-            <tr className="grid grid-cols-26 items-center gap-8 px-5 text-left md:px-8">
+            <tr className="grid min-w-[1000px] grid-cols-26 items-center gap-4 px-5 text-left md:px-8">
               <th className="col-span-4 py-4 font-normal">RUT</th>
-              <th className="col-span-6 py-4 font-normal">Nombre</th>
+              <th className="col-span-7 py-4 font-normal">Nombre</th>
               <th className="col-span-4 py-4 text-right font-normal">Folio</th>
-              <th className="col-span-4 py-4 text-right font-normal">Docs</th>
-              <th className="col-span-4 py-4 font-normal">Estado</th>
+              <th className="col-span-4 py-4 text-right font-normal">
+                Documentos
+              </th>
+              <th className="col-span-3 py-4 font-normal">Estado</th>
               <th className="col-span-4 py-4 text-right font-normal">
                 Entregado
               </th>

@@ -46,7 +46,7 @@ export default function EntregasTableRow({ item }: EntregasProps) {
   }
 
   return (
-    <tr className="group grid grid-cols-26 gap-4 text-nowrap px-5 text-sm transition-colors hover:bg-slate-50/80 md:px-8">
+    <tr className="group grid min-w-[1000px] grid-cols-26 gap-4 text-nowrap px-5 text-sm transition-colors hover:bg-slate-50/80 md:px-8">
       {/* RUT */}
       <td className="col-span-4 flex items-center py-4">
         <p
@@ -57,7 +57,7 @@ export default function EntregasTableRow({ item }: EntregasProps) {
         </p>
       </td>
       {/* Nombre */}
-      <td className="col-span-6 w-fit py-4">
+      <td className="col-span-7 shrink-0 py-4">
         <div onClick={handleClick} className="cursor-pointer hover:underline">
           <p className="font-semibold text-slate-600">{nombres_rsh}</p>
           <p className="text-xs text-slate-500/90">{apellidos_rsh}</p>
@@ -76,7 +76,7 @@ export default function EntregasTableRow({ item }: EntregasProps) {
       <td className="col-span-4 flex items-center justify-end py-4">
         <div
           className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset transition-colors ${
-            cantidad_documentos! >= 4
+            (cantidad_documentos || 0) >= 4
               ? "bg-emerald-100 text-emerald-700 ring-emerald-700/20"
               : "bg-slate-100 text-slate-600 ring-slate-700/10"
           }`}
@@ -86,7 +86,7 @@ export default function EntregasTableRow({ item }: EntregasProps) {
         </div>
       </td>
       {/* Estado */}
-      <td className="col-span-4 flex items-center self-center text-slate-600">
+      <td className="col-span-3 flex items-center justify-start py-4">
         <div
           className={`rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset ${stateColor}`}
         >
