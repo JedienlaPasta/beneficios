@@ -6,7 +6,7 @@ import SearchBar from "@/app/ui/dashboard/searchbar";
 import { Modal } from "@/app/ui/dashboard/modal";
 import ModalCitizenDetailContext from "@/app/ui/dashboard/rsh/citizen-context-modal";
 import RSHModals from "@/app/ui/dashboard/rsh/rsh-modals";
-import { Package2 } from "lucide-react";
+import { Users } from "lucide-react";
 
 type RSHProps = {
   searchParams?: Promise<{
@@ -52,8 +52,8 @@ export default async function RSH(props: RSHProps) {
         <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50">
           <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-4 md:px-6 3xl:w-[96rem] 3xl:self-center">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 shadow-sm ring-1 ring-inset ring-blue-700/10">
-                <Package2 className="h-5 w-5" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 shadow-sm ring-1 ring-inset ring-indigo-700/10">
+                <Users className="h-5 w-5" />
               </div>
               <div>
                 <h2 className="text-lg font-bold tracking-tight text-slate-800">

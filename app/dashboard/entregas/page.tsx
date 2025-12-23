@@ -73,7 +73,7 @@ export default async function Entregas(props: SocialAidProps) {
                 className={`flex h-10 w-10 items-center justify-center rounded-xl shadow-sm ring-1 ring-inset ${
                   table === "entregas"
                     ? "bg-blue-50 text-blue-600 ring-blue-700/10"
-                    : "bg-emerald-50 text-emerald-600 ring-emerald-700/10"
+                    : "bg-indigo-50 text-indigo-600 ring-indigo-700/10"
                 }`}
               >
                 {table === "entregas" ? (

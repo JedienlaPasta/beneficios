@@ -323,11 +323,12 @@ export const createEntrega = async (
       }
 
       await transaction.commit();
+      console.log("ID registro Modificado:", newFolio);
       await logAction(
         "Crear",
         logComment !== "" ? logComment : "realizó una entrega rápida",
         `Folio: ${newFolio}`,
-        userIdFromSession,
+        newFolio,
       );
       revalidatePath("/dashboard/entregas");
 
