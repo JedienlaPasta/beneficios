@@ -491,6 +491,23 @@ export async function getActaDataByFolio(
     const row = result.recordset[0];
     if (!row) return defaultValues;
 
+    // --- CONSULTA 1.5: NUMERO DE ENTREGA DEL AÑO ---
+    const countRequest = pool.request();
+    const countResult = await countRequest
+      .input("rut", sql.Int, row.rut)
+      .input("year", sql.Int, new Date(row.fecha_entrega).getFullYear())
+      .input("currentDate", sql.DateTime, row.fecha_entrega).query<{
+      total: number;
+    }>(`
+        SELECT COUNT(*) as total
+        FROM entregas
+        WHERE rut = @rut
+          AND YEAR(fecha_entrega) = @year
+          AND fecha_entrega <= @currentDate
+          AND estado_documentos != 'Anulado'
+      `);
+    const numeroEntrega = countResult.recordset[0]?.total || 1;
+
     // --- CONSULTA 2: RECEPTOR ---
     const receptorRequest = pool.request();
     const receptorResult = await receptorRequest.input(
@@ -598,7 +615,7 @@ export async function getActaDataByFolio(
     const edadVal = Number.isFinite(ageNum) ? ageNum : undefined;
     return {
       folio: row.folio,
-      numeroEntrega: 1,
+      numeroEntrega: numeroEntrega,
       profesional: {
         nombre: row.nombre_usuario || "Funcionario",
         cargo: row.cargo || "Departamento Social",

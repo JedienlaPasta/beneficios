@@ -77,8 +77,18 @@ export function getActaDocDefinition(
   const numeroEntrega = data?.numeroEntrega ?? undefined;
   const ordinalEntrega =
     typeof numeroEntrega === "number"
-      ? ["Primera", "Segunda", "Tercera"][numeroEntrega - 1] ||
-        `${numeroEntrega}ª`
+      ? [
+          "Primera",
+          "Segunda",
+          "Tercera",
+          "Cuarta",
+          "Quinta",
+          "Sexta",
+          "Séptima",
+          "Octava",
+          "Novena",
+          "Décima",
+        ][numeroEntrega - 1] || `${numeroEntrega}ª`
       : undefined;
 
   return {
