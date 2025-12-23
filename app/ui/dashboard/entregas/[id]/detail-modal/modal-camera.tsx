@@ -6,6 +6,12 @@ import { PDFDocument } from "pdf-lib";
 import { uploadPDFByFolio } from "@/app/lib/actions/entregas";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
+import {
+  BsFileEarmarkRichtext,
+  BsPersonVcard,
+  BsCreditCard,
+} from "react-icons/bs";
+import { HiOutlineTicket } from "react-icons/hi2";
 import FileNameDropdown from "./../file-name-dropdown";
 
 const fileModeList = [
@@ -38,7 +44,7 @@ const filesList = [
   {
     id: "4",
     name: "Otro",
-    defaultMode: fileModeList[0].name,
+    defaultMode: fileModeList[1].name,
   },
 ];
 
@@ -528,6 +534,31 @@ export default function CamaraComponent({
             </div>
 
             <div className="relative overflow-hidden rounded-lg bg-gray-100">
+              {/* Orientación de Documento */}
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                {pdfMode === "Página Completa" &&
+                  documentName === "Acta de Entrega" && (
+                    <BsFileEarmarkRichtext className="size-64 -rotate-90 text-slate-100 opacity-40" />
+                  )}
+                {pdfMode === "Página Completa" && documentName === "Otro" && (
+                  <BsFileEarmarkRichtext className="size-64 -rotate-90 text-slate-100 opacity-40" />
+                )}
+                {pdfMode === "Página Completa" &&
+                  documentName === "Entregas" && (
+                    <div className="flex items-center justify-center">
+                      <BsCreditCard className="-mr-8 size-48 -rotate-90 text-slate-100 opacity-40" />
+                      <HiOutlineTicket className="size-60 -rotate-90 text-slate-100 opacity-40" />
+                    </div>
+                  )}
+                {pdfMode === "Documento Pequeño" &&
+                  documentName === "Cedula" && (
+                    <BsPersonVcard className="size-64 text-slate-100 opacity-40" />
+                  )}
+                {pdfMode === "Documento Pequeño" &&
+                  documentName === "Entregas" && (
+                    <BsCreditCard className="size-64 text-slate-100 opacity-40" />
+                  )}
+              </div>
               <span className="absolute right-2 top-2 rounded-md bg-gray-800 bg-opacity-50 px-2 py-1 text-xs text-slate-200">
                 {"Cámara " + (currentCameraIndex + 1)}
               </span>
