@@ -25,36 +25,40 @@ export async function fetchEntregas(
       return { data: [], pages: 0 };
     }
 
-    // 1. Preparación de variables
+    // Preparación de variables
     const offset = (currentPage - 1) * resultsPerPage;
+
+    // Limpieza de RUT, quitando puntos y manteniendo guion
+    const rutBusquedaExacta = query.replace(/\./g, "");
     const hasDigits = /\d/.test(query);
-    const cleanedRut = hasDigits ? query.replace(/\D/g, "") : "";
 
-    const queryWithoutPercent = query.replace(/%/g, "");
-    const searchTerms = queryWithoutPercent
-      .split(" ")
-      .filter((term) => term.trim().length > 0);
+    const rawTerms = query.trim().replace(/["*]/g, "").split(/\s+/);
+    // Convertimos "Juan Perez" en '"Juan*" AND "Perez*"'
+    // Esto busca registros que tengan AMBAS palabras (o sus inicios) en cualquier orden.
+    const ftsQueryString = rawTerms
+      .filter((term) => term.length > 0)
+      .map((term) => `"${term}*"`)
+      .join(" AND ");
 
-    // 2. Construcción dinámica del WHERE (Centralizada)
-    // Esto evita repetir la lógica en el Count y en el Select
+    // Construcción dinámica del WHERE
     const whereClauses: string[] = [];
 
-    // Filtro de Estado (Seguro mediante Allowlist)
+    // Filtros estáticos de Estado
     if (filters.status && filters.status.length > 0) {
       const allowedStatuses = ["En Curso", "Finalizado", "Anulado"];
-      const validStatuses = filters.status.filter((s) =>
-        allowedStatuses.includes(s),
+      const validStatuses = filters.status.filter((status) =>
+        allowedStatuses.includes(status),
       );
-
       if (validStatuses.length > 0) {
-        // SQL Server no soporta arrays nativos en parameters fácilmente sin tipos tabla,
-        // la inyección de strings aquí es segura porque filtramos con allowedStatuses.
-        const statusList = validStatuses.map((s) => `'${s}'`).join(",");
+        // SQL Server no soporta arrays nativos en parameters fácilmente sin tipos tabla
+        // inyección de strings segura al filtrar con allowedStatuses.
+        const statusList = validStatuses
+          .map((status) => `'${status}'`)
+          .join(",");
         whereClauses.push(`entregas.estado_documentos IN (${statusList})`);
       }
     }
 
-    // Filtro de Usuario
     if (filters.userId) {
       whereClauses.push(`entregas.id_usuario = @userId`);
     }
@@ -63,60 +67,51 @@ export async function fetchEntregas(
     if (query) {
       const searchConditions: string[] = [];
 
-      // Búsqueda por RUT (Si hay dígitos)
+      // 1. Búsqueda por RUT y Folio RSH
       if (hasDigits) {
-        searchConditions.push(`concat(entregas.rut, rsh.dv) LIKE @cleanedRut`);
+        searchConditions.push(`rsh.rut_completo LIKE @rutBusquedaExacta`);
+        searchConditions.push(`CAST(rsh.folio AS VARCHAR(20)) LIKE @queryLike`);
       }
 
-      // Búsqueda General
-      searchConditions.push(`entregas.folio LIKE @query`);
-      searchConditions.push(`rsh.folio LIKE @query`);
+      // 2. Búsqueda por Folio de entrega
+      searchConditions.push(`entregas.folio LIKE @queryLike`);
 
-      // Búsqueda por Nombres (Optimizada visualmente)
-      // Nota: COLLATE en tiempo de ejecución es lento, idealmente la columna ya debería tener ese collation
-      const nameCollate = `COLLATE Modern_Spanish_CI_AI`;
-      searchConditions.push(`rsh.nombres_rsh ${nameCollate} LIKE @query`);
-      searchConditions.push(`rsh.apellidos_rsh ${nameCollate} LIKE @query`);
-      searchConditions.push(
-        `concat(rsh.nombres_rsh,' ', rsh.apellidos_rsh) ${nameCollate} LIKE @query`,
-      );
-
-      // Búsqueda Multitérmino (Compleja)
-      if (searchTerms.length > 1) {
-        const multiTermCondition = searchTerms
-          .map(
-            (_, index) =>
-              `(rsh.nombres_rsh ${nameCollate} LIKE @term${index} OR rsh.apellidos_rsh ${nameCollate} LIKE @term${index})`,
-          )
-          .join(" AND ");
-        searchConditions.push(`(${multiTermCondition})`);
+      // 3. Búsqueda Full-Text Search (Nombres y Apellidos)
+      if (ftsQueryString.length > 0) {
+        searchConditions.push(
+          `CONTAINS((rsh.nombres_rsh, rsh.apellidos_rsh), @ftsQuery)`,
+        );
       }
 
       // Unimos todas las condiciones de búsqueda con OR y las envolvemos en paréntesis
-      whereClauses.push(`(${searchConditions.join(" OR ")})`);
+      if (searchConditions.length > 0) {
+        whereClauses.push(`(${searchConditions.join(" OR ")})`);
+      }
     }
 
     // Unir todas las cláusulas WHERE con AND
     const whereSql =
       whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
 
-    // 3. Función auxiliar para inyectar parámetros (DRY)
+    // Binding de Parámetros
     const bindParams = (req: sql.Request) => {
       if (filters.userId)
         req.input("userId", sql.UniqueIdentifier, filters.userId);
+
       if (query) {
-        req.input("query", sql.VarChar, `%${query}%`);
-        req.input("cleanedRut", sql.VarChar, `%${cleanedRut}%`);
-        searchTerms.forEach((term, index) => {
-          req.input(`term${index}`, sql.VarChar, `%${term}%`);
-        });
+        req.input("queryLike", sql.VarChar, `%${query}%`);
+
+        req.input("rutBusquedaExacta", sql.VarChar, `${rutBusquedaExacta}%`); // Para rut_completo (el % al final permite autocompletar)
+
+        // Para Full-Text Search (Cadena formateada)
+        if (ftsQueryString.length > 0) {
+          req.input("ftsQuery", sql.VarChar(4000), ftsQueryString);
+        }
       }
       return req;
     };
 
-    // 4. Ejecución de Consultas
-
-    // QUERY 1: Total Count
+    // Ejecución (count)
     const countRequest = bindParams(pool.request());
     const countResult = await countRequest.query(`
       SELECT COUNT(*) as total
@@ -126,14 +121,10 @@ export async function fetchEntregas(
     `);
 
     const total = countResult.recordset[0].total;
+    if (total === 0) return { data: [], pages: 0 }; // return rápido si no hay resultados
 
-    // Si no hay resultados, retornamos rápido para ahorrar la segunda consulta
-    if (total === 0) return { data: [], pages: 0 };
-
-    // QUERY 2: Data Paginada (Usando OFFSET FETCH de SQL Server 2012+)
+    // Ejecución (Data Paginada)
     const dataRequest = bindParams(pool.request());
-
-    // Agregamos parámetros de paginación
     dataRequest.input("offset", sql.Int, offset);
     dataRequest.input("limit", sql.Int, resultsPerPage);
 
@@ -155,8 +146,10 @@ export async function fetchEntregas(
       FETCH NEXT @limit ROWS ONLY
     `);
 
-    const pages = Math.ceil(total / resultsPerPage);
-    return { data: result.recordset as Entregas[], pages };
+    return {
+      data: result.recordset as Entregas[],
+      pages: Math.ceil(total / resultsPerPage),
+    };
   } catch (error) {
     console.error("Error al obtener datos de la tabla de entregas:", error);
     return { data: [], pages: 0 };
