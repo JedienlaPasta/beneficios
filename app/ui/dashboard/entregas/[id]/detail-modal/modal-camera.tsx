@@ -538,25 +538,25 @@ export default function CamaraComponent({
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                 {pdfMode === "Página Completa" &&
                   documentName === "Acta de Entrega" && (
-                    <BsFileEarmarkRichtext className="size-64 -rotate-90 text-slate-100 opacity-40" />
+                    <BsFileEarmarkRichtext className="size-64 text-slate-100 opacity-40" />
                   )}
                 {pdfMode === "Página Completa" && documentName === "Otro" && (
-                  <BsFileEarmarkRichtext className="size-64 -rotate-90 text-slate-100 opacity-40" />
+                  <BsFileEarmarkRichtext className="size-64 text-slate-100 opacity-40" />
                 )}
                 {pdfMode === "Página Completa" &&
                   documentName === "Entregas" && (
-                    <div className="flex items-center justify-center">
-                      <BsCreditCard className="-mr-8 size-48 -rotate-90 text-slate-100 opacity-40" />
-                      <HiOutlineTicket className="size-60 -rotate-90 text-slate-100 opacity-40" />
+                    <div className="flex flex-col items-center justify-center">
+                      <BsCreditCard className="-mb-8 size-48 text-slate-100 opacity-40" />
+                      <HiOutlineTicket className="size-60 text-slate-100 opacity-40" />
                     </div>
                   )}
                 {pdfMode === "Documento Pequeño" &&
                   documentName === "Cedula" && (
-                    <BsPersonVcard className="size-64 text-slate-100 opacity-40" />
+                    <BsPersonVcard className="size-64 rotate-90 text-slate-100 opacity-40" />
                   )}
                 {pdfMode === "Documento Pequeño" &&
                   documentName === "Entregas" && (
-                    <BsCreditCard className="size-64 text-slate-100 opacity-40" />
+                    <BsCreditCard className="size-64 rotate-90 text-slate-100 opacity-40" />
                   )}
               </div>
               <span className="absolute right-2 top-2 rounded-md bg-gray-800 bg-opacity-50 px-2 py-1 text-xs text-slate-200">
