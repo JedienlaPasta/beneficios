@@ -32,13 +32,11 @@ export async function fetchEntregas(
     const rutBusquedaExacta = query.replace(/\./g, "");
     const hasDigits = /\d/.test(query);
 
-    const rawTerms = query.trim().replace(/["*]/g, "").split(/\s+/);
-    // Convertimos "Juan Perez" en '"Juan*" AND "Perez*"'
-    // Esto busca registros que tengan AMBAS palabras (o sus inicios) en cualquier orden.
-    const ftsQueryString = rawTerms
-      .filter((term) => term.length > 0)
-      .map((term) => `"${term}*"`)
-      .join(" AND ");
+    const rawTerms = query
+      .trim()
+      .replace(/["*]/g, "")
+      .split(/\s+/)
+      .filter((term) => term.length > 0);
 
     // Construcción dinámica del WHERE
     const whereClauses: string[] = [];
@@ -77,10 +75,15 @@ export async function fetchEntregas(
       searchConditions.push(`entregas.folio LIKE @queryLike`);
 
       // 3. Búsqueda Full-Text Search (Nombres y Apellidos)
-      if (ftsQueryString.length > 0) {
-        searchConditions.push(
-          `CONTAINS((rsh.nombres_rsh, rsh.apellidos_rsh), @ftsQuery)`,
-        );
+      if (rawTerms.length > 0) {
+        const ftsQueryString = rawTerms
+          .map(
+            (_, index) =>
+              `CONTAINS((rsh.nombres_rsh, rsh.apellidos_rsh), @ftsTerm${index})`,
+          )
+          .join(" AND ");
+
+        searchConditions.push(`(${ftsQueryString})`);
       }
 
       // Unimos todas las condiciones de búsqueda con OR y las envolvemos en paréntesis
@@ -100,13 +103,12 @@ export async function fetchEntregas(
 
       if (query) {
         req.input("queryLike", sql.VarChar, `%${query}%`);
-
         req.input("rutBusquedaExacta", sql.VarChar, `${rutBusquedaExacta}%`); // Para rut_completo (el % al final permite autocompletar)
 
         // Para Full-Text Search (Cadena formateada)
-        if (ftsQueryString.length > 0) {
-          req.input("ftsQuery", sql.VarChar(4000), ftsQueryString);
-        }
+        rawTerms.forEach((term, index) => {
+          req.input(`ftsTerm${index}`, sql.VarChar, `"${term}*"`);
+        });
       }
       return req;
     };
