@@ -11,12 +11,14 @@ export default function TableRow({
   item: {
     id: string;
     nombre_campaña: string;
+    code: string;
     entregas: number | null;
     fecha_inicio: Date | null;
     fecha_termino: Date | null;
   };
 }) {
-  const { id, nombre_campaña, entregas, fecha_inicio, fecha_termino } = item;
+  const { id, nombre_campaña, code, entregas, fecha_inicio, fecha_termino } =
+    item;
   const router = useRouter();
 
   const inicio = formatDate(fecha_inicio);
@@ -50,11 +52,11 @@ export default function TableRow({
         <div className="relative flex items-center gap-2">
           <div
             onClick={handleClick}
-            className="max-w-[160px] cursor-pointer truncate text-[13px] tabular-nums text-slate-500 transition-colors hover:text-blue-600 hover:underline"
+            className="max-w-[140px] cursor-pointer truncate text-[13px] tabular-nums text-slate-500 transition-colors hover:text-blue-600 hover:underline"
           >
             {id}
           </div>
-          <div className="absolute left-[110%] hidden rounded p-[3px] hover:bg-slate-200/70 sm:group-hover:block">
+          <div className="absolute left-[100%] hidden rounded p-[3px] hover:bg-slate-200/70 sm:group-hover:block">
             <TbCopy
               onClick={(e) => {
                 e.stopPropagation();
@@ -66,17 +68,19 @@ export default function TableRow({
         </div>
       </td>
       {/* Nombre de la campaña */}
-      <td className="col-span-7 flex items-center py-4">
-        <p
-          onClick={handleClick}
-          className="cursor-pointer font-medium text-slate-600 hover:underline"
-        >
-          {nombre_campaña}
-        </p>
+      <td className="col-span-7 py-4">
+        <div onClick={handleClick} className="cursor-pointer hover:underline">
+          <p className="overflow-hidden text-ellipsis whitespace-nowrap font-medium text-slate-600/90">
+            {nombre_campaña}
+          </p>
+          <p className="!text-[11px] leading-4 text-slate-400">
+            CÓDIGO: {code}
+          </p>
+        </div>
       </td>
       {/* Entregas */}
-      <td className="col-span-3 flex items-center gap-3 py-4 text-left text-slate-600">
-        <FiBox className="col-span-1 flex w-fit justify-start" />
+      <td className="col-span-3 flex items-center gap-3 py-4 text-left text-[13px] tabular-nums text-slate-600">
+        <FiBox className="col-span-1 flex w-fit justify-start text-blue-500" />
         {entregas ? entregas : 0}
       </td>
       {/* Estado */}

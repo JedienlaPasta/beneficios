@@ -52,48 +52,95 @@ export async function fetchCampaigns(
 
     const offset = (currentPage - 1) * resultsPerPage;
 
-    // Get total count (optimized)
-    const countRequest = pool.request();
-    const countResult = await countRequest.input(
-      "query",
-      sql.NVarChar,
-      `%${query}%`,
-    ).query(`
-        SELECT COUNT(*) as total
-        FROM campañas
-        WHERE nombre_campaña LIKE @query OR id LIKE @query
-      `);
+    const rawInput = query.trim();
+    const isUUID =
+      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(
+        rawInput,
+      );
 
-    const total: number = countResult.recordset[0].total;
+    const isTooShortText =
+      rawInput.length > 0 && !isUUID && rawInput.length < 3;
 
-    // Get paginated data with precomputed entregas count (optimized)
-    const dataRequest = pool.request();
-    const result = await dataRequest
-      .input("query", sql.NVarChar, `%${query}%`)
-      .input("startRow", sql.Int, offset + 1)
-      .input("endRow", sql.Int, offset + resultsPerPage).query(`
-        SELECT * FROM (
-          SELECT 
-            c.*,
-            CASE 
-              WHEN c.fecha_inicio > GETUTCDATE() THEN 'Pendiente'
-              WHEN c.fecha_inicio <= GETUTCDATE() AND c.fecha_termino >= GETUTCDATE() THEN 'En Curso'
-              ELSE 'Finalizada'
-            END AS estado,
-            ISNULL(ent_count.total_entregas, 0) AS total_entregas,
-            ROW_NUMBER() OVER (ORDER BY c.fecha_inicio DESC) AS RowNum
+    const trimmedQuery = isTooShortText ? "" : rawInput;
+
+    const isNumeric = /^\d+$/.test(trimmedQuery);
+
+    // Construcción dinámica del WHERE
+    const whereClauses: string[] = [];
+
+    if (trimmedQuery) {
+      const searchConditions: string[] = [];
+
+      if (isUUID) {
+        searchConditions.push(`c.id = @exactId`);
+      } else {
+        searchConditions.push(`c.nombre_campaña LIKE @queryLike`);
+      }
+
+      if (searchConditions.length > 0) {
+        whereClauses.push(`(${searchConditions.join(" OR ")})`);
+      }
+    }
+
+    // Unir todas las cláusulas WHERE con AND
+    const whereSql =
+      whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
+
+    // Binding de Parámetros
+    const bindParams = (req: sql.Request) => {
+      if (trimmedQuery) {
+        if (isUUID) {
+          req.input("exactId", sql.UniqueIdentifier, trimmedQuery);
+        } else {
+          req.input("queryLike", sql.NVarChar, `%${trimmedQuery}%`);
+        }
+      }
+      return req;
+    };
+
+    // Ejecución (count)
+    const countRequest = bindParams(pool.request());
+    const countResult = await countRequest.query(`
+      SELECT COUNT(*) as total
+      FROM campañas c
+      ${whereSql}
+    `);
+
+    const total = countResult.recordset[0].total;
+    if (total === 0) return { data: [], pages: 0 }; // return rápido si no hay resultados
+
+    // Ejecución (Data Paginada)
+    const dataRequest = bindParams(pool.request());
+    dataRequest.input("offset", sql.Int, offset);
+    dataRequest.input("limit", sql.Int, resultsPerPage);
+
+    const result = await dataRequest.query(`
+      WITH Paginacion AS (
+          SELECT c.id
           FROM campañas c
-          LEFT JOIN (
-            SELECT 
-              id_campaña, 
-              COUNT(*) AS total_entregas 
-            FROM beneficios_entregados 
-            GROUP BY id_campaña
-          ) ent_count ON c.id = ent_count.id_campaña
-          WHERE c.nombre_campaña LIKE @query OR c.id LIKE @query
-        ) AS NumberedResults
-        WHERE RowNum BETWEEN @startRow AND @endRow
-      `);
+          ${whereSql}
+          ORDER BY c.fecha_inicio DESC
+          OFFSET @offset ROWS
+          FETCH NEXT @limit ROWS ONLY
+      )
+      SELECT 
+        c.*,
+        -- Cálculo de Estado en vuelo (SQL Server)
+        CASE 
+          WHEN c.fecha_inicio > GETUTCDATE() THEN 'Pendiente'
+          WHEN c.fecha_inicio <= GETUTCDATE() AND c.fecha_termino >= GETUTCDATE() THEN 'En Curso'
+          ELSE 'Finalizada'
+        END AS estado,
+        
+        -- OPTIMIZACIÓN CLAVE: Subconsulta Correlacionada
+        -- En lugar de hacer JOIN con una tabla gigante agrupada,
+        -- contamos los beneficios SOLO para estas 10 campañas.
+        (SELECT COUNT(*) FROM beneficios_entregados b WHERE b.id_campaña = c.id) AS total_entregas
+        
+      FROM Paginacion p
+      JOIN campañas c ON p.id = c.id
+      ORDER BY c.fecha_inicio DESC
+    `);
 
     const pages = Math.ceil(total / resultsPerPage);
     return { data: result.recordset as Campaign[], pages };
