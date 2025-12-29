@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { Filter, Check } from "lucide-react";
+import { Filter, FilterX, Check } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
 export default function EntregasFilter() {
@@ -48,7 +48,8 @@ export default function EntregasFilter() {
     replace(`${pathname}?${params.toString()}`);
   };
 
-  const clearFilters = () => {
+  const clearFilters = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     const params = new URLSearchParams(searchParams);
     params.set("user", "all");
     params.delete("status");
@@ -77,20 +78,33 @@ export default function EntregasFilter() {
 
   return (
     <div className="relative" ref={containerRef}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:border-blue-200 ${
-          hasFilters ? "text-blue-600" : "text-slate-600"
-        }`}
-      >
-        <Filter className="h-4 w-4" />
-        {/* <span className="hidden min-[500px]:block">Filtrar</span> */}
-        {hasFilters && (
-          <span className="flex h-5 w-5 items-center justify-center rounded-md bg-blue-100 text-xs font-bold text-blue-600">
-            {(userFilter ? 1 : 0) + currentStatuses.length}
-          </span>
-        )}
-      </button>
+      {hasFilters ? (
+        <div className="flex overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all hover:border-blue-200">
+          <button
+            onClick={clearFilters}
+            className="m-0.5 flex items-center justify-center rounded-md px-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-600"
+            title="Limpiar filtros"
+          >
+            <FilterX className="size-4" />
+          </button>
+          <span className="h-6 w-[1px] self-center bg-slate-300"></span>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="m-0.5 flex items-center rounded-md px-2 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+          >
+            <span className="flex h-5 w-5 items-center justify-center rounded-md bg-blue-100 text-xs font-bold text-blue-600">
+              {(userFilter ? 1 : 0) + currentStatuses.length}
+            </span>
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="m-0.5 flex items-center rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-600 shadow-sm transition-colors hover:border-blue-200"
+        >
+          <Filter className="size-4" />
+        </button>
+      )}
 
       {isOpen && (
         <div className="absolute left-0 top-full z-50 mt-2 w-56 rounded-lg border border-slate-200 bg-white p-2 shadow-lg ring-1 ring-black ring-opacity-5">
