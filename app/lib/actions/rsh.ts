@@ -69,7 +69,7 @@ export async function createRSH(formData: FormData) {
   const fecha_nacimiento = formData.get("fechaNacimiento") as string;
 
   let dv;
-  let numRut;
+  let numRut = 0;
 
   if (rut && rut.length > 5) {
     const cleanRut = rut.replace(/\./g, "").replace(/-/g, "").toUpperCase();
@@ -156,7 +156,7 @@ export async function createRSH(formData: FormData) {
         `);
 
     // const formatedRut = formatRUT(rut);
-    await logAction("Crear", "creó el RSH", rut);
+    await logAction("Crear", "creó el RSH", rut, String(numRut));
     revalidatePath("/dashboard/rsh");
     return {
       success: true,
@@ -281,7 +281,7 @@ export async function updateRSH(formData: FormData) {
       }
 
       await transaction.commit();
-      await logAction("Editar", "editó el RSH", formatedRut);
+      await logAction("Editar", "editó el RSH", formatedRut, rut);
       revalidatePath("/dashboard/rsh");
       return {
         success: true,
@@ -433,7 +433,7 @@ export async function updateRSHGeneralInfo(formData: FormData) {
           `);
 
       await transaction.commit();
-      await logAction("Editar", "editó el RSH", formatedRut, formatedRut);
+      await logAction("Editar", "editó el RSH", formatedRut, rut);
       revalidatePath("/dashboard/rsh");
       return {
         success: true,
@@ -526,7 +526,7 @@ export async function updateRSHName(formData: FormData) {
           `);
 
       await transaction.commit();
-      await logAction("Editar", "editó el nombre de", formatedRut);
+      await logAction("Editar", "editó el nombre de", formatedRut, rut);
       revalidatePath(`/dashboard/entregas/${rut}`);
       return {
         success: true,
@@ -612,7 +612,7 @@ export async function updateTramo(formData: FormData) {
           `);
 
       await transaction.commit();
-      await logAction("Editar", "editó el tramo de", formatedRut);
+      await logAction("Editar", "editó el tramo de", formatedRut, rut);
       revalidatePath(`/dashboard/entregas/${rut}`);
       return {
         success: true,
@@ -682,7 +682,7 @@ export async function deleteRSH(rut: string) {
 
       await transaction.commit();
 
-      await logAction("Eliminar", "eliminó el RSH", formatRUT(rut));
+      await logAction("Eliminar", "eliminó el RSH", formatRUT(rut), rut);
       revalidatePath("/dashboard/rsh");
       return {
         success: true,

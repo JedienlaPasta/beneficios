@@ -53,19 +53,7 @@ export async function fetchRSH(
   query: string,
   currentPage: number,
   resultsPerPage: number,
-  searchBy:
-    | "todos"
-    | "rut"
-    | "nombre"
-    | "direccion"
-    | "sector"
-    | "folio" = "todos",
 ): Promise<{ data: RSH[]; pages: number }> {
-  const flattenQuery = query.replace(/[.]/g, "");
-  if (flattenQuery.length === 8) query = flattenQuery.slice(0, 7);
-  if (flattenQuery.length === 9) query = flattenQuery.slice(0, 8);
-  else query = flattenQuery;
-
   try {
     const pool = await connectToDB();
     if (!pool) {
@@ -73,154 +61,163 @@ export async function fetchRSH(
       return { data: [], pages: 0 };
     }
 
-    // Verificar disponibilidad de Full-Text Search
-    // const ftsCheck = await pool
-    //   .request()
-    //   .query("SELECT FULLTEXTSERVICEPROPERTY('IsFullTextInstalled') AS ft");
-    // const ftsAvailable = ftsCheck.recordset?.[0]?.ft === 1;
-
-    const hasDigits = /\d/.test(query);
-    const cleanedRut = hasDigits ? query.replace(/\D/g, "") : "";
+    // Preparación de variables
     const offset = (currentPage - 1) * resultsPerPage;
 
-    const queryWithoutPercent = query.replace(/%/g, "").trim();
-    const searchTerms = queryWithoutPercent
-      .split(" ")
-      .map((t) => t.trim())
-      .filter((t) => t.length > 0);
+    const rawInput = query.trim();
+    let trimmedQuery;
 
-    // Preparar requests y parámetros
-    const countRequest = pool.request();
-    const dataRequest = pool.request();
+    // Validaciones para el RUT y Folio
+    const hasDigits = /\d/.test(query.trim());
+    const isRutValidValue = /^[0-9kK.\-]+$/.test(query.trim());
+    const isTooShortText =
+      rawInput.length > 0 && !hasDigits && rawInput.length < 3;
 
-    // Construcción dinámica del WHERE
-    const whereParts: string[] = [];
+    trimmedQuery = isTooShortText ? "" : rawInput;
 
-    if (searchBy === "rut") {
-      if (cleanedRut.length > 0) {
-        whereParts.push("rsh.rut LIKE @rutPrefix");
-        countRequest.input("rutPrefix", sql.VarChar, `${cleanedRut}%`);
-        dataRequest.input("rutPrefix", sql.VarChar, `${cleanedRut}%`);
-      } else {
-        // Si no hay dígitos, evita devolver todo
-        whereParts.push("1 = 0");
-      }
-    } else if (searchBy === "nombre") {
-      if (searchTerms.length > 0) {
-        // Un término: prefijo; dos o más: buscar en cualquier parte
-        const useAnywhere = searchTerms.length >= 2;
-        const clauses: string[] = [];
+    // Validaciones Numéricas y Limpieza para Folio
+    const cleanQueryForNumber = trimmedQuery.replace(/['"]/g, "");
+    const isExactFolioRSH = /^\d{8}$/.test(cleanQueryForNumber);
 
-        searchTerms.forEach((term, idx) => {
-          const param = `term${idx}`;
-          const pattern = useAnywhere ? `%${term}%` : `${term}%`;
+    const rutRaw = trimmedQuery.replace(/[^0-9kK]/g, "");
 
-          clauses.push(
-            `(rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE @${param} OR rsh.apellidos_rsh COLLATE Modern_Spanish_CI_AI LIKE @${param})`,
-          );
-          countRequest.input(param, sql.NVarChar, pattern);
-          dataRequest.input(param, sql.NVarChar, pattern);
-        });
-
-        // Requiere que todos los términos aparezcan (en nombres o apellidos)
-        whereParts.push(clauses.join(" AND "));
-      } else {
-        whereParts.push("1 = 0");
-      }
-    } else if (searchBy === "direccion") {
-      whereParts.push(
-        "rsh.direccion COLLATE Modern_Spanish_CI_AI LIKE @queryPrefix",
-      );
-      countRequest.input(
-        "queryPrefix",
-        sql.NVarChar,
-        `${queryWithoutPercent}%`,
-      );
-      dataRequest.input("queryPrefix", sql.NVarChar, `${queryWithoutPercent}%`);
-    } else if (searchBy === "sector") {
-      whereParts.push(
-        "rsh.sector COLLATE Modern_Spanish_CI_AI LIKE @queryPrefix",
-      );
-      countRequest.input(
-        "queryPrefix",
-        sql.NVarChar,
-        `${queryWithoutPercent}%`,
-      );
-      dataRequest.input("queryPrefix", sql.NVarChar, `${queryWithoutPercent}%`);
-    } else if (searchBy === "folio") {
-      whereParts.push("rsh.folio LIKE @queryPrefix");
-      countRequest.input(
-        "queryPrefix",
-        sql.NVarChar,
-        `${queryWithoutPercent}%`,
-      );
-      dataRequest.input("queryPrefix", sql.NVarChar, `${queryWithoutPercent}%`);
-    } else {
-      // Modo "todos": OR reducido y prefijos (evitar CONCAT)
-      countRequest.input(
-        "queryPrefix",
-        sql.NVarChar,
-        `${queryWithoutPercent}%`,
-      );
-      dataRequest.input("queryPrefix", sql.NVarChar, `${queryWithoutPercent}%`);
-      if (hasDigits && cleanedRut.length > 0) {
-        whereParts.push("rsh.rut LIKE @rutPrefix");
-        countRequest.input("rutPrefix", sql.VarChar, `${cleanedRut}%`);
-        dataRequest.input("rutPrefix", sql.VarChar, `${cleanedRut}%`);
-      }
-      whereParts.push("rsh.folio LIKE @queryPrefix");
-      whereParts.push(
-        "rsh.direccion COLLATE Modern_Spanish_CI_AI LIKE @queryPrefix",
-      );
-      whereParts.push(
-        "rsh.sector COLLATE Modern_Spanish_CI_AI LIKE @queryPrefix",
-      );
-      whereParts.push(
-        "rsh.nombres_rsh COLLATE Modern_Spanish_CI_AI LIKE @queryPrefix",
-      );
-      whereParts.push(
-        "rsh.apellidos_rsh COLLATE Modern_Spanish_CI_AI LIKE @queryPrefix",
-      );
+    let rutFormatted: string | null = null;
+    if (trimmedQuery.includes("-")) {
+      rutFormatted = trimmedQuery.replace(/\./g, "");
+    } else if (rutRaw.length > 7) {
+      const base = rutRaw.slice(0, -1);
+      const dv = rutRaw.slice(-1);
+      rutFormatted = `${base}-${dv}`;
     }
 
-    const whereClause =
-      whereParts.length > 0 ? whereParts.join(" OR ") : "1 = 0";
+    const rawTerms = trimmedQuery
+      .replace(/["*]/g, "")
+      .split(/\s+/)
+      .filter((term) => term.length > 0);
 
-    // Conteo total
+    // Construcción dinámica del WHERE
+    const whereClauses: string[] = [];
+
+    // Filtro de Búsqueda (Texto y RUT)
+    if (trimmedQuery) {
+      const searchConditions: string[] = [];
+
+      // 1. Búsqueda por RUT
+      if (hasDigits && isRutValidValue) {
+        if (rutFormatted) {
+          searchConditions.push(
+            `rsh.rut_completo LIKE @rutRaw OR rsh.rut_completo LIKE @rutFormatted`,
+          );
+        } else {
+          searchConditions.push(`rsh.rut_completo LIKE @rutRaw`);
+        }
+      }
+
+      // 2. Búsqueda por Folio
+      if (isExactFolioRSH) {
+        searchConditions.push(`rsh.folio = @folioRshExacto`);
+      }
+
+      // 3. Búsqueda Full-Text Search (Nombres y Apellidos)
+      if (rawTerms.length > 0 && !isRutValidValue) {
+        const ftsQueryString = rawTerms
+          .map(
+            (_, index) =>
+              `CONTAINS((rsh.nombres_rsh, rsh.apellidos_rsh), @ftsTerm${index})`,
+          )
+          .join(" AND ");
+
+        searchConditions.push(`(${ftsQueryString})`);
+      }
+
+      // Unimos todas las condiciones de búsqueda con OR y las envolvemos en paréntesis
+      if (searchConditions.length > 0) {
+        whereClauses.push(`(${searchConditions.join(" OR ")})`);
+      }
+    }
+
+    // Unir todas las cláusulas WHERE con AND
+    const whereSql =
+      whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
+
+    // Binding de Parámetros
+    const bindParams = (req: sql.Request) => {
+      if (trimmedQuery) {
+        if (hasDigits && isRutValidValue) {
+          req.input("rutRaw", sql.VarChar, `${rutRaw}%`); // el % al final permite autocompletar
+          if (rutFormatted) {
+            req.input("rutFormatted", sql.VarChar, `${rutFormatted}%`);
+          }
+        }
+
+        // Parámetro para folio exacto
+        if (isExactFolioRSH) {
+          req.input("folioRshExacto", sql.Int, parseInt(cleanQueryForNumber));
+        }
+
+        // Para Full-Text Search (Cadena formateada)
+        if (rawTerms.length > 0 && !isRutValidValue) {
+          rawTerms.forEach((term, index) => {
+            req.input(`ftsTerm${index}`, sql.VarChar, `"${term}*"`);
+          });
+        }
+      }
+      return req;
+    };
+
+    // Ejecución (count)
+    const countRequest = bindParams(pool.request());
     const countResult = await countRequest.query(`
       SELECT COUNT(*) as total
       FROM rsh
       LEFT JOIN rsh_mods mods ON rsh.rut = mods.rut
-      WHERE ${whereClause}
+      ${whereSql}
     `);
 
-    const total: number = countResult.recordset[0]?.total ?? 0;
+    const total = countResult.recordset[0].total;
+    if (total === 0) return { data: [], pages: 0 }; // return rápido si no hay resultados
 
-    // Datos paginados (OUTER APPLY para última entrega con índice en entregas(rut, fecha_entrega))
-    const result = await dataRequest
-      .input("startRow", sql.Int, offset + 1)
-      .input("endRow", sql.Int, offset + resultsPerPage).query(`
-        SELECT * FROM (
-          SELECT 
-            rsh.rut, rsh.dv, rsh.nombres_rsh, rsh.apellidos_rsh, rsh.direccion, rsh.sector, rsh.tramo,
-            ent_max.ultima_entrega,
-            mods.direccion_mod, mods.sector_mod, mods.telefono_mod, mods.correo_mod,
-            ROW_NUMBER() OVER (ORDER BY rsh.apellidos_rsh ASC) AS RowNum
-          FROM rsh
-          LEFT JOIN rsh_mods mods ON rsh.rut = mods.rut
-          OUTER APPLY (
-            SELECT TOP 1 fecha_entrega AS ultima_entrega
-            FROM entregas
-            WHERE rut = rsh.rut
-            ORDER BY fecha_entrega DESC
-          ) ent_max
-          WHERE ${whereClause}
-        ) AS NumberedResults
-        WHERE RowNum BETWEEN @startRow AND @endRow
+    // Ejecución (Data Paginada)
+    const dataRequest = bindParams(pool.request());
+    dataRequest.input("offset", sql.Int, offset);
+    dataRequest.input("limit", sql.Int, resultsPerPage);
+
+    const result = await dataRequest.query(`
+        WITH Paginacion AS (
+            SELECT rsh.rut
+            FROM rsh
+            ${whereSql}
+            ORDER BY rsh.apellidos_rsh ASC, rsh.nombres_rsh ASC
+            OFFSET @offset ROWS
+            FETCH NEXT @limit ROWS ONLY
+        )
+        -- QUERY PRINCIPAL: Ahora se buscan solo los RUTs paginados con la data pesada.
+        SELECT 
+          rsh.rut,
+          rsh.dv,
+          rsh.rut_completo,
+          rsh.folio,
+          rsh.nombres_rsh,
+          rsh.apellidos_rsh,
+          rsh.direccion,
+          rsh.sector,
+          rsh.tramo,
+          rsh.correo,
+          mods.direccion_mod,
+          mods.sector_mod,
+          mods.telefono_mod,
+          mods.correo_mod,
+          (SELECT MAX(fecha_entrega) FROM entregas WHERE entregas.rut = rsh.rut) AS ultima_entrega
+        FROM Paginacion
+        JOIN rsh ON Paginacion.rut = rsh.rut
+        LEFT JOIN rsh_mods mods ON rsh.rut = mods.rut
+        ORDER BY rsh.apellidos_rsh ASC, rsh.nombres_rsh ASC
       `);
 
-    const pages = Math.ceil(total / resultsPerPage);
-    return { data: result.recordset as RSH[], pages };
+    return {
+      data: result.recordset as RSH[],
+      pages: Math.ceil(total / resultsPerPage),
+    };
   } catch (error) {
     console.error("Error al obtener registro social de hogares: ", error);
     return { data: [], pages: 0 };

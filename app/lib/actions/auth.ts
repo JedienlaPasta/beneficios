@@ -4,6 +4,7 @@ import { z } from "zod";
 import { authenticateUser } from "../auth/login";
 import { createSession, deleteSession } from "../session";
 import { redirect } from "next/navigation";
+import { logAction } from "./auditoria";
 
 const loginSchema = z.object({
   correo: z.string().email({ message: "Credenciales inválidas" }).trim(),
@@ -41,6 +42,7 @@ export async function loginAction(formData: FormData) {
     authResult.user.nombre,
     authResult.user.rol,
   );
+  await logAction("Iniciar", "inició sesión", "");
   return { success: true, message: "Bienvenido!" };
 }
 

@@ -726,7 +726,7 @@ export const deleteEntregaByFolio = async (folio: string) => {
       `);
 
       await transaction.commit();
-      await logAction("Eliminar", "eliminó la entrega", "", folio);
+      await logAction("Eliminar", "eliminó la entrega", folio, folio);
       return { success: true, message: "Entregas eliminadas correctamente" };
     } catch (error) {
       // Rollback transaction on error
@@ -828,7 +828,7 @@ export const toggleDiscardEntregaByFolio = async (
         newState === "Anulado"
           ? "anuló la entrega"
           : "cambió el estado de la entrega";
-      await logAction("Editar", actionMessage, "", folio);
+      await logAction("Editar", actionMessage, folio, folio);
       return {
         success: true,
         message: `Estado cambiado a '${newState}' correctamente`,

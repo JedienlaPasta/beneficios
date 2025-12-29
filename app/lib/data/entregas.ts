@@ -28,12 +28,33 @@ export async function fetchEntregas(
     // Preparación de variables
     const offset = (currentPage - 1) * resultsPerPage;
 
-    // Limpieza de RUT, quitando puntos y manteniendo guion
-    const rutBusquedaExacta = query.replace(/\./g, "");
-    const hasDigits = /\d/.test(query);
+    const rawInput = query.trim();
+    let trimmedQuery;
 
-    const rawTerms = query
-      .trim()
+    // Validaciones para el RUT y Folio
+    const hasDigits = /\d/.test(query.trim());
+    const isRutValidValue = /^[0-9kK.\-]+$/.test(query.trim());
+    const isTooShortText =
+      rawInput.length > 0 && !hasDigits && rawInput.length < 3;
+
+    trimmedQuery = isTooShortText ? "" : rawInput;
+
+    // Validaciones Numéricas y Limpieza para Folio
+    const cleanQueryForNumber = trimmedQuery.replace(/['"]/g, "");
+    const isExactFolioRSH = /^\d{8}$/.test(cleanQueryForNumber);
+
+    const rutRaw = trimmedQuery.replace(/[^0-9kK]/g, "");
+
+    let rutFormatted: string | null = null;
+    if (trimmedQuery.includes("-")) {
+      rutFormatted = trimmedQuery.replace(/\./g, "");
+    } else if (rutRaw.length > 7) {
+      const base = rutRaw.slice(0, -1);
+      const dv = rutRaw.slice(-1);
+      rutFormatted = `${base}-${dv}`;
+    }
+
+    const rawTerms = trimmedQuery
       .replace(/["*]/g, "")
       .split(/\s+/)
       .filter((term) => term.length > 0);
@@ -48,8 +69,6 @@ export async function fetchEntregas(
         allowedStatuses.includes(status),
       );
       if (validStatuses.length > 0) {
-        // SQL Server no soporta arrays nativos en parameters fácilmente sin tipos tabla
-        // inyección de strings segura al filtrar con allowedStatuses.
         const statusList = validStatuses
           .map((status) => `'${status}'`)
           .join(",");
@@ -62,20 +81,30 @@ export async function fetchEntregas(
     }
 
     // Filtro de Búsqueda (Texto y RUT)
-    if (query) {
+    if (trimmedQuery) {
       const searchConditions: string[] = [];
 
-      // 1. Búsqueda por RUT y Folio RSH
-      if (hasDigits) {
-        searchConditions.push(`rsh.rut_completo LIKE @rutBusquedaExacta`);
-        searchConditions.push(`CAST(rsh.folio AS VARCHAR(20)) LIKE @queryLike`);
+      // 1. Búsqueda por RUT
+      if (hasDigits && isRutValidValue) {
+        if (rutFormatted) {
+          searchConditions.push(
+            `rsh.rut_completo LIKE @rutRaw OR rsh.rut_completo LIKE @rutFormatted`,
+          );
+        } else {
+          searchConditions.push(`rsh.rut_completo LIKE @rutRaw`);
+        }
       }
 
-      // 2. Búsqueda por Folio de entrega
+      // 2. Búsqueda por Folio RSH
+      if (isExactFolioRSH) {
+        searchConditions.push(`rsh.folio = @folioRshExacto`);
+      }
+
+      // 3. Búsqueda por Folio de entrega
       searchConditions.push(`entregas.folio LIKE @queryLike`);
 
-      // 3. Búsqueda Full-Text Search (Nombres y Apellidos)
-      if (rawTerms.length > 0) {
+      // 4. Búsqueda Full-Text Search (Nombres y Apellidos)
+      if (rawTerms.length > 0 && !isRutValidValue) {
         const ftsQueryString = rawTerms
           .map(
             (_, index) =>
@@ -101,14 +130,27 @@ export async function fetchEntregas(
       if (filters.userId)
         req.input("userId", sql.UniqueIdentifier, filters.userId);
 
-      if (query) {
+      if (trimmedQuery) {
         req.input("queryLike", sql.VarChar, `%${query}%`);
-        req.input("rutBusquedaExacta", sql.VarChar, `${rutBusquedaExacta}%`); // Para rut_completo (el % al final permite autocompletar)
+
+        if (hasDigits && isRutValidValue) {
+          req.input("rutRaw", sql.VarChar, `${rutRaw}%`); // el % al final permite autocompletar
+          if (rutFormatted) {
+            req.input("rutFormatted", sql.VarChar, `${rutFormatted}%`);
+          }
+        }
+
+        // Parámetro para folio exacto
+        if (isExactFolioRSH) {
+          req.input("folioRshExacto", sql.Int, parseInt(cleanQueryForNumber));
+        }
 
         // Para Full-Text Search (Cadena formateada)
-        rawTerms.forEach((term, index) => {
-          req.input(`ftsTerm${index}`, sql.VarChar, `"${term}*"`);
-        });
+        if (rawTerms.length > 0 && !isRutValidValue) {
+          rawTerms.forEach((term, index) => {
+            req.input(`ftsTerm${index}`, sql.VarChar, `"${term}*"`);
+          });
+        }
       }
       return req;
     };
@@ -131,21 +173,28 @@ export async function fetchEntregas(
     dataRequest.input("limit", sql.Int, resultsPerPage);
 
     const result = await dataRequest.query(`
+      WITH Paginacion AS (
+          SELECT entregas.folio
+          FROM entregas
+          JOIN rsh ON entregas.rut = rsh.rut
+          ${whereSql}
+          ORDER BY entregas.fecha_entrega DESC
+          OFFSET @offset ROWS
+          FETCH NEXT @limit ROWS ONLY
+      )
       SELECT 
-        entregas.folio, 
-        entregas.fecha_entrega, 
-        entregas.estado_documentos, 
-        entregas.rut, 
+        e.folio, 
+        e.fecha_entrega, 
+        e.estado_documentos, 
+        e.rut, 
         rsh.dv, 
         rsh.nombres_rsh, 
         rsh.apellidos_rsh,
-        (SELECT COUNT(*) FROM documentos WHERE documentos.folio = entregas.folio) AS cantidad_documentos
-      FROM entregas
-      JOIN rsh ON entregas.rut = rsh.rut
-      ${whereSql}
-      ORDER BY entregas.fecha_entrega DESC
-      OFFSET @offset ROWS
-      FETCH NEXT @limit ROWS ONLY
+        (SELECT COUNT(*) FROM documentos d WHERE d.folio = e.folio) AS cantidad_documentos
+      FROM Paginacion p
+      JOIN entregas e ON p.folio = e.folio
+      JOIN rsh ON e.rut = rsh.rut
+      ORDER BY e.fecha_entrega DESC
     `);
 
     return {
