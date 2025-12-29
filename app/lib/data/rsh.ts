@@ -65,7 +65,6 @@ export async function fetchRSH(
     const offset = (currentPage - 1) * resultsPerPage;
 
     const rawInput = query.trim();
-    let trimmedQuery;
 
     // Validaciones para el RUT y Folio
     const hasDigits = /\d/.test(query.trim());
@@ -73,7 +72,7 @@ export async function fetchRSH(
     const isTooShortText =
       rawInput.length > 0 && !hasDigits && rawInput.length < 3;
 
-    trimmedQuery = isTooShortText ? "" : rawInput;
+    const trimmedQuery = isTooShortText ? "" : rawInput;
 
     // Validaciones Numéricas y Limpieza para Folio
     const cleanQueryForNumber = trimmedQuery.replace(/['"]/g, "");
