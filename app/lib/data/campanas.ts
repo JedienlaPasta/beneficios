@@ -63,8 +63,6 @@ export async function fetchCampaigns(
 
     const trimmedQuery = isTooShortText ? "" : rawInput;
 
-    const isNumeric = /^\d+$/.test(trimmedQuery);
-
     // Construcción dinámica del WHERE
     const whereClauses: string[] = [];
 
