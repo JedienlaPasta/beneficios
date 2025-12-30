@@ -1,6 +1,6 @@
 "use client";
 import { Campaign } from "@/app/lib/definitions";
-import CloseModalButton from "../../close-modal-button";
+import CloseModalButton from "../../CloseModalButton";
 import NewModalForm from "./NewModalForm";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";

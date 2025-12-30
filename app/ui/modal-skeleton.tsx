@@ -1,6 +1,6 @@
 "use client";
 
-import CloseModalButton from "./dashboard/close-modal-button";
+import CloseModalButton from "./dashboard/CloseModalButton";
 
 export default function ModalSkeleton({ name }: { name: string }) {
   return (

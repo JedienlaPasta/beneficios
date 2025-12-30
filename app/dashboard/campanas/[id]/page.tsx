@@ -1,13 +1,13 @@
 import { Suspense } from "react";
-import UpdateCampaignModal from "@/app/ui/dashboard/campañas/[id]/update/update-campaign-modal";
-import CampaignDetail from "@/app/ui/dashboard/campañas/[id]/campaign-detail";
-import SearchBar from "@/app/ui/dashboard/searchbar";
-import CampaignEntregasTable from "@/app/ui/dashboard/campañas/[id]/campaign-entregas-table";
-import CampaignEntregasTableSkeleton from "@/app/ui/dashboard/campañas/[id]/table-skeleton";
-import { Modal } from "@/app/ui/dashboard/modal";
+import UpdateCampaignModal from "@/app/ui/dashboard/campañas/[id]/update/UpdateCampaignModal";
+import CampaignDetail from "@/app/ui/dashboard/campañas/[id]/CampaignDetail";
+import SearchBar from "@/app/ui/dashboard/Searchbar";
+import CampaignEntregasTable from "@/app/ui/dashboard/campañas/[id]/CampaignEntregasTable";
+import CampaignEntregasTableSkeleton from "@/app/ui/dashboard/campañas/[id]/TableSkeleton";
+import { Modal } from "@/app/ui/dashboard/Modal";
 import ModalSkeleton from "@/app/ui/modal-skeleton";
-import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/detail-modal/modal-context";
-import { CampaignDetailSkeleton } from "@/app/ui/dashboard/campañas/[id]/campaign-detail-skeleton";
+import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/detail-modal/ModalContext";
+import { CampaignDetailSkeleton } from "@/app/ui/dashboard/campañas/[id]/CampaignDetailSkeleton";
 import { Package2 } from "lucide-react";
 
 type CampaignProps = {

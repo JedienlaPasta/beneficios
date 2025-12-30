@@ -1,8 +1,8 @@
 import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/CampaignsTableSkeleton";
-import TablaEntregasDetalleCampaña from "@/app/ui/dashboard/campañas/[id]/campaign-entregas-table";
+import TablaEntregasDetalleCampaña from "@/app/ui/dashboard/campañas/[id]/CampaignEntregasTable";
 import { Suspense } from "react";
-import CampaignDetail from "@/app/ui/dashboard/campañas/[id]/campaign-detail";
-import SearchBar from "@/app/ui/dashboard/searchbar";
+import CampaignDetail from "@/app/ui/dashboard/campañas/[id]/CampaignDetail";
+import SearchBar from "@/app/ui/dashboard/Searchbar";
 
 type RSHByIdProps = {
   searchParams?: Promise<{

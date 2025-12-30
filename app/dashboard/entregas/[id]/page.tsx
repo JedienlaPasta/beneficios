@@ -2,14 +2,14 @@ import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/CampaignsTableS
 import { Suspense } from "react";
 import CitizenDetail, {
   CitizenDetailSkeleton,
-} from "@/app/ui/dashboard/entregas/citizen-detail";
-import NewButton from "@/app/ui/dashboard/new-button";
-import SearchBar from "@/app/ui/dashboard/searchbar";
-import EntregasTable from "@/app/ui/dashboard/entregas/[id]/entregas-table";
+} from "@/app/ui/dashboard/entregas/CitizenDetail";
+import NewButton from "@/app/ui/dashboard/NewButton";
+import SearchBar from "@/app/ui/dashboard/Searchbar";
+import EntregasTable from "@/app/ui/dashboard/entregas/[id]/EntregasTable";
 import ModalSkeleton from "@/app/ui/modal-skeleton";
 import { Package2 } from "lucide-react";
-import { Modal } from "@/app/ui/dashboard/modal";
-import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/detail-modal/modal-context";
+import { Modal } from "@/app/ui/dashboard/Modal";
+import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/detail-modal/ModalContext";
 // import { Spinner } from "@/app/ui/dashboard/loaders";
 
 type CitizenRecordProps = {

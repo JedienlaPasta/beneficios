@@ -1,5 +1,5 @@
 import { Campaign } from "@/app/lib/definitions";
-import Pagination from "@/app/ui/dashboard/pagination";
+import Pagination from "@/app/ui/dashboard/Pagination";
 import TableRow from "./CampaignTableRow";
 import { fetchCampaigns } from "@/app/lib/data/campanas";
 

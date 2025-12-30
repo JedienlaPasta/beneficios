@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
-import { SubmitButton } from "./dashboard/submit-button";
+import { SubmitButton } from "./dashboard/SubmitButton";
 
 export default function LoginForm() {
   const [isDisabled, setIsDisabled] = useState(false);

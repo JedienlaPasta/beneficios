@@ -1,6 +1,6 @@
 "use client";
 import { toast } from "sonner";
-import { SubmitButton } from "../../submit-button";
+import { SubmitButton } from "../../SubmitButton";
 import { useState } from "react";
 import { Campaign } from "@/app/lib/definitions";
 import { createEntrega } from "@/app/lib/actions/entregas";

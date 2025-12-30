@@ -1,7 +1,7 @@
 import { Suspense } from "react";
-import SearchBar from "@/app/ui/dashboard/searchbar";
-import { AuditLogsTable } from "@/app/ui/dashboard/auditoria/audit-table-logs";
-import AuditTableSkeleton from "@/app/ui/dashboard/auditoria/audit-table-skeleton";
+import SearchBar from "@/app/ui/dashboard/Searchbar";
+import { AuditLogsTable } from "@/app/ui/dashboard/auditoria/AuditTableLogs";
+import AuditTableSkeleton from "@/app/ui/dashboard/auditoria/AuditTableSkeleton";
 import { Coffee } from "lucide-react";
 
 type PageProps = {

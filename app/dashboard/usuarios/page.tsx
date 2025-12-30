@@ -1,9 +1,9 @@
 import { Suspense } from "react";
-import PageHeader from "@/app/ui/dashboard/page-header";
-import { UserTableSkeleton } from "@/app/ui/dashboard/usuarios/skeletons";
-import { CreateUserButton } from "@/app/ui/dashboard/usuarios/create-user-button";
-import UsersTableWrapper from "@/app/ui/dashboard/usuarios/users-table-wrapper";
+import PageHeader from "@/app/ui/dashboard/PageHeader";
+import { CreateUserButton } from "@/app/ui/dashboard/usuarios/CreateUserButton";
+import UsersTableWrapper from "@/app/ui/dashboard/usuarios/UsersTableWrapper";
 import { Users } from "lucide-react";
+import { UserTableSkeleton } from "@/app/ui/dashboard/usuarios/Skeletons";
 
 export default async function UsersPage() {
   return (

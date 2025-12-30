@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
-import DashboardLayoutClient from "../ui/dashboard/dashboard-layout-client";
-import Breadcrumbs from "../ui/dashboard/breadcrumbs";
+import DashboardLayoutClient from "../ui/dashboard/DashboardLayoutClient";
+import Breadcrumbs from "../ui/dashboard/BreadCrumbs";
 import { getSession } from "../lib/session";
 import { getUserData } from "../lib/data/usuario";
 

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { FiBriefcase, FiMail, FiShield, FiUser, FiLock } from "react-icons/fi";
-import ChangePasswordModal from "./change-password-modal";
+import ChangePasswordModal from "./ChangePasswordModal";
 
 type UserProfileProps = {
   userData: {

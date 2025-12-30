@@ -1,15 +1,15 @@
-import GeneralInfoCards from "@/app/ui/dashboard/inicio/general-info-cards";
-import SearchBar from "@/app/ui/dashboard/searchbar";
+import GeneralInfoCards from "@/app/ui/dashboard/inicio/GeneralInfoCards";
+import SearchBar from "@/app/ui/dashboard/Searchbar";
 import { Suspense } from "react";
-import PageHeader from "../ui/dashboard/page-header";
+import PageHeader from "../ui/dashboard/PageHeader";
 import { ActiveCampaignsSkeleton } from "../ui/dashboard/campañas/ActiveCampaigns";
 import { capitalize } from "../lib/utils/format";
 import { getSession } from "../lib/session";
 import { getUserData } from "../lib/data/usuario";
-import { AuditLogsTable } from "../ui/dashboard/inicio/audit-table-logs";
-import AuditTableSkeleton from "../ui/dashboard/inicio/audit-table-skeleton";
-import HeatMap from "../ui/dashboard/inicio/heatmap";
+import { AuditLogsTable } from "../ui/dashboard/inicio/AuditTableLogs";
+import AuditTableSkeleton from "../ui/dashboard/inicio/AuditTableSkeleton";
 import { Coffee } from "lucide-react";
+import HeatMap from "../ui/dashboard/inicio/heatmap";
 
 type HomeProps = {
   searchParams?: Promise<{

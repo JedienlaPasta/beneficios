@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import Input from "../../campañas/new-campaign-modal/NewCampaignInput";
-import { SubmitButton } from "../../submit-button";
+import { SubmitButton } from "../../SubmitButton";
 import { capitalize, capitalizeAll } from "@/app/lib/utils/format";
 import ComboboxInput from "./ComboboxInput";
 

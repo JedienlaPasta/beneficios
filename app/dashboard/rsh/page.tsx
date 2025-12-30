@@ -1,11 +1,11 @@
 import { Suspense } from "react";
 import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/CampaignsTableSkeleton";
-import RSHGeneralInfo from "@/app/ui/dashboard/rsh/general-info";
-import RSHTable from "@/app/ui/dashboard/rsh/rsh-table";
-import SearchBar from "@/app/ui/dashboard/searchbar";
-import { Modal } from "@/app/ui/dashboard/modal";
-import ModalCitizenDetailContext from "@/app/ui/dashboard/rsh/citizen-context-modal";
-import RSHModals from "@/app/ui/dashboard/rsh/rsh-modals";
+import RSHGeneralInfo from "@/app/ui/dashboard/rsh/GeneralInfo";
+import RSHTable from "@/app/ui/dashboard/rsh/RshTable";
+import SearchBar from "@/app/ui/dashboard/Searchbar";
+import { Modal } from "@/app/ui/dashboard/Modal";
+import ModalCitizenDetailContext from "@/app/ui/dashboard/rsh/CitizenContextModal";
+import RSHModals from "@/app/ui/dashboard/rsh/RshModals";
 import { Users } from "lucide-react";
 
 type RSHProps = {

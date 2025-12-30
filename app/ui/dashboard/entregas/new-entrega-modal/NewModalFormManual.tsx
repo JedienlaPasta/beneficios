@@ -6,8 +6,8 @@ import { useSearchParams, useRouter } from "next/navigation"; // Router sí se u
 import { useState } from "react";
 import { toast } from "sonner";
 import Input from "../../campañas/new-campaign-modal/NewCampaignInput";
-import { SubmitButton } from "../../submit-button";
-import CustomAntdDatePicker from "../../datepicker";
+import { SubmitButton } from "../../SubmitButton";
+import CustomAntdDatePicker from "../../Datepicker";
 import dayjs from "dayjs";
 import UserDropdown from "./UserDropdown";
 import {

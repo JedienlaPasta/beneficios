@@ -1,6 +1,6 @@
-import HeatInfo from "./heatmap-heat-info";
-import HeatMapTable, { HeatmapTableSkeleton } from "./heatmap-table";
-import HeatMapFilter from "./heatmap-filter";
+import HeatInfo from "./HeatmapHeatInfo";
+import HeatMapTable, { HeatmapTableSkeleton } from "./HeatmapTable";
+import HeatMapFilter from "./HeatmapFilter";
 import { Suspense } from "react";
 
 type HeatmapProps = {

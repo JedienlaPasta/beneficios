@@ -1,10 +1,10 @@
 import Image from "next/image";
 import { anton_sc } from "../fonts";
-import NavLinks from "./nav-links";
-import PerfilUsuario from "./perfil-usuario";
+import NavLinks from "./NavLinks";
+import PerfilUsuario from "./PerfilUsuario";
 import elquiscoImg from "@/public/elquisco.svg";
 import { UserData } from "@/app/lib/definitions";
-import SibasLogo from "./sibas-logo";
+import SibasLogo from "./SibasLogo";
 
 type SidenavProps = {
   setSidenavOpen: (prev: boolean) => void;

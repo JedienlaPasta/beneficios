@@ -6,8 +6,8 @@ import NewCampaignModal from "@/app/ui/dashboard/campañas/new-campaign-modal/Ne
 import CampaignsTableSkeleton from "@/app/ui/dashboard/campañas/CampaignsTableSkeleton";
 import NewCampaignButton from "@/app/ui/dashboard/campañas/NewCampaignButton";
 import { Suspense } from "react";
-import SearchBar from "@/app/ui/dashboard/searchbar";
-import { Modal } from "@/app/ui/dashboard/modal";
+import SearchBar from "@/app/ui/dashboard/Searchbar";
+import { Modal } from "@/app/ui/dashboard/Modal";
 import { Package2 } from "lucide-react";
 
 type CampaignsProps = {

@@ -5,13 +5,13 @@ import { toast } from "sonner";
 import { createCampaign } from "@/app/lib/actions/campana";
 import Input from "@/app/ui/dashboard/campañas/new-campaign-modal/NewCampaignInput";
 import CampaignNameDropdown from "@/app/ui/dashboard/campañas/new-campaign-modal/CampaignNameDropdown";
-import { SubmitButton } from "../../submit-button";
-import { Requirements } from "../[id]/update/update-form";
-import RequirementsCard from "../[id]/update/requirements-cards";
+import { SubmitButton } from "../../SubmitButton";
+import { Requirements } from "../[id]/update/UpdateForm";
+import RequirementsCard from "../[id]/update/RequirementsCards";
 import dayjs from "dayjs";
-import CustomAntdDatePicker from "@/app/ui/dashboard/datepicker";
+import CustomAntdDatePicker from "@/app/ui/dashboard/Datepicker";
 import { campaignsList } from "@/app/lib/data/static-data";
-import CloseModalButton from "../../close-modal-button";
+import CloseModalButton from "../../CloseModalButton";
 import DynamicFieldsConfig from "./DynamicFieldsConfig";
 // import CriteriaConfig from "./CriteriaConfig";
 

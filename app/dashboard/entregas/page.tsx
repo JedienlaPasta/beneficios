@@ -1,12 +1,12 @@
-import SearchBar from "@/app/ui/dashboard/searchbar";
+import SearchBar from "@/app/ui/dashboard/Searchbar";
 import { Suspense } from "react";
-import RSHTable from "@/app/ui/dashboard/entregas/rsh-table";
-import SelectSearch from "@/app/ui/dashboard/entregas/select-search";
-import EntregasTable from "@/app/ui/dashboard/entregas/entregas-table";
+import RSHTable from "@/app/ui/dashboard/entregas/RshTable";
+import SelectSearch from "@/app/ui/dashboard/entregas/SelectSearch";
+import EntregasTable from "@/app/ui/dashboard/entregas/EntregasTable";
 import ModalSkeleton from "@/app/ui/modal-skeleton";
-import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/detail-modal/modal-context";
+import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/detail-modal/ModalContext";
 import EntregasFilter from "@/app/ui/dashboard/entregas/EntregasFilter";
-import { Modal } from "@/app/ui/dashboard/modal";
+import { Modal } from "@/app/ui/dashboard/Modal";
 import { getSession } from "@/app/lib/session";
 import EntregasTableSkeleton from "@/app/ui/dashboard/entregas/EntregasTableSkeleton";
 import { Package2, Users } from "lucide-react";
