@@ -201,15 +201,18 @@ export default function NewModalForm({
         const message =
           error instanceof Error ? error.message : "Error al crear la entrega";
         toast.error(message, { id: toastId });
+        setIsDisabled(false);
       } finally {
         setIsLoading(false);
-        setIsDisabled(false);
       }
     }, 200);
   };
 
   return (
-    <form action={formAction} className="flex select-none flex-col gap-3 pt-2">
+    <form
+      action={formAction}
+      className="flex select-none flex-col gap-3 px-0.5 pt-2"
+    >
       <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 p-4">
         <div className="mb-3 flex items-baseline justify-between border-b border-slate-200 bg-slate-50 pb-2">
           <h3 className="text-sm font-medium text-slate-700">

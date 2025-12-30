@@ -300,9 +300,9 @@ export default function NewModalFormReceiver({
       const message =
         error instanceof Error ? error.message : "Error al crear la entrega";
       toast.error(message, { id: toastId });
+      setIsDisabled(false);
     } finally {
       setIsLoading(false);
-      setIsDisabled(false);
     }
   };
 

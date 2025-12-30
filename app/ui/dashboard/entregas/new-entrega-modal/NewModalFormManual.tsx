@@ -197,9 +197,9 @@ export default function NewModalFormManual({
       const message =
         error instanceof Error ? error.message : "Error al registrar entrega";
       toast.error(message, { id: toastId });
+      setIsDisabled(false);
     } finally {
       setIsLoading(false);
-      setIsDisabled(false);
     }
   };
 
