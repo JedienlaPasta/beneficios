@@ -1,6 +1,6 @@
 import { getUserById } from "@/app/lib/data/users";
 import { getSession } from "@/app/lib/session";
-import UserProfile from "@/app/ui/dashboard/perfil/profile";
+import UserProfile from "@/app/ui/dashboard/perfil/Profile";
 
 export default async function ProfilePage() {
   const userSession = await getSession();

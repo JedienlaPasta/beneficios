@@ -9,7 +9,7 @@ import { getUserData } from "../lib/data/usuario";
 import { AuditLogsTable } from "../ui/dashboard/inicio/AuditTableLogs";
 import AuditTableSkeleton from "../ui/dashboard/inicio/AuditTableSkeleton";
 import { Coffee } from "lucide-react";
-import HeatMap from "../ui/dashboard/inicio/heatmap";
+import HeatMap from "../ui/dashboard/inicio/Heatmap";
 
 type HomeProps = {
   searchParams?: Promise<{
