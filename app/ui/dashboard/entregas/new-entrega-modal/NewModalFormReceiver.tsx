@@ -1,16 +1,17 @@
 "use client";
 import { createEntrega } from "@/app/lib/actions/entregas";
-import { getReceiverByRut } from "@/app/lib/actions/rsh"; // <--- IMPORTA TU NUEVA ACCIÓN
+import { getReceiverByRut } from "@/app/lib/actions/rsh";
 import { Campaign } from "@/app/lib/definitions";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import Input from "../../campañas/new-campaign-modal/NewCampaignInput";
 import { SubmitButton } from "../../submit-button";
-import { MdAutorenew } from "react-icons/md";
 import { capitalize, capitalizeAll } from "@/app/lib/utils/format";
 import ComboboxInput from "./ComboboxInput";
+
+import { HiOutlineRefresh } from "react-icons/hi";
 
 const OPCIONES_PARENTESCO = [
   "Mamá",
@@ -90,7 +91,7 @@ const DynamicFieldsRenderer = ({
             <Input
               placeHolder={`Ingrese ${field.label.toLowerCase()}...`}
               label={field.label}
-              type={field.tipo === "number" ? "number" : "text"}
+              type="text" // Text para todos los campos text/number
               nombre={field.nombre}
               value={String(values[field.nombre] || "")}
               setData={(val) => onChange(field.nombre, val)}
@@ -120,7 +121,6 @@ export default function NewModalFormReceiver({
   const [parentesco, setParentesco] = useState("");
 
   const [observaciones, setObservaciones] = useState("");
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   // Estados de UI
   const [isSearching, setIsSearching] = useState(false); // Estado para el spinner
@@ -148,6 +148,14 @@ export default function NewModalFormReceiver({
                 field.label.toLowerCase() === "cantidad"
               ) {
                 defaultAnswers[field.nombre] = 1;
+              }
+              // Si el campo es codigo, para la entrega de TA, valor por defecto "NN"
+              else if (
+                (field.nombre === "codigo_entrega" ||
+                  field.label === "Código") &&
+                campaign.code === "TA"
+              ) {
+                defaultAnswers[field.nombre] = "NN";
               }
             });
           } catch (e) {
@@ -217,7 +225,7 @@ export default function NewModalFormReceiver({
   };
 
   const getStock = (campaign: Campaign) => {
-    if (campaign.stock === null) return 0;
+    if (campaign.stock === null) return "Sin límite";
     if (campaign.entregas === null) return 0;
     return campaign.stock - campaign.entregas;
   };
@@ -313,13 +321,12 @@ export default function NewModalFormReceiver({
       .map(([id, value]) => {
         const campaign = activeCampaigns?.find((c) => c.id === id);
         const answers = { ...value.answers };
-        const codigoEntrega = String(answers["codigo_entrega"] || "");
 
         return {
           id,
           campaignName: campaign?.nombre_campaña || "",
           campos_adicionales: JSON.stringify(answers),
-          code: codigoEntrega || campaign?.code || "",
+          code: campaign?.code || "",
         };
       });
 
@@ -372,7 +379,7 @@ export default function NewModalFormReceiver({
   return (
     <form
       action={formAction}
-      className="flex select-none flex-col justify-center gap-3 px-0.5 pt-2"
+      className="flex select-none flex-col justify-center gap-3 px-0.5 pt-1"
     >
       {/* SECCIÓN DATOS RECEPTOR */}
       <div className="flex items-center gap-2">
@@ -386,8 +393,8 @@ export default function NewModalFormReceiver({
           className="rounded-full p-1 hover:bg-slate-100 disabled:opacity-50"
           title="Buscar datos por RUT"
         >
-          <MdAutorenew
-            className={`h-5 w-5 text-blue-600 transition-all ${isSearching ? "animate-loadspin" : ""}`}
+          <HiOutlineRefresh
+            className={`h-5 w-5 text-blue-600 transition-all ${isSearching ? "animate-loadspin-inverted" : ""}`}
           />
         </button>
       </div>
@@ -456,10 +463,7 @@ export default function NewModalFormReceiver({
       />
 
       {/* SECCIÓN CAMPAÑAS */}
-      <div
-        ref={scrollRef}
-        className="mt-2 rounded-lg border border-slate-200 bg-slate-50 p-4"
-      >
+      <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 p-4">
         <div className="mb-3 flex items-baseline justify-between border-b border-slate-200 bg-slate-50 pb-2">
           <h3 className="text-sm font-medium text-slate-700">
             Beneficios seleccionados
@@ -540,11 +544,6 @@ export default function NewModalFormReceiver({
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.3, ease: "easeInOut" }}
                       className="overflow-hidden"
-                      onAnimationStart={() => {
-                        if (scrollRef.current)
-                          scrollRef.current.scrollTop =
-                            scrollRef.current.scrollTop;
-                      }}
                     >
                       <div className="border-t border-slate-100 bg-slate-50 p-3">
                         <DynamicFieldsRenderer
@@ -579,12 +578,17 @@ export default function NewModalFormReceiver({
           name="observaciones"
           id="observaciones"
           rows={3}
-          maxLength={390}
+          maxLength={450}
           value={observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
           placeholder="Se realiza esta entrega a causa de..."
-          className="min-h-[80px] w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500"
+          className="min-h-[80px] w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm outline-none transition-all placeholder:text-[13px] placeholder:text-slate-400 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100"
         ></textarea>
+        <div className="mt-0.5 flex justify-end">
+          <span className="text-xs text-slate-500">
+            {observaciones.length}/450 caracteres
+          </span>
+        </div>
       </div>
 
       <div className="mt-2 flex">

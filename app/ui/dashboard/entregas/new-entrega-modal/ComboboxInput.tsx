@@ -63,25 +63,26 @@ export default function ComboboxInput({
         <input
           type="text"
           name={name}
-          className="h-10 w-full rounded-lg border border-blue-400 border-slate-200/10 bg-gray-200/40 px-4 text-sm text-gray-700 outline-none transition-all placeholder:text-[13px] placeholder:text-gray-400 focus-within:border-slate-500/85 focus-within:bg-gray-50/20 focus-within:ring-2 focus-within:ring-slate-200"
+          className="h-10 w-full rounded-lg border border-slate-200 bg-white px-4 text-sm text-gray-700 shadow-sm outline-none transition-all placeholder:text-[13px] placeholder:text-gray-400 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100"
           placeholder={placeholder}
           value={value}
           onChange={(e) => {
             onChange(e.target.value);
             if (!isOpen) setIsOpen(true);
           }}
-          onFocus={() => setIsOpen(true)}
+          onClick={() => setIsOpen((prev) => !prev)}
+          onBlur={() => setIsOpen(false)}
           required={required}
-          autoComplete="off" // Importante para que no tape tu lista
+          autoComplete="off"
         />
 
         {/* Flechita visual para indicar que es un desplegable */}
-        <div className="pointer-events-none absolute right-2 top-[13px] text-slate-400">
+        <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             fill="currentColor"
-            className="h-4 w-4"
+            className={`h-4 w-4 transition-transform duration-300 ${isOpen ? "-rotate-180" : ""}`}
           >
             <path
               fillRule="evenodd"
@@ -105,7 +106,7 @@ export default function ComboboxInput({
             {filteredOptions.map((option, index) => (
               <li
                 key={index}
-                className="cursor-pointer px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600"
+                className="cursor-pointer px-4 py-2 text-sm text-slate-700 hover:bg-slate-100/80 hover:text-blue-600"
                 onClick={() => handleSelect(option)}
               >
                 {option}

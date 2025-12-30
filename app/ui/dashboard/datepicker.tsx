@@ -67,7 +67,7 @@ export default function CustomAntdDatePicker({
           onChange={datePickerHandler}
           required={required}
           value={value ?? null}
-          className={`h-10 rounded-lg border border-slate-300 px-4 text-sm text-slate-700 placeholder:text-slate-400 focus-within:!border-blue-500 hover:border-slate-400/70 focus:!border-blue-500 focus:outline-none ${inter.className}`}
+          className="h-10 rounded-lg border border-slate-200 px-4 text-sm text-slate-700 shadow-sm transition-all placeholder:text-gray-400 focus-within:!border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 hover:border-slate-200 focus:border-blue-400"
         />
       </div>
     </ConfigProvider>

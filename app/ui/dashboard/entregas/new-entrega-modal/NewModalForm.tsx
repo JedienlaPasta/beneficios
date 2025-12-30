@@ -209,108 +209,104 @@ export default function NewModalForm({
   };
 
   return (
-    <form action={formAction} className="flex select-none flex-col gap-5 pt-2">
-      <div className="max-h-[400px] overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-4 scrollbar-hide">
-        <div className="justify- mb-4 flex items-baseline justify-between">
+    <form action={formAction} className="flex select-none flex-col gap-3 pt-2">
+      <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <div className="mb-3 flex items-baseline justify-between border-b border-slate-200 bg-slate-50 pb-2">
           <h3 className="text-sm font-medium text-slate-700">
-            Beneficios seleccionados:
+            Beneficios seleccionados
           </h3>
-          <div className="text-xs text-slate-500">
+          <div className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
             {Object.values(selectedCampaigns).filter((v) => v.selected).length}{" "}
             seleccionadas
           </div>
         </div>
 
         <div className="space-y-3">
-          {activeCampaigns?.map((campaign) => (
-            <div
-              key={campaign.id}
-              className={`overflow-hidden rounded-lg border bg-white shadow-sm transition-all hover:border-slate-300 ${
-                selectedCampaigns[campaign.id]?.selected
-                  ? "!border-blue-300 ring-blue-300"
-                  : lastSelection === campaign.id && checkValues(campaign)
-                    ? "!border-rose-300"
-                    : "!border-slate-200"
-              }`}
-            >
+          {activeCampaigns?.map((campaign) => {
+            const isSelected = !!selectedCampaigns[campaign.id]?.selected;
+            const isOutOfStock = !!checkValues(campaign);
+
+            return (
               <div
-                className="flex cursor-pointer items-start gap-3 p-3"
-                onClick={() => handleCheckboxChange(campaign)}
+                key={campaign.id}
+                className={`overflow-hidden rounded-lg border bg-white shadow-sm transition-all hover:border-slate-300 ${
+                  isSelected
+                    ? "!border-blue-300 ring-2 ring-blue-200"
+                    : isOutOfStock
+                      ? "!border-rose-300"
+                      : "!border-slate-200"
+                }`}
               >
                 <div
-                  className={`flex h-5 w-5 items-center justify-center rounded-md border ${
-                    selectedCampaigns[campaign.id]?.selected
-                      ? "border-blue-500 bg-blue-500"
-                      : lastSelection === campaign.id && checkValues(campaign)
-                        ? "border-rose-300 bg-white"
-                        : "border-slate-300 bg-white"
-                  }`}
+                  className="flex cursor-pointer items-start gap-3 p-3"
+                  onClick={() => handleCheckboxChange(campaign)}
                 >
-                  {selectedCampaigns[campaign.id]?.selected && (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-3.5 w-3.5 text-white"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  )}
-                </div>
+                  {/* Checkbox Visual */}
+                  <div
+                    className={`flex h-5 w-5 items-center justify-center rounded-md border ${
+                      isSelected
+                        ? "border-blue-500 bg-blue-500"
+                        : isOutOfStock
+                          ? "!border-rose-300"
+                          : "!border-slate-200"
+                    }`}
+                  >
+                    {isSelected && (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-3.5 w-3.5 text-white"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    )}
+                  </div>
 
-                <div className="flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <label
-                      className={`cursor-pointer text-sm font-medium ${
-                        lastSelection === campaign.id && checkValues(campaign)
-                          ? "text-rose-500"
-                          : "text-slate-700"
-                      }`}
-                    >
-                      {campaign.nombre_campaña}
-                    </label>
-                    <span
-                      className={`rounded-full bg-slate-100 px-2 py-0.5 text-xs ${
-                        lastSelection === campaign.id && checkValues(campaign)
-                          ? "text-rose-500"
-                          : "text-slate-600"
-                      }`}
-                    >
-                      {typeof getStock(campaign) === "number"
-                        ? ` Stock: ${getStock(campaign)}`
-                        : "Sin límite"}
-                    </span>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <label
+                        className={`cursor-pointer text-sm font-medium ${isOutOfStock ? "text-rose-400" : "text-slate-700"}`}
+                      >
+                        {campaign.nombre_campaña}
+                      </label>
+                      <span
+                        className={`rounded-full border px-2 py-0.5 text-xs ${isOutOfStock ? "border-rose-300 bg-rose-50 text-rose-500" : "border-gray-200 bg-gray-50 text-gray-600"}`}
+                      >
+                        Stock: {getStock(campaign)}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <AnimatePresence>
-                {selectedCampaigns[campaign.id]?.selected && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="overflow-hidden"
-                  >
-                    <div className="border-t border-slate-100 bg-slate-50 p-4">
-                      <DynamicFieldsRenderer
-                        schemaString={campaign.esquema_formulario || "[]"}
-                        values={selectedCampaigns[campaign.id]?.answers}
-                        onChange={(fieldName, val) =>
-                          handleFieldChange(campaign.id, fieldName, val)
-                        }
-                      />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
+                <AnimatePresence>
+                  {isSelected && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="border-t border-slate-100 bg-slate-50 p-3">
+                        <DynamicFieldsRenderer
+                          schemaString={campaign.esquema_formulario || "[]"}
+                          values={selectedCampaigns[campaign.id]?.answers}
+                          onChange={(fieldName, val) =>
+                            handleFieldChange(campaign.id, fieldName, val)
+                          }
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
 
           {(!activeCampaigns || activeCampaigns.length === 0) && (
             <div className="flex h-24 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500">
@@ -329,12 +325,17 @@ export default function NewModalForm({
           name="observaciones"
           id="observaciones"
           rows={4}
-          maxLength={390}
+          maxLength={450}
           value={observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
           placeholder="Se realiza esta entrega a causa de..."
-          className="w-full rounded-lg border border-slate-300 bg-transparent bg-white px-4 py-2 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus-within:border-blue-500"
+          className="min-h-[80px] w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm outline-none transition-all placeholder:text-[13px] placeholder:text-slate-400 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100"
         ></textarea>
+        <div className="mt-0.5 flex justify-end">
+          <span className="text-xs text-slate-500">
+            {observaciones.length}/450 caracteres
+          </span>
+        </div>
       </div>
 
       <div className="mt-1 flex">

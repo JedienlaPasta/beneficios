@@ -47,13 +47,15 @@ export default async function Campaign(props: CampaignProps) {
       )}
 
       {detailsModal && (
-        <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
-          <ModalEntregasDetailContext
-            folio={detailsModal}
-            rut={rut}
-            isOnEditForJustification={justificationModal === "true"}
-          />
-        </Suspense>
+        <Modal name="detailsModal">
+          <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
+            <ModalEntregasDetailContext
+              folio={detailsModal}
+              rut={rut}
+              isOnEditForJustification={justificationModal === "true"}
+            />
+          </Suspense>
+        </Modal>
       )}
       <div className="mb-6 flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
         <div>

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import CloseModalButton from "../../../close-modal-button";
 import { CancelButton, SubmitButton } from "../../../submit-button";
-import UserDropdown from "../../user-dropdown";
+import UserDropdown from "../../new-entrega-modal/UserDropdown";
 import RoleGuard from "@/app/ui/auth/role-guard";
 import { usersList } from "@/app/lib/data/static-data";
 import { updateSupervisorByFolio } from "@/app/lib/actions/entregas";

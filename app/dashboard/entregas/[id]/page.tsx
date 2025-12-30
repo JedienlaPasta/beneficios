@@ -6,9 +6,10 @@ import CitizenDetail, {
 import NewButton from "@/app/ui/dashboard/new-button";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import EntregasTable from "@/app/ui/dashboard/entregas/[id]/entregas-table";
-import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/detail-modal/modal-context";
 import ModalSkeleton from "@/app/ui/modal-skeleton";
 import { Package2 } from "lucide-react";
+import { Modal } from "@/app/ui/dashboard/modal";
+import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/detail-modal/modal-context";
 // import { Spinner } from "@/app/ui/dashboard/loaders";
 
 type CitizenRecordProps = {
@@ -45,13 +46,15 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
   return (
     <div>
       {detailsModal && (
-        <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
-          <ModalEntregasDetailContext
-            folio={detailsModal}
-            rut={rut}
-            isOnEditForJustification={justificationModal === "true"}
-          />
-        </Suspense>
+        <Modal name="detailsModal">
+          <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
+            <ModalEntregasDetailContext
+              folio={detailsModal}
+              rut={rut}
+              isOnEditForJustification={justificationModal === "true"}
+            />
+          </Suspense>
+        </Modal>
       )}
 
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 3xl:w-[96rem] 3xl:justify-self-center">

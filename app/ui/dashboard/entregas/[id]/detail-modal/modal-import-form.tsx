@@ -24,7 +24,6 @@ export default function ModalImportForm({
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  console.log(errorMessage);
 
   const formAction = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

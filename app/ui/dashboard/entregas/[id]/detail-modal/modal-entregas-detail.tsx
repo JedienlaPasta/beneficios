@@ -110,12 +110,12 @@ export default function ModalEntregasDetail({
     };
   }, []);
 
-  const handleOverlayClick = async () => {
-    const params = new URLSearchParams(searchParams);
-    params.delete("detailsModal");
-    router.replace(`?${params.toString()}`, { scroll: false });
-    await setIsModalClosing(true);
-  };
+  // const handleOverlayClick = async () => {
+  //   const params = new URLSearchParams(searchParams);
+  //   params.delete("detailsModal");
+  //   router.replace(`?${params.toString()}`, { scroll: false });
+  //   await setIsModalClosing(true);
+  // };
 
   const handleEntregaStatus = async () => {
     setIsToggleButtonDisabled(true);
@@ -144,242 +144,229 @@ export default function ModalEntregasDetail({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-x-hidden">
-      <div
-        className="fixed inset-0 bg-gray-900/40 transition-opacity"
-        onClick={handleOverlayClick}
-      />
-      <div className="relative z-10 mx-auto w-full sm:my-10 sm:max-w-[38rem]">
-        <span onClick={handleOverlayClick} className="absolute inset-0 -z-10" />
-        <motion.div
-          layout
-          layoutRoot
-          transition={{ layout: { duration: 0.25 } }}
-          className="max-h-[85vh]s w-full shrink-0 overflow-hidden bg-white p-4 shadow-xl ring-1 ring-slate-200/70 transition-all duration-500 scrollbar-hide sm:rounded-3xl sm:bg-gray-50 sm:p-6 md:p-8"
-        >
-          {/* Header & Hero Section */}
-          <div className="mb-3 flex flex-col gap-4">
-            {/* Top Bar: Breadcrumb & Actions */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                <span className="font-medium text-slate-600">
-                  Detalle de Entrega
-                </span>
-                <span className="text-slate-300">/</span>
-                <span className="font-bold text-slate-700">#{folio}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <RoleGuard allowedRoles={["Administrador", "Supervisor"]}>
-                  <DetailsModalOptionsMenu
-                    folio={folio}
-                    estadoDocs={estado_documentos}
-                  />
-                </RoleGuard>
-                <div className="mx-1 h-4 w-px bg-slate-300"></div>
-                <CloseModalButton
-                  name="detailsModal"
-                  secondName="rut"
-                  setIsClosing={setIsModalClosing}
-                />
-              </div>
-            </div>
+    <motion.div
+      layout
+      layoutRoot
+      transition={{ layout: { duration: 0.25 } }}
+      className="w-[38rem] max-w-full flex-1 shrink-0 overflow-hidden bg-white p-4 shadow-xl ring-1 ring-slate-200/70 transition-all duration-500 scrollbar-hide sm:rounded-3xl sm:bg-gray-50 sm:p-6 md:p-8"
+    >
+      {/* Header & Hero Section */}
+      <div className="mb-3 flex flex-col gap-4">
+        {/* Top Bar: Breadcrumb & Actions */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <span className="font-medium text-slate-600">
+              Detalle de Entrega
+            </span>
+            <span className="text-slate-300">/</span>
+            <span className="font-bold text-slate-700">#{folio}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <RoleGuard allowedRoles={["Administrador", "Supervisor"]}>
+              <DetailsModalOptionsMenu
+                folio={folio}
+                estadoDocs={estado_documentos}
+              />
+            </RoleGuard>
+            <div className="mx-1 h-4 w-px bg-slate-300"></div>
+            <CloseModalButton
+              name="detailsModal"
+              secondName="rut"
+              setIsClosing={setIsModalClosing}
+            />
+          </div>
+        </div>
 
-            {/* Beneficiario Card */}
-            <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all sm:flex-row sm:items-center sm:justify-between">
-              <div className="relative flex items-center gap-4">
-                <div className="flex flex-col">
-                  <Link
-                    href={`/dashboard/entregas/${rut}`}
-                    className="font-bold leading-tight text-slate-800 hover:cursor-pointer hover:underline sm:text-lg"
-                  >
-                    {rshName || (
-                      <span className="animate-pulse rounded bg-slate-200 text-transparent">
-                        Cargando Nombre...
-                      </span>
-                    )}
-                  </Link>
-                  <div className="mt-1 flex items-center gap-3 text-xs font-medium text-slate-500">
-                    <span className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-slate-500">
-                      RUT:{" "}
-                      <p className="font-medium text-slate-700">
-                        {formattedRUT}
-                      </p>
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Status Action */}
-              <div className="flex items-center gap-2 pl-2 sm:pl-0">
-                <p className="text-xs text-slate-400">Estado</p>
-                <button
-                  onClick={handleEntregaStatus}
-                  disabled={isToggleButtonDisabled}
-                  className={`group flex items-center gap-2 rounded-full py-1 pl-2 pr-3 text-xs font-medium ring-1 ring-inset transition-all hover:ring-2 active:scale-95 disabled:opacity-70 ${stateColor} ${
-                    isToggleButtonDisabled
-                      ? "cursor-not-allowed"
-                      : "cursor-pointer"
-                  }`}
-                >
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-75"></span>
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-current"></span>
+        {/* Beneficiario Card */}
+        <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative flex items-center gap-4">
+            <div className="flex flex-col">
+              <Link
+                href={`/dashboard/entregas/${rut}`}
+                className="font-bold leading-tight text-slate-800 hover:cursor-pointer hover:underline sm:text-lg"
+              >
+                {rshName || (
+                  <span className="animate-pulse rounded bg-slate-200 text-transparent">
+                    Cargando Nombre...
                   </span>
-                  {estado_documentos}
-                </button>
+                )}
+              </Link>
+              <div className="mt-1 flex items-center gap-3 text-xs font-medium text-slate-500">
+                <span className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-slate-500">
+                  RUT:{" "}
+                  <p className="font-medium text-slate-700">{formattedRUT}</p>
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Tab Navigation */}
-          <nav
-            className="mx-0.5 mt-2 flex border-b border-slate-200/80"
-            role="tablist"
-          >
-            {["Resumen", "Importar", "Capturar"].map((name) => (
-              <button
-                key={name}
-                role="tab"
-                onClick={() => handleTabChange(name)}
-                aria-selected={tab === name}
-                className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 ${
-                  tab === name
-                    ? "text-blue-600"
-                    : "text-slate-500 hover:text-slate-700"
-                }`}
-              >
-                {name}
-                {tab === name && (
-                  <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600" />
-                )}
-              </button>
-            ))}
-          </nav>
-
-          {/* Content */}
-          <motion.div
-            id="content-container"
-            className="scrollbar-hides relative min-h-[8rem] overflow-hidden pt-4"
-          >
-            <AnimatePresence mode="wait">
-              {tab === "Resumen" ? (
-                // Resumen ==============================================================
-                <motion.div
-                  key="resumen"
-                  initial={{ opacity: 0, y: 10, height: 460 }}
-                  animate={{ opacity: 1, y: 0, height: "auto" }}
-                  exit={{ opacity: 0, y: -10, height: 440 }}
-                  transition={{
-                    duration: 0.3,
-                    height: { duration: 0.4 },
-                  }}
-                  layout
-                  className="flex flex-col gap-3"
-                >
-                  {/* General Info */}
-                  <section className="">
-                    <div className="grid grid-cols-2 gap-1">
-                      <ModalGeneralInfoField
-                        name="Encargado"
-                        className="rounded-lg border border-slate-200/80 bg-white/80 px-3.5 py-2.5"
-                      >
-                        {nombre_usuario}
-                      </ModalGeneralInfoField>
-                      <ModalGeneralInfoField
-                        name="Fecha de Entrega"
-                        className="rounded-lg border border-slate-200/80 bg-white/80 px-3.5 py-2.5"
-                      >
-                        {fecha_entrega ? fecha_entrega : ""}
-                      </ModalGeneralInfoField>
-                      <ModalGeneralInfoField
-                        span="col-span-2"
-                        name="Justificación"
-                        className="rounded-lg border border-slate-200/80 bg-white/80 px-3.5 py-2.5"
-                      >
-                        {observacion || "No especificada"}
-                      </ModalGeneralInfoField>
-                    </div>
-                  </section>
-
-                  {/* Entregas List */}
-                  <section className="flex flex-col gap-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="flex items-center gap-2 text-sm font-medium text-slate-700">
-                        <span className="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
-                        Beneficios Recibidos
-                      </h3>
-                    </div>
-                    <div className="scrollbar-hides flex flex-col gap-1">
-                      {beneficiosEntregados.map((item, index) => (
-                        <EntregasListItem
-                          key={`${item.id_campaña}-${index}`}
-                          item={item}
-                        />
-                      ))}
-                    </div>
-                  </section>
-
-                  {/* Files List */}
-                  <FilesList folio={folio} files={files} />
-                </motion.div>
-              ) : tab === "Importar" ? (
-                // Importar ==============================================================
-                <motion.div
-                  key="importar"
-                  initial={{ opacity: 0, y: 10, height: 440 }}
-                  animate={{ opacity: 1, y: 0, height: "auto" }}
-                  exit={{ opacity: 0, y: -10, height: 460 }}
-                  transition={{
-                    duration: 0.3,
-                    height: { duration: 0.4 },
-                  }}
-                  layout
-                  className="flex flex-col gap-5"
-                >
-                  <FilesList folio={folio} files={files} />
-                  <div className="border-t border-gray-100"></div>
-                  <ModalImportForm folio={folio} savedFiles={files.length} />
-                </motion.div>
-              ) : tab === "Capturar" ? (
-                // Capturar =============================================================
-                <motion.div
-                  key="capturar"
-                  initial={{ opacity: 0, y: 10, height: 440 }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                    height: "auto",
-                    transition: {
-                      duration: 0.6,
-                      height: { duration: 0.8 },
-                    },
-                  }}
-                  exit={{
-                    opacity: 0,
-                    y: -10,
-                    height: 460,
-                    transition: {
-                      duration: 0.5,
-                      height: { duration: 0.6 },
-                    },
-                  }}
-                  layout
-                  className="flex flex-col gap-5"
-                >
-                  <div className="flex flex-col items-start justify-center">
-                    <CamaraComponent
-                      folio={folio}
-                      isActive={tab === "Capturar" && !isModalClosing}
-                      setTab={setTab}
-                    />
-                  </div>
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
-          </motion.div>
-        </motion.div>
+          {/* Status Action */}
+          <div className="flex items-center gap-2 pl-2 sm:pl-0">
+            <p className="text-xs text-slate-400">Estado</p>
+            <button
+              onClick={handleEntregaStatus}
+              disabled={isToggleButtonDisabled}
+              className={`group flex items-center gap-2 rounded-full py-1 pl-2 pr-3 text-xs font-medium ring-1 ring-inset transition-all hover:ring-2 active:scale-95 disabled:opacity-70 ${stateColor} ${
+                isToggleButtonDisabled ? "cursor-not-allowed" : "cursor-pointer"
+              }`}
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-75"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-current"></span>
+              </span>
+              {estado_documentos}
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* Tab Navigation */}
+      <nav
+        className="mx-0.5 mt-2 flex border-b border-slate-200/80"
+        role="tablist"
+      >
+        {["Resumen", "Importar", "Capturar"].map((name) => (
+          <button
+            key={name}
+            role="tab"
+            onClick={() => handleTabChange(name)}
+            aria-selected={tab === name}
+            className={`relative px-4 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 ${
+              tab === name
+                ? "text-blue-600"
+                : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            {name}
+            {tab === name && (
+              <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600" />
+            )}
+          </button>
+        ))}
+      </nav>
+
+      {/* Content */}
+      <motion.div
+        id="content-container"
+        className="scrollbar-hides relative min-h-[8rem] overflow-hidden pt-4"
+      >
+        <AnimatePresence mode="wait">
+          {tab === "Resumen" ? (
+            // Resumen ==============================================================
+            <motion.div
+              key="resumen"
+              initial={{ opacity: 0, y: 10, height: 460 }}
+              animate={{ opacity: 1, y: 0, height: "auto" }}
+              exit={{ opacity: 0, y: -10, height: 440 }}
+              transition={{
+                duration: 0.3,
+                height: { duration: 0.4 },
+              }}
+              layout
+              className="flex flex-col gap-3"
+            >
+              {/* General Info */}
+              <section className="">
+                <div className="grid grid-cols-2 gap-1">
+                  <ModalGeneralInfoField
+                    name="Encargado"
+                    className="rounded-lg border border-slate-200/80 bg-white/80 px-3.5 py-2.5"
+                  >
+                    {nombre_usuario}
+                  </ModalGeneralInfoField>
+                  <ModalGeneralInfoField
+                    name="Fecha de Entrega"
+                    className="rounded-lg border border-slate-200/80 bg-white/80 px-3.5 py-2.5"
+                  >
+                    {fecha_entrega ? fecha_entrega : ""}
+                  </ModalGeneralInfoField>
+                  <ModalGeneralInfoField
+                    span="col-span-2"
+                    name="Justificación"
+                    className="rounded-lg border border-slate-200/80 bg-white/80 px-3.5 py-2.5"
+                  >
+                    {observacion || "No especificada"}
+                  </ModalGeneralInfoField>
+                </div>
+              </section>
+
+              {/* Entregas List */}
+              <section className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
+                    Beneficios Recibidos
+                  </h3>
+                </div>
+                <div className="scrollbar-hides flex flex-col gap-1">
+                  {beneficiosEntregados.map((item, index) => (
+                    <EntregasListItem
+                      key={`${item.id_campaña}-${index}`}
+                      item={item}
+                    />
+                  ))}
+                </div>
+              </section>
+
+              {/* Files List */}
+              <FilesList folio={folio} files={files} />
+            </motion.div>
+          ) : tab === "Importar" ? (
+            // Importar ==============================================================
+            <motion.div
+              key="importar"
+              initial={{ opacity: 0, y: 10, height: 440 }}
+              animate={{ opacity: 1, y: 0, height: "auto" }}
+              exit={{ opacity: 0, y: -10, height: 460 }}
+              transition={{
+                duration: 0.3,
+                height: { duration: 0.4 },
+              }}
+              layout
+              className="flex flex-col gap-5"
+            >
+              <FilesList folio={folio} files={files} />
+              <div className="border-t border-gray-100"></div>
+              <ModalImportForm folio={folio} savedFiles={files.length} />
+            </motion.div>
+          ) : tab === "Capturar" ? (
+            // Capturar =============================================================
+            <motion.div
+              key="capturar"
+              initial={{ opacity: 0, y: 10, height: 440 }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                height: "auto",
+                transition: {
+                  duration: 0.6,
+                  height: { duration: 0.8 },
+                },
+              }}
+              exit={{
+                opacity: 0,
+                y: -10,
+                height: 460,
+                transition: {
+                  duration: 0.5,
+                  height: { duration: 0.6 },
+                },
+              }}
+              layout
+              className="flex flex-col gap-5"
+            >
+              <div className="flex flex-col items-start justify-center">
+                <CamaraComponent
+                  folio={folio}
+                  isActive={tab === "Capturar" && !isModalClosing}
+                  setTab={setTab}
+                />
+              </div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </motion.div>
+    </motion.div>
   );
 }
 

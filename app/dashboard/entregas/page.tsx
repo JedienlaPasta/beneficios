@@ -6,7 +6,7 @@ import EntregasTable from "@/app/ui/dashboard/entregas/entregas-table";
 import ModalSkeleton from "@/app/ui/modal-skeleton";
 import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/detail-modal/modal-context";
 import EntregasFilter from "@/app/ui/dashboard/entregas/EntregasFilter";
-
+import { Modal } from "@/app/ui/dashboard/modal";
 import { getSession } from "@/app/lib/session";
 import EntregasTableSkeleton from "@/app/ui/dashboard/entregas/EntregasTableSkeleton";
 import { Package2, Users } from "lucide-react";
@@ -43,14 +43,16 @@ export default async function Entregas(props: SocialAidProps) {
   return (
     <div className="flex flex-col gap-6">
       {detailsModal && (
-        <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
-          <ModalEntregasDetailContext
-            folio={detailsModal}
-            rut={rut}
-            isOnEditForJustification={justificationModal === "true"}
-            isOnEditForSupervisor={supervisorModal === "true"}
-          />
-        </Suspense>
+        <Modal name="detailsModal">
+          <Suspense fallback={<ModalSkeleton name="detailsModal" />}>
+            <ModalEntregasDetailContext
+              folio={detailsModal}
+              rut={rut}
+              isOnEditForJustification={justificationModal === "true"}
+              isOnEditForSupervisor={supervisorModal === "true"}
+            />
+          </Suspense>
+        </Modal>
       )}
       <div className="flex items-center justify-between 3xl:w-[96rem] 3xl:justify-self-center">
         <div>

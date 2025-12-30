@@ -66,7 +66,7 @@ export default function UserDropdown({
         placeholder={placeHolder}
         autoComplete="off"
         readOnly
-        className={`h-10 w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-4 text-sm text-slate-700 shadow-sm outline-none transition-all placeholder:text-gray-400 focus-within:border-blue-500 focus:outline-none`}
+        className="h-10 w-full rounded-lg border border-slate-200 bg-white px-4 text-sm text-gray-700 shadow-sm outline-none transition-all placeholder:text-[13px] placeholder:text-gray-400 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100"
       />
       {/* Input oculto para enviar correo al servidor */}
       <input type="hidden" name={name} value={userEmail} required />

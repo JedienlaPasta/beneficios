@@ -3,13 +3,13 @@ import { createEntregaManual } from "@/app/lib/actions/entregas";
 import { Campaign } from "@/app/lib/definitions";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSearchParams, useRouter } from "next/navigation"; // Router sí se usa para refresh
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import Input from "../../campañas/new-campaign-modal/NewCampaignInput";
 import { SubmitButton } from "../../submit-button";
 import CustomAntdDatePicker from "../../datepicker";
 import dayjs from "dayjs";
-import UserDropdown from "../user-dropdown";
+import UserDropdown from "./UserDropdown";
 
 // --- TIPOS ---
 type FormValue = string | number | boolean | null | undefined;
@@ -53,7 +53,7 @@ const DynamicFieldsRenderer = ({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3">
       {schema.map((field) => (
         <div key={field.nombre} className="col-span-1">
           {field.tipo === "select" ? (
@@ -106,7 +106,6 @@ export default function NewModalFormManual({
   const [encargado, setEncargado] = useState({ nombre: "", correo: "" });
 
   const [observaciones, setObservaciones] = useState("");
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   // Estado de Campañas (Dinámico)
   // Fix: Tipado explícito para 'answers'
@@ -152,7 +151,7 @@ export default function NewModalFormManual({
   };
 
   const getStock = (campaign: Campaign) => {
-    if (campaign.stock === null) return 0;
+    if (campaign.stock === null) return "Sin límite";
     if (campaign.entregas === null) return 0;
     return campaign.stock - campaign.entregas;
   };
@@ -238,13 +237,12 @@ export default function NewModalFormManual({
         const campaign = activeCampaigns?.find((c) => c.id === id);
 
         const answers = { ...value.answers };
-        const codigoEntrega = String(answers["codigo_entrega"] || ""); // Aseguramos string
 
         return {
           id,
           campaignName: campaign?.nombre_campaña || "",
           campos_adicionales: JSON.stringify(answers),
-          code: codigoEntrega || campaign?.code || "",
+          code: campaign?.code || "",
         };
       });
 
@@ -282,11 +280,14 @@ export default function NewModalFormManual({
   };
 
   return (
-    <form action={formAction} className="flex select-none flex-col gap-5 pt-2">
+    <form
+      action={formAction}
+      className="flex select-none flex-col justify-center gap-3 px-0.5 pt-2"
+    >
       {/* Datos Manuales */}
       <div className="grid grid-cols-2 gap-2">
         <Input
-          placeHolder="Ej: 2024-001"
+          placeHolder="Ej: 1024-25-TA"
           label="Folio"
           type="text"
           nombre="folio"
@@ -313,15 +314,12 @@ export default function NewModalFormManual({
       />
 
       {/* Listado de Campañas (Dinámico) */}
-      <div
-        ref={scrollRef}
-        className="scrollbar-gutter-stable max-h-[380px] overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-4"
-      >
-        <div className="sticky top-0 z-10 mb-3 flex items-baseline justify-between border-b border-slate-200 bg-slate-50 pb-2">
+      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <div className="mb-3 flex items-baseline justify-between border-b border-slate-200 bg-slate-50 pb-2">
           <h3 className="text-sm font-medium text-slate-700">
-            Beneficios entregados
+            Beneficios seleccionados
           </h3>
-          <div className="text-xs text-slate-500">
+          <div className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
             {Object.values(selectedCampaigns).filter((v) => v.selected).length}{" "}
             seleccionadas
           </div>
@@ -347,6 +345,7 @@ export default function NewModalFormManual({
                   className="flex cursor-pointer items-start gap-3 p-3"
                   onClick={() => handleCheckboxChange(campaign)}
                 >
+                  {/* Checkbox Visual */}
                   <div
                     className={`flex h-5 w-5 items-center justify-center rounded-md border ${
                       isSelected
@@ -395,11 +394,6 @@ export default function NewModalFormManual({
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.3, ease: "easeInOut" }}
                       className="overflow-hidden"
-                      onAnimationStart={() => {
-                        if (scrollRef.current)
-                          scrollRef.current.scrollTop =
-                            scrollRef.current.scrollTop;
-                      }}
                     >
                       <div className="border-t border-slate-100 bg-slate-50 p-3">
                         <DynamicFieldsRenderer
@@ -434,12 +428,17 @@ export default function NewModalFormManual({
           name="observaciones"
           id="observaciones"
           rows={3}
-          maxLength={390}
+          maxLength={450}
           value={observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
           placeholder="Se realiza esta entrega a causa de..."
-          className="min-h-[80px] w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500"
+          className="min-h-[80px] w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm outline-none transition-all placeholder:text-[13px] placeholder:text-slate-400 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100"
         ></textarea>
+        <div className="mt-0.5 flex justify-end">
+          <span className="text-xs text-slate-500">
+            {observaciones.length}/450 caracteres
+          </span>
+        </div>
       </div>
 
       <div className="mt-2 flex">
