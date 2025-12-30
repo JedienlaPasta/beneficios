@@ -24,6 +24,7 @@ export type Campaign = {
   nombre_campaña: string;
   fecha_inicio: Date | null;
   fecha_termino: Date | null;
+  estado: string;
   entregas: number | null;
   code: string;
   stock: number | null;

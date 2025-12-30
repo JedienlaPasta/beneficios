@@ -15,24 +15,25 @@ export default function TableRow({
     entregas: number | null;
     fecha_inicio: Date | null;
     fecha_termino: Date | null;
+    estado: string;
   };
 }) {
-  const { id, nombre_campaña, code, entregas, fecha_inicio, fecha_termino } =
-    item;
+  const {
+    id,
+    nombre_campaña,
+    code,
+    entregas,
+    fecha_inicio,
+    fecha_termino,
+    estado,
+  } = item;
   const router = useRouter();
 
   const inicio = formatDate(fecha_inicio);
   const termino = formatDate(fecha_termino);
 
-  const now = new Date();
-  const estado = fecha_termino
-    ? fecha_termino > now
-      ? "En curso"
-      : "Finalizado"
-    : "";
-
   const colorEstado =
-    estado === "En curso"
+    estado === "En Curso"
       ? "bg-emerald-100/70 text-emerald-600 ring-emerald-600/5"
       : "bg-slate-100/70 text-slate-600 ring-slate-700/5";
 

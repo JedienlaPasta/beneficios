@@ -8,13 +8,13 @@ export async function fetchCampaignById(id: string): Promise<Campaign> {
     nombre_campaña: "",
     fecha_inicio: null,
     fecha_termino: null,
+    estado: "",
     entregas: null,
     code: "",
     stock: null,
     tipo_dato: "",
     tramo: "",
     esquema_formulario: "",
-    // estado: "En curso",
     discapacidad: "",
     adulto_mayor: "",
   };
@@ -126,15 +126,10 @@ export async function fetchCampaigns(
         -- Cálculo de Estado en vuelo (SQL Server)
         CASE 
           WHEN c.fecha_inicio > GETUTCDATE() THEN 'Pendiente'
-          WHEN c.fecha_inicio <= GETUTCDATE() AND c.fecha_termino >= GETUTCDATE() THEN 'En Curso'
+          WHEN c.fecha_inicio <= GETUTCDATE() AND c.fecha_termino >= CAST(GETUTCDATE() AS DATE) THEN 'En Curso'
           ELSE 'Finalizada'
         END AS estado,
-        
-        -- OPTIMIZACIÓN CLAVE: Subconsulta Correlacionada
-        -- En lugar de hacer JOIN con una tabla gigante agrupada,
-        -- contamos los beneficios SOLO para estas 10 campañas.
         (SELECT COUNT(*) FROM beneficios_entregados b WHERE b.id_campaña = c.id) AS total_entregas
-        
       FROM Paginacion p
       JOIN campañas c ON p.id = c.id
       ORDER BY c.fecha_inicio DESC
@@ -158,7 +153,7 @@ export async function fetchActiveCampaigns(): Promise<Campaign[]> {
     const request = pool.request();
     const result = await request.query(`
       SELECT * FROM campañas 
-      WHERE fecha_inicio <= GETUTCDATE() AND fecha_termino >= GETUTCDATE()
+      WHERE fecha_inicio <= GETUTCDATE() AND fecha_termino >= CAST(GETUTCDATE() AS DATE)
       ORDER BY fecha_inicio DESC
       `);
     return result.recordset as Campaign[];
