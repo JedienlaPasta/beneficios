@@ -7,7 +7,13 @@ import { deletePDFById, downloadPDFById } from "@/app/lib/actions/entregas";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export function Files({ item, folio }: { item: EntregasFiles; folio: string }) {
+export default function Files({
+  item,
+  folio,
+}: {
+  item: EntregasFiles;
+  folio: string;
+}) {
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const [isHovered, setIsHovered] = useState<boolean>(false);

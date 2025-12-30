@@ -20,7 +20,7 @@ import GetNewFileButton from "./NewFileButton";
 import ModalImportForm from "./ModalImportForm";
 import DetailsModalOptionsMenu from "./ModalOptionsMenu";
 import CamaraComponent from "./ModalCamera";
-import { Files } from "./Files";
+import Files from "./Files";
 
 type Props = {
   rut: string;
