@@ -3,7 +3,7 @@ import sql from "mssql";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import * as ExcelJS from "exceljs";
-import { FormState } from "@/app/ui/dashboard/campañas/new-campaign-modal";
+import { FormState } from "@/app/ui/dashboard/campañas/new-campaign-modal/NewCampaignModal";
 import { connectToDB } from "../utils/db-connection";
 import { capitalize, capitalizeAll, formatRUT } from "../utils/format";
 import { logAction } from "./auditoria";

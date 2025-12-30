@@ -1,6 +1,6 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
-import Input from "../../../campañas/new-campaign-input";
+import Input from "../../../campañas/new-campaign-modal/NewCampaignInput";
 import { SubmitButton } from "../../../submit-button";
 import { toast } from "sonner";
 import { updateRSHGeneralInfo } from "@/app/lib/actions/rsh";

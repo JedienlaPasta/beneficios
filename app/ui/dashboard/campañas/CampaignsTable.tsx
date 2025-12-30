@@ -1,6 +1,6 @@
 import { Campaign } from "@/app/lib/definitions";
 import Pagination from "@/app/ui/dashboard/pagination";
-import TableRow from "./table-row";
+import TableRow from "./CampaignTableRow";
 import { fetchCampaigns } from "@/app/lib/data/campanas";
 
 type CampaignsTableProps = {

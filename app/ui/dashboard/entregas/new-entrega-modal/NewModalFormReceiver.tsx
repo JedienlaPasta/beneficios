@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import Input from "../../campañas/new-campaign-input";
+import Input from "../../campañas/new-campaign-modal/NewCampaignInput";
 import { SubmitButton } from "../../submit-button";
 import { MdAutorenew } from "react-icons/md";
 import { capitalize, capitalizeAll } from "@/app/lib/utils/format";

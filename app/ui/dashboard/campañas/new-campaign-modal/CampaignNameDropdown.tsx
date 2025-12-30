@@ -14,7 +14,7 @@ type CampaignList = {
   code: string;
 };
 
-type CampañaDropdownProps = {
+type CampaignNameDropdownProps = {
   label: string;
   name: keyof FormField | string;
   campaignsList?: CampaignList[];
@@ -24,7 +24,7 @@ type CampañaDropdownProps = {
   setCampaignName?: (name: keyof FormField, prev: string) => void;
 };
 
-export default function CampaignDropdown({
+export default function CampaignNameDropdown({
   label,
   name,
   campaignsList,
@@ -32,7 +32,7 @@ export default function CampaignDropdown({
   readOnly,
   setCampaign,
   setCampaignName,
-}: CampañaDropdownProps) {
+}: CampaignNameDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleDropdown = () => {

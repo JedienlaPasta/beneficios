@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/campaigns-table-skeleton";
+import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/CampaignsTableSkeleton";
 import RSHGeneralInfo from "@/app/ui/dashboard/rsh/general-info";
 import RSHTable from "@/app/ui/dashboard/rsh/rsh-table";
 import SearchBar from "@/app/ui/dashboard/searchbar";

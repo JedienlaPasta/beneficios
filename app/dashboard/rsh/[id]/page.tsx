@@ -1,4 +1,4 @@
-import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/campaigns-table-skeleton";
+import TablaCampañasSkeleton from "@/app/ui/dashboard/campañas/CampaignsTableSkeleton";
 import TablaEntregasDetalleCampaña from "@/app/ui/dashboard/campañas/[id]/campaign-entregas-table";
 import { Suspense } from "react";
 import CampaignDetail from "@/app/ui/dashboard/campañas/[id]/campaign-detail";

@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import CloseModalButton from "../close-modal-button";
 import { SubmitButton } from "../submit-button";
-import Input from "../campañas/new-campaign-input";
+import Input from "../campañas/new-campaign-modal/NewCampaignInput";
 import { toast } from "sonner";
 import { updateRSHName } from "@/app/lib/actions/rsh";
 

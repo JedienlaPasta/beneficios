@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useSearchParams, useRouter } from "next/navigation"; // Router sí se usa para refresh
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import Input from "../../campañas/new-campaign-input";
+import Input from "../../campañas/new-campaign-modal/NewCampaignInput";
 import { SubmitButton } from "../../submit-button";
 import CustomAntdDatePicker from "../../datepicker";
 import dayjs from "dayjs";

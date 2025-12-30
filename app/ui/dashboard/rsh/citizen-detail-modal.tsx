@@ -8,7 +8,7 @@ import { getAge } from "@/app/lib/utils/get-values";
 import RoleGuard from "../../auth/role-guard";
 import DeleteRSHButton from "./delete-rsh-button";
 import { SubmitButton } from "../submit-button";
-import Input from "../campañas/new-campaign-input";
+import Input from "../campañas/new-campaign-modal/NewCampaignInput";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   updateRSH,

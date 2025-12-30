@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import Input from "@/app/ui/dashboard/campañas/new-campaign-input";
+import Input from "@/app/ui/dashboard/campañas/new-campaign-modal/NewCampaignInput";
 import { AnimatePresence, motion } from "framer-motion";
 import dayjs from "dayjs";
 import CustomAntdDatePicker from "@/app/ui/dashboard/datepicker";

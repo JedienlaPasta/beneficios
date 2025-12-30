@@ -1,5 +1,5 @@
 "use client";
-import Input from "../../new-campaign-input";
+import Input from "../../new-campaign-modal/NewCampaignInput";
 import RequirementsCard from "./requirements-cards";
 import { CancelButton, SubmitButton } from "../../../submit-button";
 import { Campaign } from "@/app/lib/definitions";

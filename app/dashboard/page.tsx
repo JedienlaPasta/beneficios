@@ -2,7 +2,7 @@ import GeneralInfoCards from "@/app/ui/dashboard/inicio/general-info-cards";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import { Suspense } from "react";
 import PageHeader from "../ui/dashboard/page-header";
-import { ActiveCampaignsSkeleton } from "../ui/dashboard/campañas/active-campaigns";
+import { ActiveCampaignsSkeleton } from "../ui/dashboard/campañas/ActiveCampaigns";
 import { capitalize } from "../lib/utils/format";
 import { getSession } from "../lib/session";
 import { getUserData } from "../lib/data/usuario";

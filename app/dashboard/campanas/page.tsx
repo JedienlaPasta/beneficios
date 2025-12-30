@@ -1,10 +1,10 @@
-import CampaignsTable from "@/app/ui/dashboard/campañas/campaigns-table";
+import CampaignsTable from "@/app/ui/dashboard/campañas/CampaignsTable";
 import ActiveCampaigns, {
   ActiveCampaignsSkeleton,
-} from "@/app/ui/dashboard/campañas/active-campaigns";
-import NewCampaignModal from "@/app/ui/dashboard/campañas/new-campaign-modal";
-import CampaignsTableSkeleton from "@/app/ui/dashboard/campañas/campaigns-table-skeleton";
-import NewCampaignButton from "@/app/ui/dashboard/campañas/new-campaign-button";
+} from "@/app/ui/dashboard/campañas/ActiveCampaigns";
+import NewCampaignModal from "@/app/ui/dashboard/campañas/new-campaign-modal/NewCampaignModal";
+import CampaignsTableSkeleton from "@/app/ui/dashboard/campañas/CampaignsTableSkeleton";
+import NewCampaignButton from "@/app/ui/dashboard/campañas/NewCampaignButton";
 import { Suspense } from "react";
 import SearchBar from "@/app/ui/dashboard/searchbar";
 import { Modal } from "@/app/ui/dashboard/modal";
