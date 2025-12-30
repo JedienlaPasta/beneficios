@@ -9,10 +9,10 @@ import { SubmitButton } from "../../SubmitButton";
 import { Requirements } from "../[id]/update/UpdateForm";
 import RequirementsCard from "../[id]/update/RequirementsCards";
 import dayjs from "dayjs";
-import CustomAntdDatePicker from "@/app/ui/dashboard/Datepicker";
 import { campaignsList } from "@/app/lib/data/static-data";
 import CloseModalButton from "../../CloseModalButton";
 import DynamicFieldsConfig from "./DynamicFieldsConfig";
+import CustomAntdDatePicker from "../../Datepicker";
 // import CriteriaConfig from "./CriteriaConfig";
 
 export type FormState = {

@@ -5,8 +5,8 @@ import { formatDate, formatTime } from "@/app/lib/utils/format";
 import { MdAutorenew } from "react-icons/md";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { BiFolderPlus } from "react-icons/bi";
-import Pagination from "./Pagination";
 import AuditDetailsModal from "./auditoria/DetailsModal";
+import Pagination from "./Pagination";
 
 const ACTIVITY = [
   {

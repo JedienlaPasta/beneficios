@@ -8,8 +8,8 @@ import DataTypeCards from "./DataTypeCards";
 import { updateCampaign } from "@/app/lib/actions/campana";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import CustomAntdDatePicker from "@/app/ui/dashboard/Datepicker";
 import dayjs from "dayjs";
+import CustomAntdDatePicker from "../../../Datepicker";
 
 export type Requirements = {
   tramo: boolean;
