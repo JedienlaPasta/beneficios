@@ -31,28 +31,28 @@ export type DynamicField = {
   isCustomLabel?: boolean;
 };
 
-export type Criteria =
-  | {
-      id: number;
-      name: "edad_maxima";
-      value: "Edad Máxima";
-      type: number;
-      action: "BLOQUEAR" | "ADVERTIR";
-    }
-  | {
-      id: number;
-      name: "edad_minima";
-      value: "Edad Mínima";
-      type: number;
-      action: "BLOQUEAR" | "ADVERTIR";
-    }
-  | {
-      id: number;
-      name: "tramo_maximo";
-      value: "Tramo Máximo";
-      type: number;
-      action: "BLOQUEAR" | "ADVERTIR";
-    };
+// export type Criteria =
+//   | {
+//       id: number;
+//       name: "edad_maxima";
+//       value: "Edad Máxima";
+//       type: number;
+//       action: "BLOQUEAR" | "ADVERTIR";
+//     }
+//   | {
+//       id: number;
+//       name: "edad_minima";
+//       value: "Edad Mínima";
+//       type: number;
+//       action: "BLOQUEAR" | "ADVERTIR";
+//     }
+//   | {
+//       id: number;
+//       name: "tramo_maximo";
+//       value: "Tramo Máximo";
+//       type: number;
+//       action: "BLOQUEAR" | "ADVERTIR";
+//     };
 
 export default function NewCampaignModal() {
   const router = useRouter();
@@ -81,15 +81,15 @@ export default function NewCampaignModal() {
     adultoMayor: Boolean(false),
   });
 
-  const [criteriaConfig, setCriteriaConfig] = useState<Criteria[]>([
-    {
-      id: Date.now(),
-      name: "tramo_maximo",
-      value: "Tramo Máximo",
-      type: 40,
-      action: "ADVERTIR",
-    },
-  ]);
+  // const [criteriaConfig, setCriteriaConfig] = useState<Criteria[]>([
+  //   {
+  //     id: Date.now(),
+  //     name: "tramo_maximo",
+  //     value: "Tramo Máximo",
+  //     type: 40,
+  //     action: "ADVERTIR",
+  //   },
+  // ]);
 
   // --- PRESETS / PLANTILLAS ---
   // Esto reemplaza la lógica simple de antes. Ahora carga estructuras completas.
