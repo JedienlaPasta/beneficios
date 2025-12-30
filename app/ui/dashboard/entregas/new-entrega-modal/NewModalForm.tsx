@@ -7,13 +7,11 @@ import { Campaign } from "@/app/lib/definitions";
 import { createEntrega } from "@/app/lib/actions/entregas";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { DynamicFieldsRenderer } from "./DynamicFieldsRenderer";
 
-// --- TIPOS DE DATOS ---
+export type FormValue = string | number | boolean | null | undefined;
 
-// Tipo seguro para los valores de los inputs
-type FormValue = string | number | boolean | undefined | null;
-
-type DynamicFieldSchema = {
+export type DynamicFieldSchema = {
   nombre: string;
   label: string;
   tipo: "text" | "number" | "select" | "boolean";
@@ -21,13 +19,12 @@ type DynamicFieldSchema = {
   requerido: boolean;
 };
 
-type NewModalFormProps = {
+export type NewModalFormProps = {
   activeCampaigns?: Campaign[];
   rut: string;
-  userId: string;
+  userId?: string;
 };
 
-// --- COMPONENTE PRINCIPAL ---
 export default function NewModalForm({
   activeCampaigns,
   rut,
@@ -35,13 +32,11 @@ export default function NewModalForm({
 }: NewModalFormProps) {
   const router = useRouter();
   const [observaciones, setObservaciones] = useState("");
-  const [lastSelection, setLastSelection] = useState("");
 
-  // ESTADO ACTUALIZADO: Type safe
   const [selectedCampaigns, setSelectedCampaigns] = useState<{
     [campaignId: string]: {
       selected: boolean;
-      answers: Record<string, FormValue>; // Reemplazado 'any' por 'FormValue'
+      answers: Record<string, FormValue>;
     };
   }>(() => {
     if (activeCampaigns && activeCampaigns.length > 0) {
@@ -57,7 +52,7 @@ export default function NewModalForm({
           [key: string]: {
             selected: boolean;
             answers: Record<string, FormValue>;
-          }; // Reemplazado 'any'
+          };
         },
       );
     }
@@ -75,7 +70,7 @@ export default function NewModalForm({
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
-  const createEntregaWithId = createEntrega.bind(null, userId);
+  // const createEntregaWithId = createEntrega.bind(null, userId);
 
   const checkValues = (campaign: Campaign) => {
     if (campaign.stock === null) return;
@@ -92,7 +87,6 @@ export default function NewModalForm({
 
   const handleCheckboxChange = (campaign: Campaign) => {
     const campaignId = campaign.id;
-    setLastSelection(campaignId);
 
     if (!checkValues(campaign)) {
       setSelectedCampaigns((prev) => ({
@@ -105,7 +99,6 @@ export default function NewModalForm({
     }
   };
 
-  // FUNCIÓN TIPADA: value ahora es FormValue en lugar de any
   const handleFieldChange = (
     campaignId: string,
     fieldName: string,
@@ -187,10 +180,17 @@ export default function NewModalForm({
     formData.append("rut", rut.toString());
     formData.append("observaciones", observaciones);
 
+    if (!userId) {
+      toast.error("Sesión invalida");
+      setIsLoading(false);
+      setIsDisabled(false);
+      return;
+    }
+
     const toastId = toast.loading("Guardando...");
     setTimeout(async () => {
       try {
-        const response = await createEntregaWithId(formData);
+        const response = await createEntrega(userId, formData);
         if (!response.success) {
           throw new Error(response.message);
         }
@@ -346,77 +346,3 @@ export default function NewModalForm({
     </form>
   );
 }
-
-// --- SUB-COMPONENTE CON TYPES CORREGIDOS ---
-const DynamicFieldsRenderer = ({
-  schemaString,
-  values,
-  onChange,
-}: {
-  schemaString: string;
-  values: Record<string, FormValue>; // Reemplazado 'any'
-  onChange: (fieldName: string, value: FormValue) => void; // Reemplazado 'any'
-}) => {
-  let schema: DynamicFieldSchema[] = [];
-  try {
-    schema = JSON.parse(schemaString || "[]");
-  } catch (e) {
-    console.error("Error parsing schema", e);
-    return (
-      <p className="text-xs text-red-500">Error en configuración de campaña</p>
-    );
-  }
-
-  if (schema.length === 0) {
-    return (
-      <p className="text-xs italic text-slate-400">
-        Sin datos adicionales requeridos.
-      </p>
-    );
-  }
-
-  return (
-    <div className="grid gap-3">
-      {schema.map((field) => {
-        return (
-          <div
-            key={field.nombre}
-            className={field.tipo === "select" ? "col-span-1" : "col-span-1"}
-          >
-            {field.tipo === "select" ? (
-              <div className="flex flex-col gap-1">
-                <label className="ml-1 text-[10px] font-bold uppercase text-slate-400">
-                  {field.label} {field.requerido && "*"}
-                </label>
-                <select
-                  className="w-full border-b border-slate-200 bg-transparent py-1.5 text-sm text-slate-700 outline-none focus:border-blue-500"
-                  value={String(values[field.nombre] || "")} // Asegurar string para el value
-                  onChange={(e) => onChange(field.nombre, e.target.value)}
-                >
-                  <option value="" disabled>
-                    Seleccione...
-                  </option>
-                  {field.opciones?.map((op) => (
-                    <option key={op} value={op}>
-                      {op}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ) : (
-              <Input
-                placeHolder={`Ingrese ${field.label.toLowerCase()}...`}
-                label={field.label}
-                type={field.tipo === "number" ? "number" : "text"}
-                nombre={field.nombre}
-                value={String(values[field.nombre] || "")} // Asegurar string
-                setData={(val) => onChange(field.nombre, val)}
-                required={field.requerido}
-              />
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-};
