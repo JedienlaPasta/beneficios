@@ -12,7 +12,7 @@ import { formatDate, formatRUT, formatTime } from "@/app/lib/utils/format";
 import RoleGuard from "@/app/ui/auth/role-guard";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toggleEntregaStatus } from "@/app/lib/actions/entregas";
 import { toast } from "sonner";
 import EditButton from "../../../edit-btn";
@@ -46,7 +46,6 @@ export default function ModalEntregasDetail({
     entregas;
 
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const [rshName, setRshName] = useState<string>("");
   useEffect(() => {
@@ -109,13 +108,6 @@ export default function ModalEntregasDetail({
       document.body.style.overflow = "auto";
     };
   }, []);
-
-  // const handleOverlayClick = async () => {
-  //   const params = new URLSearchParams(searchParams);
-  //   params.delete("detailsModal");
-  //   router.replace(`?${params.toString()}`, { scroll: false });
-  //   await setIsModalClosing(true);
-  // };
 
   const handleEntregaStatus = async () => {
     setIsToggleButtonDisabled(true);

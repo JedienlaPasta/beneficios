@@ -1,6 +1,5 @@
 "use client";
 import { toast } from "sonner";
-import Input from "../../campañas/new-campaign-modal/NewCampaignInput";
 import { SubmitButton } from "../../submit-button";
 import { useState } from "react";
 import { Campaign } from "@/app/lib/definitions";
