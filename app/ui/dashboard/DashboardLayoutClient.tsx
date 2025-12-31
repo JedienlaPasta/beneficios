@@ -52,7 +52,7 @@ export default function DashboardLayoutClient({
       </div>
       <div className="z-0 hidden w-72 md:block"></div>
 
-      <main className="scrollbar-gutter-stable flex-1 overflow-x-hidden">
+      <main className="sm:scrollbar-gutter-stable flex-1 overflow-x-hidden">
         <div className="flex h-20 items-center justify-between bg-[#171a1f] px-4 text-slate-300 md:hidden">
           <SibasLogo />
           <button
