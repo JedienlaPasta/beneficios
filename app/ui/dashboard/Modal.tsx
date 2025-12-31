@@ -31,7 +31,7 @@ export function Modal({ name, secondName, children }: ModalProps) {
 
   return (
     <div className="sm:scrollbar-gutter-stable fixed inset-0 z-50 overflow-y-auto">
-      <div className="fixed inset-0 bg-gray-900/50" onClick={handleClick} />
+      <div className="fixed inset-0 bg-slate-900/60" onClick={handleClick} />
       <div className="flex min-h-full justify-center sm:items-center sm:px-4 sm:py-10">
         <div className={`relative z-10 mx-auto w-full sm:w-fit`}>
           <span onClick={handleClick} className="absolute inset-0 -z-10" />

@@ -24,7 +24,7 @@ export default async function ProfilePage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl p-8">
+    <div className="mx-auto max-w-4xl sm:p-8">
       <h1 className="mb-8 text-2xl font-bold text-slate-800">
         Perfil de Usuario
       </h1>
