@@ -440,16 +440,25 @@ export const createEntregaManual = async (formData: FormData) => {
 
       // 4. Insertar Beneficios e Impactar Stock
       for (const item of campaigns) {
+        let realCodigoEntrega: string | null = null;
+        let finalJsonString = item.campos_adicionales; // JSON original por defecto
+        try {
+          const data = JSON.parse(item.campos_adicionales);
+          if (data && data.codigo_entrega) {
+            realCodigoEntrega = String(data.codigo_entrega).toUpperCase();
+            data.codigo_entrega = realCodigoEntrega;
+            finalJsonString = JSON.stringify(data);
+          }
+        } catch (error) {
+          console.error("Error parseando JSON en entrega manual", error);
+        }
+
         const insertItemReq = new sql.Request(transaction);
         await insertItemReq
           .input("folio", sql.VarChar(50), folio.toUpperCase())
           .input("id_campana", sql.UniqueIdentifier, item.id)
-          .input("codigo_entrega", sql.VarChar(100), item.code || null)
-          .input(
-            "campos_adicionales",
-            sql.NVarChar(sql.MAX),
-            item.campos_adicionales,
-          ) // JSON
+          .input("codigo_entrega", sql.VarChar(100), realCodigoEntrega)
+          .input("campos_adicionales", sql.NVarChar(sql.MAX), finalJsonString)
           .query(`
             INSERT INTO beneficios_entregados (folio, id_campaña, codigo_entrega, campos_adicionales)
             VALUES (@folio, @id_campana, @codigo_entrega, @campos_adicionales)
