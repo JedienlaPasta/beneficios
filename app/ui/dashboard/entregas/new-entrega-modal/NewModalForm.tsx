@@ -32,6 +32,7 @@ export default function NewModalForm({
   const router = useRouter();
   const [observaciones, setObservaciones] = useState("");
 
+  // Estado de Campañas (Dinámico)
   const [selectedCampaigns, setSelectedCampaigns] = useState<{
     [campaignId: string]: {
       selected: boolean;
@@ -41,9 +42,36 @@ export default function NewModalForm({
     if (activeCampaigns && activeCampaigns.length > 0) {
       return activeCampaigns.reduce(
         (acc, campaign) => {
+          const defaultAnswers: Record<string, FormValue> = {};
+
+          try {
+            const schema = JSON.parse(campaign.esquema_formulario || "[]");
+            schema.forEach((field: DynamicFieldSchema) => {
+              // Si el campo es cantidad, valor por defecto 1
+              if (
+                (field.nombre === "cantidad" ||
+                  field.label.toLowerCase() === "cantidad") &&
+                campaign.code === "NA"
+              ) {
+                defaultAnswers[field.nombre] = 1;
+              }
+              // Si el campo es codigo, para la entrega de TA, valor por defecto "NN"
+              else if (
+                (field.nombre === "codigo_entrega" ||
+                  field.label === "Código") &&
+                campaign.code === "TA"
+              ) {
+                defaultAnswers[field.nombre] = "NN";
+              }
+            });
+          } catch (e) {
+            console.error("Error al parsear el esquema de la campaña:", e);
+            toast.error("Error al parsear el esquema de la campaña");
+          }
+
           acc[campaign.id] = {
             selected: false,
-            answers: {},
+            answers: defaultAnswers,
           };
           return acc;
         },
@@ -68,8 +96,6 @@ export default function NewModalForm({
 
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
-
-  // const createEntregaWithId = createEntrega.bind(null, userId);
 
   const checkValues = (campaign: Campaign) => {
     if (campaign.stock === null) return;
