@@ -84,11 +84,11 @@ export default function ModalEntregasDetail({
 
   let stateColor;
   if (estado_documentos === "Anulado") {
-    stateColor = "bg-rose-100/60 text-rose-600 ring-rose-100";
+    stateColor = "bg-red-100/70 text-red-600 ring-red-600/5";
   } else if (estado_documentos === "En Curso") {
-    stateColor = "bg-amber-100/60 text-amber-500/90 ring-amber-100";
+    stateColor = "bg-purple-100/70 text-purple-600 ring-purple-600/5";
   } else if (estado_documentos === "Finalizado") {
-    stateColor = "bg-emerald-100/60 text-emerald-600 ring-emerald-100";
+    stateColor = "bg-emerald-100/70 text-emerald-600 ring-emerald-600/5";
   }
 
   const handleTabChange = async (newTab: string) => {
@@ -170,12 +170,12 @@ export default function ModalEntregasDetail({
         </div>
 
         {/* Beneficiario Card */}
-        <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative flex items-center gap-4">
-            <div className="flex flex-col">
+        <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm transition-all sm:flex-row sm:items-center sm:justify-between sm:p-5">
+          <div className="relative flex w-full items-center gap-4">
+            <div className="flex w-full flex-col">
               <Link
                 href={`/dashboard/entregas/${rut}`}
-                className="font-bold leading-tight text-slate-800 hover:cursor-pointer hover:underline sm:text-lg"
+                className="text-sm font-bold leading-tight text-slate-800 hover:cursor-pointer hover:underline sm:text-lg"
               >
                 {rshName || (
                   <span className="animate-pulse rounded bg-slate-200 text-transparent">
@@ -183,31 +183,35 @@ export default function ModalEntregasDetail({
                   </span>
                 )}
               </Link>
-              <div className="mt-1 flex items-center gap-3 text-xs font-medium text-slate-500">
-                <span className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-slate-500">
-                  RUT:{" "}
-                  <p className="font-medium text-slate-700">{formattedRUT}</p>
-                </span>
+              <div className="mt-1 flex w-full flex-1 items-center justify-between">
+                <div className="flex items-center gap-3 text-xs font-medium text-slate-500">
+                  <span className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-slate-500">
+                    RUT:{" "}
+                    <p className="font-medium text-slate-700">{formattedRUT}</p>
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 pl-2 sm:pl-0">
+                  <p className="hidden text-xs text-slate-400 sm:block">
+                    Estado
+                  </p>
+                  <button
+                    onClick={handleEntregaStatus}
+                    disabled={isToggleButtonDisabled}
+                    className={`group flex shrink-0 items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset transition-all hover:ring-2 active:scale-95 disabled:opacity-70 ${stateColor} ${
+                      isToggleButtonDisabled
+                        ? "cursor-not-allowed"
+                        : "cursor-pointer"
+                    }`}
+                  >
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-75"></span>
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-current"></span>
+                    </span>
+                    {estado_documentos}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Status Action */}
-          <div className="flex items-center gap-2 pl-2 sm:pl-0">
-            <p className="text-xs text-slate-400">Estado</p>
-            <button
-              onClick={handleEntregaStatus}
-              disabled={isToggleButtonDisabled}
-              className={`group flex items-center gap-2 rounded-full py-1 pl-2 pr-3 text-xs font-medium ring-1 ring-inset transition-all hover:ring-2 active:scale-95 disabled:opacity-70 ${stateColor} ${
-                isToggleButtonDisabled ? "cursor-not-allowed" : "cursor-pointer"
-              }`}
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-75"></span>
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-current"></span>
-              </span>
-              {estado_documentos}
-            </button>
           </div>
         </div>
       </div>
