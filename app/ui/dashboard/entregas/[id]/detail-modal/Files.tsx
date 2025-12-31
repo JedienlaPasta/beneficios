@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { deletePDFById, downloadPDFById } from "@/app/lib/actions/entregas";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Eye } from "lucide-react";
 
 export default function Files({
   item,
@@ -145,7 +146,8 @@ export default function Files({
           disabled={!isHovered}
           title="Ver"
         >
-          <svg
+          <Eye className="h-4 w-4" />
+          {/* <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-4 w-4"
             fill="none"
@@ -158,7 +160,7 @@ export default function Files({
               strokeWidth={2}
               d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
             />
-          </svg>
+          </svg> */}
         </button>
         <button
           className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-gray-500 text-white transition-all hover:bg-red-500 active:scale-90"
