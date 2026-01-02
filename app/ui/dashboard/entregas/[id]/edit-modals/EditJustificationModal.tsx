@@ -88,14 +88,14 @@ export default function EditJustificationModal({
           <CloseModalButton name="justification" />
         </section>
         <p className="text-xs text-gray-500">
-          Puedes redactar una justificación de hasta 390 caracteres.
+          Puedes redactar una justificación de hasta 400 caracteres.
         </p>
 
         <form
           onSubmit={handleSubmit}
           className="overflow-y-auto scrollbar-hide"
         >
-          <motion.div className="relative grid min-h-[6rem] gap-6">
+          <motion.div className="relative mx-0.5 grid min-h-[6rem] gap-4">
             <AnimatePresence mode="wait">
               <motion.section
                 key="obligatorio"
@@ -123,13 +123,18 @@ export default function EditJustificationModal({
                       name="justification"
                       id="justification"
                       // cols={30}
-                      rows={10}
-                      maxLength={390}
+                      rows={7}
+                      maxLength={400}
                       value={justification}
                       onChange={(e) => setJustification(e.target.value)}
                       placeholder="Justificación..."
-                      className="w-full rounded-lg border border-slate-300 bg-transparent bg-white px-4 py-2 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus-within:border-blue-500"
+                      className="min-h-[80px] w-full rounded-lg border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700 shadow-sm outline-none transition-all placeholder:text-[13px] placeholder:text-slate-400 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100"
                     ></textarea>
+                    <div className="mt-0.5 flex justify-end">
+                      <span className="text-xs text-slate-500">
+                        {justification.length}/400 caracteres
+                      </span>
+                    </div>
                   </div>
                 </div>
               </motion.section>

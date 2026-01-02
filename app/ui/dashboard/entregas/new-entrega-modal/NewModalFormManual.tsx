@@ -385,7 +385,7 @@ export default function NewModalFormManual({
           name="observaciones"
           id="observaciones"
           rows={3}
-          maxLength={450}
+          maxLength={400}
           value={observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
           placeholder="Se realiza esta entrega a causa de..."
@@ -393,7 +393,7 @@ export default function NewModalFormManual({
         ></textarea>
         <div className="mt-0.5 flex justify-end">
           <span className="text-xs text-slate-500">
-            {observaciones.length}/450 caracteres
+            {observaciones.length}/400 caracteres
           </span>
         </div>
       </div>
