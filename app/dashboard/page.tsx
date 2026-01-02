@@ -24,7 +24,8 @@ export default async function Home(props: HomeProps) {
   const searchParams = await props.searchParams;
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
-  const year = searchParams?.year || "2025";
+  const currentYear = String(new Date().getFullYear());
+  const year = searchParams?.year || currentYear;
 
   // Get userId from jwt
   const userSession = await getSession();
