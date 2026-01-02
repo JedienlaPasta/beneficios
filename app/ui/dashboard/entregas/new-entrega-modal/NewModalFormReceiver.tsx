@@ -20,6 +20,7 @@ import {
 import { ActiveCampaignsForEntregas } from "@/app/lib/data/campanas";
 
 const OPCIONES_PARENTESCO = [
+  "Representante de Organización",
   "Mamá",
   "Papá",
   "Abuelo",
@@ -29,7 +30,6 @@ const OPCIONES_PARENTESCO = [
   "Hermana",
 ];
 
-// --- COMPONENTE PRINCIPAL ---
 export default function NewModalFormReceiver({
   activeCampaigns,
   rut,

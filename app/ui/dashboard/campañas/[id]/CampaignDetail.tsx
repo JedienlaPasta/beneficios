@@ -4,7 +4,6 @@ import StaticRequirementsCard from "./StaticCardRequirements";
 import { fetchCampaignById } from "@/app/lib/data/campanas";
 import { redirect } from "next/navigation";
 import RoleGuard from "@/app/ui/auth/role-guard";
-// import EntregasStockSummary from "./entregas-stock-summary"; // POR ELIMINAR SI NO LO UTILIZO
 
 export default async function CampaignDetail({ id }: { id: string }) {
   const {
