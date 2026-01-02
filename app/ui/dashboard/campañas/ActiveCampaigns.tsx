@@ -1,4 +1,4 @@
-import { fetchActiveCampaigns } from "@/app/lib/data/campanas";
+import { getActiveCampaigns } from "@/app/lib/data/campanas";
 import { formatDate } from "@/app/lib/utils/format";
 import { FaBoxOpen } from "react-icons/fa6";
 import Link from "next/link";
@@ -6,11 +6,11 @@ import Link from "next/link";
 type ActiveCampaignsProps = {
   nombre_campaña: string;
   termina: Date | null;
-  entregas: number | null;
+  total_entregas: number | null;
 };
 
 export default async function ActiveCampaigns() {
-  const response = await fetchActiveCampaigns();
+  const response = await getActiveCampaigns();
   return (
     <>
       <div className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-3">
@@ -19,7 +19,7 @@ export default async function ActiveCampaigns() {
             <ActiveCampaign
               nombre_campaña={campaign.nombre_campaña}
               termina={campaign.fecha_termino}
-              entregas={campaign.entregas}
+              total_entregas={campaign.entregas}
             />
           </Link>
         ))}
@@ -31,7 +31,7 @@ export default async function ActiveCampaigns() {
 function ActiveCampaign({
   nombre_campaña,
   termina,
-  entregas,
+  total_entregas,
 }: ActiveCampaignsProps) {
   const fecha_termino = formatDate(termina);
   return (
@@ -70,7 +70,7 @@ function ActiveCampaign({
         </div>
         <div className="flex flex-col items-end">
           <span className="relative right-0 text-2xl font-bold text-slate-600 transition-all duration-500 group-hover:right-3 group-hover:text-blue-50">
-            {entregas ? entregas : 0}
+            {total_entregas ? total_entregas : 0}
           </span>
           <span className="text-xs font-medium uppercase tracking-wider text-slate-400 transition-all duration-500 group-hover:text-blue-300">
             Entregas

@@ -143,20 +143,128 @@ export async function fetchCampaigns(
   }
 }
 
-export async function fetchActiveCampaigns(): Promise<Campaign[]> {
+type ActiveCampaigns = {
+  id: string;
+  nombre_campaña: string;
+  fecha_inicio: Date;
+  fecha_termino: Date;
+  entregas: number;
+};
+
+export async function getActiveCampaigns(): Promise<ActiveCampaigns[]> {
   try {
     const pool = await connectToDB();
     if (!pool) {
       console.warn("No se pudo establecer una conexión a la base de datos.");
       return [];
     }
+
+    const currentYear = new Date().getFullYear();
+    const startOfYear = new Date(currentYear, 0, 1);
+    const endOfYear = new Date(currentYear, 11, 31, 23, 59, 59);
+
     const request = pool.request();
+
+    // Inyectamos fechas para el conteo
+    request.input("startDate", sql.DateTime, startOfYear);
+    request.input("endDate", sql.DateTime, endOfYear);
+
     const result = await request.query(`
-      SELECT * FROM campañas 
-      WHERE fecha_inicio <= GETUTCDATE() AND fecha_termino >= CAST(GETUTCDATE() AS DATE)
-      ORDER BY fecha_inicio DESC
-      `);
-    return result.recordset as Campaign[];
+      SELECT 
+        c.id,
+        c.nombre_campaña,
+        c.fecha_inicio,
+        c.fecha_termino,
+        
+        -- SUBCONSULTA: Cuenta las entregas solo de este año para esta campaña
+        (
+            SELECT COUNT(*)
+            FROM beneficios_entregados be
+            INNER JOIN entregas e ON be.folio = e.folio
+            WHERE be.id_campaña = c.id
+              AND e.estado_documentos <> 'Anulado'
+              AND e.fecha_entrega BETWEEN @startDate AND @endDate
+        ) as total_entregas
+
+      FROM campañas c
+      WHERE c.fecha_inicio <= GETUTCDATE() 
+        AND c.fecha_termino >= CAST(GETUTCDATE() AS DATE)
+      ORDER BY c.fecha_inicio DESC
+    `);
+
+    return result.recordset as ActiveCampaigns[];
+  } catch (error) {
+    console.error("Error al obtener campañas activas:", error);
+    return [];
+  }
+}
+
+export type ActiveCampaignsForEntregas = {
+  id: string;
+  nombre_campaña: string;
+  code: string;
+  stock: number;
+  entregas: number;
+  esquema_formulario: string;
+};
+
+export async function getActiveCampaignsForEntregas(): Promise<
+  ActiveCampaignsForEntregas[]
+> {
+  try {
+    const pool = await connectToDB();
+    if (!pool) {
+      console.warn("No se pudo establecer una conexión a la base de datos.");
+      return [];
+    }
+
+    const currentYear = new Date().getFullYear();
+    const startOfYear = new Date(currentYear, 0, 1);
+    const endOfYear = new Date(currentYear, 11, 31, 23, 59, 59);
+
+    const request = pool.request();
+
+    // Inyectamos fechas para el conteo
+    request.input("startDate", sql.DateTime, startOfYear);
+    request.input("endDate", sql.DateTime, endOfYear);
+
+    const result = await request.query(`
+      SELECT 
+        c.id,
+        c.nombre_campaña,
+        c.code,
+        c.stock,
+        c.esquema_formulario,
+        
+        -- SUBCONSULTA: Cuenta las entregas solo de este año para esta campaña
+        (
+            SELECT COUNT(*)
+            FROM beneficios_entregados be
+            INNER JOIN entregas e ON be.folio = e.folio
+            WHERE be.id_campaña = c.id
+              AND e.estado_documentos <> 'Anulado'
+              AND e.fecha_entrega BETWEEN @startDate AND @endDate
+        ) as total_entregas
+
+      FROM campañas c
+      WHERE c.fecha_inicio <= GETUTCDATE() 
+        AND c.fecha_termino >= CAST(GETUTCDATE() AS DATE)
+      ORDER BY c.fecha_inicio DESC
+    `);
+
+    // Mapeo seguro de datos
+    const campaigns: ActiveCampaignsForEntregas[] = result.recordset.map(
+      (row) => ({
+        id: row.id,
+        nombre_campaña: row.nombre_campaña,
+        code: row.code,
+        stock: row.stock,
+        entregas: row.total_entregas ?? 0,
+        esquema_formulario: row.esquema_formulario || "",
+      }),
+    );
+
+    return campaigns;
   } catch (error) {
     console.error("Error al obtener campañas activas:", error);
     return [];

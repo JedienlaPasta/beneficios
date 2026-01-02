@@ -1,7 +1,6 @@
 "use client";
 import { createEntrega } from "@/app/lib/actions/entregas";
 import { getReceiverByRut } from "@/app/lib/actions/rsh";
-import { Campaign } from "@/app/lib/definitions";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -18,6 +17,7 @@ import {
   FormValue,
   NewModalFormProps,
 } from "./NewModalForm";
+import { ActiveCampaignsForEntregas } from "@/app/lib/data/campanas";
 
 const OPCIONES_PARENTESCO = [
   "Mamá",
@@ -113,7 +113,7 @@ export default function NewModalFormReceiver({
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
-  // --- LÓGICA DE BÚSQUEDA ---
+  // Búsqueda de Receptor
   const handleSearchReceiver = async () => {
     if (!rutReceiver || rutReceiver.length < 8) {
       toast.error("Ingrese un RUT válido para buscar");
@@ -141,22 +141,28 @@ export default function NewModalFormReceiver({
     }
   };
 
-  // Helpers de Stock
-  const checkValues = (campaign: Campaign): boolean => {
-    if (campaign.stock === null || campaign.entregas === null) return false;
-    return campaign.stock - campaign.entregas < 1;
+  const isOutOfStock = (campaign: ActiveCampaignsForEntregas) => {
+    // Si stock es null, es "infinito" o "sin limite"
+    if (campaign.stock === null) return false;
+    const entregasRealizadas = campaign.entregas ?? 0;
+
+    // Stock disponible
+    const remaining = campaign.stock - entregasRealizadas;
+
+    // Si queda menos de 1, está sin stock
+    return remaining < 1;
   };
 
-  const getStock = (campaign: Campaign) => {
+  const getStockLabel = (campaign: ActiveCampaignsForEntregas) => {
     if (campaign.stock === null) return "Sin límite";
     if (campaign.entregas === null) return 0;
     return campaign.stock - campaign.entregas;
   };
 
   // Handlers
-  const handleCheckboxChange = (campaign: Campaign) => {
+  const handleCheckboxChange = (campaign: ActiveCampaignsForEntregas) => {
     const campaignId = campaign.id;
-    if (!checkValues(campaign)) {
+    if (!isOutOfStock(campaign)) {
       setSelectedCampaigns((prev) => ({
         ...prev,
         [campaignId]: {
@@ -407,7 +413,7 @@ export default function NewModalFormReceiver({
         <div className="space-y-3">
           {activeCampaigns?.map((campaign) => {
             const isSelected = !!selectedCampaigns[campaign.id]?.selected;
-            const isOutOfStock = !!checkValues(campaign);
+            const outOfStock = isOutOfStock(campaign);
 
             return (
               <div
@@ -415,7 +421,7 @@ export default function NewModalFormReceiver({
                 className={`overflow-hidden rounded-lg border bg-white shadow-sm transition-all hover:border-slate-300 ${
                   isSelected
                     ? "!border-blue-300 ring-2 ring-blue-200"
-                    : isOutOfStock
+                    : outOfStock
                       ? "!border-rose-300"
                       : "!border-slate-200"
                 }`}
@@ -429,7 +435,7 @@ export default function NewModalFormReceiver({
                     className={`flex h-5 w-5 items-center justify-center rounded-md border ${
                       isSelected
                         ? "border-blue-500 bg-blue-500"
-                        : isOutOfStock
+                        : outOfStock
                           ? "!border-rose-300"
                           : "!border-slate-200"
                     }`}
@@ -453,14 +459,14 @@ export default function NewModalFormReceiver({
                   <div className="flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <label
-                        className={`cursor-pointer text-sm font-medium ${isOutOfStock ? "text-rose-400" : "text-slate-700"}`}
+                        className={`cursor-pointer text-sm font-medium ${outOfStock ? "text-rose-400" : "text-slate-700"}`}
                       >
                         {campaign.nombre_campaña}
                       </label>
                       <span
-                        className={`rounded-full border px-2 py-0.5 text-xs ${isOutOfStock ? "border-rose-300 bg-rose-50 text-rose-500" : "border-gray-200 bg-gray-50 text-gray-600"}`}
+                        className={`rounded-full border px-2 py-0.5 text-xs ${outOfStock ? "border-rose-300 bg-rose-50 text-rose-500" : "border-gray-200 bg-gray-50 text-gray-600"}`}
                       >
-                        Stock: {getStock(campaign)}
+                        Stock: {getStockLabel(campaign)}
                       </span>
                     </div>
                   </div>

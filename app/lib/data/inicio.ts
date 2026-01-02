@@ -16,23 +16,24 @@ export async function fetchGeneralInfo(): Promise<GeneralInfo> {
       };
     }
     const request = pool.request();
-    const currentYear = String(new Date().getFullYear()).substring(2);
-    console.log(currentYear);
+
+    const currentYear = new Date().getFullYear();
+    const startOfYear = new Date(currentYear, 0, 1); // 1 de Enero 00:00:00
+    const endOfYear = new Date(currentYear, 11, 31, 23, 59, 59);
 
     const activeCampaignsResult = await request.query(`
       SELECT COUNT(*) as active_campaigns
       FROM campañas
-      WHERE fecha_inicio <= GETUTCDATE() AND fecha_termino >= GETUTCDATE()
+      WHERE fecha_inicio <= GETUTCDATE() AND fecha_termino >= CAST(GETUTCDATE() AS DATE)
     `);
 
-    // Add parameter input for @currentYear to the SQL query to prevent SQL injection
-    request.input("currentYear", sql.VarChar(2), currentYear);
+    request.input("start", sql.DateTime, startOfYear);
+    request.input("end", sql.DateTime, endOfYear);
     const totalEntregasResult = await request.query(`
-      SELECT COUNT(*) as total_entregas
-      FROM beneficios_entregados be
-      JOIN entregas e ON be.folio = e.folio
-      WHERE e.estado_documentos <> 'Anulado'
-      AND e.folio_year = @currentYear
+      SELECT COUNT(folio) as total_entregas
+      FROM entregas
+      WHERE estado_documentos <> 'Anulado'
+      AND fecha_entrega BETWEEN @start AND @end
     `);
 
     const totalBeneficiariosResult = await request.query(`
@@ -68,7 +69,6 @@ export async function fetchDailyEntregasCountByYear(year: string) {
     }
     const request = pool.request();
 
-    // Use parameterized query to prevent SQL injection
     const result = await request
       .input("startDate", sql.Date, `${year}-01-01`)
       .input("endDate", sql.Date, `${year}-12-31`).query(`

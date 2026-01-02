@@ -1,4 +1,4 @@
-import { fetchActiveCampaigns } from "@/app/lib/data/campanas";
+import { getActiveCampaignsForEntregas } from "@/app/lib/data/campanas";
 import NewEntregaModal from "./NewEntregaModal";
 import { getSession } from "@/app/lib/session";
 import { cookies } from "next/headers";
@@ -10,7 +10,7 @@ type NewEntregaModalContextProps = {
 export default async function NewEntregaModalContext({
   rut,
 }: NewEntregaModalContextProps) {
-  const response = await fetchActiveCampaigns();
+  const response = await getActiveCampaignsForEntregas();
 
   const userSession = await getSession();
   if (!userSession?.userId) {

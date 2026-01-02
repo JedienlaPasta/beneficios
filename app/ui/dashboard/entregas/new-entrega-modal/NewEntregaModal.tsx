@@ -1,16 +1,16 @@
 "use client";
-import { Campaign } from "@/app/lib/definitions";
 import CloseModalButton from "../../CloseModalButton";
 import NewModalForm from "./NewModalForm";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import NewModalFormManual from "./NewModalFormManual";
 import NewModalFormReceiver from "./NewModalFormReceiver";
+import { ActiveCampaignsForEntregas } from "@/app/lib/data/campanas";
 
-type NewEntregaModalProps = {
+export type NewEntregaModalProps = {
   rut: string;
   userId: string;
-  activeCampaigns: Campaign[];
+  activeCampaigns: ActiveCampaignsForEntregas[];
   userRole: string;
 };
 

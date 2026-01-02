@@ -2,11 +2,11 @@
 import { toast } from "sonner";
 import { SubmitButton } from "../../SubmitButton";
 import { useState } from "react";
-import { Campaign } from "@/app/lib/definitions";
 import { createEntrega } from "@/app/lib/actions/entregas";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { DynamicFieldsRenderer } from "./DynamicFieldsRenderer";
+import { ActiveCampaignsForEntregas } from "@/app/lib/data/campanas";
 
 export type FormValue = string | number | boolean | null | undefined;
 
@@ -19,7 +19,7 @@ export type DynamicFieldSchema = {
 };
 
 export type NewModalFormProps = {
-  activeCampaigns?: Campaign[];
+  activeCampaigns?: ActiveCampaignsForEntregas[];
   rut: string;
   userId?: string;
 };
@@ -97,23 +97,29 @@ export default function NewModalForm({
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
-  const checkValues = (campaign: Campaign) => {
-    if (campaign.stock === null) return;
-    if (campaign.entregas === null) return;
-    if (campaign.stock - campaign.entregas < 1) return true;
-    return false;
+  const isOutOfStock = (campaign: ActiveCampaignsForEntregas) => {
+    // Si stock es null, es "infinito" o "sin limite"
+    if (campaign.stock === null) return false;
+    const entregasRealizadas = campaign.entregas ?? 0;
+
+    // Stock disponible
+    const remaining = campaign.stock - entregasRealizadas;
+
+    // Si queda menos de 1, está sin stock
+    return remaining < 1;
   };
 
-  const getStock = (campaign: Campaign) => {
+  const getStockLabel = (campaign: ActiveCampaignsForEntregas) => {
     if (campaign.stock === null) return "Sin límite";
-    if (campaign.entregas === null) return 0;
-    return campaign.stock - campaign.entregas;
+    const remaining = campaign.stock - (campaign.entregas ?? 0);
+    return Math.max(0, remaining); // Para que nunca muestre números negativos visualmente
   };
 
-  const handleCheckboxChange = (campaign: Campaign) => {
+  // Handlers
+  const handleCheckboxChange = (campaign: ActiveCampaignsForEntregas) => {
     const campaignId = campaign.id;
 
-    if (!checkValues(campaign)) {
+    if (!isOutOfStock(campaign)) {
       setSelectedCampaigns((prev) => ({
         ...prev,
         [campaignId]: {
@@ -252,7 +258,7 @@ export default function NewModalForm({
         <div className="space-y-3">
           {activeCampaigns?.map((campaign) => {
             const isSelected = !!selectedCampaigns[campaign.id]?.selected;
-            const isOutOfStock = !!checkValues(campaign);
+            const outOfStock = isOutOfStock(campaign);
 
             return (
               <div
@@ -260,7 +266,7 @@ export default function NewModalForm({
                 className={`overflow-hidden rounded-lg border bg-white shadow-sm transition-all hover:border-slate-300 ${
                   isSelected
                     ? "!border-blue-300 ring-2 ring-blue-200"
-                    : isOutOfStock
+                    : outOfStock
                       ? "!border-rose-300"
                       : "!border-slate-200"
                 }`}
@@ -274,7 +280,7 @@ export default function NewModalForm({
                     className={`flex h-5 w-5 items-center justify-center rounded-md border ${
                       isSelected
                         ? "border-blue-500 bg-blue-500"
-                        : isOutOfStock
+                        : outOfStock
                           ? "!border-rose-300"
                           : "!border-slate-200"
                     }`}
@@ -298,14 +304,14 @@ export default function NewModalForm({
                   <div className="flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <label
-                        className={`cursor-pointer text-sm font-medium ${isOutOfStock ? "text-rose-400" : "text-slate-700"}`}
+                        className={`cursor-pointer text-sm font-medium ${outOfStock ? "text-rose-400" : "text-slate-700"}`}
                       >
                         {campaign.nombre_campaña}
                       </label>
                       <span
-                        className={`rounded-full border px-2 py-0.5 text-xs ${isOutOfStock ? "border-rose-300 bg-rose-50 text-rose-500" : "border-gray-200 bg-gray-50 text-gray-600"}`}
+                        className={`rounded-full border px-2 py-0.5 text-xs ${outOfStock ? "border-rose-300 bg-rose-50 text-rose-500" : "border-gray-200 bg-gray-50 text-gray-600"}`}
                       >
-                        Stock: {getStock(campaign)}
+                        Stock: {getStockLabel(campaign)}
                       </span>
                     </div>
                   </div>
