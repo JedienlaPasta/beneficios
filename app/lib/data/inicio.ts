@@ -16,6 +16,8 @@ export async function fetchGeneralInfo(): Promise<GeneralInfo> {
       };
     }
     const request = pool.request();
+    const currentYear = String(new Date().getFullYear()).substring(2);
+    console.log(currentYear);
 
     const activeCampaignsResult = await request.query(`
       SELECT COUNT(*) as active_campaigns
@@ -23,9 +25,14 @@ export async function fetchGeneralInfo(): Promise<GeneralInfo> {
       WHERE fecha_inicio <= GETUTCDATE() AND fecha_termino >= GETUTCDATE()
     `);
 
+    // Add parameter input for @currentYear to the SQL query to prevent SQL injection
+    request.input("currentYear", sql.VarChar(2), currentYear);
     const totalEntregasResult = await request.query(`
       SELECT COUNT(*) as total_entregas
-      FROM beneficios_entregados
+      FROM beneficios_entregados be
+      JOIN entregas e ON be.folio = e.folio
+      WHERE e.estado_documentos <> 'Anulado'
+      AND e.folio_year = @currentYear
     `);
 
     const totalBeneficiariosResult = await request.query(`
