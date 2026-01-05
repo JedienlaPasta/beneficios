@@ -126,14 +126,22 @@ export default function NewCampaignModal() {
       setDynamicFields([
         {
           id: Date.now(),
-          label: "Talla",
-          nombre: "talla",
+          label: "Categoría",
+          nombre: "categoria",
           tipo: "select",
-          opciones: "RN, P, M, G, XG, XXG",
+          opciones: "Infantil, Adulto",
           requerido: true,
         },
         {
           id: Date.now() + 1,
+          label: "Talla",
+          nombre: "talla",
+          tipo: "select",
+          opciones: "RN, P, M, G, XG, XXG, S, L, XL",
+          requerido: true,
+        },
+        {
+          id: Date.now() + 2,
           label: "Paquetes",
           nombre: "cantidad_paquetes",
           tipo: "number",
@@ -141,9 +149,9 @@ export default function NewCampaignModal() {
           requerido: true,
         },
         {
-          id: Date.now() + 2,
-          label: "Unidades Totales",
-          nombre: "cantidad_unidades",
+          id: Date.now() + 3,
+          label: "Unidades por Paquete",
+          nombre: "unidades_por_paquete",
           tipo: "number",
           opciones: "",
           requerido: true,
