@@ -506,9 +506,12 @@ export default function NewModalFormReceiver({
       </div>
 
       <div className="flex grow flex-col gap-1">
-        <label htmlFor="observaciones" className="text-xs text-slate-500">
+        <label className="ml-1 text-[10px] font-bold uppercase text-slate-500">
           Justificación
-          <span className="text-slate-400"> (opcional)</span>
+          <span className="text-[10px] font-normal text-slate-400">
+            {" "}
+            (opcional)
+          </span>
         </label>
         <textarea
           name="observaciones"

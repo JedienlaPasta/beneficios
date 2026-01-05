@@ -86,6 +86,7 @@ export default function NewModalForm({
     return {};
   });
 
+  console.log(selectedCampaigns);
   const searchParams = useSearchParams();
 
   const closeModal = () => {
@@ -260,10 +261,16 @@ export default function NewModalForm({
             const isSelected = !!selectedCampaigns[campaign.id]?.selected;
             const outOfStock = isOutOfStock(campaign);
 
+            const fieldsCount = JSON.parse(
+              campaign.esquema_formulario || "[]",
+            ).length;
+
+            const dynamicDuration = Math.min(0.2 + fieldsCount * 0.1, 1.0);
+
             return (
               <div
                 key={campaign.id}
-                className={`overflow-hidden rounded-lg border bg-white shadow-sm transition-all hover:border-slate-300 ${
+                className={`overflow-hiddens rounded-lg border bg-white shadow-sm transition-all hover:border-slate-300 ${
                   isSelected
                     ? "!border-blue-300 ring-2 ring-blue-200"
                     : outOfStock
@@ -320,13 +327,19 @@ export default function NewModalForm({
                 <AnimatePresence>
                   {isSelected && (
                     <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                      className="overflow-hidden"
+                      initial={{ height: 0, opacity: 0, overflow: "hidden" }}
+                      animate={{
+                        height: "auto",
+                        opacity: 1,
+                        transitionEnd: { overflow: "visible" },
+                      }}
+                      exit={{ height: 0, opacity: 0, overflow: "hidden" }}
+                      transition={{
+                        duration: dynamicDuration,
+                        ease: "easeInOut",
+                      }}
                     >
-                      <div className="border-t border-slate-100 bg-slate-50 p-3">
+                      <div className="rounded-b-lg border-t border-slate-100 bg-slate-50 p-3">
                         <DynamicFieldsRenderer
                           schemaString={campaign.esquema_formulario || "[]"}
                           values={selectedCampaigns[campaign.id]?.answers}
@@ -351,9 +364,12 @@ export default function NewModalForm({
       </div>
 
       <div className="flex grow flex-col gap-1">
-        <label htmlFor="observaciones" className="text-xs text-slate-500">
+        <label className="ml-1 text-[10px] font-bold uppercase text-slate-500">
           Justificación
-          <span className="text-slate-400"> (opcional)</span>
+          <span className="text-[10px] font-normal text-slate-400">
+            {" "}
+            (opcional)
+          </span>
         </label>
         <textarea
           name="observaciones"
