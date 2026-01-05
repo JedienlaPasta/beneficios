@@ -245,12 +245,12 @@ export default function NewModalForm({
       action={formAction}
       className="flex select-none flex-col gap-3 px-0.5 pt-2"
     >
-      <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 p-4">
-        <div className="mb-3 flex items-baseline justify-between border-b border-slate-200 bg-slate-50 pb-2">
+      <div className="rounded-lg border-slate-200 xs:border xs:bg-slate-50 xs:p-4 sm:mt-2">
+        <div className="mb-3 flex items-baseline justify-between border-b border-slate-200 pb-2 xs:bg-slate-50">
           <h3 className="text-sm font-medium text-slate-700">
             Beneficios seleccionados
           </h3>
-          <div className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+          <div className="hidden rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 xs:block">
             {Object.values(selectedCampaigns).filter((v) => v.selected).length}{" "}
             seleccionadas
           </div>
@@ -316,7 +316,7 @@ export default function NewModalForm({
                         {campaign.nombre_campaña}
                       </label>
                       <span
-                        className={`rounded-full border px-2 py-0.5 text-xs ${outOfStock ? "border-rose-300 bg-rose-50 text-rose-500" : "border-gray-200 bg-gray-50 text-gray-600"}`}
+                        className={`hidden rounded-full border px-2 py-0.5 text-xs xs:inline-block ${outOfStock ? "border-rose-300 bg-rose-50 text-rose-500" : "border-gray-200 bg-gray-50 text-gray-600"}`}
                       >
                         Stock: {getStockLabel(campaign)}
                       </span>

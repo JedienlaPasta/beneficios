@@ -140,7 +140,7 @@ export default function ModalEntregasDetail({
       layout
       layoutRoot
       transition={{ layout: { duration: 0.25 } }}
-      className="w-[38rem] max-w-full flex-1 shrink-0 overflow-hidden bg-white p-4 shadow-xl ring-1 ring-slate-200/70 transition-all duration-500 scrollbar-hide sm:rounded-3xl sm:bg-gray-50 sm:p-6 md:p-8"
+      className="w-full flex-1 shrink-0 overflow-hidden bg-white p-4 shadow-xl ring-1 ring-slate-200/70 transition-all duration-500 scrollbar-hide sm:w-[38rem] sm:rounded-3xl sm:bg-gray-50 sm:p-6 md:p-8"
     >
       {/* Header & Hero Section */}
       <div className="mb-3 flex flex-col gap-4">

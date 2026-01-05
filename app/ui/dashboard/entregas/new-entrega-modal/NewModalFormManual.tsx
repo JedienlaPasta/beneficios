@@ -271,12 +271,12 @@ export default function NewModalFormManual({
       />
 
       {/* Listado de Campañas (Dinámico) */}
-      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-        <div className="mb-3 flex items-baseline justify-between border-b border-slate-200 bg-slate-50 pb-2">
+      <div className="rounded-lg border-slate-200 xs:border xs:bg-slate-50 xs:p-4 sm:mt-2">
+        <div className="mb-3 flex items-baseline justify-between border-b border-slate-200 pb-2 xs:bg-slate-50">
           <h3 className="text-sm font-medium text-slate-700">
             Beneficios seleccionados
           </h3>
-          <div className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+          <div className="hidden rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 xs:block">
             {Object.values(selectedCampaigns).filter((v) => v.selected).length}{" "}
             seleccionadas
           </div>
@@ -287,10 +287,16 @@ export default function NewModalFormManual({
             const isSelected = !!selectedCampaigns[campaign.id]?.selected;
             const outOfStock = isOutOfStock(campaign);
 
+            const fieldsCount = JSON.parse(
+              campaign.esquema_formulario || "[]",
+            ).length;
+
+            const dynamicDuration = Math.min(0.2 + fieldsCount * 0.1, 1.0);
+
             return (
               <div
                 key={campaign.id}
-                className={`overflow-hidden rounded-lg border bg-white shadow-sm transition-all hover:border-slate-300 ${
+                className={`overflow-hiddens rounded-lg border bg-white shadow-sm transition-all hover:border-slate-300 ${
                   isSelected
                     ? "!border-blue-300 ring-2 ring-blue-200"
                     : outOfStock
@@ -327,6 +333,7 @@ export default function NewModalFormManual({
                       </svg>
                     )}
                   </div>
+
                   <div className="flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <label
@@ -335,7 +342,7 @@ export default function NewModalFormManual({
                         {campaign.nombre_campaña}
                       </label>
                       <span
-                        className={`rounded-full border px-2 py-0.5 text-xs ${outOfStock ? "border-rose-300 bg-rose-50 text-rose-500" : "border-gray-200 bg-gray-50 text-gray-600"}`}
+                        className={`hidden rounded-full border px-2 py-0.5 text-xs xs:inline-block ${outOfStock ? "border-rose-300 bg-rose-50 text-rose-500" : "border-gray-200 bg-gray-50 text-gray-600"}`}
                       >
                         Stock: {getStockLabel(campaign)}
                       </span>
@@ -346,13 +353,19 @@ export default function NewModalFormManual({
                 <AnimatePresence>
                   {isSelected && (
                     <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                      className="overflow-hidden"
+                      initial={{ height: 0, opacity: 0, overflow: "hidden" }}
+                      animate={{
+                        height: "auto",
+                        opacity: 1,
+                        transitionEnd: { overflow: "visible" },
+                      }}
+                      exit={{ height: 0, opacity: 0, overflow: "hidden" }}
+                      transition={{
+                        duration: dynamicDuration,
+                        ease: "easeInOut",
+                      }}
                     >
-                      <div className="border-t border-slate-100 bg-slate-50 p-3">
+                      <div className="rounded-b-lg border-t border-slate-100 bg-slate-50 p-3">
                         <DynamicFieldsRenderer
                           schemaString={campaign.esquema_formulario || "[]"}
                           values={selectedCampaigns[campaign.id]?.answers}
