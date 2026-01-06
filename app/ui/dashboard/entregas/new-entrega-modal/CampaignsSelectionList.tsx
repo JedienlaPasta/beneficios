@@ -3,6 +3,7 @@ import { FormValue } from "./NewModalForm";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { DynamicFieldsRenderer } from "./DynamicFieldsRenderer";
+import { toast } from "sonner";
 
 type CampaignsSelectionListProps = {
   selectedCampaigns: Record<
@@ -27,7 +28,7 @@ export default function CampaignsSelectionList({
   const isOutOfStock = (campaign: ActiveCampaignsForEntregas) => {
     // Si stock es null, es "infinito" o "sin limite"
     if (campaign.stock === null) return false;
-    const entregasRealizadas = campaign.entregas ?? 0;
+    const entregasRealizadas = campaign.total_entregas ?? 0;
 
     // Stock disponible
     const remaining = campaign.stock - entregasRealizadas;
@@ -38,23 +39,26 @@ export default function CampaignsSelectionList({
 
   const getStockLabel = (campaign: ActiveCampaignsForEntregas) => {
     if (campaign.stock === null) return "Sin límite";
-    const remaining = campaign.stock - (campaign.entregas ?? 0);
+    const remaining = campaign.stock - (campaign.total_entregas ?? 0);
     return Math.max(0, remaining); // Para que nunca muestre números negativos visualmente
   };
 
   // Handlers
   const handleCheckboxChange = (campaign: ActiveCampaignsForEntregas) => {
     const campaignId = campaign.id;
-    // Fix: Removido setLastSelection (unused)
-    if (!isOutOfStock(campaign)) {
-      setSelectedCampaigns((prev) => ({
-        ...prev,
-        [campaignId]: {
-          ...prev[campaignId],
-          selected: !prev[campaignId].selected,
-        },
-      }));
+
+    if (isOutOfStock(campaign)) {
+      toast.error(`La campaña '${campaign.nombre_campaña}' está sin stock.`);
+      return;
     }
+
+    setSelectedCampaigns((prev) => ({
+      ...prev,
+      [campaignId]: {
+        ...prev[campaignId],
+        selected: !prev[campaignId].selected,
+      },
+    }));
   };
 
   const handleFieldChange = (

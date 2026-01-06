@@ -19,7 +19,7 @@ export default async function ActiveCampaigns() {
             <ActiveCampaign
               nombre_campaña={campaign.nombre_campaña}
               termina={campaign.fecha_termino}
-              total_entregas={campaign.entregas}
+              total_entregas={campaign.total_entregas}
             />
           </Link>
         ))}

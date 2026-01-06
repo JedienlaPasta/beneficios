@@ -148,7 +148,7 @@ type ActiveCampaigns = {
   nombre_campaña: string;
   fecha_inicio: Date;
   fecha_termino: Date;
-  entregas: number;
+  total_entregas: number;
 };
 
 export async function getActiveCampaigns(): Promise<ActiveCampaigns[]> {
@@ -204,7 +204,7 @@ export type ActiveCampaignsForEntregas = {
   nombre_campaña: string;
   code: string;
   stock: number;
-  entregas: number;
+  total_entregas: number;
   esquema_formulario: string;
 };
 
@@ -259,7 +259,7 @@ export async function getActiveCampaignsForEntregas(): Promise<
         nombre_campaña: row.nombre_campaña,
         code: row.code,
         stock: row.stock,
-        entregas: row.total_entregas ?? 0,
+        total_entregas: row.total_entregas ?? 0,
         esquema_formulario: row.esquema_formulario || "",
       }),
     );
