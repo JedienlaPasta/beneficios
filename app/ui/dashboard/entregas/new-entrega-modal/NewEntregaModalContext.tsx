@@ -11,7 +11,6 @@ export default async function NewEntregaModalContext({
   rut,
 }: NewEntregaModalContextProps) {
   const response = await getActiveCampaignsForEntregas();
-  console.log(response);
 
   const userSession = await getSession();
   if (!userSession?.userId) {
