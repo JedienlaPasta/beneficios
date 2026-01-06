@@ -92,7 +92,6 @@ export default function NewCampaignModal() {
   // ]);
 
   // --- PRESETS / PLANTILLAS ---
-  // Esto reemplaza la lógica simple de antes. Ahora carga estructuras completas.
   const handleCampaignNameSelection = (value: string) => {
     setCampaignName(value);
 
@@ -137,7 +136,7 @@ export default function NewCampaignModal() {
           label: "Talla",
           nombre: "talla",
           tipo: "select",
-          opciones: "RN, P, M, G, XG, XXG, S, L, XL",
+          opciones: "RN, P, M, G, XG, XXG, XXXG, S, L, XL",
           requerido: true,
         },
         {
@@ -158,7 +157,7 @@ export default function NewCampaignModal() {
         },
       ]);
     } else {
-      // Default limpia o deja uno genérico
+      // Default limpia
       setCode("");
       setDynamicFields([
         {

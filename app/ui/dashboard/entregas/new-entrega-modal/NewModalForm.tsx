@@ -31,6 +31,7 @@ export default function NewModalForm({
 }: NewModalFormProps) {
   const router = useRouter();
   const [observaciones, setObservaciones] = useState("");
+  const [isAnimating, setIsAnimating] = useState<Record<string, boolean>>({});
 
   // Estado de Campañas (Dinámico)
   const [selectedCampaigns, setSelectedCampaigns] = useState<{
@@ -86,7 +87,6 @@ export default function NewModalForm({
     return {};
   });
 
-  console.log(selectedCampaigns);
   const searchParams = useSearchParams();
 
   const closeModal = () => {
@@ -270,13 +270,13 @@ export default function NewModalForm({
             return (
               <div
                 key={campaign.id}
-                className={`overflow-hiddens rounded-lg border bg-white shadow-sm transition-all hover:border-slate-300 ${
+                className={`relative rounded-lg border bg-white shadow-sm transition-all ${
                   isSelected
-                    ? "!border-blue-300 ring-2 ring-blue-200"
-                    : outOfStock
-                      ? "!border-rose-300"
-                      : "!border-slate-200"
+                    ? "z-[60] !border-blue-400 ring-2 ring-blue-200" // Subimos el z-index significativamente
+                    : "z-10 !border-slate-200"
                 }`}
+                // Agregamos esto para asegurar que el z-index se aplique correctamente en el flujo
+                style={{ position: "relative" }}
               >
                 <div
                   className="flex cursor-pointer items-start gap-3 p-3"
@@ -327,16 +327,35 @@ export default function NewModalForm({
                 <AnimatePresence>
                   {isSelected && (
                     <motion.div
-                      initial={{ height: 0, opacity: 0, overflow: "hidden" }}
+                      key="content"
+                      initial={{ height: 0, opacity: 0 }}
                       animate={{
                         height: "auto",
                         opacity: 1,
-                        transitionEnd: { overflow: "visible" },
                       }}
                       exit={{ height: 0, opacity: 0, overflow: "hidden" }}
                       transition={{
                         duration: dynamicDuration,
                         ease: "easeInOut",
+                      }}
+                      onAnimationStart={() =>
+                        setIsAnimating((prev) => ({
+                          ...prev,
+                          [campaign.id]: true,
+                        }))
+                      }
+                      onAnimationComplete={() =>
+                        setIsAnimating((prev) => ({
+                          ...prev,
+                          [campaign.id]: false,
+                        }))
+                      }
+                      // Estilo dinámico según el estado
+                      style={{
+                        overflow:
+                          isSelected && !isAnimating[campaign.id]
+                            ? "visible"
+                            : "hidden",
                       }}
                     >
                       <div className="rounded-b-lg border-t border-slate-100 bg-slate-50 p-3">

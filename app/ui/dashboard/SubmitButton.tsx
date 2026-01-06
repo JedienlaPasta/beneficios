@@ -15,7 +15,6 @@ export function SubmitButton({
     <button
       type="submit"
       disabled={isDisabled}
-      onClick={() => console.log(isDisabled)}
       className={`flex h-10 grow items-center justify-center rounded-lg text-sm font-medium transition-all active:scale-95 ${
         isDisabled
           ? "cursor-not-allowed bg-slate-300 text-slate-500"

@@ -30,6 +30,7 @@ export default function NewModalFormManual({
   const [encargado, setEncargado] = useState({ nombre: "", correo: "" });
 
   const [observaciones, setObservaciones] = useState("");
+  const [isAnimating, setIsAnimating] = useState<Record<string, boolean>>({});
 
   // Estado de Campañas (Dinámico)
   const [selectedCampaigns, setSelectedCampaigns] = useState<{
@@ -353,16 +354,35 @@ export default function NewModalFormManual({
                 <AnimatePresence>
                   {isSelected && (
                     <motion.div
-                      initial={{ height: 0, opacity: 0, overflow: "hidden" }}
+                      key="content"
+                      initial={{ height: 0, opacity: 0 }}
                       animate={{
                         height: "auto",
                         opacity: 1,
-                        transitionEnd: { overflow: "visible" },
                       }}
                       exit={{ height: 0, opacity: 0, overflow: "hidden" }}
                       transition={{
                         duration: dynamicDuration,
                         ease: "easeInOut",
+                      }}
+                      onAnimationStart={() =>
+                        setIsAnimating((prev) => ({
+                          ...prev,
+                          [campaign.id]: true,
+                        }))
+                      }
+                      onAnimationComplete={() =>
+                        setIsAnimating((prev) => ({
+                          ...prev,
+                          [campaign.id]: false,
+                        }))
+                      }
+                      // Estilo dinámico según el estado
+                      style={{
+                        overflow:
+                          isSelected && !isAnimating[campaign.id]
+                            ? "visible"
+                            : "hidden",
                       }}
                     >
                       <div className="rounded-b-lg border-t border-slate-100 bg-slate-50 p-3">

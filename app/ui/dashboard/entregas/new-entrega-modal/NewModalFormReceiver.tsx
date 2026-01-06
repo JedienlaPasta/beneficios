@@ -48,6 +48,7 @@ export default function NewModalFormReceiver({
   const [observaciones, setObservaciones] = useState("");
 
   // Estados de UI
+  const [isAnimating, setIsAnimating] = useState<Record<string, boolean>>({});
   const [isSearching, setIsSearching] = useState(false); // Estado para el spinner
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
@@ -481,16 +482,35 @@ export default function NewModalFormReceiver({
                 <AnimatePresence>
                   {isSelected && (
                     <motion.div
-                      initial={{ height: 0, opacity: 0, overflow: "hidden" }}
+                      key="content"
+                      initial={{ height: 0, opacity: 0 }}
                       animate={{
                         height: "auto",
                         opacity: 1,
-                        transitionEnd: { overflow: "visible" },
                       }}
                       exit={{ height: 0, opacity: 0, overflow: "hidden" }}
                       transition={{
                         duration: dynamicDuration,
                         ease: "easeInOut",
+                      }}
+                      onAnimationStart={() =>
+                        setIsAnimating((prev) => ({
+                          ...prev,
+                          [campaign.id]: true,
+                        }))
+                      }
+                      onAnimationComplete={() =>
+                        setIsAnimating((prev) => ({
+                          ...prev,
+                          [campaign.id]: false,
+                        }))
+                      }
+                      // Estilo dinámico según el estado
+                      style={{
+                        overflow:
+                          isSelected && !isAnimating[campaign.id]
+                            ? "visible"
+                            : "hidden",
                       }}
                     >
                       <div className="rounded-b-lg border-t border-slate-100 bg-slate-50 p-3">
