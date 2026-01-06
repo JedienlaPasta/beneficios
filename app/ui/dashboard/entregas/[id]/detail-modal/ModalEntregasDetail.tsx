@@ -9,7 +9,7 @@ import {
 import Link from "next/link";
 import { formatDate, formatRUT, formatTime } from "@/app/lib/utils/format";
 import RoleGuard from "@/app/ui/auth/role-guard";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { toggleEntregaStatus } from "@/app/lib/actions/entregas";
@@ -373,6 +373,7 @@ interface ModalGeneralInfoFieldProps {
   className?: string;
 }
 
+// Encargado // Fecha de Entrega // Justificación
 function ModalGeneralInfoField({
   name,
   children,
@@ -437,7 +438,7 @@ function EntregasListItem({ item }: { item: EntregaByFolio }) {
   };
 
   return (
-    <div className="group flex items-start justify-between gap-4 rounded-lg border border-slate-200/80 bg-white/80 px-3 py-2.5 transition-colors hover:shadow-sm">
+    <div className="group flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white/80 px-3 py-3 transition-colors hover:shadow-sm sm:flex-row sm:items-start sm:justify-between sm:gap-4">
       <div className="flex items-center gap-3">
         <Link
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm ring-1 ring-slate-200/70 transition-all hover:bg-blue-100"
@@ -456,15 +457,16 @@ function EntregasListItem({ item }: { item: EntregaByFolio }) {
         </div>
       </div>
 
-      <div className="flex flex-col items-end justify-center gap-0.5 text-right">
-        {/* Detalles dinámicos iterados */}
+      <div className="-mt-0.5 grid grid-cols-[max-content_1fr] gap-x-3 gap-y-0.5 border-t border-slate-200 px-1 pt-1.5 text-xs sm:mt-0 sm:grid-cols-[max-content_max-content] sm:justify-end sm:gap-x-2 sm:border-none sm:px-0 sm:pt-0">
         {Object.entries(details).map(([key, value]) => (
-          <p key={key} className="text-xs text-slate-500">
-            <span className="font-medium capitalize text-slate-700">
+          <Fragment key={key}>
+            <span className="text-left capitalize text-slate-500 sm:text-right">
               {getLabel(key)}:
-            </span>{" "}
-            {String(value)}
-          </p>
+            </span>
+            <span className="text-right font-medium text-slate-700 sm:text-left">
+              {String(value)}
+            </span>
+          </Fragment>
         ))}
       </div>
     </div>
