@@ -215,8 +215,45 @@ export default function NewCampaignModal() {
     setIsLoading(true);
     setIsDisabled(true);
 
-    // Preparar el esquema para la BD
-    // Convertimos el string de opciones "A, B" a array ["A", "B"]
+    // Validar campos dinámicos antes de continuar
+    for (const field of dynamicFields) {
+      if (!field.label.trim()) {
+        toast.error("Todos los campos deben tener una etiqueta.");
+        setIsLoading(false);
+        setIsDisabled(false);
+        return;
+      }
+      if (!field.nombre.trim()) {
+        toast.error(
+          `El campo "${field.label}" no tiene un nombre técnico válido.`,
+        );
+        setIsLoading(false);
+        setIsDisabled(false);
+        return;
+      }
+      if (!field.tipo) {
+        toast.error(
+          `El campo "${field.label}" debe tener un tipo seleccionado.`,
+        );
+        setIsLoading(false);
+        setIsDisabled(false);
+        return;
+      }
+      // Validar opciones para select
+      if (
+        field.tipo === "select" &&
+        (!field.opciones || !field.opciones.trim())
+      ) {
+        toast.error(
+          `El campo "${field.label}" es de tipo Selección y requiere opciones.`,
+        );
+        setIsLoading(false);
+        setIsDisabled(false);
+        return;
+      }
+    }
+
+    // Preparar el esquema para la DB
     const esquemaFinal = dynamicFields.map((field) => ({
       nombre: field.nombre,
       label: field.label,

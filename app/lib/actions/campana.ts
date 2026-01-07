@@ -133,6 +133,25 @@ export async function createCampaign(formData: FormData): Promise<FormState> {
       throw new Error("Ya existe una campaña activa con este nombre.");
     }
 
+    // Verificar si ya existe una campaña con el mismo código este año
+    const codeRequest = pool.request();
+    const codeCheckResult = await codeRequest.input(
+      "code_check",
+      sql.VarChar,
+      code!.toUpperCase(),
+    ).query(`
+        SELECT TOP 1 1 
+        FROM campañas 
+        WHERE code = @code_check 
+        AND YEAR(fecha_inicio) = YEAR(GETUTCDATE())
+      `);
+
+    if (codeCheckResult.recordset.length > 0) {
+      throw new Error(
+        `Ya existe una campaña con el código "${code}" registrada este año.`,
+      );
+    }
+
     const entregasIniciales = 0;
 
     // Modified query to return the inserted ID
