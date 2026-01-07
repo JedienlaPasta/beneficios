@@ -260,7 +260,7 @@ export default function NewCampaignModal() {
   };
 
   return (
-    <div className="flex max-h-full w-[40rem] max-w-full shrink-0 flex-col overflow-hidden rounded-xl bg-white p-8 shadow-xl transition-all">
+    <div className="flex w-full max-w-full flex-1 shrink-0 flex-col gap-2 overflow-hidden bg-white p-4 shadow-xl ring-1 ring-slate-200/70 transition-all duration-500 scrollbar-hide xs:w-full xs:rounded-3xl xs:p-8 sm:w-[32rem]">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold">Crear Campaña</h2>
         <CloseModalButton name="modal" />
@@ -272,7 +272,7 @@ export default function NewCampaignModal() {
       <div className="overflow-y-auto px-0.5 pr-2 scrollbar-hide">
         <form
           onSubmit={formAction}
-          className="mt-4 flex flex-col gap-5 bg-white"
+          className="mt-4 flex flex-col gap-4 bg-white xs:gap-5"
         >
           {/* SECCIÓN 1: DATOS GENERALES */}
           <CampaignNameDropdown
@@ -284,7 +284,7 @@ export default function NewCampaignModal() {
             required
           />
 
-          <div className="flex items-end gap-3">
+          <div className="flex flex-col gap-4 xs:flex-row xs:items-end xs:gap-3">
             <div className="grow">
               <Input
                 placeHolder="Stock..."
@@ -295,7 +295,7 @@ export default function NewCampaignModal() {
                 setData={(e) => handleStockChange(e)}
               />
             </div>
-            <div className="grow">
+            <div className="flex grow items-end gap-3">
               <Input
                 required={true}
                 placeHolder="Código..."
@@ -305,8 +305,8 @@ export default function NewCampaignModal() {
                 value={code}
                 setData={setCode}
               />
+              <CampaignCode descripcion={code ? code.toUpperCase() : "##"} />
             </div>
-            <CampaignCode descripcion={code ? code.toUpperCase() : "##"} />
           </div>
 
           <CustomAntdDatePicker

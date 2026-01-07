@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { DynamicField } from "./NewCampaignModal";
+import { AnimatePresence, motion } from "framer-motion";
 
 const PREDEFINED_LABELS = [
   "Código",
@@ -12,12 +13,13 @@ const PREDEFINED_LABELS = [
   "N° de Vale",
 ];
 
-const PREDEFINED_TYPES = ["text", "number", "select", "boolean"];
+const PREDEFINED_TYPES = ["text", "number", "select"];
+// const PREDEFINED_TYPES = ["text", "number", "select", "boolean"];
 const TYPE_META: Record<string, { display: string }> = {
   text: { display: "Texto" },
   number: { display: "Número" },
   select: { display: "Selección" },
-  boolean: { display: "Sí/No" },
+  // boolean: { display: "Sí/No" },
 };
 
 type Props = {
@@ -86,7 +88,7 @@ export default function DynamicFieldsConfig({
 
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-slate-200 bg-slate-50 p-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs font-semibold text-slate-600">
           Configuración del Formulario de Entrega
         </p>
@@ -112,7 +114,7 @@ export default function DynamicFieldsConfig({
               key={field.id}
               className="group relative flex flex-col gap-2 rounded border border-slate-200 bg-white p-3 shadow-sm"
             >
-              <div className="flex gap-2">
+              <div className="flex flex-col xs:flex-row xs:gap-2">
                 <div className="flex-1">
                   <label className="text-[10px] font-bold uppercase text-slate-400">
                     Etiqueta
@@ -156,35 +158,40 @@ export default function DynamicFieldsConfig({
                     </div>
 
                     {/* Lista desplegable */}
-                    {labelDropdownId === field.id && (
-                      <div className="absolute left-0 top-full z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-md border border-slate-200 bg-white shadow-lg ring-1 ring-black ring-opacity-5">
-                        <div className="border-t border-slate-100 bg-slate-50">
-                          <p className="px-3 py-1 text-[10px] font-semibold uppercase text-slate-400">
-                            Sugerencias
-                          </p>
-                          {PREDEFINED_LABELS.map((lbl) => (
-                            <button
-                              key={lbl}
-                              type="button"
-                              onMouseDown={() => {
-                                updateField(field.id, "label", lbl);
-                                setlabelDropdownId(null);
-                              }}
-                              className={`w-full px-3 py-2 text-left text-sm text-slate-500 ${
-                                field.label === lbl
-                                  ? "bg-slate-200/80 text-slate-800"
-                                  : "hover:bg-slate-100"
-                              }`}
-                            >
-                              {lbl}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                    <AnimatePresence>
+                      {labelDropdownId === field.id && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          transition={{ duration: 0.1 }}
+                          className="absolute left-0 top-full z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-md border border-slate-200 bg-white p-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                        >
+                          <div className="flex flex-col gap-1">
+                            {PREDEFINED_LABELS.map((lbl) => (
+                              <button
+                                key={lbl}
+                                type="button"
+                                onMouseDown={() => {
+                                  updateField(field.id, "label", lbl);
+                                  setlabelDropdownId(null);
+                                }}
+                                className={`w-full rounded px-3 py-2 text-left text-sm font-medium transition-colors ${
+                                  field.label === lbl
+                                    ? "bg-blue-50 font-medium text-blue-700"
+                                    : "text-slate-600 hover:bg-slate-50"
+                                }`}
+                              >
+                                {lbl}
+                              </button>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
-                <div className="w-1/3">
+                <div className="xs:w-1/3">
                   <label className="text-[10px] font-bold uppercase text-slate-400">
                     Tipo
                   </label>
@@ -193,13 +200,6 @@ export default function DynamicFieldsConfig({
                     <input
                       type="text"
                       value={TYPE_META[field.tipo]?.display || field.tipo}
-                      // onChange={(e) =>
-                      //   updateField(
-                      //     field.id,
-                      //     "tipo",
-                      //     e.target.value as DynamicField["tipo"],
-                      //   )
-                      // }
                       readOnly
                       onClick={() =>
                         typeDropdownId
@@ -231,67 +231,47 @@ export default function DynamicFieldsConfig({
                     </div>
 
                     {/* Lista desplegable */}
-                    {typeDropdownId === field.id && (
-                      <div className="absolute left-0 top-full z-50 mt-1 max-h-56 w-full overflow-y-auto rounded-md border border-slate-200 bg-white shadow-lg ring-1 ring-black ring-opacity-5">
-                        <div className="border-t border-slate-100 bg-slate-50">
-                          <p className="px-3 py-1 text-[10px] font-semibold uppercase text-slate-400">
-                            Sugerencias
-                          </p>
-                          {PREDEFINED_TYPES.map((type) => {
-                            const meta = TYPE_META[type] ?? { display: type };
-                            const selected = field.tipo === type;
-                            return (
-                              <button
-                                key={type}
-                                type="button"
-                                onMouseDown={() => {
-                                  updateField(
-                                    field.id,
-                                    "tipo",
-                                    type as DynamicField["tipo"],
-                                  );
-                                  setTypeDropdownId(null);
-                                }}
-                                className={`w-full px-3 py-2 text-left text-sm ${
-                                  selected
-                                    ? "bg-blue-50 text-blue-700"
-                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
-                                }`}
-                              >
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium">
-                                    {meta.display}
-                                  </span>
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
+                    <AnimatePresence>
+                      {typeDropdownId === field.id && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          transition={{ duration: 0.1 }}
+                          className="absolute left-0 top-full z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-md border border-slate-200 bg-white p-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                        >
+                          <div className="flex flex-col gap-1">
+                            {PREDEFINED_TYPES.map((type) => {
+                              const meta = TYPE_META[type] ?? { display: type };
+                              const selected = field.tipo === type;
+                              return (
+                                <button
+                                  key={type}
+                                  type="button"
+                                  onMouseDown={() => {
+                                    updateField(
+                                      field.id,
+                                      "tipo",
+                                      type as DynamicField["tipo"],
+                                    );
+                                    setTypeDropdownId(null);
+                                  }}
+                                  className={`w-full rounded px-3 py-2 text-left text-sm font-medium transition-colors ${
+                                    selected
+                                      ? "bg-blue-50 font-medium text-blue-700"
+                                      : "text-slate-600 hover:bg-slate-50"
+                                  }`}
+                                >
+                                  {meta.display}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
-                {/* <div className="w-1/3">
-                  <label className="text-[10px] font-bold uppercase text-slate-400">
-                    Tipo
-                  </label>
-                  <select
-                    value={field.tipo}
-                    onChange={(e) =>
-                      updateField(
-                        field.id,
-                        "tipo",
-                        e.target.value as DynamicField["tipo"],
-                      )
-                    }
-                    className="w-full border-b border-slate-200 bg-transparent py-1 text-sm outline-none focus:border-blue-500"
-                  >
-                    <option value="text">Texto</option>
-                    <option value="number">Número</option>
-                    <option value="select">Selección</option>
-                    <option value="boolean">Si/No</option>
-                  </select>
-                </div> */}
               </div>
 
               {/* Opciones extra para Select */}
