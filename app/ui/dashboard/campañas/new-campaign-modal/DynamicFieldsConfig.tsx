@@ -13,14 +13,11 @@ const PREDEFINED_LABELS = [
 ];
 
 const PREDEFINED_TYPES = ["text", "number", "select", "boolean"];
-const TYPE_META: Record<
-  string,
-  { display: string; desc: string; iconText: string }
-> = {
-  text: { display: "Texto", desc: "Campo de texto libre", iconText: "Aa" },
-  number: { display: "Número", desc: "Solo números", iconText: "#" },
-  select: { display: "Selección", desc: "Lista de opciones", iconText: "▤" },
-  boolean: { display: "Sí/No", desc: "Opción binaria", iconText: "✓" },
+const TYPE_META: Record<string, { display: string }> = {
+  text: { display: "Texto" },
+  number: { display: "Número" },
+  select: { display: "Selección" },
+  boolean: { display: "Sí/No" },
 };
 
 type Props = {
@@ -59,6 +56,8 @@ export default function DynamicFieldsConfig({
       },
     ]);
   };
+
+  // console.log(dynamicFields);
 
   const removeField = (id: number) => {
     setDynamicFields(dynamicFields.filter((field) => field.id !== id));
@@ -193,14 +192,15 @@ export default function DynamicFieldsConfig({
                   <div className="relative">
                     <input
                       type="text"
-                      value={field.tipo}
-                      onChange={(e) =>
-                        updateField(
-                          field.id,
-                          "tipo",
-                          e.target.value as DynamicField["tipo"],
-                        )
-                      }
+                      value={TYPE_META[field.tipo]?.display || field.tipo}
+                      // onChange={(e) =>
+                      //   updateField(
+                      //     field.id,
+                      //     "tipo",
+                      //     e.target.value as DynamicField["tipo"],
+                      //   )
+                      // }
+                      readOnly
                       onClick={() =>
                         typeDropdownId
                           ? setTypeDropdownId(null)
@@ -208,7 +208,7 @@ export default function DynamicFieldsConfig({
                       }
                       onBlur={() => setTypeDropdownId(null)}
                       placeholder="Escribe o selecciona..."
-                      className="w-full border-b border-slate-200 bg-transparent py-1 pr-6 text-sm outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500"
+                      className="w-full cursor-pointer border-b border-slate-200 bg-transparent py-1 pr-6 text-sm outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500"
                     />
 
                     {/* Icono de chevron para indicar dropdown */}
@@ -238,11 +238,7 @@ export default function DynamicFieldsConfig({
                             Sugerencias
                           </p>
                           {PREDEFINED_TYPES.map((type) => {
-                            const meta = TYPE_META[type] ?? {
-                              display: type,
-                              desc: "",
-                              iconText: "",
-                            };
+                            const meta = TYPE_META[type] ?? { display: type };
                             const selected = field.tipo === type;
                             return (
                               <button
@@ -267,11 +263,6 @@ export default function DynamicFieldsConfig({
                                     {meta.display}
                                   </span>
                                 </div>
-                                {meta.desc && (
-                                  <div className="mt-0.5 text-xs text-slate-400">
-                                    {meta.desc}
-                                  </div>
-                                )}
                               </button>
                             );
                           })}

@@ -269,18 +269,19 @@ export default function NewCampaignModal() {
         Configura los datos generales y estructura el formulario de entrega.
       </p>
 
-      <div className="overflow-y-auto pr-2 scrollbar-hide">
+      <div className="overflow-y-auto px-0.5 pr-2 scrollbar-hide">
         <form
           onSubmit={formAction}
           className="mt-4 flex flex-col gap-5 bg-white"
         >
           {/* SECCIÓN 1: DATOS GENERALES */}
           <CampaignNameDropdown
-            label="Campaña (Plantilla)"
+            label="Campaña"
             name={"nombre"}
             campaignsList={campaignsList}
             campaignName={campaignName}
             setCampaign={handleCampaignNameSelection}
+            required
           />
 
           <div className="flex items-end gap-3">
