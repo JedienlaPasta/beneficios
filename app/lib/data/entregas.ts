@@ -616,14 +616,6 @@ export async function getActaDataByFolio(
 
         const detalles: { label: string; value: string }[] = [];
 
-        // (Codigo entregas viejas) ELIMINAR EVENTUALMENTE UNA VEZ CONFIRMADA LA MIGRACION DE DATOS A NUEVA
-        // if (b.codigo_entrega) {
-        //   detalles.push({
-        //     label: "Código / Serial",
-        //     value: String(b.codigo_entrega),
-        //   });
-        // }
-
         // Mapear campos dinámicos
         Object.entries(respuestas).forEach(([key, val]) => {
           // Buscar el label
@@ -634,6 +626,26 @@ export async function getActaDataByFolio(
 
           detalles.push({ label: label, value: String(val) });
         });
+
+        // Combinar Paquetes y Unidades (Solo para Pañales)
+        if (codigo === "PA") {
+          const packIndex = detalles.findIndex((d) => d.label === "Paquetes");
+          const unitIndex = detalles.findIndex(
+            (d) => d.label === "Unidades por Paquete",
+          );
+
+          if (packIndex !== -1 && unitIndex !== -1) {
+            const packs = detalles[packIndex].value;
+            const units = detalles[unitIndex].value;
+
+            // Actualizar el valor de Paquetes
+            detalles[packIndex].value =
+              `${packs} paquetes de ${units} unidades`;
+
+            // Eliminar la entrada de Unidades por Paquete
+            detalles.splice(unitIndex, 1);
+          }
+        }
 
         return { nombre, codigo, detalles };
       },
