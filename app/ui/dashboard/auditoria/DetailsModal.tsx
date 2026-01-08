@@ -105,7 +105,7 @@ function DetailItem({
   value,
   highlight = false,
 }: {
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   label: string;
   value: string | number | null;
   highlight?: boolean;
