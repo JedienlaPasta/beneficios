@@ -18,12 +18,12 @@ export default function BoardCube({
   const isToday = dateStr === today;
 
   const stateColor = [
-    "bg-slate-200/60 border-slate-300/40",
-    "bg-emerald-100/80 border-emerald-200/80",
-    "bg-emerald-100 border-emerald-200",
-    "bg-emerald-200 border-emerald-300",
-    "bg-emerald-300 border-emerald-400",
-    "bg-emerald-400 border-emerald-500",
+    "bg-slate-200/60 border-slate-300/50",
+    "bg-emerald-100/70 border-emerald-200/50",
+    "bg-emerald-200/70 border-emerald-300/50",
+    "bg-emerald-300/70 border-emerald-400/50",
+    "bg-emerald-400/70 border-emerald-500/50",
+    "bg-emerald-500/70 border-emerald-600/50",
   ];
 
   // Select the color based on count thresholds—or highlight if today.
