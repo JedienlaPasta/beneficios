@@ -16,7 +16,7 @@ export async function fetchEntregas(
   query: string,
   currentPage: number,
   resultsPerPage: number,
-  filters: { status?: string[]; userId?: string } = {},
+  filters: { status?: string[]; userId?: string; year?: string } = {},
 ): Promise<{ data: Entregas[]; pages: number }> {
   try {
     const pool = await connectToDB();
@@ -79,6 +79,10 @@ export async function fetchEntregas(
       whereClauses.push(`entregas.id_usuario = @userId`);
     }
 
+    // Filtro de Año (Por defecto año actual)
+    const targetYear = filters.year || new Date().getFullYear().toString();
+    whereClauses.push(`YEAR(entregas.fecha_entrega) = @year`);
+
     // Filtro de Búsqueda (Texto y RUT)
     if (trimmedQuery) {
       const searchConditions: string[] = [];
@@ -128,6 +132,9 @@ export async function fetchEntregas(
     const bindParams = (req: sql.Request) => {
       if (filters.userId)
         req.input("userId", sql.UniqueIdentifier, filters.userId);
+
+      // Siempre enviamos el año
+      req.input("year", sql.Int, parseInt(targetYear));
 
       if (trimmedQuery) {
         req.input("queryLike", sql.VarChar, `%${query}%`);

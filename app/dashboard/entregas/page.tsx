@@ -6,6 +6,7 @@ import EntregasTable from "@/app/ui/dashboard/entregas/EntregasTable";
 import ModalSkeleton from "@/app/ui/modal-skeleton";
 import ModalEntregasDetailContext from "@/app/ui/dashboard/entregas/[id]/detail-modal/ModalContext";
 import EntregasFilter from "@/app/ui/dashboard/entregas/EntregasFilter";
+import YearFilter from "@/app/ui/dashboard/entregas/YearFilter";
 import { Modal } from "@/app/ui/dashboard/Modal";
 import { getSession } from "@/app/lib/session";
 import EntregasTableSkeleton from "@/app/ui/dashboard/entregas/EntregasTableSkeleton";
@@ -22,6 +23,7 @@ type SocialAidProps = {
     rut?: string;
     status?: string;
     user?: string;
+    year?: string;
   }>;
 };
 
@@ -36,6 +38,7 @@ export default async function Entregas(props: SocialAidProps) {
   const rut = searchParams?.rut || "";
   const status = searchParams?.status || "";
   const userFilter = searchParams?.user || "me";
+  const year = searchParams?.year;
 
   const session = await getSession();
   const currentUserId = session?.userId ? String(session.userId) : "";
@@ -99,12 +102,17 @@ export default async function Entregas(props: SocialAidProps) {
             </div>
             {/* <div className="flex flex-col gap-2 sm:flex-row sm:items-center"> */}
             <div className="flex flex-wrap items-center gap-2">
-              {table === "entregas" && <EntregasFilter />}
+              {table === "entregas" && (
+                <>
+                  <YearFilter />
+                  <EntregasFilter />
+                </>
+              )}
               <SearchBar placeholder="Buscar..." />
             </div>
           </div>
           <Suspense
-            key={table + status + userFilter + currentPage}
+            key={table + status + userFilter + currentPage + (year || "")}
             fallback={<EntregasTableSkeleton />}
           >
             {table === "entregas" ? (
@@ -113,6 +121,7 @@ export default async function Entregas(props: SocialAidProps) {
                 currentPage={currentPage}
                 status={status}
                 userFilter={userFilter}
+                year={year}
                 currentUserId={currentUserId}
               />
             ) : (
