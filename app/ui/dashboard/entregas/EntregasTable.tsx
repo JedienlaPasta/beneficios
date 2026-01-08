@@ -7,6 +7,7 @@ type EntregasProps = {
   currentPage: number;
   status?: string;
   userFilter?: string;
+  year?: string;
   currentUserId?: string;
 };
 
@@ -15,11 +16,13 @@ export default async function EntregasTable({
   currentPage,
   status,
   userFilter,
+  year,
   currentUserId,
 }: EntregasProps) {
   const filters = {
     status: status ? status.split(",") : undefined,
     userId: userFilter === "me" ? currentUserId : undefined,
+    year,
   };
 
   const { data, pages } = await fetchEntregas(query, currentPage, 9, filters);
