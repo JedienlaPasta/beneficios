@@ -1,5 +1,5 @@
 "use client";
-import { useState, Fragment, useEffect } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -8,6 +8,7 @@ import { CancelButton, SubmitButton } from "../../../SubmitButton";
 import { updateBeneficioDetailsById } from "@/app/lib/actions/entregas";
 import { EntregaByFolio } from "@/app/lib/definitions";
 import { DynamicFieldsRenderer } from "../../new-entrega-modal/DynamicFieldsRenderer";
+import { FormValue } from "../../new-entrega-modal/NewModalForm";
 
 type Props = {
   folio: string;
@@ -30,7 +31,7 @@ export default function EditBeneficioModal({ folio, beneficio }: Props) {
   }
 
   const [editValues, setEditValues] =
-    useState<Record<string, any>>(initialDetails);
+    useState<Record<string, FormValue>>(initialDetails);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const router = useRouter();
@@ -75,7 +76,7 @@ export default function EditBeneficioModal({ folio, beneficio }: Props) {
     closeModal();
   };
 
-  const handleFieldChange = (fieldName: string, value: any) => {
+  const handleFieldChange = (fieldName: string, value: FormValue) => {
     setEditValues((prev) => ({
       ...prev,
       [fieldName]: value,
