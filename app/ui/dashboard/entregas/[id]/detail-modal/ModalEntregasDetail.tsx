@@ -279,7 +279,7 @@ export default function ModalEntregasDetail({
                   <ModalGeneralInfoField
                     span="col-span-2"
                     name="Justificación"
-                    className="relative rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2.5 tracking-tight"
+                    className="relative rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2.5"
                   >
                     {observacion || "No especificada"}
                   </ModalGeneralInfoField>
@@ -392,7 +392,7 @@ function ModalGeneralInfoField({
           {name === "Encargado" && <EditButton name="supervisor" />}
         </RoleGuard>
       </span>
-      <span className="relative text-[13px] text-slate-700 sm:text-sm">
+      <span className="relative text-[13px] tracking-tight text-slate-700 sm:text-sm">
         {value}
         {typeof children === "object" && (
           <p className="absolute left-[calc(100%+7px)] top-0 rounded bg-slate-200/60 px-2 py-0.5 text-xs text-slate-500">
