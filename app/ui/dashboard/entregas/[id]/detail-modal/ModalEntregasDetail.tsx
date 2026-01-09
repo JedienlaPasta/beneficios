@@ -488,10 +488,10 @@ function EntregasListItem({ item }: { item: EntregaByFolio }) {
         <div className="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-1 border-t border-slate-200 bg-slate-50/50 px-4 py-2 text-xs">
           {Object.entries(details).map(([key, value]) => (
             <Fragment key={key}>
-              <span className="min-w-36 text-left text-slate-500">
+              <span className="min-w-36 text-left text-slate-600">
                 {getLabel(key)}:
               </span>
-              <span className="min-w-20 text-right font-medium text-slate-700">
+              <span className="min-w-20 text-right font-medium text-slate-800">
                 {String(value)}
               </span>
             </Fragment>
