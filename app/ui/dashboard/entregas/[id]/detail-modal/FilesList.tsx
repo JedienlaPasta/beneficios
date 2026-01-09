@@ -21,7 +21,7 @@ export default function FilesList({
       </div>
 
       {files.length > 0 ? (
-        <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-sm sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-2 rounded-xl border border-slate-200/80 bg-white p-3 shadow-sm sm:grid-cols-2">
           {files.map((item: EntregasFiles, index) => (
             <Files key={index} item={item} folio={folio} />
           ))}
