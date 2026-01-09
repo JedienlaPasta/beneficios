@@ -100,7 +100,7 @@ export default function EntregasFilter() {
       ) : (
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="m-0.5 flex items-center rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-600 shadow-sm transition-colors hover:border-blue-200"
+          className="flex items-center rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-600 shadow-sm transition-colors hover:border-blue-200"
         >
           <Filter className="size-4" />
         </button>
@@ -141,7 +141,7 @@ export default function EntregasFilter() {
             onClick={clearFilters}
             className="w-full rounded-md px-2 py-2 text-left text-sm text-blue-600 hover:bg-blue-50"
           >
-            Todas (Limpiar filtros)
+            Limpiar filtros
           </button>
         </div>
       )}

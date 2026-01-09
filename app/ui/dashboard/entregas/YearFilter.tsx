@@ -55,21 +55,10 @@ export default function YearFilter() {
     <div ref={containerRef} className="relative flex items-center">
       <button
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm transition-colors hover:border-blue-200"
+        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 shadow-sm transition-colors hover:border-blue-200"
       >
         <Calendar className="h-4 w-4 text-slate-500" />
-        {/* <select
-          value={activeYear}
-          onChange={(e) => handleYearChange(e.target.value)}
-          className="cursor-pointer bg-transparent text-sm font-medium text-slate-700 outline-none hover:text-blue-600"
-          title="Filtrar por año"
-        >
-          {years.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select> */}
+        <span className="text-xs font-medium text-blue-600">{activeYear}</span>
       </button>
 
       {/* Dropdown */}
