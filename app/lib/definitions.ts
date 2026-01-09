@@ -84,6 +84,7 @@ export type EntregasTableByFolio = {
 
 // Modal Detalle Entrega
 export type EntregaByFolio = {
+  id: string;
   id_campaña: string;
   nombre_campaña: string;
   codigo_entrega: string | null; // Puede ser null ahora

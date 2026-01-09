@@ -43,7 +43,7 @@ export default function CitizenDetailModal({ citizen }: ModalProps) {
       layout
       layoutRoot
       transition={{ layout: { duration: 0.25 } }}
-      className="flex max-h-full w-[32rem] max-w-full shrink-0 flex-col gap-2 overflow-hidden rounded-xl bg-white p-8 shadow-xl" // Removed scrollbar-hide from here
+      className="flex w-full max-w-full flex-1 shrink-0 flex-col gap-2 overflow-hidden bg-white p-4 shadow-xl ring-1 ring-slate-200/70 transition-all duration-500 scrollbar-hide sm:w-[32rem] sm:rounded-3xl sm:p-8"
     >
       {/* Header */}
       <section className="flex flex-shrink-0 items-center justify-between">

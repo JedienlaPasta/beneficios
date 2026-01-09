@@ -99,7 +99,7 @@ export default function ImportXLSXModal({ name }: { name: string }) {
   };
 
   return (
-    <div className="grid max-h-dvh max-w-[30rem] shrink-0 flex-col gap-4 overflow-y-auto rounded-xl bg-white p-8 shadow-xl">
+    <div className="flex w-full max-w-full flex-1 shrink-0 flex-col gap-2 overflow-hidden bg-white p-4 shadow-xl ring-1 ring-slate-200/70 transition-all duration-500 scrollbar-hide sm:w-[28rem] sm:rounded-3xl sm:p-8">
       <div>
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">

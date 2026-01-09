@@ -297,7 +297,7 @@ export default function NewCampaignModal() {
   };
 
   return (
-    <div className="flex w-full max-w-full flex-1 shrink-0 flex-col gap-2 overflow-hidden bg-white p-4 shadow-xl ring-1 ring-slate-200/70 transition-all duration-500 scrollbar-hide xs:w-full xs:rounded-3xl xs:p-8 sm:w-[32rem]">
+    <div className="flex w-full max-w-full flex-1 shrink-0 flex-col gap-2 overflow-hidden bg-white p-4 shadow-xl ring-1 ring-slate-200/70 transition-all duration-500 scrollbar-hide sm:w-[32rem] sm:rounded-3xl sm:p-8">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold">Crear Campaña</h2>
         <CloseModalButton name="modal" />

@@ -6,12 +6,14 @@ import {
 import ModalEntregasDetail from "./ModalEntregasDetail";
 import EditJustificationModal from "../edit-modals/EditJustificationModal";
 import EditSupervisorModal from "../edit-modals/EditSupervisorModal";
+import EditBeneficioModal from "../edit-modals/EditBeneficioModal";
 
 type ModalContextProps = {
   folio: string;
   rut: string;
   isOnEditForJustification?: boolean;
   isOnEditForSupervisor?: boolean;
+  editBeneficioId?: string;
 };
 
 export default async function ModalEntregasDetailContext({
@@ -19,6 +21,7 @@ export default async function ModalEntregasDetailContext({
   rut,
   isOnEditForJustification,
   isOnEditForSupervisor,
+  editBeneficioId,
 }: ModalContextProps) {
   const [entregasResponse, beneficiosEntregadosResponse, filesResponse] =
     await Promise.all([
@@ -47,6 +50,17 @@ export default async function ModalEntregasDetailContext({
         prevSupervisor={entregas.nombre_usuario}
       />
     );
+  }
+
+  if (editBeneficioId) {
+    const beneficioToEdit = beneficiosEntregados.find(
+      (b) => String(b.id) === editBeneficioId,
+    );
+    if (beneficioToEdit) {
+      return <EditBeneficioModal folio={folio} beneficio={beneficioToEdit} />;
+    } else {
+      console.log("not found");
+    }
   }
 
   return (

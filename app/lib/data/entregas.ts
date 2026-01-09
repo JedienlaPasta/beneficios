@@ -330,12 +330,13 @@ export async function fetchBeneficiosEntregadosByFolio(
     // Actualizamos la Query para traer los JSONs
     const result = await request.input("folio", sql.VarChar, folio).query(`
         SELECT 
+            be.id,
             be.id_campaña, 
             be.codigo_entrega, 
-            be.campos_adicionales, -- Aquí vienen las respuestas (Talla: M, etc.)
+            be.campos_adicionales,
             c.nombre_campaña,
-            c.esquema_formulario,  -- Aquí viene la configuración (Label: "Talla", etc.)
-            c.code                 -- El código corto de la campaña (ej: "PA")
+            c.esquema_formulario,
+            c.code
         FROM beneficios_entregados be
         LEFT JOIN campañas c ON be.id_campaña = c.id
         WHERE be.folio = @folio

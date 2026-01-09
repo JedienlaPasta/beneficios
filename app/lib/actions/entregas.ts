@@ -856,6 +856,53 @@ export const toggleDiscardEntregaByFolio = async (
   }
 };
 
+export async function updateBeneficioDetailsById(
+  id: string,
+  newDetails: string,
+  folio: string,
+) {
+  try {
+    const pool = await connectToDB();
+    if (!pool) return { success: false, message: "Database connection failed" };
+
+    const request = pool.request();
+    request.input("id", sql.UniqueIdentifier, id);
+    request.input("newDetails", sql.NVarChar, newDetails);
+
+    let query = `
+        UPDATE beneficios_entregados
+        SET campos_adicionales = @newDetails
+      `;
+
+    // Si codigo_entrega existe en newDetails, agregarlo para actualizarlo
+    try {
+      const details = JSON.parse(newDetails);
+      if (
+        details &&
+        typeof details === "object" &&
+        "codigo_entrega" in details
+      ) {
+        request.input("codigo_entrega", sql.NVarChar, details.codigo_entrega);
+        console.log(details.codigo_entrega);
+        query += `, codigo_entrega = @codigo_entrega`;
+      }
+    } catch (e) {
+      console.error("Error parsing newDetails for codigo_entrega check", e);
+    }
+
+    query += ` WHERE id = @id`;
+
+    await request.query(query);
+
+    await logAction("Editar", "editó los detalles de entrega", folio, folio);
+    revalidatePath(`/dashboard/entregas`);
+    return { success: true, message: "Detalles actualizados correctamente" };
+  } catch (error) {
+    console.error("Error updating details:", error);
+    return { success: false, message: "Error al actualizar los detalles" };
+  }
+}
+
 // Subir actas de cada entrega
 export const uploadPDFByFolio = async (folio: string, formData: FormData) => {
   try {

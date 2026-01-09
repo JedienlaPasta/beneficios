@@ -51,7 +51,7 @@ export function CancelButton({
       type="button"
       disabled={isDisabled}
       onClick={handleSubmit}
-      className="flex h-10 grow items-center justify-center rounded-lg border border-transparent bg-gray-200 text-sm font-medium text-slate-800 transition-all hover:border-slate-300/60 hover:bg-slate-100 active:scale-95"
+      className="sborder flex h-10 grow items-center justify-center rounded-lg border-transparent bg-gray-200 text-sm font-medium text-slate-800 transition-all hover:border-slate-300/60 hover:bg-slate-100 active:scale-95"
     >
       Cancelar
     </button>

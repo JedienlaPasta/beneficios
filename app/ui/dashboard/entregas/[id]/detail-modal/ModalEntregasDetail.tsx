@@ -1,6 +1,7 @@
 "use client";
 import CloseModalButton from "../../../CloseModalButton";
 import { FaBoxOpen } from "react-icons/fa6";
+import { MdModeEdit } from "react-icons/md";
 import {
   EntregaByFolio,
   EntregasTableByFolio,
@@ -11,16 +12,15 @@ import { formatDate, formatRUT, formatTime } from "@/app/lib/utils/format";
 import RoleGuard from "@/app/ui/auth/role-guard";
 import { useEffect, useState, Fragment } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { toggleEntregaStatus } from "@/app/lib/actions/entregas";
 import { toast } from "sonner";
 import EditButton from "../../../EditBtn";
 import { getRshName } from "@/app/lib/actions/rsh";
-import GetNewFileButton from "./NewFileButton";
 import ModalImportForm from "./ModalImportForm";
 import DetailsModalOptionsMenu from "./ModalOptionsMenu";
 import CamaraComponent from "./ModalCamera";
-import Files from "@/app/ui/dashboard/entregas/[id]/detail-modal/Files";
+import FilesList from "./FilesList";
 
 type Props = {
   rut: string;
@@ -140,7 +140,7 @@ export default function ModalEntregasDetail({
       layout
       layoutRoot
       transition={{ layout: { duration: 0.25 } }}
-      className="w-full flex-1 shrink-0 overflow-hidden bg-white p-4 shadow-xl ring-1 ring-slate-200/70 transition-all duration-500 scrollbar-hide sm:w-[38rem] sm:rounded-3xl sm:bg-gray-50 sm:p-6 md:p-8"
+      className="w-full flex-1 shrink-0 overflow-hidden bg-gray-50 p-4 shadow-xl ring-1 ring-slate-200/70 transition-all duration-500 scrollbar-hide sm:w-[38rem] sm:rounded-3xl sm:p-6 md:p-8"
     >
       {/* Header & Hero Section */}
       <div className="mb-3 flex flex-col gap-4">
@@ -266,20 +266,20 @@ export default function ModalEntregasDetail({
                 <div className="grid grid-cols-2 gap-1">
                   <ModalGeneralInfoField
                     name="Encargado"
-                    className="rounded-lg border border-slate-200/80 bg-white/80 px-3.5 py-2.5"
+                    className="relative rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2.5"
                   >
                     {nombre_usuario}
                   </ModalGeneralInfoField>
                   <ModalGeneralInfoField
                     name="Fecha de Entrega"
-                    className="rounded-lg border border-slate-200/80 bg-white/80 px-3.5 py-2.5"
+                    className="relative rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2.5"
                   >
                     {fecha_entrega ? fecha_entrega : ""}
                   </ModalGeneralInfoField>
                   <ModalGeneralInfoField
                     span="col-span-2"
                     name="Justificación"
-                    className="rounded-lg border border-slate-200/80 bg-white/80 px-3.5 py-2.5"
+                    className="relative rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2.5 tracking-tight"
                   >
                     {observacion || "No especificada"}
                   </ModalGeneralInfoField>
@@ -405,10 +405,14 @@ function ModalGeneralInfoField({
 }
 
 function EntregasListItem({ item }: { item: EntregaByFolio }) {
-  // Definimos el tipo posible para los valores del JSON
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Tipos posibles para los valores del JSON
   type DetailValue = string | number | boolean | null;
 
-  // 1. Parsear Respuestas (Campos Adicionales) con Type Safety
+  // Parsear Respuestas (Campos Adicionales)
   let details: Record<string, DetailValue> = {};
   try {
     if (item.campos_adicionales) {
@@ -421,8 +425,13 @@ function EntregasListItem({ item }: { item: EntregaByFolio }) {
     console.error("Error parsing details", e);
   }
 
-  // 2. Parsear Esquema (Para obtener los labels)
-  type SchemaField = { nombre: string; label: string };
+  // Parsear Esquema (Para obtener los labels)
+  type SchemaField = {
+    nombre: string;
+    label: string;
+    tipo?: string;
+    opciones?: string;
+  };
   let schema: SchemaField[] = [];
   try {
     if (item.esquema_formulario) {
@@ -437,83 +446,58 @@ function EntregasListItem({ item }: { item: EntregaByFolio }) {
     return field ? field.label : key.replace(/_/g, " ");
   };
 
-  return (
-    <div className="group flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white/80 px-3 py-3 transition-colors hover:shadow-sm sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-      <div className="flex items-center gap-3">
-        <Link
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm ring-1 ring-slate-200/70 transition-all hover:bg-blue-100"
-          href={`/dashboard/campanas/${item.id_campaña}`}
-        >
-          <FaBoxOpen className="h-5 w-5 text-slate-700 transition-all group-hover:text-blue-500" />
-        </Link>
+  const handleEdit = () => {
+    const params = new URLSearchParams(searchParams);
+    params.set("editBeneficio", String(item.id));
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
 
-        <div>
-          <h3 className="text-sm font-semibold text-slate-700">
-            {item.nombre_campaña}
-          </h3>
-          <p className="w-full max-w-[150px] overflow-hidden text-ellipsis text-nowrap text-xs text-slate-400">
-            {item.code ? `Campaña: ${item.code}` : "Campaña General"}
-          </p>
+  return (
+    <div className="px-3s group flex flex-col overflow-hidden rounded-xl border border-slate-200/80 bg-white/80 pt-3 transition-colors hover:shadow-sm">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3 self-start px-3">
+          <Link
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm ring-1 ring-slate-200/70 transition-all hover:bg-blue-100"
+            href={`/dashboard/campanas/${item.id_campaña}`}
+          >
+            <FaBoxOpen className="h-5 w-5 text-slate-700 transition-all group-hover:text-blue-500" />
+          </Link>
+
+          <div>
+            <h3 className="text-sm font-semibold text-slate-700">
+              {item.nombre_campaña}
+            </h3>
+            <p className="w-full max-w-[150px] overflow-hidden text-ellipsis text-nowrap text-xs text-slate-400">
+              {item.code ? `Campaña: ${item.code}` : "Campaña General"}
+            </p>
+          </div>
+        </div>
+        <div className="mx-4">
+          <RoleGuard allowedRoles={["Administrador", "Supervisor"]}>
+            <button
+              onClick={handleEdit}
+              className="flex w-fit items-center self-end rounded-md border border-transparent p-1 text-xs text-slate-400 transition-all hover:border-slate-200 hover:text-blue-600 hover:shadow-sm active:scale-95"
+            >
+              <MdModeEdit className="size-4" />
+            </button>
+          </RoleGuard>
         </div>
       </div>
 
-      <div className="-mt-0.5 grid grid-cols-[max-content_1fr] gap-x-3 gap-y-0.5 border-t border-slate-200 px-1 pt-1.5 text-xs sm:mt-0 sm:grid-cols-[max-content_max-content] sm:justify-end sm:gap-x-2 sm:border-none sm:px-0 sm:pt-0">
-        {Object.entries(details).map(([key, value]) => (
-          <Fragment key={key}>
-            <span className="text-left capitalize text-slate-500 sm:text-right">
-              {getLabel(key)}:
-            </span>
-            <span className="text-right font-medium text-slate-700 sm:text-left">
-              {String(value)}
-            </span>
-          </Fragment>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function FilesList({
-  folio,
-  files,
-}: {
-  folio: string;
-  files: EntregasFiles[];
-}) {
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <h3 className="flex items-center gap-2 text-sm font-medium text-slate-700">
-          <span className="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
-          Documentos Adjuntos
-        </h3>
-        <GetNewFileButton folio={folio} />
-      </div>
-
-      {files.length > 0 ? (
-        <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-sm sm:grid-cols-2">
-          {files.map((item: EntregasFiles, index) => (
-            <Files key={index} item={item} folio={folio} />
+      <div className="mt-2.5 flex flex-1 flex-col justify-end gap-1.5">
+        <div className="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-1 border-t border-slate-200 bg-slate-50/50 px-4 py-2 text-xs">
+          {Object.entries(details).map(([key, value]) => (
+            <Fragment key={key}>
+              <span className="min-w-36 text-left text-slate-500">
+                {getLabel(key)}:
+              </span>
+              <span className="min-w-20 text-right font-medium text-slate-700">
+                {String(value)}
+              </span>
+            </Fragment>
           ))}
         </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-gray-200 bg-gray-50/50 p-8 text-sm text-gray-400">
-          <svg
-            className="h-10 w-10 text-gray-300"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
-          <p>No hay documentos adjuntos</p>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

@@ -23,6 +23,8 @@ type CitizenRecordProps = {
     changeNameModal?: string;
     changeTramoModal?: string;
     justification?: string;
+    editBeneficio?: string;
+    supervisor?: string;
   }>;
   params: Promise<{ id: string }>;
 };
@@ -37,6 +39,8 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
   const editBirthdateModal = searchParams?.editBirthdateModal || "";
   const changeTramoModal = searchParams?.changeTramoModal || "";
   const justificationModal = searchParams?.justification || "";
+  const editBeneficio = searchParams?.editBeneficio || "";
+  const supervisorModal = searchParams?.supervisor || "";
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
   // Params (id)
@@ -52,6 +56,8 @@ export default async function CitizenRecord(props: CitizenRecordProps) {
               folio={detailsModal}
               rut={rut}
               isOnEditForJustification={justificationModal === "true"}
+              isOnEditForSupervisor={supervisorModal === "true"}
+              editBeneficioId={editBeneficio}
             />
           </Suspense>
         </Modal>

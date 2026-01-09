@@ -4,8 +4,8 @@ import Input from "../../campañas/new-campaign-modal/NewCampaignInput";
 import { DynamicFieldSchema, FormValue } from "./NewModalForm";
 import { AnimatePresence, motion } from "framer-motion";
 
-const CHILD_SIZES = new Set(["RN", "P", "M", "G", "XG", "XXG", "XXXG"]);
-const ADULT_SIZES = new Set(["S", "M", "L", "XL"]);
+export const CHILD_SIZES = new Set(["RN", "P", "M", "G", "XG", "XXG", "XXXG"]);
+export const ADULT_SIZES = new Set(["S", "M", "L", "XL"]);
 
 export const DynamicFieldsRenderer = ({
   schemaString,

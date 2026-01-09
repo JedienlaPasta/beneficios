@@ -99,9 +99,9 @@ export default function EditJustificationModal({
             <AnimatePresence mode="wait">
               <motion.section
                 key="obligatorio"
-                initial={{ opacity: 0, y: 10, height: 400 }}
+                initial={{ opacity: 0, y: 10, height: 300 }}
                 animate={{ opacity: 1, y: 0, height: "auto" }}
-                exit={{ opacity: 0, y: -10, height: 400 }}
+                exit={{ opacity: 0, y: -10, height: 300 }}
                 transition={{
                   duration: 0.4,
                   height: { duration: 0.4 },

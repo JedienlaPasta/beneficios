@@ -18,6 +18,8 @@ type CampaignProps = {
     detailsModal?: string;
     rut?: string;
     justification?: string;
+    editBeneficio?: string;
+    supervisor?: string;
   }>;
   params: Promise<{ id: string }>;
 };
@@ -28,6 +30,8 @@ export default async function Campaign(props: CampaignProps) {
   const showUpdateModal = searchParams?.update || "";
   const detailsModal = searchParams?.detailsModal || "";
   const justificationModal = searchParams?.justification || "";
+  const editBeneficio = searchParams?.editBeneficio || "";
+  const supervisorModal = searchParams?.supervisor || "";
 
   const rut = searchParams?.rut || "";
   const query = searchParams?.query || "";
@@ -53,6 +57,8 @@ export default async function Campaign(props: CampaignProps) {
               folio={detailsModal}
               rut={rut}
               isOnEditForJustification={justificationModal === "true"}
+              isOnEditForSupervisor={supervisorModal === "true"}
+              editBeneficioId={editBeneficio}
             />
           </Suspense>
         </Modal>

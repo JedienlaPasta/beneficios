@@ -95,13 +95,13 @@ export default function EditSupervisorModal({ folio, prevSupervisor }: Props) {
             onSubmit={handleSubmit}
             className="overflow-y-autos scrollbar-hide"
           >
-            <motion.div className="relative flex min-h-[12srem] flex-col justify-between gap-6">
+            <motion.div className="relative flex min-h-[12srem] flex-col justify-between gap-3">
               <AnimatePresence mode="wait">
                 <motion.section
                   key="supervisor"
-                  initial={{ opacity: 0, y: 10, height: 400 }}
+                  initial={{ opacity: 0, y: 10, height: 200 }}
                   animate={{ opacity: 1, y: 0, height: "auto" }}
-                  exit={{ opacity: 0, y: -10, height: 400 }}
+                  exit={{ opacity: 0, y: -10, height: 200 }}
                   transition={{
                     duration: 0.4,
                     height: { duration: 0.4 },
